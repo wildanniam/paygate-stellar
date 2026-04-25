@@ -9,7 +9,7 @@
 
 **Page goal:** Communicate the product clearly and confidently to a technical audience. The page should feel like a real, shipping developer tool — not a pitch or a proposal. Let the product speak for itself.
 
-**Primary CTA:** "View on GitHub" → `https://github.com/paygate-stellar` (placeholder)
+**Primary CTA:** "View on GitHub" → `https://github.com/wildanniam/paygate-stellar`
 
 **Audience:** Developers who build and monetize APIs. Familiarity with Node.js assumed. Stellar/MPP knowledge not required — the page should make it feel approachable.
 

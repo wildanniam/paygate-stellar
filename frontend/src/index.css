@@ -8,15 +8,79 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Cursor blink ── */
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  50%       { opacity: 0; }
 }
-
 .cursor-blink {
   animation: blink 1.2s step-end infinite;
+}
+
+/* ── Sections: no opacity:0 here — JS sets it after mount so no-JS stays visible ── */
+.fs {
+  will-change: opacity, transform;
+}
+
+/* ── Badge: pulse ring ── */
+@keyframes badge-pulse {
+  0%         { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.45); }
+  70%        { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); }
+  100%       { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+.badge-pulse {
+  animation: badge-pulse 2.8s ease-out infinite;
+}
+
+/* ── Gradient headlines: slow hue drift ── */
+@keyframes hue-shift {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50%       { filter: hue-rotate(22deg); }
+}
+.gradient-headline {
+  display: inline-block;
+  animation: hue-shift 8s ease-in-out infinite;
+}
+
+/* ── Hero code block: animated gradient border ── */
+@keyframes shimmer-sweep {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.shimmer-border {
+  border-radius: 13px;
+  padding: 1px;
+  background: linear-gradient(90deg, #7C3AED, #22D3EE, #a855f7, #7C3AED);
+  background-size: 300% 100%;
+  animation: shimmer-sweep 4s linear infinite;
+}
+
+/* ── Code typewriter: each line slides in from left ── */
+@keyframes line-fade-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.code-line {
+  display: inline;
+  animation: line-fade-in 0.2s ease-out both;
+}
+
+/* ── SVG noise grain overlay ── */
+.noise-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.03;
+  background-color: white;
+  filter: url(#grain);
 }
