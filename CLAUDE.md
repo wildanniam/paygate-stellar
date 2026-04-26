@@ -77,12 +77,15 @@ When implementing, preserve the existing landing page look unless the user asks 
 
 As of April 26, 2026:
 
-- `frontend/src/App.jsx` is the existing single-file landing page.
+- `frontend/src/App.jsx` is now the React Router root.
+- The original landing page has moved to `frontend/src/pages/Landing.jsx`.
+- `frontend/src/pages/Generate.jsx`, `Result.jsx`, and `Dashboard.jsx` exist.
+- Shared frontend files exist at `frontend/src/colors.js`, `components/AppNavbar.jsx`, and `components/CodeBlock.jsx`.
+- `backend/` exists with Express, Zod validation, generator route, and code templates.
+- React Router is installed in `frontend/package.json`.
+- `frontend/vite.config.js` proxies `/api` to `localhost:3001`.
+- `ecosystem.config.cjs` exists for PM2 deployment.
 - `frontend/CLAUDE.md` is legacy guidance from the landing-page-only phase.
-- `backend/` does not exist yet.
-- React Router is not installed yet.
-- `frontend/vite.config.js` does not yet proxy `/api` to `localhost:3001`.
-- `ecosystem.config.cjs` does not exist yet.
 
 Update this section when major milestones land, so future agents inherit accurate context.
 

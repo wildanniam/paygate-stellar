@@ -64,12 +64,15 @@ Do not implement these unless the user explicitly asks:
 
 As of April 26, 2026:
 
-- Existing implementation is mostly a polished single-file landing page in `frontend/src/App.jsx`.
+- `frontend/src/App.jsx` is now the React Router root.
+- The polished landing page has moved to `frontend/src/pages/Landing.jsx`.
+- `/generate`, `/result`, and `/dashboard` pages exist.
+- Shared `colors`, `AppNavbar`, and `CodeBlock` frontend modules exist.
+- `backend/` exists with Express, Zod validation, generator route, and templates.
+- React Router is installed.
+- Vite proxy for `/api` is configured.
+- PM2 `ecosystem.config.cjs` exists.
 - `frontend/CLAUDE.md` is legacy guidance from the landing-page-only phase.
-- Backend files are not created yet.
-- React Router is not installed yet.
-- Vite proxy for `/api` is not configured yet.
-- PM2 `ecosystem.config.cjs` is not created yet.
 
 Update this snapshot when the project materially changes.
 

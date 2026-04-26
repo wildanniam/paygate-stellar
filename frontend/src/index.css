@@ -26,6 +26,14 @@ body {
   animation: blink 1.2s step-end infinite;
 }
 
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── Sections: no opacity:0 here — JS sets it after mount so no-JS stays visible ── */
 .fs {
   will-change: opacity, transform;
