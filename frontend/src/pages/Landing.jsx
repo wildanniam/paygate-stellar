@@ -1,5 +1,6 @@
 import { Github, Code2, BarChart3, Zap, Globe, Copy } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { C, MONO as M } from '../colors.js';
 
 const KW   = t => <span style={{ color: C.purple }}>{t}</span>;
@@ -355,10 +356,9 @@ export default function Landing() {
 
           {/* CTAs */}
           <div className="flex flex-wrap justify-center" style={{ gap: 12, marginTop: 36 }}>
-            <a
+            <Link
               ref={heroPrimaryRef}
-              href="https://github.com/wildanniam/paygate-stellar"
-              target="_blank" rel="noopener noreferrer"
+              to="/generate"
               onMouseEnter={() => hov('heroPrimary', true)}
               onMouseLeave={() => { hov('heroPrimary', false); setMagnetHero({ x: 0, y: 0 }); }}
               onMouseMove={e => applyMagnet(e, heroPrimaryRef, setMagnetHero)}
@@ -372,8 +372,8 @@ export default function Landing() {
                 transform: `translate(${magnetHero.x}px, ${magnetHero.y}px)`,
               }}
             >
-              <Github size={16} /> View on GitHub
-            </a>
+              <Zap size={16} /> Generate Paywall
+            </Link>
             <button
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
               onMouseEnter={() => hov('heroSecondary', true)}
@@ -733,13 +733,12 @@ export default function Landing() {
             </span>
           </h2>
           <p style={{ color: C.text2, fontSize: 18, marginTop: 20 }}>
-            Follow PayGate's progress on GitHub.
+            Generate your first MPP-ready Express paywall.
           </p>
           <div style={{ marginTop: 40 }}>
-            <a
+            <Link
               ref={ctaBottomRef}
-              href="https://github.com/wildanniam/paygate-stellar"
-              target="_blank" rel="noopener noreferrer"
+              to="/generate"
               onMouseEnter={() => hov('ctaBtn', true)}
               onMouseLeave={() => { hov('ctaBtn', false); setMagnetCta({ x: 0, y: 0 }); }}
               onMouseMove={e => applyMagnet(e, ctaBottomRef, setMagnetCta)}
@@ -753,8 +752,8 @@ export default function Landing() {
                 transform: `translate(${magnetCta.x}px, ${magnetCta.y}px)`,
               }}
             >
-              <Github size={18} /> View on GitHub
-            </a>
+              <Zap size={18} /> Generate Paywall
+            </Link>
           </div>
         </div>
       </section>

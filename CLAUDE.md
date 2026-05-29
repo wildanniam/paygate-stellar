@@ -7,9 +7,11 @@ This file is the project memory for Claude Code and other Claude-based agents wo
 Read these in order before making code changes:
 
 1. `TECHNICAL_SPEC.md` — canonical implementation plan for the current PayGate 30-day POC.
-2. This file — persistent project context, scope boundaries, and agent behavior rules.
-3. `frontend/PayGate_LandingPage_Brief.md` — landing page visual/copy reference only.
-4. `README.md` — useful overview, but it may lag behind the technical spec.
+2. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
+3. `openspec/README.md` and relevant `openspec/specs/*/spec.md` files — capability-level requirements.
+4. This file — persistent project context, scope boundaries, and agent behavior rules.
+5. `frontend/PayGate_LandingPage_Brief.md` — landing page visual/copy reference only.
+6. `README.md` — useful overview, but it may lag behind the technical spec.
 
 If any file conflicts with `TECHNICAL_SPEC.md`, follow `TECHNICAL_SPEC.md` and note the conflict.
 
@@ -22,7 +24,16 @@ PayGate is a web tool that helps developers monetize Node.js/Express API endpoin
 3. Copy the generated middleware and integration snippet into an Express server.
 4. Monitor USDC earnings and request/payment history from a Stellar testnet wallet.
 
-The SOW context is a 30-day Instawards execution sprint, planned to start on May 1, 2026. The project must produce a working, demonstrable POC rather than open-ended exploration.
+The SOW context is a 30-day Instawards execution sprint, planned to start on May 1, 2026. PayGate has passed review and was accepted for a **$5,000 Instaward in XLM** through the Stellar Ambassador program, per the SCF email dated May 14, 2026. The project must produce a working, demonstrable POC rather than open-ended exploration.
+
+Official Instawards context from the SCF handbook:
+
+- Instawards fund clearly scoped, execution-focused work that moves a Stellar project meaningfully forward.
+- Sprint scope and award amount are agreed in advance.
+- Scope should typically be achievable within 30 days or less.
+- Progress is measured against agreed deliverables, not future plans.
+- Disbursement requires successful SDF KYC/compliance procedures.
+- Completion evidence should emphasize working deliverables, demo readiness, and verifiable Stellar activity.
 
 ## SOW-Backed Deliverables
 
@@ -75,7 +86,7 @@ When implementing, preserve the existing landing page look unless the user asks 
 
 ## Current Repository State
 
-As of April 26, 2026:
+As of May 20, 2026:
 
 - `frontend/src/App.jsx` is now the React Router root.
 - The original landing page has moved to `frontend/src/pages/Landing.jsx`.
@@ -86,6 +97,7 @@ As of April 26, 2026:
 - `frontend/vite.config.js` proxies `/api` to `localhost:3001`.
 - `ecosystem.config.cjs` exists for PM2 deployment.
 - `frontend/CLAUDE.md` is legacy guidance from the landing-page-only phase.
+- PayGate is now an accepted $5,000 SCF Instaward project; future work should prioritize delivery proof, KYC/compliance follow-through, and demo evidence.
 
 Update this section when major milestones land, so future agents inherit accurate context.
 
@@ -141,9 +153,26 @@ Use the checklist in `TECHNICAL_SPEC.md` section 10 as the acceptance checklist.
 
 ## Agent Behavior
 
-- Treat this as a grant/SOW deliverable with a fixed 30-day execution scope.
+- Treat this as an accepted grant/SOW deliverable with a fixed 30-day execution scope.
 - Favor simple, shippable implementation over speculative architecture.
 - Keep the app stateless unless the user explicitly changes the scope.
 - Do not add dependencies casually; use the stack specified in `TECHNICAL_SPEC.md`.
 - Preserve existing visual polish on the landing page during migration.
 - Update this file when major architectural decisions or scope changes are made.
+
+## Product Reporting Style
+
+When Wildan asks for a PayGate progress report as if the agent is a product developer reporting to him as CEO, answer in business/product language first.
+
+Do:
+
+- Explain what a user can do with the product today.
+- Separate "usable now" from "not proven yet".
+- State the product readiness verdict clearly.
+- Name the next product milestone.
+
+Do not lead with code files, architecture, or implementation details unless Wildan asks for technical detail.
+
+Preferred short verdict:
+
+> PayGate is a functional alpha. Users can try the generator and dashboard, but it is not yet fully ready for real API monetization until one end-to-end Stellar testnet payment is proven from generated middleware to dashboard evidence.
