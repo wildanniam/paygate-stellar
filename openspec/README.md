@@ -2,14 +2,15 @@
 
 OpenSpec in this repo is a lightweight planning and requirements layer for PayGate.
 
-PayGate is now an accepted **$5,000 SCF Instaward** project, per the Stellar Community Fund email dated May 14, 2026. OpenSpec should therefore be used to keep the 30-day delivery scope tight, evidence-oriented, and aligned with the accepted SOW.
+PayGate is now an accepted **$5,000 SCF Instaward** project, per the Stellar Community Fund email dated May 14, 2026. OpenSpec should therefore preserve the 30-day SOW evidence path while also documenting the approved V1 product pivot.
 
 Read order for agents:
 
-1. `../TECHNICAL_SPEC.md` for the canonical project implementation plan.
-2. `../PAYGATE_NEXT_PLAN.md` for product/SOW context and the current testing playbook.
-3. `openspec/specs/*/spec.md` for capability-level requirements.
-4. `openspec/changes/*` for active or proposed changes before implementation.
+1. `../docs/PAYGATE_V1_PRODUCT_SPEC.md` for the locked V1 product direction.
+2. `../docs/TECHNICAL_SPEC.md` for the original SOW/V0 implementation plan.
+3. `../docs/PAYGATE_NEXT_PLAN.md` for product/SOW context and the current testing playbook.
+4. `openspec/specs/*/spec.md` for capability-level requirements.
+5. `openspec/changes/*` for active or proposed changes before implementation.
 
 ## Current Specs
 
@@ -21,6 +22,7 @@ Read order for agents:
 ## Current Active Change
 
 - `changes/prove-e2e-mpp-payment/` — prove the SOW-critical flow: generate middleware, run it in a sample Express API, execute a real Stellar testnet MPP payment, and show it in the dashboard.
+- `changes/build-paygate-v1-gateway/` — build the approved V1 direction: paid proxy, Freighter auth, Supabase API registry, Soroban escrow settlement, and AI-agent payment flow.
 
 ## How To Use
 
@@ -31,4 +33,4 @@ When adding a feature or changing behavior:
 3. Write the proposal, design notes, tasks, and spec delta before coding.
 4. After implementation is verified, update the canonical spec under `openspec/specs`.
 
-Keep this lightweight. PayGate is still a 30-day accepted grant POC, so document behavior that matters for the SOW, official Instawards review, and demo evidence.
+Keep this lightweight. For V0 work, document behavior that matters for the SOW, official Instawards review, and demo evidence. For V1 work, document the product behavior that makes PayGate a pay-per-call gateway rather than only a code generator.

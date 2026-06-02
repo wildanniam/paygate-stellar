@@ -2,20 +2,20 @@
 
 ## 1. Sample API
 
-- [ ] Create `examples/express-paid-api/package.json`.
-- [ ] Create `examples/express-paid-api/server.js`.
-- [ ] Create `examples/express-paid-api/.env.example`.
-- [ ] Generate `mpp-middleware.js` from PayGate and place a copy in the example.
-- [ ] Add a paid route returning JSON via `res.json()`.
-- [ ] Verify server starts with env vars configured.
-- [ ] Verify missing env vars fail with clear PayGate errors.
+- [x] Create `examples/express-paid-api/package.json`.
+- [x] Create `examples/express-paid-api/server.js`.
+- [x] Create `examples/express-paid-api/.env.example`.
+- [x] Generate `mpp-middleware.js` from PayGate and place a copy in the example.
+- [x] Add a paid route returning JSON via `res.json()`.
+- [x] Verify server starts with env vars configured.
+- [x] Verify missing env vars fail with clear PayGate errors.
 
 ## 2. No-Payment Challenge Test
 
-- [ ] Start sample API.
-- [ ] Call paid route without payment.
-- [ ] Confirm HTTP 402 response.
-- [ ] Capture response headers/body for documentation.
+- [x] Start sample API.
+- [x] Call paid route without payment.
+- [x] Confirm HTTP 402 response.
+- [x] Capture response headers/body for documentation.
 
 ## 3. Testnet Wallet Setup
 
@@ -28,8 +28,8 @@
 
 ## 4. MPP Client
 
-- [ ] Create `examples/express-paid-api/client.js`.
-- [ ] Configure it with payer secret key via env var.
+- [x] Create `examples/express-paid-api/client.js`.
+- [x] Configure it with payer secret key via env var.
 - [ ] Request paid endpoint through the MPP client.
 - [ ] Confirm successful protected API response.
 - [ ] Print or capture payment/transaction evidence.
@@ -46,11 +46,12 @@
 
 ## 6. Documentation And Evidence
 
-- [ ] Add example README with setup and test instructions.
-- [ ] Update root README to reflect generator, result page, dashboard, and example flow.
-- [ ] Add known limitations around paid request counting and in-memory store.
+- [x] Add example README with setup and test instructions.
+- [x] Update root README to reflect generator, result page, dashboard, and example flow.
+- [x] Document Vercel production routes for `/api/generate` and `/api/demo/market-signal`.
+- [x] Add known limitations around paid request counting and in-memory store.
 - [ ] Add tx hash evidence note if appropriate.
-- [ ] Update `PAYGATE_NEXT_PLAN.md` with completed scenario results.
+- [ ] Update `docs/PAYGATE_NEXT_PLAN.md` with completed scenario results.
 
 ## 7. Acceptance
 
@@ -60,4 +61,3 @@
 - [ ] Sample API paid request returns protected data.
 - [ ] Dashboard shows the real payment.
 - [ ] Evidence is sufficient for the SOW demo video.
-

@@ -14,7 +14,7 @@ tags:
   - instawards
 status: active
 created: 2026-04-26
-updated: 2026-05-20
+updated: 2026-06-02
 owner: Wildan
 grant_status: accepted
 grant_amount: 5000 USD in XLM
@@ -66,6 +66,38 @@ Namun, jika benchmark-nya adalah dokumen SOW Instawards, produk ini **belum bisa
 
 > [!important] Verdict Produk
 > PayGate sudah cukup kuat sebagai fondasi POC, kira-kira 65-75% menuju grant-delivery-ready. Gap terbesar bukan UI, tapi bukti pembayaran real MPP di Stellar testnet, dashboard update dari transaksi nyata, dan evidence package untuk review Instawards.
+
+### 1.1 V1 Product Direction Update
+
+Per 2 Juni 2026, Wildan memilih arah V1 yang lebih kuat secara produk:
+
+> PayGate V1 adalah **pay-per-call gateway for APIs**.
+
+V0/SOW tetap penting sebagai grant evidence, tetapi development baru berjalan di branch `codex/paygate-v1` dengan konsep:
+
+1. Developer connect Freighter wallet.
+2. Developer daftarkan API ke PayGate.
+3. PayGate membuat paid proxy endpoint.
+4. AI agent call endpoint PayGate.
+5. Tanpa payment, agent menerima `402 Payment Required`.
+6. Agent bayar USDC testnet via Stellar MPP ke Soroban escrow contract.
+7. Backend PayGate memverifikasi payment dan memanggil `creditPayment`.
+8. Contract membagi 90% ke developer balance dan 10% ke PayGate fee.
+9. PayGate forward request ke API asli menggunakan `X-PayGate-Secret`.
+10. Developer withdraw balance via Freighter.
+
+V1 sengaja menambah scope yang dulu non-goal di SOW:
+
+- Supabase database untuk API registry dan request/payment logs.
+- Freighter wallet login dengan sign-message challenge.
+- Paid proxy backend.
+- Encrypted unique secret header per API.
+- Soroban escrow smart contract.
+- 10% platform fee dan withdrawal.
+
+First milestone V1:
+
+> Prove the escrow spike first: Soroban contract tests, MPP payment to `C...` contract recipient, backend credit, and Freighter withdrawal.
 
 ## 2. Konteks Bisnis Dari SOW
 
@@ -308,6 +340,15 @@ Sudah lolos:
 - `POST /api/generate` valid payload.
 - `POST /api/generate` invalid payload.
 - Vite proxy `/api/generate`.
+- `examples/express-paid-api` demo lab dibuat.
+- Sample paid endpoint `/v1/market-signal` bisa start dengan env vars.
+- Missing env vars gagal dengan error PayGate yang jelas.
+- Request tanpa payment ke sample endpoint berhasil return `402 Payment Required` dengan MPP challenge.
+- Vercel production demo routes ditambahkan:
+  - `/api/generate`
+  - `/api/demo/market-signal`
+- `/api/generate` Vercel Function smoke test berhasil secara lokal.
+- `/api/demo/market-signal` Vercel Function return `503` saat env kosong dan `402` saat env demo tersedia.
 - Playwright smoke test:
   - `/generate`
   - submit form
@@ -316,7 +357,7 @@ Sudah lolos:
 
 Belum terbukti:
 
-- Generated middleware dipasang ke sample Express API.
+- Agent/client melakukan paid request real dengan funded testnet wallet.
 - MPP client melakukan payment real.
 - Tx hash real muncul.
 - Dashboard membaca payment real.
@@ -1043,7 +1084,18 @@ Pass criteria:
 - Payment muncul di Horizon.
 
 > [!warning] Open Technical Work
-> Scenario ini kemungkinan membutuhkan sample MPP client script. Kalau belum ada, next agent harus membuat `examples/express-paid-api/client.js` berdasarkan official `@stellar/mpp/charge/client` API.
+> Sample MPP client script sudah ada di `examples/express-paid-api/client.js`, tapi belum bisa dibuktikan sampai `200 OK` karena masih membutuhkan funded payer wallet dengan testnet USDC dan recipient wallet yang siap menerima USDC.
+
+Current internal testing status:
+
+- [x] Sample API dibuat.
+- [x] Generated-style middleware dipasang ke sample API.
+- [x] Server gagal jelas jika env vars tidak ada.
+- [x] Server bisa start dengan env vars.
+- [x] Request tanpa payment return `402 Payment Required`.
+- [ ] Funded payer wallet menjalankan `client.js`.
+- [ ] Payment real menghasilkan tx hash.
+- [ ] API return `200 OK` setelah payment.
 
 ### Scenario 10 - Dashboard Shows Real Payment
 

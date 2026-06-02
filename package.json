@@ -1,0 +1,20 @@
+{
+  "name": "paygate-vercel",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm --prefix frontend ci && npm --prefix frontend run build",
+    "vercel-build": "npm run build"
+  },
+  "dependencies": {
+    "@stellar/mpp": "^0.6.0",
+    "@stellar/stellar-sdk": "^15.0.0",
+    "express": "^5.2.1",
+    "mppx": "^0.6.28",
+    "zod": "^3.22.0"
+  }
+}

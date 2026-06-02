@@ -4,9 +4,9 @@ This file is legacy guidance from the landing-page-only phase of PayGate.
 
 For current project work, use the root-level files instead:
 
-1. `../TECHNICAL_SPEC.md` — canonical implementation spec.
-2. `../CLAUDE.md` — project memory for Claude-based agents.
-3. `../AGENTS.md` — project memory for Codex and other agents.
+1. `../docs/TECHNICAL_SPEC.md` — canonical implementation spec.
+2. `../docs/CLAUDE.md` — project memory for Claude-based agents.
+3. `../docs/AGENTS.md` — project memory for Codex and other agents.
 
 ## Important
 
@@ -17,4 +17,4 @@ The old single-file constraint no longer applies to the full project. The curren
 - `/result` generated code result page
 - `/dashboard` Stellar testnet earnings dashboard
 
-Only use `PayGate_LandingPage_Brief.md` when editing the existing landing page visual direction or copy. It should not override `../TECHNICAL_SPEC.md`.
+Only use `PayGate_LandingPage_Brief.md` when editing the existing landing page visual direction or copy. It should not override `../docs/TECHNICAL_SPEC.md`.

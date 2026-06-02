@@ -6,18 +6,48 @@ This file gives Codex and other coding agents the durable project context for Pa
 
 Before editing code, read:
 
-1. `TECHNICAL_SPEC.md` — canonical build spec for the current 30-day POC.
-2. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
-3. `openspec/README.md` and relevant `openspec/specs/*/spec.md` files — capability-level requirements.
-4. `AGENTS.md` — this project memory and agent operating guide.
-5. `CLAUDE.md` — same project context for Claude-based agents.
-6. `frontend/PayGate_LandingPage_Brief.md` — only when changing landing page copy or visuals.
+1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.
+2. `TECHNICAL_SPEC.md` — canonical build spec for the original 30-day V0/SOW POC.
+3. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
+4. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
+5. `AGENTS.md` — this project memory and agent operating guide.
+6. `CLAUDE.md` — same project context for Claude-based agents.
+7. `../frontend/PayGate_LandingPage_Brief.md` — only when changing landing page copy or visuals.
 
-`README.md` may be stale. If docs conflict, `TECHNICAL_SPEC.md` wins.
+`README.md` may be stale. For V0/SOW generator work, `TECHNICAL_SPEC.md` wins. For the V1 branch, `PAYGATE_V1_PRODUCT_SPEC.md` wins where it intentionally conflicts with V0 constraints.
+
+## V1 Branch Direction
+
+Wildan has approved a V1 pivot on the `codex/paygate-v1` branch.
+
+PayGate V1 is a **pay-per-call gateway for APIs**, not only a code generator. The locked V1 flow is:
+
+1. Developer connects Freighter wallet.
+2. Developer registers an API in PayGate.
+3. PayGate stores API config in Supabase.
+4. PayGate creates a paid proxy endpoint.
+5. AI agent calls the paid proxy.
+6. PayGate returns `402 Payment Required`.
+7. Agent pays USDC via Stellar MPP Charge to a Soroban escrow contract.
+8. PayGate backend verifies payment and calls `creditPayment`.
+9. Contract splits 90% developer balance and 10% PayGate platform fee.
+10. PayGate forwards request to the original API using a generated `X-PayGate-Secret`.
+11. Developer withdraws balance by signing with Freighter.
+
+V1 intentionally adds things that were non-goals in the original SOW:
+
+- Freighter wallet login.
+- Supabase database/API registry.
+- Paid proxy backend.
+- Soroban escrow smart contract.
+- Encrypted per-API secret header.
+- Platform fee accounting and withdrawal.
 
 ## What PayGate Is
 
-PayGate is a web tool for developers who want to monetize Node.js/Express APIs with Stellar Machine Payments Protocol (MPP) micropayments. The product promise is: fill 3 fields, generate MPP middleware, paste it into an Express server, and monitor USDC testnet earnings from a Stellar wallet.
+PayGate started as a web tool for developers who want to monetize Node.js/Express APIs with Stellar Machine Payments Protocol (MPP) micropayments. The original V0 product promise was: fill 3 fields, generate MPP middleware, paste it into an Express server, and monitor USDC testnet earnings from a Stellar wallet.
+
+The current V1 product direction is stronger: PayGate becomes a pay-per-call API gateway. Developers register APIs, PayGate creates paid proxy endpoints, AI agents pay per request, and settlement is tracked through a Soroban escrow contract.
 
 The project exists because the SOW targets a 30-day Instawards sprint, planned to start on May 1, 2026. PayGate has passed review and was accepted for a **$5,000 Instaward in XLM** through the Stellar Ambassador program, per the SCF email dated May 14, 2026. The work must be concrete, demoable, and scoped to the agreed POC.
 
@@ -47,7 +77,7 @@ Official Instawards context:
 
 ## Non-Goals For This Sprint
 
-Do not implement these unless the user explicitly asks:
+These were non-goals for the original V0/SOW sprint. Wildan has now explicitly approved a V1 branch that includes database, wallet auth, and smart contract work. Do not apply this list blindly to V1 work.
 
 - Database.
 - Auth/login/account system.
@@ -72,7 +102,7 @@ Do not implement these unless the user explicitly asks:
 
 ## Current State Snapshot
 
-As of May 20, 2026:
+As of June 2, 2026:
 
 - `frontend/src/App.jsx` is now the React Router root.
 - The polished landing page has moved to `frontend/src/pages/Landing.jsx`.
@@ -82,8 +112,11 @@ As of May 20, 2026:
 - React Router is installed.
 - Vite proxy for `/api` is configured.
 - PM2 `ecosystem.config.cjs` exists.
-- `frontend/CLAUDE.md` is legacy guidance from the landing-page-only phase.
+- `../frontend/CLAUDE.md` is legacy guidance from the landing-page-only phase.
 - PayGate is now an accepted $5,000 SCF Instaward project; delivery evidence and KYC/compliance completion are now part of the execution context.
+- A V1 branch direction has been locked: paid proxy + Freighter login + Supabase API registry + Soroban escrow settlement.
+- A `contracts/` Soroban workspace has been scaffolded for `paygate-escrow`.
+- The first V1 milestone is a technical spike proving MPP Charge can pay a `C...` escrow contract recipient and that developers can withdraw from the contract.
 
 Update this snapshot when the project materially changes.
 

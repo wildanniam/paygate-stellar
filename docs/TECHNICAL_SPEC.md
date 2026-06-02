@@ -68,8 +68,9 @@ Stellar Horizon Testnet API (eksternal, publik)
 
 ```
 paygate/
-├── TECHNICAL_SPEC.md              # dokumen ini
-├── README.md
+├── docs/
+│   ├── TECHNICAL_SPEC.md          # dokumen ini
+│   └── README.md
 ├── ecosystem.config.cjs           # PM2 config
 ├── .gitignore
 │
