@@ -48,10 +48,10 @@
 - [x] Create paid proxy route.
 - [x] Resolve API config by API id.
 - [x] Return 402 for unpaid request.
-- [ ] Verify MPP payment credential.
-- [ ] Credit contract balance.
-- [ ] Forward to upstream API with `X-PayGate-Secret`.
-- [ ] Log request success/failure.
+- [x] Verify MPP payment credential.
+- [x] Credit contract balance.
+- [x] Forward to upstream API with `X-PayGate-Secret`.
+- [x] Log request success/failure.
 
 ## 7. Dashboard
 
@@ -68,7 +68,7 @@
 
 - [x] Demo API protected by secret header.
 - [x] Agent unpaid request returns 402.
-- [ ] Agent paid request returns 200 JSON.
+- [x] Agent paid request returns 200 JSON.
 - [x] Contract balance updates.
 - [x] Developer withdrawal works.
 - [x] Platform fee withdrawal works.

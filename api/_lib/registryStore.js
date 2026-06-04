@@ -10,6 +10,8 @@ function getMemoryState() {
     globalThis.__PAYGATE_REGISTRY_MEMORY = {
       apis: new Map(),
       developers: new Map(),
+      mppStore: new Map(),
+      payments: new Map(),
       proxyRequests: new Map(),
     };
   }
@@ -46,6 +48,24 @@ function publicProxyRequestFields(record) {
     created_at: record.created_at,
     paid_at: record.paid_at,
     forwarded_at: record.forwarded_at,
+  };
+}
+
+function publicPaymentFields(record) {
+  return {
+    id: record.id,
+    request_id: record.request_id,
+    api_id: record.api_id,
+    payment_id: record.payment_id,
+    tx_hash: record.tx_hash,
+    credit_tx_hash: record.credit_tx_hash,
+    gross_amount_usdc: record.gross_amount_usdc,
+    developer_amount_usdc: record.developer_amount_usdc,
+    platform_fee_usdc: record.platform_fee_usdc,
+    recipient_mode: record.recipient_mode,
+    verified_at: record.verified_at,
+    credited_at: record.credited_at,
+    created_at: record.created_at,
   };
 }
 
@@ -120,6 +140,66 @@ function createMemoryRegistry() {
       };
       state.proxyRequests.set(row.id, row);
       return publicProxyRequestFields(row);
+    },
+    async getProxyRequestByPaymentId(paymentId) {
+      return [...state.proxyRequests.values()].find((row) => row.payment_id === paymentId) ?? null;
+    },
+    async updateProxyRequest(proxyRequestId, updates) {
+      const row = state.proxyRequests.get(proxyRequestId);
+      if (!row) return null;
+      const next = {
+        ...row,
+        ...updates,
+      };
+      state.proxyRequests.set(proxyRequestId, next);
+      return publicProxyRequestFields(next);
+    },
+    async getPaymentByPaymentId(paymentId) {
+      const row = [...state.payments.values()].find((payment) => payment.payment_id === paymentId);
+      return row ? publicPaymentFields(row) : null;
+    },
+    async createPayment(record) {
+      const duplicatePaymentId = [...state.payments.values()].find(
+        (payment) => payment.payment_id === record.payment_id,
+      );
+      const duplicateTxHash = [...state.payments.values()].find(
+        (payment) => payment.tx_hash === record.tx_hash,
+      );
+      if (duplicatePaymentId || duplicateTxHash) {
+        const error = new Error('duplicate key value violates unique constraint');
+        error.code = '23505';
+        throw error;
+      }
+      const row = {
+        ...record,
+        id: crypto.randomUUID(),
+        credit_tx_hash: record.credit_tx_hash ?? null,
+        verified_at: record.verified_at ?? null,
+        credited_at: record.credited_at ?? null,
+        created_at: nowIso(),
+      };
+      state.payments.set(row.id, row);
+      return publicPaymentFields(row);
+    },
+    async updatePayment(paymentId, updates) {
+      const row = [...state.payments.values()].find((payment) => payment.payment_id === paymentId);
+      if (!row) return null;
+      const next = {
+        ...row,
+        ...updates,
+      };
+      state.payments.set(row.id, next);
+      return publicPaymentFields(next);
+    },
+    async getMppStoreValue(key) {
+      const raw = state.mppStore.get(key);
+      return raw === undefined ? null : JSON.parse(raw);
+    },
+    async putMppStoreValue(key, value) {
+      state.mppStore.set(key, JSON.stringify(value));
+    },
+    async deleteMppStoreValue(key) {
+      state.mppStore.delete(key);
     },
   };
 }
@@ -214,6 +294,79 @@ function createSupabaseRegistry() {
       if (error) throw error;
       return data;
     },
+    async getProxyRequestByPaymentId(paymentId) {
+      const { data, error } = await client
+        .from('proxy_requests')
+        .select('*')
+        .eq('payment_id', paymentId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async updateProxyRequest(proxyRequestId, updates) {
+      const { data, error } = await client
+        .from('proxy_requests')
+        .update(updates)
+        .eq('id', proxyRequestId)
+        .select('*')
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async getPaymentByPaymentId(paymentId) {
+      const { data, error } = await client
+        .from('payments')
+        .select('*')
+        .eq('payment_id', paymentId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async createPayment(record) {
+      const { data, error } = await client
+        .from('payments')
+        .insert(record)
+        .select('*')
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    async updatePayment(paymentId, updates) {
+      const { data, error } = await client
+        .from('payments')
+        .update(updates)
+        .eq('payment_id', paymentId)
+        .select('*')
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async getMppStoreValue(key) {
+      const { data, error } = await client
+        .from('mpp_store')
+        .select('value')
+        .eq('key', key)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.value ?? null;
+    },
+    async putMppStoreValue(key, value) {
+      const { error } = await client
+        .from('mpp_store')
+        .upsert(
+          {
+            key,
+            value,
+            updated_at: nowIso(),
+          },
+          { onConflict: 'key' },
+        );
+      if (error) throw error;
+    },
+    async deleteMppStoreValue(key) {
+      const { error } = await client.from('mpp_store').delete().eq('key', key);
+      if (error) throw error;
+    },
   };
 }
 
@@ -226,6 +379,8 @@ export function clearRegistryForTest() {
   const state = getMemoryState();
   state.apis.clear();
   state.developers.clear();
+  state.mppStore?.clear();
+  state.payments?.clear();
   state.proxyRequests?.clear();
 }
 
@@ -235,4 +390,12 @@ export function getRawApisForTest() {
 
 export function getRawProxyRequestsForTest() {
   return [...getMemoryState().proxyRequests.values()];
+}
+
+export function getRawPaymentsForTest() {
+  return [...getMemoryState().payments.values()];
+}
+
+export function getRawMppStoreForTest() {
+  return [...getMemoryState().mppStore.entries()].map(([key, value]) => [key, JSON.parse(value)]);
 }

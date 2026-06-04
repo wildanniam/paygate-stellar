@@ -230,6 +230,7 @@ This is the starting schema for Supabase. It can be adjusted during implementati
 | `api_id` | uuid | FK to `apis.id` |
 | `payment_id` | text | id used for contract duplicate prevention |
 | `tx_hash` | text | Stellar transaction hash |
+| `credit_tx_hash` | text | nullable contract credit transaction hash |
 | `gross_amount_usdc` | numeric | amount paid |
 | `developer_amount_usdc` | numeric | 90% |
 | `platform_fee_usdc` | numeric | 10% |
@@ -249,6 +250,15 @@ This is the starting schema for Supabase. It can be adjusted during implementati
 | `status` | text | pending/succeeded/failed |
 | `created_at` | timestamptz | default now |
 | `completed_at` | timestamptz | nullable |
+
+### `mpp_store`
+
+| Column | Type | Notes |
+|---|---|---|
+| `key` | text | primary key used by MPP replay protection |
+| `value` | jsonb | MPP challenge/hash state |
+| `created_at` | timestamptz | default now |
+| `updated_at` | timestamptz | updated on put |
 
 ### RLS Direction
 
