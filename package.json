@@ -10,6 +10,7 @@
     "build": "npm --prefix frontend ci && npm --prefix frontend run build",
     "test:auth": "node scripts/phase2-auth-smoke.mjs",
     "test:registry": "node scripts/phase3-registry-smoke.mjs",
+    "test:upstream": "node scripts/phase4-upstream-smoke.mjs",
     "vercel-build": "npm run build"
   },
   "dependencies": {

@@ -66,7 +66,7 @@
 
 ## 8. Demo Evidence
 
-- [ ] Demo API protected by secret header.
+- [x] Demo API protected by secret header.
 - [ ] Agent unpaid request returns 402.
 - [ ] Agent paid request returns 200 JSON.
 - [x] Contract balance updates.

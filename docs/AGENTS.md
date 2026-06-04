@@ -125,6 +125,7 @@ As of June 2, 2026:
 - Phase 2 challenge storage is still in-memory. Phase 3 added the `auth_challenges` table in Supabase, but the auth endpoints still need a later migration from memory store to Supabase before relying on production multi-instance behavior.
 - Phase 3 API registry is implemented. Authenticated developers can create/list/view/update owned APIs through `/api/apis`, secrets are generated and encrypted server-side, and Supabase migrations exist. Evidence: `docs/evidence/PAYGATE_V1_PHASE3_REGISTRY_PROOF.md`.
 - `/api/pay/:apiId` is still not implemented; proxy URL is reserved for Phase 5/6.
+- Phase 4 demo upstream API is implemented at `/api/upstream/market-signal`. It is a normal secret-protected API with no MPP code. Evidence: `docs/evidence/PAYGATE_V1_PHASE4_UPSTREAM_API_PROOF.md`; registration guide: `docs/demo-upstream-api.md`.
 
 Update this snapshot when the project materially changes.
 
