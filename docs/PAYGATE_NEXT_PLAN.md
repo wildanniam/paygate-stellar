@@ -1336,7 +1336,7 @@ Recommendation:
 Use this prompt for the next agent:
 
 ```text
-Read PAYGATE_NEXT_PLAN.md, TECHNICAL_SPEC.md, AGENTS.md, and CLAUDE.md.
+Read docs/PAYGATE_NEXT_PLAN.md, docs/PAYGATE_V1_PRODUCT_SPEC.md, docs/PAYGATE_V1_DEVELOPMENT_PLAN.md, docs/TECHNICAL_SPEC.md, docs/AGENTS.md, and docs/CLAUDE.md.
 
 Your priority is not adding random features. Your priority is proving the PayGate SOW end-to-end:
 

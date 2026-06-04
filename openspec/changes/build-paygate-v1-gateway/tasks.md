@@ -3,6 +3,7 @@
 ## 1. Product And Agent Memory
 
 - [x] Create `docs/PAYGATE_V1_PRODUCT_SPEC.md`.
+- [x] Create `docs/PAYGATE_V1_DEVELOPMENT_PLAN.md` draft.
 - [x] Update `docs/AGENTS.md`.
 - [x] Update `docs/CLAUDE.md`.
 - [x] Add this OpenSpec change.

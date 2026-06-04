@@ -7,12 +7,13 @@ This file gives Codex and other coding agents the durable project context for Pa
 Before editing code, read:
 
 1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.
-2. `TECHNICAL_SPEC.md` — canonical build spec for the original 30-day V0/SOW POC.
-3. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
-4. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
-5. `AGENTS.md` — this project memory and agent operating guide.
-6. `CLAUDE.md` — same project context for Claude-based agents.
-7. `../frontend/PayGate_LandingPage_Brief.md` — only when changing landing page copy or visuals.
+2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — detailed V1 technical development plan; draft until Wildan locks it.
+3. `TECHNICAL_SPEC.md` — canonical build spec for the original 30-day V0/SOW POC.
+4. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
+5. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
+6. `AGENTS.md` — this project memory and agent operating guide.
+7. `CLAUDE.md` — same project context for Claude-based agents.
+8. `../frontend/PayGate_LandingPage_Brief.md` — only when changing landing page copy or visuals.
 
 `README.md` may be stale. For V0/SOW generator work, `TECHNICAL_SPEC.md` wins. For the V1 branch, `PAYGATE_V1_PRODUCT_SPEC.md` wins where it intentionally conflicts with V0 constraints.
 
@@ -93,9 +94,11 @@ These were non-goals for the original V0/SOW sprint. Wildan has now explicitly a
 
 ## Architecture Guardrails
 
+These guardrails describe the original V0/SOW generator architecture. For V1 gateway work, use `PAYGATE_V1_DEVELOPMENT_PLAN.md` once locked.
+
 - Frontend: React 18, React Router v6, Tailwind CSS v3, Vite 5, lucide-react.
 - Backend: Node.js 20 ES modules, Express 4, Zod, CORS, express-rate-limit.
-- Backend should remain a pure generator service: no persistence, no auth, no wallet secrets.
+- V0 backend should remain a pure generator service: no persistence, no auth, no wallet secrets.
 - Frontend calls backend with relative `/api/generate`.
 - Dashboard calls Horizon testnet directly from the browser.
 - Deployment target is Nginx static frontend plus `/api/*` proxy to Express on port `3001`.
@@ -116,11 +119,16 @@ As of June 2, 2026:
 - PayGate is now an accepted $5,000 SCF Instaward project; delivery evidence and KYC/compliance completion are now part of the execution context.
 - A V1 branch direction has been locked: paid proxy + Freighter login + Supabase API registry + Soroban escrow settlement.
 - A `contracts/` Soroban workspace has been scaffolded for `paygate-escrow`.
-- The first V1 milestone is a technical spike proving MPP Charge can pay a `C...` escrow contract recipient and that developers can withdraw from the contract.
+- `PAYGATE_V1_DEVELOPMENT_PLAN.md` exists as a draft plan for review. Do not treat it as locked until Wildan explicitly says it is locked.
+- The first V1 implementation milestone is a technical spike proving MPP Charge can pay a `C...` escrow contract recipient, or documenting the approved fallback if it cannot.
 
 Update this snapshot when the project materially changes.
 
 ## Preferred Build Order
+
+For V1 work, follow `PAYGATE_V1_DEVELOPMENT_PLAN.md` once Wildan locks it. Until it is locked, do not start broad V1 implementation.
+
+For V0/SOW generator work, use this order:
 
 1. Migrate the frontend to the final SPA structure without changing landing page behavior.
 2. Add backend generator API and templates.
@@ -146,7 +154,7 @@ Use `TECHNICAL_SPEC.md` section 10 as the acceptance checklist. At minimum:
 - Keep changes scoped and shippable.
 - Prefer existing style and design language.
 - Do not remove the landing page polish during migration.
-- Do not introduce persistence or accounts.
+- For V0 generator work, do not introduce persistence or accounts. For V1 work, persistence and wallet sessions are approved and must follow `PAYGATE_V1_DEVELOPMENT_PLAN.md` after Wildan locks it.
 - Keep generated code copy-paste friendly.
 - Document any important scope or API decision by updating this file and `CLAUDE.md`.
 

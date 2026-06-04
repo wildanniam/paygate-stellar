@@ -7,12 +7,13 @@ This file is the project memory for Claude Code and other Claude-based agents wo
 Read these in order before making code changes:
 
 1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.
-2. `TECHNICAL_SPEC.md` — canonical implementation plan for the original PayGate 30-day V0/SOW POC.
-3. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
-4. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
-5. This file — persistent project context, scope boundaries, and agent behavior rules.
-6. `../frontend/PayGate_LandingPage_Brief.md` — landing page visual/copy reference only.
-7. `README.md` — useful overview, but it may lag behind the technical spec.
+2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — detailed V1 technical development plan; draft until Wildan locks it.
+3. `TECHNICAL_SPEC.md` — canonical implementation plan for the original PayGate 30-day V0/SOW POC.
+4. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
+5. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
+6. This file — persistent project context, scope boundaries, and agent behavior rules.
+7. `../frontend/PayGate_LandingPage_Brief.md` — landing page visual/copy reference only.
+8. `README.md` — useful overview, but it may lag behind the technical spec.
 
 If any file conflicts with `TECHNICAL_SPEC.md`, follow `TECHNICAL_SPEC.md` for V0/SOW work. For the V1 branch, follow `PAYGATE_V1_PRODUCT_SPEC.md` where it intentionally conflicts with the old stateless generator scope.
 
@@ -123,6 +124,7 @@ As of June 2, 2026:
 - PayGate is now an accepted $5,000 SCF Instaward project; future work should prioritize delivery proof, KYC/compliance follow-through, and demo evidence.
 - V1 direction is locked: paid proxy + Freighter login + Supabase API registry + Soroban escrow settlement.
 - `PAYGATE_V1_PRODUCT_SPEC.md` records the locked decisions.
+- `PAYGATE_V1_DEVELOPMENT_PLAN.md` exists as a draft plan for review and must not be treated as locked until Wildan explicitly approves it.
 - `contracts/` has been scaffolded for the `paygate-escrow` Soroban spike.
 
 Update this section when major milestones land, so future agents inherit accurate context.
@@ -181,7 +183,7 @@ Use the checklist in `TECHNICAL_SPEC.md` section 10 as the acceptance checklist.
 
 - Treat this as an accepted grant/SOW deliverable with a fixed 30-day execution scope.
 - Favor simple, shippable implementation over speculative architecture.
-- Keep the app stateless unless the user explicitly changes the scope.
+- Keep V0 generator work stateless. For V1 work, Wildan has explicitly approved persistence, wallet sessions, paid proxy state, and contract settlement; follow `PAYGATE_V1_DEVELOPMENT_PLAN.md` after it is locked.
 - Do not add dependencies casually; use the stack specified in `TECHNICAL_SPEC.md`.
 - Preserve existing visual polish on the landing page during migration.
 - Update this file when major architectural decisions or scope changes are made.
