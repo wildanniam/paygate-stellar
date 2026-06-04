@@ -10,6 +10,7 @@ function getMemoryState() {
     globalThis.__PAYGATE_REGISTRY_MEMORY = {
       apis: new Map(),
       developers: new Map(),
+      proxyRequests: new Map(),
     };
   }
   return globalThis.__PAYGATE_REGISTRY_MEMORY;
@@ -27,6 +28,24 @@ function publicApiFields(record) {
     active: record.active,
     created_at: record.created_at,
     updated_at: record.updated_at,
+  };
+}
+
+function publicProxyRequestFields(record) {
+  return {
+    id: record.id,
+    api_id: record.api_id,
+    owner_wallet: record.owner_wallet,
+    payment_id: record.payment_id,
+    status: record.status,
+    price_usdc: record.price_usdc,
+    payer_wallet: record.payer_wallet,
+    tx_hash: record.tx_hash,
+    upstream_status: record.upstream_status,
+    error_message: record.error_message,
+    created_at: record.created_at,
+    paid_at: record.paid_at,
+    forwarded_at: record.forwarded_at,
   };
 }
 
@@ -81,6 +100,26 @@ function createMemoryRegistry() {
       };
       state.apis.set(apiId, next);
       return publicApiFields(next);
+    },
+    async getPublicApi(apiId) {
+      const row = state.apis.get(apiId);
+      if (!row || !row.active) return null;
+      return row;
+    },
+    async createProxyRequest(record) {
+      const row = {
+        ...record,
+        id: crypto.randomUUID(),
+        payer_wallet: record.payer_wallet ?? null,
+        tx_hash: record.tx_hash ?? null,
+        upstream_status: record.upstream_status ?? null,
+        error_message: record.error_message ?? null,
+        paid_at: record.paid_at ?? null,
+        forwarded_at: record.forwarded_at ?? null,
+        created_at: nowIso(),
+      };
+      state.proxyRequests.set(row.id, row);
+      return publicProxyRequestFields(row);
     },
   };
 }
@@ -156,6 +195,25 @@ function createSupabaseRegistry() {
       if (error) throw error;
       return data;
     },
+    async getPublicApi(apiId) {
+      const { data, error } = await client
+        .from('apis')
+        .select('*')
+        .eq('id', apiId)
+        .eq('active', true)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async createProxyRequest(record) {
+      const { data, error } = await client
+        .from('proxy_requests')
+        .insert(record)
+        .select('*')
+        .single();
+      if (error) throw error;
+      return data;
+    },
   };
 }
 
@@ -168,8 +226,13 @@ export function clearRegistryForTest() {
   const state = getMemoryState();
   state.apis.clear();
   state.developers.clear();
+  state.proxyRequests?.clear();
 }
 
 export function getRawApisForTest() {
   return [...getMemoryState().apis.values()];
+}
+
+export function getRawProxyRequestsForTest() {
+  return [...getMemoryState().proxyRequests.values()];
 }
