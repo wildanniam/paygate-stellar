@@ -1,9 +1,11 @@
-import { AlertCircle, ExternalLink, Loader2, RefreshCw, Wallet } from 'lucide-react';
+import { isConnected, requestAccess, signMessage } from '@stellar/freighter-api';
+import { AlertCircle, ExternalLink, Loader2, LogOut, RefreshCw, ShieldCheck, Wallet } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import AppNavbar from '../components/AppNavbar.jsx';
 import { C, MONO } from '../colors.js';
 
 const HORIZON = 'https://horizon-testnet.stellar.org';
+const TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015';
 
 function isValidStellarAddress(addr) {
   return /^G[A-Z2-7]{55}$/.test(addr);
@@ -24,6 +26,27 @@ function formatDate(value) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
+}
+
+function normalizeSignedMessage(signedMessage) {
+  if (typeof signedMessage === 'string') return signedMessage;
+  if (signedMessage?.type === 'Buffer' && Array.isArray(signedMessage.data)) {
+    return btoa(String.fromCharCode(...signedMessage.data));
+  }
+  if (signedMessage && typeof signedMessage.toString === 'function') {
+    return signedMessage.toString('base64');
+  }
+  return '';
+}
+
+async function readJsonResponse(res) {
+  const text = await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
 }
 
 async function fetchMppPayments(walletAddress) {
@@ -71,6 +94,9 @@ export default function Dashboard() {
   const [walletAddress, setWalletAddress] = useState(() => localStorage.getItem('paygate_wallet_address') ?? '');
   const [activeWallet, setActiveWallet] = useState(() => localStorage.getItem('paygate_wallet_address') ?? '');
   const [status, setStatus] = useState(activeWallet ? 'loading' : 'idle');
+  const [session, setSession] = useState({ authenticated: false });
+  const [authStatus, setAuthStatus] = useState('idle');
+  const [authError, setAuthError] = useState('');
   const [payments, setPayments] = useState([]);
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -98,6 +124,34 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [activeWallet, fetchAndSet]);
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadSession() {
+      setAuthStatus('loading');
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        const data = await readJsonResponse(res);
+        if (!active) return;
+        setSession(data);
+        setAuthStatus('idle');
+        if (data.authenticated && data.walletAddress) {
+          localStorage.setItem('paygate_wallet_address', data.walletAddress);
+          setWalletAddress(data.walletAddress);
+          setActiveWallet(data.walletAddress);
+        }
+      } catch {
+        if (!active) return;
+        setAuthStatus('idle');
+      }
+    }
+
+    loadSession();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const summary = useMemo(() => {
     const total = payments.reduce((sum, payment) => sum + payment.amount, 0);
     return {
@@ -120,6 +174,76 @@ export default function Dashboard() {
     setStatus('loading');
   };
 
+  const handleConnectWallet = async () => {
+    setAuthStatus('connecting');
+    setAuthError('');
+
+    try {
+      const connected = await isConnected();
+      if (connected.error) throw new Error(connected.error.message || 'Freighter connection failed.');
+      if (!connected.isConnected) throw new Error('Freighter extension belum terhubung.');
+
+      const access = await requestAccess();
+      if (access.error) throw new Error(access.error.message || 'Wallet access ditolak.');
+      const developerWallet = access.address;
+
+      const challengeRes = await fetch('/api/auth/challenge', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress: developerWallet }),
+      });
+      const challenge = await readJsonResponse(challengeRes);
+      if (!challengeRes.ok) throw new Error(challenge.error || 'Gagal membuat login challenge.');
+
+      const signed = await signMessage(challenge.message, {
+        address: developerWallet,
+        networkPassphrase: TESTNET_PASSPHRASE,
+      });
+      if (signed.error) throw new Error(signed.error.message || 'Signature ditolak.');
+
+      const signature = normalizeSignedMessage(signed.signedMessage);
+      if (!signature) throw new Error('Freighter tidak mengembalikan signature.');
+
+      const verifyRes = await fetch('/api/auth/verify', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challengeId: challenge.challengeId,
+          walletAddress: developerWallet,
+          signerAddress: signed.signerAddress,
+          signedMessage: signature,
+        }),
+      });
+      const verified = await readJsonResponse(verifyRes);
+      if (!verifyRes.ok) throw new Error(verified.error || 'Signature wallet tidak valid.');
+
+      setSession({ authenticated: true, walletAddress: verified.walletAddress });
+      setWalletAddress(verified.walletAddress);
+      setActiveWallet(verified.walletAddress);
+      localStorage.setItem('paygate_wallet_address', verified.walletAddress);
+      setAuthStatus('idle');
+    } catch (err) {
+      setAuthError(err.message || 'Gagal connect wallet.');
+      setAuthStatus('error');
+    }
+  };
+
+  const handleLogout = async () => {
+    setAuthStatus('loading');
+    setAuthError('');
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } finally {
+      setSession({ authenticated: false });
+      setAuthStatus('idle');
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif", backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
       <AppNavbar />
@@ -135,6 +259,30 @@ export default function Dashboard() {
             Load a Stellar testnet wallet to monitor USDC transfers generated by your MPP paywall.
           </p>
         </header>
+
+        <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: C.text1, fontWeight: 800 }}>
+              <ShieldCheck size={18} color={C.green} />
+              Developer Wallet
+            </div>
+            <div style={{ color: C.text3, fontSize: 13, marginTop: 8, ...MONO }}>
+              {session.authenticated ? short(session.walletAddress, 10, 6) : 'Not connected'}
+            </div>
+            {authError && <div style={{ color: C.red, fontSize: 13, marginTop: 8 }}>{authError}</div>}
+          </div>
+          {session.authenticated ? (
+            <button type="button" onClick={handleLogout} disabled={authStatus === 'loading'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: C.text2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}>
+              <LogOut size={15} />
+              Logout
+            </button>
+          ) : (
+            <button type="button" onClick={handleConnectWallet} disabled={authStatus === 'connecting' || authStatus === 'loading'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.accent, color: C.text1, border: 'none', borderRadius: 8, padding: '11px 16px', fontWeight: 700, cursor: 'pointer' }}>
+              {authStatus === 'connecting' ? <Loader2 size={16} className="spin" /> : <Wallet size={16} />}
+              Connect Freighter
+            </button>
+          )}
+        </section>
 
         <form onSubmit={handleSubmit} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'grid', gap: 14, marginBottom: 24 }}>
           <label>

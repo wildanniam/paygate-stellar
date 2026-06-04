@@ -30,10 +30,10 @@
 
 ## 4. Wallet Auth
 
-- [ ] Add Freighter connection.
-- [ ] Add sign-message challenge endpoint.
-- [ ] Verify signature server-side.
-- [ ] Create session for wallet owner.
+- [x] Add Freighter connection.
+- [x] Add sign-message challenge endpoint.
+- [x] Verify signature server-side.
+- [x] Create session for wallet owner.
 
 ## 5. API Registry
 

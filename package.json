@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "npm --prefix frontend ci && npm --prefix frontend run build",
+    "test:auth": "node scripts/phase2-auth-smoke.mjs",
     "vercel-build": "npm run build"
   },
   "dependencies": {
