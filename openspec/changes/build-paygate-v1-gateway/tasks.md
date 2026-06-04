@@ -55,13 +55,13 @@
 
 ## 7. Dashboard
 
-- [ ] Show registered API list.
-- [ ] Show paid proxy URL.
-- [ ] Show total paid calls.
-- [ ] Show gross revenue.
-- [ ] Show 10% platform fee.
-- [ ] Show withdrawable balance from contract.
-- [ ] Show request/payment logs.
+- [x] Show registered API list.
+- [x] Show paid proxy URL.
+- [x] Show total paid calls.
+- [x] Show gross revenue.
+- [x] Show 10% platform fee.
+- [x] Show withdrawable balance from contract.
+- [x] Show request/payment logs.
 - [ ] Add developer withdraw action through Freighter.
 
 ## 8. Demo Evidence

@@ -126,6 +126,13 @@ function createMemoryRegistry() {
       if (!row || !row.active) return null;
       return row;
     },
+    async listProxyRequests(ownerWallet, limit = 100) {
+      return [...state.proxyRequests.values()]
+        .filter((record) => record.owner_wallet === ownerWallet)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, limit)
+        .map(publicProxyRequestFields);
+    },
     async createProxyRequest(record) {
       const row = {
         ...record,
@@ -157,6 +164,18 @@ function createMemoryRegistry() {
     async getPaymentByPaymentId(paymentId) {
       const row = [...state.payments.values()].find((payment) => payment.payment_id === paymentId);
       return row ? publicPaymentFields(row) : null;
+    },
+    async listPaymentsForOwner(ownerWallet, limit = 100) {
+      const ownedApiIds = new Set(
+        [...state.apis.values()]
+          .filter((record) => record.owner_wallet === ownerWallet)
+          .map((record) => record.id),
+      );
+      return [...state.payments.values()]
+        .filter((payment) => ownedApiIds.has(payment.api_id))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, limit)
+        .map(publicPaymentFields);
     },
     async createPayment(record) {
       const duplicatePaymentId = [...state.payments.values()].find(
@@ -285,6 +304,16 @@ function createSupabaseRegistry() {
       if (error) throw error;
       return data;
     },
+    async listProxyRequests(ownerWallet, limit = 100) {
+      const { data, error } = await client
+        .from('proxy_requests')
+        .select('*')
+        .eq('owner_wallet', ownerWallet)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data ?? [];
+    },
     async createProxyRequest(record) {
       const { data, error } = await client
         .from('proxy_requests')
@@ -321,6 +350,26 @@ function createSupabaseRegistry() {
         .maybeSingle();
       if (error) throw error;
       return data;
+    },
+    async listPaymentsForOwner(ownerWallet, limit = 100) {
+      const { data: apis, error: apiError } = await client
+        .from('apis')
+        .select('id')
+        .eq('owner_wallet', ownerWallet)
+        .order('created_at', { ascending: false });
+      if (apiError) throw apiError;
+
+      const apiIds = (apis ?? []).map((api) => api.id);
+      if (apiIds.length === 0) return [];
+
+      const { data, error } = await client
+        .from('payments')
+        .select('*')
+        .in('api_id', apiIds)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data ?? [];
     },
     async createPayment(record) {
       const { data, error } = await client

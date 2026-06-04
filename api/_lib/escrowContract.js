@@ -1,4 +1,5 @@
 import {
+  Account,
   Address,
   BASE_FEE,
   Contract,
@@ -7,11 +8,13 @@ import {
   TransactionBuilder,
   nativeToScVal,
   rpc,
+  scValToNative,
 } from '@stellar/stellar-sdk';
-import { SOROBAN_RPC_URLS, STELLAR_TESTNET } from '@stellar/mpp';
+import { SOROBAN_RPC_URLS, STELLAR_TESTNET, fromBaseUnits } from '@stellar/mpp';
 
 const DEFAULT_POLL_ATTEMPTS = 20;
 const DEFAULT_POLL_DELAY_MS = 1_000;
+const SIMULATION_SOURCE = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,6 +56,64 @@ async function waitForSuccessfulTransaction(server, hash) {
   }
 
   throw new Error(`Escrow credit transaction did not confirm in time: ${hash}`);
+}
+
+async function simulateEscrowCall(method, args = []) {
+  const contractId = getEscrowContractId();
+  if (!contractId) {
+    throw new Error('Escrow contract id is not configured');
+  }
+
+  const server = new rpc.Server(getRpcUrl());
+  const source = new Account(SIMULATION_SOURCE, '0');
+  const contract = new Contract(contractId);
+  const tx = new TransactionBuilder(source, {
+    fee: BASE_FEE,
+    networkPassphrase: getNetworkPassphrase(),
+  })
+    .addOperation(contract.call(method, ...args))
+    .setTimeout(60)
+    .build();
+
+  const simulated = await server.simulateTransaction(tx);
+  if (simulated.error) {
+    throw new Error(simulated.error);
+  }
+  if (!simulated.result?.retval) {
+    throw new Error(`Escrow ${method} simulation returned no value`);
+  }
+
+  return scValToNative(simulated.result.retval);
+}
+
+function balanceResult(baseUnits) {
+  const value = BigInt(baseUnits ?? 0);
+  return {
+    baseUnits: value.toString(),
+    usdc: fromBaseUnits(value.toString(), 7),
+  };
+}
+
+export async function readEscrowBalances(developerWallet) {
+  if (!getEscrowContractId()) {
+    return {
+      configured: false,
+      developerBalance: balanceResult(0),
+      platformFeeBalance: balanceResult(0),
+      error: 'ESCROW_CONTRACT_ID is not configured',
+    };
+  }
+
+  const [developerBalance, platformFeeBalance] = await Promise.all([
+    simulateEscrowCall('balance', [new Address(developerWallet).toScVal()]),
+    simulateEscrowCall('platform_fee_balance'),
+  ]);
+
+  return {
+    configured: true,
+    developerBalance: balanceResult(developerBalance),
+    platformFeeBalance: balanceResult(platformFeeBalance),
+  };
 }
 
 export async function creditEscrowPayment({ paymentId, developerWallet, grossAmountBaseUnits }) {

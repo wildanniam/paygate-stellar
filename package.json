@@ -13,6 +13,7 @@
     "test:upstream": "node scripts/phase4-upstream-smoke.mjs",
     "test:proxy-unpaid": "node scripts/phase5-proxy-smoke.mjs",
     "test:proxy-paid": "node scripts/phase6-paid-proxy-smoke.mjs",
+    "test:dashboard": "node scripts/phase7-dashboard-smoke.mjs",
     "vercel-build": "npm run build"
   },
   "dependencies": {

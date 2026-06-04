@@ -105,7 +105,7 @@ These guardrails describe the original V0/SOW generator architecture. For V1 gat
 
 ## Current State Snapshot
 
-As of June 2, 2026:
+As of June 4, 2026:
 
 - `frontend/src/App.jsx` is now the React Router root.
 - The polished landing page has moved to `frontend/src/pages/Landing.jsx`.
@@ -124,11 +124,12 @@ As of June 2, 2026:
 - Phase 2 wallet auth is implemented. The dashboard can connect Freighter, sign a login challenge, verify the signature server-side, set an HTTP-only signed session cookie, load `/api/auth/me`, and logout. Evidence: `docs/evidence/PAYGATE_V1_PHASE2_WALLET_AUTH_PROOF.md`.
 - Phase 2 challenge storage is still in-memory. Phase 3 added the `auth_challenges` table in Supabase, but the auth endpoints still need a later migration from memory store to Supabase before relying on production multi-instance behavior.
 - Phase 3 API registry is implemented. Authenticated developers can create/list/view/update owned APIs through `/api/apis`, secrets are generated and encrypted server-side, and Supabase migrations exist. Evidence: `docs/evidence/PAYGATE_V1_PHASE3_REGISTRY_PROOF.md`.
-- `/api/pay/:apiId` is still not implemented; proxy URL is reserved for Phase 5/6.
 - Phase 4 demo upstream API is implemented at `/api/upstream/market-signal`. It is a normal secret-protected API with no MPP code. Evidence: `docs/evidence/PAYGATE_V1_PHASE4_UPSTREAM_API_PROOF.md`; registration guide: `docs/demo-upstream-api.md`.
 - Phase 5 paid proxy unpaid flow is implemented at `/api/pay/:apiId`. It resolves active APIs, logs `proxy_requests` with `challenge_sent`, and returns Stellar MPP 402 challenges with PayGate request/payment headers. Evidence: `docs/evidence/PAYGATE_V1_PHASE5_PROXY_UNPAID_PROOF.md`.
 - Phase 6 paid proxy success flow is implemented. Paid retries map MPP `externalId` to PayGate `payment_id`, verify the MPP credential, save payment rows and tx hashes, credit the escrow ledger, decrypt the upstream secret, forward to the registered API, and log `forwarded` or `upstream_failed`. Evidence: `docs/evidence/PAYGATE_V1_PHASE6_PAID_PROXY_PROOF.md`.
 - The Phase 6 smoke test uses memory-only mock MPP/escrow modes for deterministic local verification. Production mode still requires real `@stellar/mpp` verification, persistent Supabase MPP store, `ESCROW_CONTRACT_ID`, and `PAYGATE_OPERATOR_SECRET`.
+- Phase 7 developer dashboard is implemented. Authenticated wallet owners can load API list, paid proxy URLs, request counts, gross revenue, 10% platform fee, payment/request history, tx links, and contract withdrawable balance from `/api/dashboard/summary`. Evidence: `docs/evidence/PAYGATE_V1_PHASE7_DASHBOARD_PROOF.md`.
+- Developer withdrawal UI/action is still Phase 8 and must not be treated as complete yet.
 
 Update this snapshot when the project materially changes.
 
