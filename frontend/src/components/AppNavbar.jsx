@@ -55,8 +55,8 @@ export default function AppNavbar() {
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {navLink('/generate', 'Generator')}
           {navLink('/dashboard', 'Dashboard')}
+          {navLink('/apis/new', 'New API')}
           <a
             href="https://github.com/wildanniam/paygate-stellar"
             target="_blank"
@@ -83,4 +83,3 @@ export default function AppNavbar() {
     </nav>
   );
 }
-

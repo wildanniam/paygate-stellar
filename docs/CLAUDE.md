@@ -128,7 +128,9 @@ As of June 2, 2026:
 - `contracts/` has been scaffolded for the `paygate-escrow` Soroban spike.
 - Phase 1 settlement proof is complete on Stellar testnet. MPP Charge successfully paid the deployed escrow `C...` contract, the contract received USDC testnet, and `creditPayment` updated the 90/10 developer/platform ledger. Evidence: `docs/evidence/PAYGATE_V1_PHASE1_SETTLEMENT_PROOF.md`.
 - Phase 2 wallet auth is implemented. The dashboard can connect Freighter, sign a login challenge, verify the signature server-side, set an HTTP-only signed session cookie, load `/api/auth/me`, and logout. Evidence: `docs/evidence/PAYGATE_V1_PHASE2_WALLET_AUTH_PROOF.md`.
-- Phase 2 challenge storage is intentionally in-memory. Move `auth_challenges` to Supabase in Phase 3 before relying on production multi-instance behavior.
+- Phase 2 challenge storage is still in-memory. Phase 3 added the `auth_challenges` table in Supabase, but the auth endpoints still need a later migration from memory store to Supabase before relying on production multi-instance behavior.
+- Phase 3 API registry is implemented. Authenticated developers can create/list/view/update owned APIs through `/api/apis`, secrets are generated and encrypted server-side, and Supabase migrations exist. Evidence: `docs/evidence/PAYGATE_V1_PHASE3_REGISTRY_PROOF.md`.
+- `/api/pay/:apiId` is still not implemented; proxy URL is reserved for Phase 5/6.
 
 Update this section when major milestones land, so future agents inherit accurate context.
 

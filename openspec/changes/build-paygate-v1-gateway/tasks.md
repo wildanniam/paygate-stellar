@@ -37,11 +37,11 @@
 
 ## 5. API Registry
 
-- [ ] Add Supabase project/env configuration docs.
-- [ ] Create API registry schema.
-- [ ] Encrypt per-API secret header.
-- [ ] Allow one wallet to register multiple APIs.
-- [ ] Auto-fill API owner/payout wallet from connected wallet.
+- [x] Add Supabase project/env configuration docs.
+- [x] Create API registry schema.
+- [x] Encrypt per-API secret header.
+- [x] Allow one wallet to register multiple APIs.
+- [x] Auto-fill API owner/payout wallet from connected wallet.
 
 ## 6. Paid Proxy
 
