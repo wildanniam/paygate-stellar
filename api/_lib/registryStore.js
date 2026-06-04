@@ -13,6 +13,7 @@ function getMemoryState() {
       mppStore: new Map(),
       payments: new Map(),
       proxyRequests: new Map(),
+      withdrawals: new Map(),
     };
   }
   return globalThis.__PAYGATE_REGISTRY_MEMORY;
@@ -66,6 +67,18 @@ function publicPaymentFields(record) {
     verified_at: record.verified_at,
     credited_at: record.credited_at,
     created_at: record.created_at,
+  };
+}
+
+function publicWithdrawalFields(record) {
+  return {
+    id: record.id,
+    wallet_address: record.wallet_address,
+    amount_usdc: record.amount_usdc,
+    tx_hash: record.tx_hash,
+    status: record.status,
+    created_at: record.created_at,
+    completed_at: record.completed_at,
   };
 }
 
@@ -199,6 +212,34 @@ function createMemoryRegistry() {
       };
       state.payments.set(row.id, row);
       return publicPaymentFields(row);
+    },
+    async listWithdrawals(walletAddress, limit = 50) {
+      return [...state.withdrawals.values()]
+        .filter((record) => record.wallet_address === walletAddress)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, limit)
+        .map(publicWithdrawalFields);
+    },
+    async createWithdrawal(record) {
+      const row = {
+        ...record,
+        id: crypto.randomUUID(),
+        tx_hash: record.tx_hash ?? null,
+        completed_at: record.completed_at ?? null,
+        created_at: nowIso(),
+      };
+      state.withdrawals.set(row.id, row);
+      return publicWithdrawalFields(row);
+    },
+    async updateWithdrawal(withdrawalId, updates) {
+      const row = state.withdrawals.get(withdrawalId);
+      if (!row) return null;
+      const next = {
+        ...row,
+        ...updates,
+      };
+      state.withdrawals.set(withdrawalId, next);
+      return publicWithdrawalFields(next);
     },
     async updatePayment(paymentId, updates) {
       const row = [...state.payments.values()].find((payment) => payment.payment_id === paymentId);
@@ -380,6 +421,35 @@ function createSupabaseRegistry() {
       if (error) throw error;
       return data;
     },
+    async listWithdrawals(walletAddress, limit = 50) {
+      const { data, error } = await client
+        .from('withdrawals')
+        .select('*')
+        .eq('wallet_address', walletAddress)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data ?? [];
+    },
+    async createWithdrawal(record) {
+      const { data, error } = await client
+        .from('withdrawals')
+        .insert(record)
+        .select('*')
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    async updateWithdrawal(withdrawalId, updates) {
+      const { data, error } = await client
+        .from('withdrawals')
+        .update(updates)
+        .eq('id', withdrawalId)
+        .select('*')
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
     async updatePayment(paymentId, updates) {
       const { data, error } = await client
         .from('payments')
@@ -431,6 +501,7 @@ export function clearRegistryForTest() {
   state.mppStore?.clear();
   state.payments?.clear();
   state.proxyRequests?.clear();
+  state.withdrawals?.clear();
 }
 
 export function getRawApisForTest() {
@@ -443,6 +514,10 @@ export function getRawProxyRequestsForTest() {
 
 export function getRawPaymentsForTest() {
   return [...getMemoryState().payments.values()];
+}
+
+export function getRawWithdrawalsForTest() {
+  return [...getMemoryState().withdrawals.values()];
 }
 
 export function getRawMppStoreForTest() {

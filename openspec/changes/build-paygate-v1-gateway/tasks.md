@@ -62,7 +62,7 @@
 - [x] Show 10% platform fee.
 - [x] Show withdrawable balance from contract.
 - [x] Show request/payment logs.
-- [ ] Add developer withdraw action through Freighter.
+- [x] Add developer withdraw action through Freighter.
 
 ## 8. Demo Evidence
 

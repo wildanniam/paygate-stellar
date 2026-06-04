@@ -85,6 +85,18 @@ function serializePayment(row, names) {
   };
 }
 
+function serializeWithdrawal(row) {
+  return {
+    id: row.id,
+    walletAddress: row.wallet_address,
+    amountUsdc: Number(row.amount_usdc),
+    txHash: row.tx_hash,
+    status: row.status,
+    createdAt: row.created_at,
+    completedAt: row.completed_at,
+  };
+}
+
 async function readBalances(walletAddress) {
   try {
     return await readEscrowBalances(walletAddress);
@@ -111,10 +123,11 @@ export default async function handler(req, res) {
   if (!store) return undefined;
 
   try {
-    const [apis, proxyRequests, payments, escrow] = await Promise.all([
+    const [apis, proxyRequests, payments, withdrawals, escrow] = await Promise.all([
       store.listApis(session.walletAddress),
       store.listProxyRequests(session.walletAddress, 100),
       store.listPaymentsForOwner(session.walletAddress, 100),
+      store.listWithdrawals(session.walletAddress, 50),
       readBalances(session.walletAddress),
     ]);
 
@@ -139,6 +152,7 @@ export default async function handler(req, res) {
       apis: buildApiStats(req, apis, proxyRequests, payments),
       requests: proxyRequests.map((row) => serializeRequest(row, names)),
       payments: payments.map((row) => serializePayment(row, names)),
+      withdrawals: withdrawals.map(serializeWithdrawal),
     });
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Dashboard summary error' });

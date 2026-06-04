@@ -14,6 +14,8 @@
     "test:proxy-unpaid": "node scripts/phase5-proxy-smoke.mjs",
     "test:proxy-paid": "node scripts/phase6-paid-proxy-smoke.mjs",
     "test:dashboard": "node scripts/phase7-dashboard-smoke.mjs",
+    "test:withdrawal": "node scripts/phase8-withdrawal-smoke.mjs",
+    "admin:withdraw-fees": "node scripts/admin-withdraw-fees.mjs",
     "vercel-build": "npm run build"
   },
   "dependencies": {

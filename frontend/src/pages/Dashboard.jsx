@@ -1,4 +1,4 @@
-import { isConnected, requestAccess, signMessage } from '@stellar/freighter-api';
+import { isConnected, requestAccess, signMessage, signTransaction } from '@stellar/freighter-api';
 import {
   Activity,
   AlertCircle,
@@ -64,9 +64,9 @@ async function readJsonResponse(res) {
 }
 
 function statusColor(status) {
-  if (status === 'forwarded') return C.green;
+  if (status === 'forwarded' || status === 'succeeded') return C.green;
   if (status === 'credited' || status === 'payment_verified') return C.blue;
-  if (status === 'challenge_sent') return C.amber;
+  if (status === 'challenge_sent' || status === 'pending') return C.amber;
   if (status?.includes('failed') || status === 'duplicate_payment') return C.red;
   return C.text2;
 }
@@ -139,6 +139,9 @@ export default function Dashboard() {
   const [dashboardStatus, setDashboardStatus] = useState('idle');
   const [dashboardError, setDashboardError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [withdrawStatus, setWithdrawStatus] = useState('idle');
+  const [withdrawError, setWithdrawError] = useState('');
+  const [withdrawResult, setWithdrawResult] = useState(null);
 
   const loadDashboard = useCallback(async () => {
     setDashboardStatus((prev) => (prev === 'loaded' ? 'refreshing' : 'loading'));
@@ -256,10 +259,55 @@ export default function Dashboard() {
     }
   };
 
+  const handleWithdraw = async () => {
+    setWithdrawStatus('preparing');
+    setWithdrawError('');
+    setWithdrawResult(null);
+
+    try {
+      const prepareRes = await fetch('/api/withdraw/prepare', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const prepared = await readJsonResponse(prepareRes);
+      if (!prepareRes.ok) throw new Error(prepared.error || 'Failed to prepare withdrawal.');
+
+      setWithdrawStatus('signing');
+      const signed = await signTransaction(prepared.transactionXdr, {
+        address: session.walletAddress,
+        networkPassphrase: prepared.networkPassphrase || TESTNET_PASSPHRASE,
+      });
+      if (signed.error) throw new Error(signed.error.message || 'Withdrawal signature rejected.');
+
+      const signedTransactionXdr = signed.signedTxXdr;
+      if (!signedTransactionXdr) throw new Error('Freighter did not return a signed transaction.');
+
+      setWithdrawStatus('submitting');
+      const submitRes = await fetch('/api/withdraw/submit', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signedTransactionXdr }),
+      });
+      const submitted = await readJsonResponse(submitRes);
+      if (!submitRes.ok) throw new Error(submitted.error || 'Failed to submit withdrawal.');
+
+      setWithdrawResult(submitted);
+      setWithdrawStatus('done');
+      await loadDashboard();
+    } catch (err) {
+      setWithdrawError(err.message || 'Withdrawal failed.');
+      setWithdrawStatus('error');
+    }
+  };
+
   const summary = dashboard?.summary;
   const escrowError = dashboard?.escrow?.error;
   const isLoading = dashboardStatus === 'loading' || authStatus === 'loading';
   const isRefreshing = dashboardStatus === 'refreshing';
+  const isWithdrawing = ['preparing', 'signing', 'submitting'].includes(withdrawStatus);
+  const withdrawableUsdc = Number(dashboard?.escrow?.developerBalance?.usdc || 0);
+  const canWithdraw = session.authenticated && dashboard?.escrow?.configured && withdrawableUsdc > 0 && !escrowError && !isWithdrawing;
 
   const topApis = useMemo(() => {
     return [...(dashboard?.apis || [])].sort((a, b) => b.calls - a.calls).slice(0, 6);
@@ -502,10 +550,55 @@ export default function Dashboard() {
                 <div style={{ color: C.text3, fontSize: 12, ...MONO }}>PayGate Fee Balance</div>
                 <div style={{ color: C.amber, fontWeight: 800, marginTop: 8 }}>{formatUsdc(dashboard.escrow?.platformFeeBalance?.usdc)}</div>
               </div>
-              <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>
-                Open Explorer
-                <ArrowUpRight size={16} />
-              </a>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <button type="button" onClick={handleWithdraw} disabled={!canWithdraw} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: canWithdraw ? C.accent : C.surfaceHover, color: canWithdraw ? C.text1 : C.text3, border: canWithdraw ? 'none' : `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', fontWeight: 800, cursor: canWithdraw ? 'pointer' : 'not-allowed' }}>
+                  {isWithdrawing ? <Loader2 size={15} className="spin" /> : <Wallet size={15} />}
+                  {withdrawStatus === 'signing' ? 'Sign in Freighter' : withdrawStatus === 'submitting' ? 'Submitting' : 'Withdraw'}
+                </button>
+                <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>
+                  Open Explorer
+                  <ArrowUpRight size={16} />
+                </a>
+              </div>
+              {(withdrawError || withdrawResult) && (
+                <div style={{ flexBasis: '100%', color: withdrawError ? C.red : C.green, fontSize: 13, ...MONO }}>
+                  {withdrawError || `Withdrawal submitted: ${short(withdrawResult.txHash, 10, 8)}`}
+                </div>
+              )}
+            </section>
+
+            <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
+              <div style={{ padding: '18px 20px', borderBottom: `1px solid ${C.border}` }}>
+                <h2 style={{ margin: 0, fontSize: 18 }}>Withdrawal History</h2>
+                <div style={{ color: C.text3, fontSize: 13, marginTop: 5 }}>Developer payout contract invocations.</div>
+              </div>
+              {(dashboard.withdrawals || []).length === 0 ? (
+                <EmptyState title="No withdrawals yet" body="Withdrawable balance will move to the connected developer wallet after a Freighter-signed withdrawal." />
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
+                    <thead>
+                      <tr style={{ color: C.text3, fontSize: 12, ...MONO, textAlign: 'left' }}>
+                        {['Time', 'Amount', 'Status', 'Tx'].map((heading) => (
+                          <th key={heading} style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, fontWeight: 500 }}>
+                            {heading}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dashboard.withdrawals.slice(0, 8).map((withdrawal) => (
+                        <tr key={withdrawal.id} style={{ borderBottom: `1px solid ${C.border}` }}>
+                          <td style={{ padding: '15px 16px', color: C.text2 }}>{formatDate(withdrawal.createdAt)}</td>
+                          <td style={{ padding: '15px 16px', color: C.green, fontWeight: 800 }}>{formatUsdc(withdrawal.amountUsdc)}</td>
+                          <td style={{ padding: '15px 16px', color: statusColor(withdrawal.status), fontWeight: 800 }}>{withdrawal.status}</td>
+                          <td style={{ padding: '15px 16px' }}><TxLink hash={withdrawal.txHash} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </section>
           </div>
         )}
