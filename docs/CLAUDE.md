@@ -8,12 +8,13 @@ Read these in order before making code changes:
 
 1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.
 2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — locked V1 technical development plan and phase-by-phase execution guide.
-3. `TECHNICAL_SPEC.md` — canonical implementation plan for the original PayGate 30-day V0/SOW POC.
-4. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
-5. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
-6. This file — persistent project context, scope boundaries, and agent behavior rules.
-7. `../frontend/PayGate_LandingPage_Brief.md` — landing page visual/copy reference only.
-8. `README.md` — useful overview, but it may lag behind the technical spec.
+3. `PAYGATE_V1_DEMO_GUIDE.md` — current replay guide, evidence index, screenshot checklist, and demo script.
+4. `TECHNICAL_SPEC.md` — canonical implementation plan for the original PayGate 30-day V0/SOW POC.
+5. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
+6. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
+7. This file — persistent project context, scope boundaries, and agent behavior rules.
+8. `../frontend/PayGate_LandingPage_Brief.md` — landing page visual/copy reference only.
+9. `README.md` — useful overview, but it may lag behind the technical spec.
 
 If any file conflicts with `TECHNICAL_SPEC.md`, follow `TECHNICAL_SPEC.md` for V0/SOW work. For the V1 branch, follow `PAYGATE_V1_PRODUCT_SPEC.md` where it intentionally conflicts with the old stateless generator scope.
 
@@ -137,6 +138,7 @@ As of June 4, 2026:
 - Phase 7 developer dashboard is implemented. Authenticated wallet owners can load API list, paid proxy URLs, request counts, gross revenue, 10% platform fee, payment/request history, tx links, and contract withdrawable balance from `/api/dashboard/summary`. Evidence: `docs/evidence/PAYGATE_V1_PHASE7_DASHBOARD_PROOF.md`.
 - Phase 8 escrow withdrawal flow is implemented. Dashboard can prepare a withdrawal, Freighter signs the transaction XDR, `/api/withdraw/submit` submits it to Soroban RPC, and withdrawal rows are recorded. Admin fee withdrawal is available through `npm run admin:withdraw-fees`. Evidence: `docs/evidence/PAYGATE_V1_PHASE8_WITHDRAWAL_PROOF.md`.
 - Live admin fee withdrawal still requires `PAYGATE_OPERATOR_SECRET` in the operator environment; do not expose that secret to the frontend.
+- Phase 9 demo guide is documented in `docs/PAYGATE_V1_DEMO_GUIDE.md`. Demo video is still not recorded in this repository.
 
 Update this section when major milestones land, so future agents inherit accurate context.
 

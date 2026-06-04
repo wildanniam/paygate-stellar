@@ -52,18 +52,23 @@ Every unpaid request to that endpoint receives an MPP `402 Payment Required` cha
 
 ## Project Status
 
-> **Functional alpha.** The generator, result page, dashboard, and internal sample API lab exist. Full demo readiness still depends on completing a real funded testnet payment and dashboard proof.
+> **V1 demo-ready alpha.** The original generator is preserved, and the `codex/paygate-v1` branch now implements the stronger gateway story: wallet login, API registry, paid proxy, MPP payment verification, Soroban escrow crediting, dashboard, and withdrawal flow. Use `PAYGATE_V1_DEMO_GUIDE.md` as the current demo replay guide.
 
 | Component | Status |
 |---|---|
 | Landing page | Done |
 | Middleware generator | Done |
 | Result/code copy page | Done |
-| Horizon-backed dashboard | Done, needs real payment proof |
-| Sample paid API lab | Added |
-| V1 product spec | Added |
-| Soroban escrow contract spike | Scaffolded, unit-tested, WASM builds |
-| MPP client payment proof | Needs funded testnet wallet run |
+| V1 wallet auth | Done |
+| V1 API registry | Done |
+| Secret-protected demo upstream API | Done |
+| V1 paid proxy unpaid `402` flow | Done |
+| V1 paid proxy paid `200` flow | Done, live testnet proof captured |
+| V1 Soroban escrow contract | Done for testnet demo |
+| V1 developer dashboard | Done |
+| V1 developer withdrawal | Done |
+| Demo guide/evidence index | Done |
+| Demo video | Not recorded yet |
 
 ---
 
@@ -238,7 +243,7 @@ Expected result: `200 OK` with:
 | MPP | `@stellar/mpp`, `mppx` |
 | Chain | Stellar testnet |
 | Asset | USDC testnet |
-| Persistence | None |
+| Persistence | Supabase for V1 registry, logs, payments, withdrawals |
 
 ---
 
@@ -246,7 +251,7 @@ Expected result: `200 OK` with:
 
 Traditional payment rails make tiny per-request API payments awkward or uneconomical. PayGate explores a machine-payment model where API consumers, especially agent clients, can pay only when they call a resource.
 
-The current POC focuses on proving the simplest developer flow: generate a paywall, protect an Express endpoint, perform one Stellar testnet payment, and show that payment in the dashboard.
+The current V1 POC focuses on proving the stronger product loop: register a normal API, expose it through a PayGate paid proxy, require MPP payment per call, forward successful requests, show revenue in the dashboard, and withdraw developer balance from escrow.
 
 ---
 
@@ -256,18 +261,19 @@ The current POC focuses on proving the simplest developer flow: generate a paywa
 - [x] Backend `POST /api/generate`
 - [x] Internal sample paid API
 - [x] No-payment `402` challenge proof
-- [ ] Funded testnet payer payment proof
-- [ ] Dashboard proof with real tx hash
-- [ ] Demo video/evidence package
+- [x] Funded testnet payer payment proof
+- [x] Dashboard proof with real tx hash support
+- [x] Demo evidence guide
+- [ ] Demo video recorded
 
 ## Known Limitations
 
 - Testnet only.
 - USDC only.
-- Express only; the internal demo uses Express 5 because current `mppx` middleware helpers expect `express >=5`.
+- GET endpoints only for the V1 paid proxy.
 - Charge mode only.
-- Dashboard counts matching USDC payments as paid requests.
-- No accounts, prepaid balance, fiat checkout, or non-Web3 buyer abstraction yet.
+- AI agent/client is represented by a local script, not a full LLM agent.
+- No fiat checkout, refund system, mainnet support, or non-Web3 buyer abstraction yet.
 
 ---
 

@@ -8,12 +8,13 @@ Before editing code, read:
 
 1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.
 2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — locked V1 technical development plan and phase-by-phase execution guide.
-3. `TECHNICAL_SPEC.md` — canonical build spec for the original 30-day V0/SOW POC.
-4. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
-5. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
-6. `AGENTS.md` — this project memory and agent operating guide.
-7. `CLAUDE.md` — same project context for Claude-based agents.
-8. `../frontend/PayGate_LandingPage_Brief.md` — only when changing landing page copy or visuals.
+3. `PAYGATE_V1_DEMO_GUIDE.md` — current replay guide, evidence index, screenshot checklist, and demo script.
+4. `TECHNICAL_SPEC.md` — canonical build spec for the original 30-day V0/SOW POC.
+5. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
+6. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
+7. `AGENTS.md` — this project memory and agent operating guide.
+8. `CLAUDE.md` — same project context for Claude-based agents.
+9. `../frontend/PayGate_LandingPage_Brief.md` — only when changing landing page copy or visuals.
 
 `README.md` may be stale. For V0/SOW generator work, `TECHNICAL_SPEC.md` wins. For the V1 branch, `PAYGATE_V1_PRODUCT_SPEC.md` wins where it intentionally conflicts with V0 constraints.
 
@@ -131,6 +132,7 @@ As of June 4, 2026:
 - Phase 7 developer dashboard is implemented. Authenticated wallet owners can load API list, paid proxy URLs, request counts, gross revenue, 10% platform fee, payment/request history, tx links, and contract withdrawable balance from `/api/dashboard/summary`. Evidence: `docs/evidence/PAYGATE_V1_PHASE7_DASHBOARD_PROOF.md`.
 - Phase 8 escrow withdrawal flow is implemented. Dashboard can prepare a withdrawal, Freighter signs the transaction XDR, `/api/withdraw/submit` submits it to Soroban RPC, and withdrawal rows are recorded. Admin fee withdrawal is available through `npm run admin:withdraw-fees`. Evidence: `docs/evidence/PAYGATE_V1_PHASE8_WITHDRAWAL_PROOF.md`.
 - Live admin fee withdrawal still requires `PAYGATE_OPERATOR_SECRET` in the operator environment; do not expose that secret to the frontend.
+- Phase 9 demo guide is documented in `docs/PAYGATE_V1_DEMO_GUIDE.md`. Demo video is still not recorded in this repository.
 
 Update this snapshot when the project materially changes.
 
