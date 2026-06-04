@@ -1,6 +1,6 @@
 # PayGate V1 Development Plan
 
-> Status: Draft for Wildan review. Do not treat this as locked until Wildan explicitly says "lock".
+> Status: Locked for implementation by Wildan on 2026-06-04.
 > Created: 2026-06-04.
 > Branch target: `codex/paygate-v1`.
 
@@ -944,9 +944,9 @@ Exit criteria:
 
 ---
 
-## 19. Review Checklist Before Lock
+## 19. Lock Record
 
-Wildan should review and approve:
+Wildan reviewed and approved:
 
 - Phase order.
 - Payment fallback honesty.
@@ -958,15 +958,4 @@ Wildan should review and approve:
 - GET-only limitation.
 - V0 generator hidden but preserved.
 
-After approval, update status at the top from:
-
-```text
-Draft for Wildan review
-```
-
-to:
-
-```text
-Locked for implementation
-```
-
+The status at the top records this plan as locked for implementation.

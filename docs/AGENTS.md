@@ -7,7 +7,7 @@ This file gives Codex and other coding agents the durable project context for Pa
 Before editing code, read:
 
 1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.
-2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — detailed V1 technical development plan; draft until Wildan locks it.
+2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — locked V1 technical development plan and phase-by-phase execution guide.
 3. `TECHNICAL_SPEC.md` — canonical build spec for the original 30-day V0/SOW POC.
 4. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
 5. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
@@ -119,7 +119,7 @@ As of June 2, 2026:
 - PayGate is now an accepted $5,000 SCF Instaward project; delivery evidence and KYC/compliance completion are now part of the execution context.
 - A V1 branch direction has been locked: paid proxy + Freighter login + Supabase API registry + Soroban escrow settlement.
 - A `contracts/` Soroban workspace has been scaffolded for `paygate-escrow`.
-- `PAYGATE_V1_DEVELOPMENT_PLAN.md` exists as a draft plan for review. Do not treat it as locked until Wildan explicitly says it is locked.
+- `PAYGATE_V1_DEVELOPMENT_PLAN.md` is locked for implementation by Wildan as of June 4, 2026.
 - The first V1 implementation milestone is a technical spike proving MPP Charge can pay a `C...` escrow contract recipient, or documenting the approved fallback if it cannot.
 
 Update this snapshot when the project materially changes.

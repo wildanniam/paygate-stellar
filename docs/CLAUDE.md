@@ -7,7 +7,7 @@ This file is the project memory for Claude Code and other Claude-based agents wo
 Read these in order before making code changes:
 
 1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.
-2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — detailed V1 technical development plan; draft until Wildan locks it.
+2. `PAYGATE_V1_DEVELOPMENT_PLAN.md` — locked V1 technical development plan and phase-by-phase execution guide.
 3. `TECHNICAL_SPEC.md` — canonical implementation plan for the original PayGate 30-day V0/SOW POC.
 4. `PAYGATE_NEXT_PLAN.md` — product/SOW/grant handoff, next plan, and testing playbook.
 5. `../openspec/README.md` and relevant `../openspec/specs/*/spec.md` files — capability-level requirements.
@@ -124,7 +124,7 @@ As of June 2, 2026:
 - PayGate is now an accepted $5,000 SCF Instaward project; future work should prioritize delivery proof, KYC/compliance follow-through, and demo evidence.
 - V1 direction is locked: paid proxy + Freighter login + Supabase API registry + Soroban escrow settlement.
 - `PAYGATE_V1_PRODUCT_SPEC.md` records the locked decisions.
-- `PAYGATE_V1_DEVELOPMENT_PLAN.md` exists as a draft plan for review and must not be treated as locked until Wildan explicitly approves it.
+- `PAYGATE_V1_DEVELOPMENT_PLAN.md` is locked for implementation by Wildan as of June 4, 2026.
 - `contracts/` has been scaffolded for the `paygate-escrow` Soroban spike.
 
 Update this section when major milestones land, so future agents inherit accurate context.
