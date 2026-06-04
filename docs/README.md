@@ -73,6 +73,7 @@ Every unpaid request to that endpoint receives an MPP `402 Payment Required` cha
 paygate/
 ├── docs/                     # Project docs, specs, agent memory, and README
 │   ├── README.md
+│   ├── evidence/
 │   ├── PAYGATE_V1_PRODUCT_SPEC.md
 │   ├── PAYGATE_V1_DEVELOPMENT_PLAN.md
 │   └── TECHNICAL_SPEC.md

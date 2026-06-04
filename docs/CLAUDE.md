@@ -126,6 +126,7 @@ As of June 2, 2026:
 - `PAYGATE_V1_PRODUCT_SPEC.md` records the locked decisions.
 - `PAYGATE_V1_DEVELOPMENT_PLAN.md` is locked for implementation by Wildan as of June 4, 2026.
 - `contracts/` has been scaffolded for the `paygate-escrow` Soroban spike.
+- Phase 1 settlement proof is complete on Stellar testnet. MPP Charge successfully paid the deployed escrow `C...` contract, the contract received USDC testnet, and `creditPayment` updated the 90/10 developer/platform ledger. Evidence: `docs/evidence/PAYGATE_V1_PHASE1_SETTLEMENT_PROOF.md`.
 
 Update this section when major milestones land, so future agents inherit accurate context.
 

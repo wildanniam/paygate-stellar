@@ -120,7 +120,7 @@ As of June 2, 2026:
 - A V1 branch direction has been locked: paid proxy + Freighter login + Supabase API registry + Soroban escrow settlement.
 - A `contracts/` Soroban workspace has been scaffolded for `paygate-escrow`.
 - `PAYGATE_V1_DEVELOPMENT_PLAN.md` is locked for implementation by Wildan as of June 4, 2026.
-- The first V1 implementation milestone is a technical spike proving MPP Charge can pay a `C...` escrow contract recipient, or documenting the approved fallback if it cannot.
+- Phase 1 settlement proof is complete on Stellar testnet. MPP Charge successfully paid the deployed escrow `C...` contract, the contract received USDC testnet, and `creditPayment` updated the 90/10 developer/platform ledger. Evidence: `docs/evidence/PAYGATE_V1_PHASE1_SETTLEMENT_PROOF.md`.
 
 Update this snapshot when the project materially changes.
 

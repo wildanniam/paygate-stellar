@@ -14,19 +14,19 @@
 - [x] Replace sample contract with `paygate-escrow` skeleton.
 - [x] Run contract unit tests (`cargo test`, 4 passed).
 - [x] Build contract WASM (`stellar contract build`, hash `b17921b9446d6155d38d7cf9c842082f92c0d01027a59aadc6802a4c9d74d751`).
-- [ ] Deploy escrow contract on Soroban testnet.
-- [ ] Confirm USDC testnet token contract address.
-- [ ] Prove escrow contract can hold USDC testnet.
-- [ ] Prove `withdraw` sends USDC to developer wallet.
-- [ ] Prove `withdrawPlatformFee` sends fee to PayGate admin wallet.
+- [x] Deploy escrow contract on Soroban testnet.
+- [x] Confirm USDC testnet token contract address.
+- [x] Prove escrow contract can hold USDC testnet.
+- [x] Prove `withdraw` sends USDC to developer wallet.
+- [x] Prove `withdrawPlatformFee` sends fee to PayGate admin wallet.
 
 ## 3. MPP-To-Contract Spike
 
-- [ ] Configure MPP Charge recipient as escrow `C...` contract address.
-- [ ] Run agent/client payment to escrow contract.
-- [ ] Capture tx hash.
-- [ ] Confirm MPP verification accepts contract recipient.
-- [ ] Confirm backend can call `creditPayment` after payment.
+- [x] Configure MPP Charge recipient as escrow `C...` contract address.
+- [x] Run agent/client payment to escrow contract.
+- [x] Capture tx hash.
+- [x] Confirm MPP verification accepts contract recipient.
+- [x] Confirm backend can call `creditPayment` after payment.
 
 ## 4. Wallet Auth
 
@@ -69,8 +69,8 @@
 - [ ] Demo API protected by secret header.
 - [ ] Agent unpaid request returns 402.
 - [ ] Agent paid request returns 200 JSON.
-- [ ] Contract balance updates.
-- [ ] Developer withdrawal works.
-- [ ] Platform fee withdrawal works.
-- [ ] Tx hashes saved.
+- [x] Contract balance updates.
+- [x] Developer withdrawal works.
+- [x] Platform fee withdrawal works.
+- [x] Tx hashes saved.
 - [ ] Demo video recorded.
