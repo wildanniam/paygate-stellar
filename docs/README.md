@@ -1,10 +1,10 @@
 # { PayGate }
 
-**MPP middleware generator, sample paid API, and earnings dashboard for Node.js APIs on Stellar.**
+**Pay-per-call gateway for APIs on Stellar testnet.**
 
-PayGate helps developers turn an Express endpoint into a pay-per-request API using Stellar MPP and USDC testnet. Fill a 3-field form, get middleware, attach it to an API route, and monitor incoming payments from a Stellar wallet.
+PayGate lets a developer put a paid gateway in front of a normal API. The developer connects a Freighter wallet, registers an API, receives a PayGate proxy URL, and lets machine clients or AI agents pay per request through Stellar MPP. Successful calls are logged in PayGate, credited into a Soroban escrow ledger, and shown in the developer dashboard.
 
-> **V1 branch update:** the current `codex/paygate-v1` direction is evolving PayGate into a **pay-per-call gateway for APIs**. V1 adds Freighter wallet login, Supabase API registry, paid proxy endpoints, and Soroban escrow settlement so AI agents can pay per API call and developers can withdraw balances. See `PAYGATE_V1_PRODUCT_SPEC.md`.
+The original SOW/V0 code generator is still preserved at `/generate`, but the current product direction is **PayGate V1: a pay-per-call gateway for APIs**. Use `PAYGATE_V1_PRODUCT_SPEC.md` and `PAYGATE_V1_DEMO_GUIDE.md` as the current source of truth for the V1 demo.
 
 ---
 
@@ -12,9 +12,7 @@ PayGate helps developers turn an Express endpoint into a pay-per-request API usi
 
 [Machine Payments Protocol (MPP)](https://developers.stellar.org/docs/build/agentic-payments/mpp) enables machine/API clients to pay for HTTP resources through `402 Payment Required` flows. In PayGate's current POC, each paid request uses Stellar testnet USDC through MPP Charge mode.
 
-PayGate is the onboarding layer: it generates the Express paywall code and provides a dashboard for proof of received payments.
-
-For V1, PayGate becomes the paid gateway in front of the API:
+PayGate is the onboarding layer for this flow. In V1, PayGate becomes the paid gateway in front of the API:
 
 ```text
 AI agent
@@ -28,25 +26,21 @@ Payment is intended to settle into a Soroban escrow contract, with 90% credited 
 
 ## How It Works
 
-```
-┌─────────────────────────┐
-│  1. Fill the form        │  endpoint URL · gated path · USDC price
-│  2. Click Generate       │  PayGate builds @stellar/mpp middleware
-│  3. Copy. Paste. Ship.   │  drop into Express — done
-└─────────────────────────┘
-```
-
-Generated middleware looks like this:
-
-```js
-import { paywall } from './mpp-middleware.js';
-
-app.get('/v1/data', paywall, (req, res) => {
-  res.json({ data: 'premium data' });
-});
+```text
+Developer connects Freighter
+→ Developer registers an API
+→ PayGate stores the API config in Supabase
+→ PayGate creates /api/pay/:apiId as the paid proxy
+→ Agent calls the proxy without payment
+→ PayGate returns 402 Payment Required
+→ Agent pays USDC testnet through Stellar MPP
+→ PayGate verifies the payment
+→ PayGate credits the Soroban escrow contract
+→ PayGate forwards the request to the original API with X-PayGate-Secret
+→ Dashboard shows calls, payments, fees, and withdrawable balance
 ```
 
-Every unpaid request to that endpoint receives an MPP `402 Payment Required` challenge. A compatible machine client can pay with Stellar testnet USDC, retry, and receive the protected JSON response.
+The original `/generate` page still exists as a legacy MPP middleware generator. It is useful for SOW evidence and code-snippet experimentation, but it is not the main V1 product flow. For the V1 demo, use `/dashboard` and `/apis/new`.
 
 ---
 
@@ -90,6 +84,7 @@ paygate/
 ├── backend/                  # Express generator API
 ├── contracts/                # Soroban escrow contract spike for V1
 ├── examples/express-paid-api # Internal demo lab for protected API + agent client
+├── supabase/                 # SQL migrations for V1 registry and payment logs
 └── openspec/                 # Capability specs and active demo-proof change
 ```
 
@@ -97,40 +92,79 @@ paygate/
 
 ## Running Locally
 
-**Requirements:** Node.js 22+ for the Vercel/Mpp demo functions. The frontend and legacy Express backend can still run on Node.js 20.
+**Recommended requirement:** Node.js 22+ locally. The Vercel project is configured for Node.js 24.x, and `@stellar/mpp` requires Node.js 22+.
+
+### Full V1 App
+
+Use this path for the real PayGate V1 flow. It serves the React frontend and root-level Vercel Functions from one local URL.
 
 ```bash
 cd paygate
-
-# Frontend
-cd frontend
 npm install
-npm run dev       # http://localhost:5173
+npm --prefix frontend install
+vercel env pull .env.local --environment=development --yes
+vercel dev
 ```
 
-Beta hardening commands from repo root:
+Open:
+
+```text
+http://localhost:3000
+```
+
+Verify that V1 API functions are loaded:
+
+```bash
+curl -i http://localhost:3000/api/auth/me
+```
+
+Expected before login:
+
+```json
+{"authenticated":false}
+```
+
+If `/api/auth/me` logs a Vite proxy `ECONNREFUSED` error, the linked Vercel project is still using `frontend` as the Root Directory. Fix the Vercel project setting first:
+
+```text
+Vercel project → Settings → General → Root Directory → repo root / "."
+```
+
+Then run:
+
+```bash
+vercel env pull .env.local --environment=development --yes
+vercel dev
+```
+
+### Legacy Frontend-Only Mode
+
+This is only for visual checks. It does not load the V1 Vercel Functions.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+### Verification Commands
+
+Run from the repo root:
 
 ```bash
 npm run test:beta       # local smokes, frontend build, contract tests, diff check
 npm run audit:prod      # production dependency audit gates
-npm run test:browser    # local desktop/mobile SPA route smoke
-npm run evidence:init   # create a timestamped live-replay evidence folder
+npm run test:browser    # desktop/mobile SPA route smoke
+npm run evidence:init   # create a timestamped live replay evidence folder
 ```
 
-Deployed preflight requires production-like Vercel/Supabase/Stellar environment variables:
+Deployed preflight requires production-like Vercel/Supabase/Stellar env:
 
 ```bash
 npm run beta:preflight
 ```
-
-```bash
-# Backend
-cd backend
-npm install
-npm start         # http://localhost:3001
-```
-
-The frontend calls the backend through `/api/generate` during local development.
 
 ## Vercel Production Demo
 
@@ -144,6 +178,14 @@ Build Command: npm run build
 Output Directory: frontend/dist
 ```
 
+Check the linked project:
+
+```bash
+vercel project inspect paygate-stellar
+```
+
+The project must not show `Root Directory: frontend`. If it does, `/api/*` will not load the V1 functions and local dev will fall through to the Vite proxy.
+
 Live routes after deployment:
 
 ```text
@@ -156,22 +198,65 @@ Live routes after deployment:
 /api/demo/market-signal   Official sample paid API
 ```
 
-Set these Vercel environment variables before testing the V1 paid gateway:
+### Vercel Environment Variables
+
+Set these variables for **Development** first, then add the same set to Preview/Production when the beta is ready to deploy.
+
+| Variable | Purpose | Source |
+|---|---|---|
+| `SUPABASE_URL` | Supabase project URL | Supabase dashboard |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side database access | Supabase dashboard, service role key |
+| `SESSION_SECRET` | Signs wallet login sessions | Strong random string, 32+ chars |
+| `API_SECRET_ENCRYPTION_KEY` | Encrypts generated API secrets | Strong random string, 32+ chars or 64-char hex |
+| `MPP_SECRET_KEY` | Signs MPP challenge state | Strong random string, 32+ chars |
+| `ESCROW_CONTRACT_ID` | Soroban escrow contract recipient | Testnet contract id, `C...` |
+| `PAYGATE_OPERATOR_SECRET` | Operator/admin signer for escrow credit and platform fee withdrawal | Stellar testnet secret seed, `S...` |
+| `PAYGATE_DEMO_UPSTREAM_SECRET` | Secret expected by the demo upstream endpoint | Generated API secret during demo setup |
+| `STELLAR_NETWORK` | Network selector | `stellar:testnet` |
+| `STELLAR_RPC_URL` | Soroban RPC endpoint | `https://soroban-testnet.stellar.org` |
+
+Generate local random secrets:
 
 ```bash
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-API_SECRET_ENCRYPTION_KEY=
-SESSION_SECRET=
-MPP_SECRET_KEY=
-ESCROW_CONTRACT_ID=
-PAYGATE_OPERATOR_SECRET=
-PAYGATE_DEMO_UPSTREAM_SECRET=
-STELLAR_NETWORK=stellar:testnet
-STELLAR_RPC_URL=https://soroban-testnet.stellar.org
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Do not set `STELLAR_SECRET` in Vercel. The payer secret belongs only in the local agent/client `.env`. Do not set `PAYGATE_AUTH_CHALLENGE_STORE=memory` in production; memory mode is only for deterministic local smoke tests.
+Do not set `STELLAR_SECRET` in Vercel. The payer secret belongs only in the local agent/client `.env`. Do not set `PAYGATE_AUTH_CHALLENGE_STORE=memory` or `PAYGATE_REGISTRY_STORE=memory` in Vercel; memory mode is only for deterministic local smoke tests.
+
+After adding env vars in Vercel:
+
+```bash
+vercel env pull .env.local --environment=development --yes
+```
+
+Check keys without printing secret values:
+
+```bash
+node -e "require('fs').readFileSync('.env.local','utf8').split('\n').filter(l=>l&&!l.startsWith('#')).map(l=>l.split('=')[0]).forEach(k=>console.log(k))"
+```
+
+### Supabase Setup
+
+Run the migrations in Supabase SQL Editor:
+
+```text
+supabase/migrations/20260604000000_paygate_v1_registry.sql
+supabase/migrations/20260604000001_paygate_v1_paid_proxy.sql
+```
+
+The V1 API registry depends on these tables:
+
+```text
+developers
+auth_challenges
+apis
+proxy_requests
+payments
+withdrawals
+mpp_store
+```
+
+### Smoke Tests
 
 Production generator test:
 
@@ -188,6 +273,18 @@ curl -i https://your-vercel-domain.vercel.app/api/demo/market-signal
 ```
 
 Expected with Vercel env configured:
+
+```text
+HTTP/1.1 402 Payment Required
+```
+
+V1 paid proxy smoke after registering an API:
+
+```bash
+curl -i https://your-vercel-domain.vercel.app/api/pay/<apiId>
+```
+
+Expected without payment:
 
 ```text
 HTTP/1.1 402 Payment Required
@@ -306,6 +403,9 @@ The current V1 POC focuses on proving the stronger product loop: register a norm
 - Charge mode only.
 - AI agent/client is represented by a local script, not a full LLM agent.
 - No fiat checkout, refund system, mainnet support, or non-Web3 buyer abstraction yet.
+- The legacy `/generate` flow does not require wallet login because it only generates code snippets. The V1 product flow starts at `/apis/new`.
+- Local V1 development requires the linked Vercel project Root Directory to be the repo root, not `frontend`.
+- `.env.local` is intentionally ignored and should never be committed.
 
 ---
 
