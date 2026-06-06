@@ -1,10 +1,8 @@
-import { isConnected, requestAccess, signMessage, signTransaction } from '@stellar/freighter-api';
+import { signTransaction } from '@stellar/freighter-api';
 import {
   Activity,
   AlertCircle,
   ArrowUpRight,
-  CheckCircle2,
-  Copy,
   Database,
   DollarSign,
   ExternalLink,
@@ -17,9 +15,9 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
+import CopyButton from '../components/CopyButton.jsx';
 import { C, MONO } from '../colors.js';
-
-const TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015';
+import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
 
 function short(value, head = 7, tail = 5) {
   if (!value) return '-';
@@ -40,27 +38,6 @@ function formatDate(value) {
 function formatUsdc(value) {
   const number = Number(value || 0);
   return `${number.toFixed(4).replace(/\.?0+$/, '') || '0'} USDC`;
-}
-
-function normalizeSignedMessage(signedMessage) {
-  if (typeof signedMessage === 'string') return signedMessage;
-  if (signedMessage?.type === 'Buffer' && Array.isArray(signedMessage.data)) {
-    return btoa(String.fromCharCode(...signedMessage.data));
-  }
-  if (signedMessage && typeof signedMessage.toString === 'function') {
-    return signedMessage.toString('base64');
-  }
-  return '';
-}
-
-async function readJsonResponse(res) {
-  const text = await res.text();
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
 }
 
 function statusColor(status) {
@@ -106,28 +83,6 @@ function TxLink({ hash }) {
       {short(hash, 8, 0)}
       <ExternalLink size={13} />
     </a>
-  );
-}
-
-function CopyButton({ value }) {
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={copy}
-      aria-label="Copy proxy URL"
-      title="Copy proxy URL"
-      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 7, color: copied ? C.green : C.text2, cursor: 'pointer' }}
-    >
-      {copied ? <CheckCircle2 size={15} /> : <Copy size={15} />}
-    </button>
   );
 }
 
@@ -194,47 +149,8 @@ export default function Dashboard() {
     setAuthError('');
 
     try {
-      const connected = await isConnected();
-      if (connected.error) throw new Error(connected.error.message || 'Freighter connection failed.');
-      if (!connected.isConnected) throw new Error('Freighter extension belum terhubung.');
-
-      const access = await requestAccess();
-      if (access.error) throw new Error(access.error.message || 'Wallet access ditolak.');
-      const developerWallet = access.address;
-
-      const challengeRes = await fetch('/api/auth/challenge', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ walletAddress: developerWallet }),
-      });
-      const challenge = await readJsonResponse(challengeRes);
-      if (!challengeRes.ok) throw new Error(challenge.error || 'Gagal membuat login challenge.');
-
-      const signed = await signMessage(challenge.message, {
-        address: developerWallet,
-        networkPassphrase: TESTNET_PASSPHRASE,
-      });
-      if (signed.error) throw new Error(signed.error.message || 'Signature ditolak.');
-
-      const signature = normalizeSignedMessage(signed.signedMessage);
-      if (!signature) throw new Error('Freighter tidak mengembalikan signature.');
-
-      const verifyRes = await fetch('/api/auth/verify', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          challengeId: challenge.challengeId,
-          walletAddress: developerWallet,
-          signerAddress: signed.signerAddress,
-          signedMessage: signature,
-        }),
-      });
-      const verified = await readJsonResponse(verifyRes);
-      if (!verifyRes.ok) throw new Error(verified.error || 'Signature wallet tidak valid.');
-
-      setSession({ authenticated: true, walletAddress: verified.walletAddress });
+      const nextSession = await connectFreighterWallet();
+      setSession(nextSession);
       setAuthStatus('idle');
       await loadDashboard();
     } catch (err) {
@@ -270,6 +186,12 @@ export default function Dashboard() {
         credentials: 'include',
       });
       const prepared = await readJsonResponse(prepareRes);
+      if (prepareRes.status === 401) {
+        setSession({ authenticated: false });
+        setDashboard(null);
+        setDashboardStatus('idle');
+        throw new Error('Wallet session expired. Connect Freighter again.');
+      }
       if (!prepareRes.ok) throw new Error(prepared.error || 'Failed to prepare withdrawal.');
 
       setWithdrawStatus('signing');
@@ -290,6 +212,12 @@ export default function Dashboard() {
         body: JSON.stringify({ signedTransactionXdr }),
       });
       const submitted = await readJsonResponse(submitRes);
+      if (submitRes.status === 401) {
+        setSession({ authenticated: false });
+        setDashboard(null);
+        setDashboardStatus('idle');
+        throw new Error('Wallet session expired. Connect Freighter again.');
+      }
       if (!submitRes.ok) throw new Error(submitted.error || 'Failed to submit withdrawal.');
 
       setWithdrawResult(submitted);
@@ -451,7 +379,7 @@ export default function Dashboard() {
                           <td style={{ padding: '15px 16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <span style={{ color: C.text2, fontSize: 12, ...MONO }}>{short(api.proxyUrl, 30, 12)}</span>
-                              <CopyButton value={api.proxyUrl} />
+                              <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
                             </div>
                           </td>
                           <td style={{ padding: '15px 16px', color: C.text2 }}>{api.successfulCalls}/{api.calls}</td>

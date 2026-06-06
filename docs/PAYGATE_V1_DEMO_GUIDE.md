@@ -64,6 +64,8 @@ STELLAR_NETWORK=stellar:testnet
 STELLAR_RPC_URL=https://soroban-testnet.stellar.org
 ```
 
+Do not set `PAYGATE_AUTH_CHALLENGE_STORE=memory` on Vercel. Memory auth challenge storage is only for local smoke tests; deployed beta auth uses Supabase `auth_challenges`.
+
 Local agent/client env:
 
 ```text
@@ -262,6 +264,7 @@ Existing evidence files:
 | Phase 6 paid proxy | `docs/evidence/PAYGATE_V1_PHASE6_PAID_PROXY_PROOF.md` |
 | Phase 7 dashboard | `docs/evidence/PAYGATE_V1_PHASE7_DASHBOARD_PROOF.md` |
 | Phase 8 withdrawal | `docs/evidence/PAYGATE_V1_PHASE8_WITHDRAWAL_PROOF.md` |
+| Testnet beta readiness | `docs/evidence/PAYGATE_V1_BETA_READINESS.md` |
 
 Important Phase 6 live tx hashes:
 
@@ -312,7 +315,17 @@ Record one short demo video with this order:
 Run from repo root:
 
 ```bash
+npm run test:beta
+npm run audit:prod
+npm run test:browser
+```
+
+Expanded command list:
+
+```bash
+npm run beta:preflight        # deployed env only; requires real secrets
 npm run test:auth
+npm run test:auth:supabase    # optional; skips when Supabase env is absent
 npm run test:registry
 npm run test:upstream
 npm run test:proxy-unpaid
@@ -320,8 +333,22 @@ npm run test:proxy-paid
 npm run test:dashboard
 npm run test:withdrawal
 npm --prefix frontend run build
+cd contracts && cargo test
+cd ..
 git diff --check
+npm audit --omit=dev
+npm --prefix frontend audit --omit=dev
+npm --prefix backend audit --omit=dev
+npm --prefix examples/express-paid-api audit --omit=dev
 ```
+
+Evidence run setup:
+
+```bash
+npm run evidence:init
+```
+
+This creates `docs/evidence/runs/<timestamp>/` with screenshot and transcript folders plus the live replay checklist.
 
 Optional command smoke:
 
@@ -341,6 +368,5 @@ npm run admin:withdraw-fees
 - No external user beta yet.
 - No fiat checkout.
 - No refund flow if upstream fails after payment.
-- Auth challenge storage is still memory-based unless migrated to Supabase in a later production-hardening pass.
 - Admin/operator secret must stay server-side.
 - V1 is demo/POC quality, not mainnet billing infrastructure.

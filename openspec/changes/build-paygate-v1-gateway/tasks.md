@@ -74,3 +74,22 @@
 - [x] Platform fee withdrawal works.
 - [x] Tx hashes saved.
 - [ ] Demo video recorded.
+
+## 9. Testnet Beta Hardening
+
+- [x] Persist wallet auth challenges in Supabase by default.
+- [x] Keep memory auth challenge storage only for deterministic local smoke tests.
+- [x] Add Vercel SPA rewrites for `/apis/new` and `/apis/:apiId`.
+- [x] Add friendly unauthenticated states to V1 API registration/detail pages.
+- [x] Add proxy URL and API secret copy affordances to registration/detail pages.
+- [x] Remove `frontend/node_modules` and `frontend/dist` from Git tracking.
+- [x] Add consolidated `npm run test:beta` local verification command.
+- [x] Add beta readiness evidence document.
+
+## 10. Regression And Evidence Tooling
+
+- [x] Add deployed beta preflight for required env, Supabase tables, Vercel rewrites, and generated artifact hygiene.
+- [x] Add optional Supabase auth challenge regression for atomic consume and expired challenge rejection.
+- [x] Add browser route smoke automation for desktop/mobile SPA refresh states.
+- [x] Add live replay evidence template and run-folder initializer.
+- [x] Mark older V0/SOW planning docs as historical so current V1 beta gaps remain clear.

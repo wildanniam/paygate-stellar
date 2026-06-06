@@ -1,9 +1,13 @@
 import { AlertCircle, CheckCircle2, Loader2, Plus, ShieldCheck } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import CodeBlock from '../components/CodeBlock.jsx';
+import CopyButton from '../components/CopyButton.jsx';
+import ValueRow from '../components/ValueRow.jsx';
+import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
 import { C, MONO } from '../colors.js';
+import { readJsonResponse } from '../lib/walletAuth.js';
 
 const initialForm = {
   name: 'Market Signal API',
@@ -11,16 +15,6 @@ const initialForm = {
   path: '/v1/market-signal',
   priceUsdc: '0.01',
 };
-
-async function readJsonResponse(res) {
-  const text = await res.text();
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
 
 function inputStyle() {
   return {
@@ -48,10 +42,36 @@ app.get('${api.path}', (req, res) => {
 }
 
 export default function RegisterApi() {
+  const [session, setSession] = useState({ authenticated: false });
+  const [sessionStatus, setSessionStatus] = useState('loading');
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
   const [createdApi, setCreatedApi] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSession() {
+      setSessionStatus('loading');
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        const data = await readJsonResponse(res);
+        if (!active) return;
+        setSession(data);
+      } catch {
+        if (!active) return;
+        setSession({ authenticated: false });
+      } finally {
+        if (active) setSessionStatus('idle');
+      }
+    }
+
+    loadSession();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const update = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
@@ -76,6 +96,10 @@ export default function RegisterApi() {
         }),
       });
       const data = await readJsonResponse(res);
+      if (res.status === 401) {
+        setSession({ authenticated: false });
+        throw new Error('Wallet session expired. Connect Freighter again.');
+      }
       if (!res.ok) throw new Error(data.error || 'Failed to register API.');
       setCreatedApi(data.api);
       setStatus('created');
@@ -98,6 +122,22 @@ export default function RegisterApi() {
           </h1>
         </header>
 
+        {sessionStatus === 'loading' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: C.text2, padding: '24px 0' }}>
+            <Loader2 size={18} className="spin" />
+            Checking wallet session...
+          </div>
+        )}
+
+        {sessionStatus !== 'loading' && !session.authenticated && (
+          <WalletLoginPanel
+            title="Connect wallet to register APIs"
+            body="API ownership and payout wallet come from your Freighter session. Sign the PayGate challenge before creating a paid proxy."
+            onConnected={setSession}
+          />
+        )}
+
+        {sessionStatus !== 'loading' && session.authenticated && (
         <section className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 20, alignItems: 'start' }}>
           <form onSubmit={handleSubmit} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'grid', gap: 16 }}>
             <label>
@@ -141,13 +181,17 @@ export default function RegisterApi() {
                     <CheckCircle2 size={18} />
                     API Registered
                   </div>
-                  <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14 }}>
-                    <div><strong style={{ color: C.text1 }}>Proxy URL:</strong> <span style={MONO}>{createdApi.proxyUrl}</span></div>
-                    <div><strong style={{ color: C.text1 }}>Secret:</strong> <span style={MONO}>{createdApi.secret}</span></div>
+                  <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14, minWidth: 0 }}>
+                    <ValueRow label="Proxy URL" value={createdApi.proxyUrl} />
+                    <ValueRow label="Secret" value={createdApi.secret} />
                   </div>
-                  <Link to={`/apis/${createdApi.id}`} style={{ display: 'inline-flex', marginTop: 16, color: C.cyan, textDecoration: 'none', fontWeight: 700 }}>
-                    Open API Detail
-                  </Link>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
+                    <CopyButton value={createdApi.proxyUrl} label="Copy proxy" />
+                    <CopyButton value={createdApi.secret} label="Copy secret" />
+                    <Link to={`/apis/${createdApi.id}`} style={{ display: 'inline-flex', alignItems: 'center', color: C.cyan, textDecoration: 'none', fontWeight: 700 }}>
+                      Open API Detail
+                    </Link>
+                  </div>
                 </div>
                 <CodeBlock code={setupSnippet(createdApi)} filename="upstream-api.js" maxHeight={360} />
               </>
@@ -164,6 +208,7 @@ export default function RegisterApi() {
             )}
           </div>
         </section>
+        )}
       </main>
     </div>
   );

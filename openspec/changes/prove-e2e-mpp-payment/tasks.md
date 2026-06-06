@@ -1,5 +1,7 @@
 # Tasks: prove-e2e-mpp-payment
 
+> Current note: this change tracks the original V0/SOW generated-middleware proof path. The current `codex/paygate-v1` beta path is tracked in `openspec/changes/build-paygate-v1-gateway/tasks.md` and `docs/evidence/PAYGATE_V1_BETA_READINESS.md`. The unchecked items below require live wallet secrets, funded testnet accounts, screenshots, or video capture and should not be read as missing V1 gateway implementation.
+
 ## 1. Sample API
 
 - [x] Create `examples/express-paid-api/package.json`.

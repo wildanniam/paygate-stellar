@@ -129,7 +129,7 @@ As of June 4, 2026:
 - `contracts/` has been scaffolded for the `paygate-escrow` Soroban spike.
 - Phase 1 settlement proof is complete on Stellar testnet. MPP Charge successfully paid the deployed escrow `C...` contract, the contract received USDC testnet, and `creditPayment` updated the 90/10 developer/platform ledger. Evidence: `docs/evidence/PAYGATE_V1_PHASE1_SETTLEMENT_PROOF.md`.
 - Phase 2 wallet auth is implemented. The dashboard can connect Freighter, sign a login challenge, verify the signature server-side, set an HTTP-only signed session cookie, load `/api/auth/me`, and logout. Evidence: `docs/evidence/PAYGATE_V1_PHASE2_WALLET_AUTH_PROOF.md`.
-- Phase 2 challenge storage is still in-memory. Phase 3 added the `auth_challenges` table in Supabase, but the auth endpoints still need a later migration from memory store to Supabase before relying on production multi-instance behavior.
+- Wallet auth challenge storage is now Supabase-backed by default through the `auth_challenges` table when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured. Local smoke tests opt into memory storage with `PAYGATE_AUTH_CHALLENGE_STORE=memory`.
 - Phase 3 API registry is implemented. Authenticated developers can create/list/view/update owned APIs through `/api/apis`, secrets are generated and encrypted server-side, and Supabase migrations exist. Evidence: `docs/evidence/PAYGATE_V1_PHASE3_REGISTRY_PROOF.md`.
 - Phase 4 demo upstream API is implemented at `/api/upstream/market-signal`. It is a normal secret-protected API with no MPP code. Evidence: `docs/evidence/PAYGATE_V1_PHASE4_UPSTREAM_API_PROOF.md`; registration guide: `docs/demo-upstream-api.md`.
 - Phase 5 paid proxy unpaid flow is implemented at `/api/pay/:apiId`. It resolves active APIs, logs `proxy_requests` with `challenge_sent`, and returns Stellar MPP 402 challenges with PayGate request/payment headers. Evidence: `docs/evidence/PAYGATE_V1_PHASE5_PROXY_UNPAID_PROOF.md`.
@@ -138,7 +138,11 @@ As of June 4, 2026:
 - Phase 7 developer dashboard is implemented. Authenticated wallet owners can load API list, paid proxy URLs, request counts, gross revenue, 10% platform fee, payment/request history, tx links, and contract withdrawable balance from `/api/dashboard/summary`. Evidence: `docs/evidence/PAYGATE_V1_PHASE7_DASHBOARD_PROOF.md`.
 - Phase 8 escrow withdrawal flow is implemented. Dashboard can prepare a withdrawal, Freighter signs the transaction XDR, `/api/withdraw/submit` submits it to Soroban RPC, and withdrawal rows are recorded. Admin fee withdrawal is available through `npm run admin:withdraw-fees`. Evidence: `docs/evidence/PAYGATE_V1_PHASE8_WITHDRAWAL_PROOF.md`.
 - Live admin fee withdrawal still requires `PAYGATE_OPERATOR_SECRET` in the operator environment; do not expose that secret to the frontend.
-- Phase 9 demo guide is documented in `docs/PAYGATE_V1_DEMO_GUIDE.md`. Demo video is still not recorded in this repository.
+- Phase 9 demo guide is documented in `docs/PAYGATE_V1_DEMO_GUIDE.md`. Testnet beta readiness evidence is tracked in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`. Demo video is still not recorded in this repository.
+- Beta hardening utilities now exist: `npm run beta:preflight` for deployed env/Supabase/rewrite checks, `npm run test:auth:supabase` for optional Supabase auth challenge regression, `npm run test:browser` for local desktop/mobile SPA route smoke, and `npm run evidence:init` for timestamped live replay evidence folders.
+- Vercel SPA rewrites include `/apis/new` and `/apis/:apiId`, so direct refreshes of V1 app routes should resolve to the React app after deployment.
+- `frontend/node_modules` and `frontend/dist` are ignored and should remain untracked. Use `npm run build` to regenerate build output locally.
+- `npm run test:beta` is the consolidated local beta smoke command.
 
 Update this section when major milestones land, so future agents inherit accurate context.
 

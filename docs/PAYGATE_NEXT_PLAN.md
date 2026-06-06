@@ -23,6 +23,8 @@ grant_program: SCF Instawards
 
 # PayGate Next Plan
 
+> Current V1 note, 2026-06-06: this file is now a historical planning notebook plus grant/SOW memory. The current `codex/paygate-v1` beta source of truth is `docs/README.md`, `docs/PAYGATE_V1_DEMO_GUIDE.md`, `docs/evidence/PAYGATE_V1_BETA_READINESS.md`, and `openspec/changes/build-paygate-v1-gateway/tasks.md`. Older unchecked V0/SOW checklist items below should be read as historical unless they are repeated in those current V1 files.
+
 > [!abstract] Tujuan Dokumen
 > Dokumen ini adalah handoff Obsidian untuk kamu dan agent berikutnya. Isinya menjelaskan konteks bisnis PayGate berdasarkan SOW dan status grant SCF Instawards, status produk saat ini, gap terhadap target SOW, prioritas next session, dan skenario testing detail yang harus dilakukan untuk membuktikan produk benar-benar siap demo.
 
@@ -36,6 +38,20 @@ Related notes:
 - [[PayGate Testing]]
 
 ## 1. Executive Summary
+
+### 1.0 Beta Hardening Update - 2026-06-06
+
+Current branch `codex/paygate-v1` has been hardened toward a testnet production-beta posture:
+
+- Wallet auth challenges are Supabase-backed by default through `auth_challenges`; memory mode is only for local smoke tests via `PAYGATE_AUTH_CHALLENGE_STORE=memory`.
+- Vercel SPA rewrites now cover `/apis/new` and `/apis/:apiId`.
+- API registration/detail pages now show Freighter login states instead of raw unauthenticated API errors.
+- `frontend/node_modules` and `frontend/dist` should remain untracked generated output.
+- `npm run test:beta` is the consolidated local verification command.
+- `npm run beta:preflight`, `npm run test:browser`, and `npm run evidence:init` are available for deployed readiness, visual route smoke, and evidence folder setup.
+- Beta evidence is tracked in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`.
+
+Remaining manual evidence still requires live deployment secrets, funded testnet wallets, screenshots, and demo video recording.
 
 PayGate saat ini sudah berada di fase **accepted grant / functional alpha / POC foundation**.
 

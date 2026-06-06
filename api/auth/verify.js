@@ -1,4 +1,4 @@
-import { getChallenge, markChallengeUsed } from '../_lib/authStore.js';
+import { consumeChallenge, getChallenge } from '../_lib/authStore.js';
 import {
   hasSessionSecret,
   isValidWalletAddress,
@@ -31,7 +31,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid verification payload' });
   }
 
-  const challenge = getChallenge(challengeId);
+  let challenge;
+  try {
+    challenge = await getChallenge(challengeId);
+  } catch (error) {
+    return res.status(503).json({
+      error: error.message || 'PayGate auth challenge store is not configured',
+      requiredEnv: ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'],
+      testMode: 'Set PAYGATE_AUTH_CHALLENGE_STORE=memory for local smoke tests only.',
+    });
+  }
+
   if (!challenge) {
     return res.status(400).json({ error: 'Challenge expired or not found' });
   }
@@ -52,7 +62,21 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Invalid wallet signature' });
   }
 
-  markChallengeUsed(challengeId);
+  let consumed;
+  try {
+    consumed = await consumeChallenge(challengeId);
+  } catch (error) {
+    return res.status(503).json({
+      error: error.message || 'PayGate auth challenge store is not configured',
+      requiredEnv: ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'],
+      testMode: 'Set PAYGATE_AUTH_CHALLENGE_STORE=memory for local smoke tests only.',
+    });
+  }
+
+  if (!consumed) {
+    return res.status(400).json({ error: 'Challenge already used or expired' });
+  }
+
   setSessionCookie(req, res, walletAddress);
 
   return res.status(200).json({ walletAddress });

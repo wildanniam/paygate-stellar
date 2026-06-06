@@ -1,0 +1,207 @@
+import { execFileSync } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
+import { createClient } from '@supabase/supabase-js';
+import { StrKey } from '@stellar/stellar-sdk';
+
+const EXPECTED_TESTNET_RPC = 'https://soroban-testnet.stellar.org';
+
+const REQUIRED_ENV = [
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'SESSION_SECRET',
+  'API_SECRET_ENCRYPTION_KEY',
+  'MPP_SECRET_KEY',
+  'ESCROW_CONTRACT_ID',
+  'PAYGATE_OPERATOR_SECRET',
+  'PAYGATE_DEMO_UPSTREAM_SECRET',
+  'STELLAR_NETWORK',
+  'STELLAR_RPC_URL',
+];
+
+const TABLE_CHECKS = [
+  ['developers', 'id,wallet_address,created_at,last_login_at'],
+  ['auth_challenges', 'id,wallet_address,nonce,message,expires_at,used_at,created_at'],
+  ['apis', 'id,owner_wallet,name,upstream_base_url,path,method,price_usdc,active,created_at,updated_at'],
+  ['proxy_requests', 'id,api_id,owner_wallet,payment_id,status,price_usdc,tx_hash,created_at'],
+  ['payments', 'id,request_id,api_id,payment_id,tx_hash,credit_tx_hash,gross_amount_usdc,created_at'],
+  ['withdrawals', 'id,wallet_address,amount_usdc,tx_hash,status,created_at,completed_at'],
+  ['mpp_store', 'key,value,created_at,updated_at'],
+];
+
+const checks = [];
+
+function addCheck(status, label, detail = '') {
+  checks.push({ status, label, detail });
+}
+
+function pass(label, detail) {
+  addCheck('pass', label, detail);
+}
+
+function warn(label, detail) {
+  addCheck('warn', label, detail);
+}
+
+function fail(label, detail) {
+  addCheck('fail', label, detail);
+}
+
+function isMissing(value) {
+  return value === undefined || value === null || String(value).trim() === '';
+}
+
+function isUrl(value) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function checkRequiredEnv() {
+  for (const name of REQUIRED_ENV) {
+    if (isMissing(process.env[name])) {
+      fail(`${name} is set`, 'Required for deployed V1 beta.');
+    } else {
+      pass(`${name} is set`);
+    }
+  }
+}
+
+function checkEnvSemantics() {
+  if (process.env.PAYGATE_AUTH_CHALLENGE_STORE === 'memory') {
+    fail('PAYGATE_AUTH_CHALLENGE_STORE is not memory', 'Memory auth challenges are only for local smoke tests.');
+  } else {
+    pass('PAYGATE_AUTH_CHALLENGE_STORE is deployment-safe', 'Unset or Supabase-backed.');
+  }
+
+  if (process.env.PAYGATE_REGISTRY_STORE === 'memory') {
+    fail('PAYGATE_REGISTRY_STORE is not memory', 'The deployed registry must use Supabase.');
+  } else {
+    pass('PAYGATE_REGISTRY_STORE is deployment-safe', 'Unset means Supabase when env is configured.');
+  }
+
+  for (const name of ['PAYGATE_ESCROW_CREDIT_MODE', 'PAYGATE_ESCROW_WITHDRAW_MODE']) {
+    if (process.env[name] === 'memory') {
+      fail(`${name} is not memory`, 'Mock escrow mode is local-test only.');
+    }
+  }
+
+  if (process.env.SUPABASE_URL && !isUrl(process.env.SUPABASE_URL)) {
+    fail('SUPABASE_URL is a valid URL');
+  }
+
+  if (!isMissing(process.env.SESSION_SECRET) && process.env.SESSION_SECRET.length < 32) {
+    fail('SESSION_SECRET is at least 32 characters', 'Short session secrets are not acceptable for beta deploy.');
+  } else if (!isMissing(process.env.SESSION_SECRET)) {
+    pass('SESSION_SECRET length is acceptable');
+  }
+
+  if (!isMissing(process.env.API_SECRET_ENCRYPTION_KEY) && process.env.API_SECRET_ENCRYPTION_KEY.length < 32) {
+    fail('API_SECRET_ENCRYPTION_KEY is at least 32 characters', 'Use a stable random secret or 32-byte key material.');
+  } else if (!isMissing(process.env.API_SECRET_ENCRYPTION_KEY)) {
+    pass('API_SECRET_ENCRYPTION_KEY length is acceptable');
+  }
+
+  if (process.env.STELLAR_NETWORK && process.env.STELLAR_NETWORK !== 'stellar:testnet') {
+    fail('STELLAR_NETWORK is stellar:testnet', `Current value: ${process.env.STELLAR_NETWORK}`);
+  } else if (process.env.STELLAR_NETWORK) {
+    pass('STELLAR_NETWORK is stellar:testnet');
+  }
+
+  if (process.env.STELLAR_RPC_URL && process.env.STELLAR_RPC_URL !== EXPECTED_TESTNET_RPC) {
+    warn('STELLAR_RPC_URL differs from the documented testnet RPC', process.env.STELLAR_RPC_URL);
+  } else if (process.env.STELLAR_RPC_URL) {
+    pass('STELLAR_RPC_URL matches documented testnet RPC');
+  }
+
+  if (process.env.PAYGATE_OPERATOR_SECRET && !StrKey.isValidEd25519SecretSeed(process.env.PAYGATE_OPERATOR_SECRET)) {
+    fail('PAYGATE_OPERATOR_SECRET is a Stellar secret seed');
+  } else if (process.env.PAYGATE_OPERATOR_SECRET) {
+    pass('PAYGATE_OPERATOR_SECRET is a Stellar secret seed');
+  }
+
+  if (process.env.ESCROW_CONTRACT_ID && !StrKey.isValidContract(process.env.ESCROW_CONTRACT_ID)) {
+    fail('ESCROW_CONTRACT_ID is a Stellar contract id');
+  } else if (process.env.ESCROW_CONTRACT_ID) {
+    pass('ESCROW_CONTRACT_ID is a Stellar contract id');
+  }
+}
+
+async function checkVercelRewrites() {
+  try {
+    const vercel = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+    const rewrites = vercel.rewrites || [];
+    const hasApisNew = rewrites.some((rewrite) => rewrite.source === '/apis/new' && rewrite.destination === '/index.html');
+    const hasApiDetail = rewrites.some((rewrite) => rewrite.source === '/apis/:apiId' && rewrite.destination === '/index.html');
+    if (hasApisNew && hasApiDetail) {
+      pass('Vercel SPA rewrites include V1 API routes');
+    } else {
+      fail('Vercel SPA rewrites include V1 API routes', 'Expected /apis/new and /apis/:apiId to route to /index.html.');
+    }
+  } catch (err) {
+    fail('vercel.json is readable JSON', err.message);
+  }
+}
+
+function checkGeneratedArtifactsUntracked() {
+  try {
+    const output = execFileSync('git', ['ls-files', 'frontend/node_modules', 'frontend/dist'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+    if (output) {
+      fail('Generated frontend artifacts are untracked', output.split('\n').slice(0, 5).join('\n'));
+    } else {
+      pass('Generated frontend artifacts are untracked');
+    }
+  } catch (err) {
+    warn('Generated frontend artifact git check skipped', err.message);
+  }
+}
+
+async function checkSupabaseTables() {
+  const url = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey || !isUrl(url)) {
+    warn('Supabase table checks skipped', 'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
+    return;
+  }
+
+  const client = createClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+
+  for (const [table, columns] of TABLE_CHECKS) {
+    const { error } = await client.from(table).select(columns).limit(1);
+    if (error) {
+      fail(`Supabase table ${table} is queryable`, error.message);
+    } else {
+      pass(`Supabase table ${table} is queryable`);
+    }
+  }
+}
+
+checkRequiredEnv();
+checkEnvSemantics();
+await checkVercelRewrites();
+checkGeneratedArtifactsUntracked();
+await checkSupabaseTables();
+
+for (const check of checks) {
+  const prefix = check.status === 'pass' ? '[pass]' : check.status === 'warn' ? '[warn]' : '[fail]';
+  const suffix = check.detail ? ` - ${check.detail}` : '';
+  console.log(`${prefix} ${check.label}${suffix}`);
+}
+
+const failures = checks.filter((check) => check.status === 'fail');
+const warnings = checks.filter((check) => check.status === 'warn');
+console.log(`\nBeta preflight complete: ${failures.length} failure(s), ${warnings.length} warning(s).`);
+
+if (failures.length > 0) {
+  process.exitCode = 1;
+}

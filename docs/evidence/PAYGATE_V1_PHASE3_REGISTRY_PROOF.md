@@ -59,7 +59,7 @@ The migration creates:
 
 RLS is enabled on all tables. Vercel Functions use the Supabase service role key server-side.
 
-Note: the `auth_challenges` table exists for the production auth migration, but Phase 3 does not yet move the Phase 2 auth endpoints from memory storage to Supabase.
+Historical note: Phase 3 created the `auth_challenges` table before the auth endpoints moved off memory storage. Beta hardening on 2026-06-06 now uses Supabase-backed auth challenges by default, with memory mode reserved for local smoke tests.
 
 ## Frontend
 

@@ -17,10 +17,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid Stellar wallet address' });
   }
 
-  const challenge = createChallenge({
-    walletAddress,
-    origin: getOrigin(req),
-  });
+  let challenge;
+  try {
+    challenge = await createChallenge({
+      walletAddress,
+      origin: getOrigin(req),
+    });
+  } catch (error) {
+    return res.status(503).json({
+      error: error.message || 'PayGate auth challenge store is not configured',
+      requiredEnv: ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'],
+      testMode: 'Set PAYGATE_AUTH_CHALLENGE_STORE=memory for local smoke tests only.',
+    });
+  }
 
   return res.status(200).json({
     challengeId: challenge.id,

@@ -3,6 +3,7 @@ import { Keypair } from '@stellar/stellar-sdk';
 import { clearChallengesForTest, expireChallengeForTest } from '../api/_lib/authStore.js';
 
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-phase2-smoke-session-secret-32';
+process.env.PAYGATE_AUTH_CHALLENGE_STORE = 'memory';
 
 const [{ default: challengeHandler }, { default: verifyHandler }, { default: meHandler }, { default: logoutHandler }] =
   await Promise.all([

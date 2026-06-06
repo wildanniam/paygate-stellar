@@ -134,6 +134,5 @@ STELLAR_RPC_URL=https://soroban-testnet.stellar.org
 ## Remaining Work
 
 - Replay the live agent payment through the deployed Vercel production proxy after environment variables are configured.
-- Surface paid calls, revenue, and tx hashes in the V1 dashboard.
-- Add developer withdrawal flow through Freighter.
-- Replace memory auth challenge storage with Supabase-backed challenge storage before relying on multi-instance production behavior.
+- Record the final demo video after the deployed replay.
+- Fill the deployment evidence slots in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`.

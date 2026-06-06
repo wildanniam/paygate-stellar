@@ -14,6 +14,14 @@
     {
       "source": "/dashboard",
       "destination": "/index.html"
+    },
+    {
+      "source": "/apis/new",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/apis/:apiId",
+      "destination": "/index.html"
     }
   ]
 }

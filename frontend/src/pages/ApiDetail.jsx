@@ -3,17 +3,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import CodeBlock from '../components/CodeBlock.jsx';
+import CopyButton from '../components/CopyButton.jsx';
+import ValueRow from '../components/ValueRow.jsx';
+import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
 import { C, MONO } from '../colors.js';
-
-async function readJsonResponse(res) {
-  const text = await res.text();
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
+import { readJsonResponse } from '../lib/walletAuth.js';
 
 function setupSnippet(api) {
   return `const PAYGATE_SECRET = process.env.PAYGATE_SECRET;
@@ -29,8 +23,10 @@ app.get('${api.path}', (req, res) => {
 
 export default function ApiDetail() {
   const { apiId } = useParams();
+  const [session, setSession] = useState({ authenticated: false });
+  const [sessionStatus, setSessionStatus] = useState('loading');
   const [api, setApi] = useState(null);
-  const [status, setStatus] = useState('loading');
+  const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
 
   const loadApi = useCallback(async () => {
@@ -39,6 +35,17 @@ export default function ApiDetail() {
     try {
       const res = await fetch(`/api/apis/${apiId}`, { credentials: 'include' });
       const data = await readJsonResponse(res);
+      if (res.status === 401) {
+        setSession({ authenticated: false });
+        setApi(null);
+        setStatus('idle');
+        return;
+      }
+      if (res.status === 404) {
+        setApi(null);
+        setStatus('not-found');
+        return;
+      }
       if (!res.ok) throw new Error(data.error || 'Failed to load API.');
       setApi(data.api);
       setStatus('loaded');
@@ -49,7 +56,28 @@ export default function ApiDetail() {
   }, [apiId]);
 
   useEffect(() => {
-    loadApi();
+    let active = true;
+
+    async function loadSession() {
+      setSessionStatus('loading');
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        const data = await readJsonResponse(res);
+        if (!active) return;
+        setSession(data);
+        if (data.authenticated) await loadApi();
+      } catch {
+        if (!active) return;
+        setSession({ authenticated: false });
+      } finally {
+        if (active) setSessionStatus('idle');
+      }
+    }
+
+    loadSession();
+    return () => {
+      active = false;
+    };
   }, [loadApi]);
 
   const toggleActive = async () => {
@@ -64,6 +92,12 @@ export default function ApiDetail() {
         body: JSON.stringify({ active: !api.active }),
       });
       const data = await readJsonResponse(res);
+      if (res.status === 401) {
+        setSession({ authenticated: false });
+        setApi(null);
+        setStatus('idle');
+        return;
+      }
       if (!res.ok) throw new Error(data.error || 'Failed to update API.');
       setApi((current) => ({ ...current, ...data.api }));
       setStatus('loaded');
@@ -89,11 +123,22 @@ export default function ApiDetail() {
           <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 700 }}>Register another API</Link>
         </header>
 
-        {status === 'loading' && (
+        {(sessionStatus === 'loading' || status === 'loading') && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: C.text2, padding: '28px 0' }}>
             <Loader2 size={18} className="spin" />
             Loading...
           </div>
+        )}
+
+        {sessionStatus !== 'loading' && !session.authenticated && (
+          <WalletLoginPanel
+            title="Connect wallet to view this API"
+            body="API detail is scoped to the owner wallet. Connect Freighter and sign the challenge before PayGate shows proxy URLs, secrets, and active controls."
+            onConnected={(nextSession) => {
+              setSession(nextSession);
+              loadApi();
+            }}
+          />
         )}
 
         {error && (
@@ -103,7 +148,7 @@ export default function ApiDetail() {
           </div>
         )}
 
-        {api && (
+        {session.authenticated && api && (
           <section className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 20, alignItems: 'start' }}>
             <div style={{ display: 'grid', gap: 16 }}>
               <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
@@ -111,13 +156,15 @@ export default function ApiDetail() {
                   <CheckCircle2 size={18} />
                   {api.active ? 'Active' : 'Inactive'}
                 </div>
-                <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14 }}>
-                  <div><strong style={{ color: C.text1 }}>Proxy URL:</strong> <span style={MONO}>{api.proxyUrl}</span></div>
-                  <div><strong style={{ color: C.text1 }}>Upstream:</strong> <span style={MONO}>{api.upstreamBaseUrl}{api.path}</span></div>
+                <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14, minWidth: 0 }}>
+                  <ValueRow label="Proxy URL" value={api.proxyUrl} />
+                  <ValueRow label="Upstream" value={`${api.upstreamBaseUrl}${api.path}`} />
                   <div><strong style={{ color: C.text1 }}>Price:</strong> {api.priceUsdc} USDC per call</div>
-                  <div><strong style={{ color: C.text1 }}>Secret:</strong> <span style={MONO}>{api.secret}</span></div>
+                  <ValueRow label="Secret" value={api.secret} />
                 </div>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>
+                  <CopyButton value={api.proxyUrl} label="Copy proxy" />
+                  <CopyButton value={api.secret} label="Copy secret" />
                   <button type="button" onClick={toggleActive} disabled={status === 'saving'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: C.text2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}>
                     <Power size={15} />
                     {api.active ? 'Deactivate' : 'Activate'}
@@ -131,6 +178,22 @@ export default function ApiDetail() {
             </div>
 
             <CodeBlock code={setupSnippet(api)} filename="upstream-api.js" maxHeight={420} />
+          </section>
+        )}
+
+        {session.authenticated && status === 'not-found' && (
+          <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.amber, fontWeight: 800, marginBottom: 10 }}>
+              <AlertCircle size={18} style={{ flex: '0 0 auto', marginTop: 1 }} />
+              API not found for this wallet
+            </div>
+            <p style={{ color: C.text2, lineHeight: 1.7, margin: 0, maxWidth: 680 }}>
+              This API either does not exist or belongs to a different developer wallet. Connect the owner wallet or register a new API.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
+              <Link to="/dashboard" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Back to dashboard</Link>
+              <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Register API</Link>
+            </div>
           </section>
         )}
       </main>

@@ -1,6 +1,8 @@
 # PayGate — Technical Specification
 > Panduan development untuk AI agent. Baca seluruh dokumen ini sebelum menulis satu baris kode pun.
 
+> Current V1 note, 2026-06-06: this document describes the original V0/SOW stateless generator architecture. It is preserved for historical context. The active V1 beta architecture now includes Freighter auth, Supabase persistence, Vercel Functions, paid proxy routes, and Soroban escrow; use `docs/README.md`, `docs/PAYGATE_V1_DEMO_GUIDE.md`, and `docs/evidence/PAYGATE_V1_BETA_READINESS.md` as the current source of truth.
+
 ---
 
 ## 0. Konteks Proyek

@@ -74,11 +74,13 @@ The smoke test covers:
 - `/api/auth/me` returns authenticated wallet.
 - Logout clears cookie.
 
-## Important Limitation
+## Historical Phase Limitation
 
 For Phase 2, `auth_challenges` uses an in-memory store so auth behavior can be proven before introducing Supabase.
 
 This is acceptable for the phase checkpoint, but not final production behavior. During Phase 3, move challenge persistence to Supabase together with the API registry so single-use challenge guarantees survive serverless cold starts and multiple Vercel instances.
+
+Beta hardening update, 2026-06-06: auth challenges are now Supabase-backed by default when Supabase service-role env is configured. Memory challenge storage is only used when `PAYGATE_AUTH_CHALLENGE_STORE=memory` is explicitly set for local smoke tests.
 
 ## Required Environment
 

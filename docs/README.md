@@ -52,7 +52,7 @@ Every unpaid request to that endpoint receives an MPP `402 Payment Required` cha
 
 ## Project Status
 
-> **V1 demo-ready alpha.** The original generator is preserved, and the `codex/paygate-v1` branch now implements the stronger gateway story: wallet login, API registry, paid proxy, MPP payment verification, Soroban escrow crediting, dashboard, and withdrawal flow. Use `PAYGATE_V1_DEMO_GUIDE.md` as the current demo replay guide.
+> **V1 testnet beta candidate.** The original generator is preserved, and the `codex/paygate-v1` branch now implements the stronger gateway story: wallet login, API registry, paid proxy, MPP payment verification, Soroban escrow crediting, dashboard, withdrawal flow, Supabase-backed auth challenges, and deployment-safe SPA routes. Use `PAYGATE_V1_DEMO_GUIDE.md` as the current demo replay guide.
 
 | Component | Status |
 |---|---|
@@ -68,6 +68,10 @@ Every unpaid request to that endpoint receives an MPP `402 Payment Required` cha
 | V1 developer dashboard | Done |
 | V1 developer withdrawal | Done |
 | Demo guide/evidence index | Done |
+| Supabase auth challenge persistence | Done |
+| Vercel SPA deep links | Done |
+| Beta readiness evidence package | Done; deployment slots pending live replay |
+| Beta preflight and browser smoke tooling | Done |
 | Demo video | Not recorded yet |
 
 ---
@@ -104,6 +108,21 @@ npm install
 npm run dev       # http://localhost:5173
 ```
 
+Beta hardening commands from repo root:
+
+```bash
+npm run test:beta       # local smokes, frontend build, contract tests, diff check
+npm run audit:prod      # production dependency audit gates
+npm run test:browser    # local desktop/mobile SPA route smoke
+npm run evidence:init   # create a timestamped live-replay evidence folder
+```
+
+Deployed preflight requires production-like Vercel/Supabase/Stellar environment variables:
+
+```bash
+npm run beta:preflight
+```
+
 ```bash
 # Backend
 cd backend
@@ -131,18 +150,28 @@ Live routes after deployment:
 /                         PayGate frontend
 /generate                 Generator page
 /dashboard                Dashboard page
+/apis/new                 Register API page
+/apis/:apiId              API detail page
 /api/generate             Generator API
 /api/demo/market-signal   Official sample paid API
 ```
 
-Set these Vercel environment variables before testing the paid demo API:
+Set these Vercel environment variables before testing the V1 paid gateway:
 
 ```bash
-STELLAR_RECIPIENT=G...  # demo API owner public key
-MPP_SECRET_KEY=...      # strong random server secret
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+API_SECRET_ENCRYPTION_KEY=
+SESSION_SECRET=
+MPP_SECRET_KEY=
+ESCROW_CONTRACT_ID=
+PAYGATE_OPERATOR_SECRET=
+PAYGATE_DEMO_UPSTREAM_SECRET=
+STELLAR_NETWORK=stellar:testnet
+STELLAR_RPC_URL=https://soroban-testnet.stellar.org
 ```
 
-Do not set `STELLAR_SECRET` in Vercel. The payer secret belongs only in the local agent/client `.env`.
+Do not set `STELLAR_SECRET` in Vercel. The payer secret belongs only in the local agent/client `.env`. Do not set `PAYGATE_AUTH_CHALLENGE_STORE=memory` in production; memory mode is only for deterministic local smoke tests.
 
 Production generator test:
 
@@ -264,6 +293,9 @@ The current V1 POC focuses on proving the stronger product loop: register a norm
 - [x] Funded testnet payer payment proof
 - [x] Dashboard proof with real tx hash support
 - [x] Demo evidence guide
+- [x] Supabase-backed wallet auth challenges
+- [x] Deployment-safe V1 SPA routes
+- [x] Beta readiness evidence package
 - [ ] Demo video recorded
 
 ## Known Limitations
