@@ -1,5 +1,5 @@
 import { Keypair } from '@stellar/stellar-sdk';
-import { clearRegistryForTest, getRawApisForTest } from '../api/_lib/registryStore.js';
+import { clearRegistryForTest, getRawApisForTest } from '../server/lib/registryStore.js';
 
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-phase3-smoke-session-secret-32';
 process.env.API_SECRET_ENCRYPTION_KEY = process.env.API_SECRET_ENCRYPTION_KEY || 'paygate-phase3-smoke-api-secret-key-32';
@@ -9,7 +9,7 @@ const [{ default: apisHandler }, { default: apiDetailHandler }, { createSessionT
   await Promise.all([
     import('../api/apis/index.js'),
     import('../api/apis/[apiId].js'),
-    import('../api/_lib/auth.js'),
+    import('../server/lib/auth.js'),
   ]);
 
 function makeCookie(walletAddress) {

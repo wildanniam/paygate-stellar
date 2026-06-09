@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
-import { encryptApiSecret } from '../api/_lib/apiSecret.js';
-import { clearRegistryForTest, getRawProxyRequestsForTest, getRegistryStore } from '../api/_lib/registryStore.js';
+import { encryptApiSecret } from '../server/lib/apiSecret.js';
+import { clearRegistryForTest, getRawProxyRequestsForTest, getRegistryStore } from '../server/lib/registryStore.js';
 import proxyHandler from '../api/pay/[apiId].js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';

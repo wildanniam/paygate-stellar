@@ -1,4 +1,4 @@
-import { withdrawPlatformFees } from '../api/_lib/escrowContract.js';
+import { withdrawPlatformFees } from '../server/lib/escrowContract.js';
 
 try {
   const result = await withdrawPlatformFees();

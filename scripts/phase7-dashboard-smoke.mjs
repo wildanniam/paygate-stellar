@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
-import { encryptApiSecret } from '../api/_lib/apiSecret.js';
-import { createSessionToken, SESSION_COOKIE } from '../api/_lib/auth.js';
-import { clearRegistryForTest, getRegistryStore } from '../api/_lib/registryStore.js';
+import { encryptApiSecret } from '../server/lib/apiSecret.js';
+import { createSessionToken, SESSION_COOKIE } from '../server/lib/auth.js';
+import { clearRegistryForTest, getRegistryStore } from '../server/lib/registryStore.js';
 import dashboardHandler from '../api/dashboard/summary.js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';

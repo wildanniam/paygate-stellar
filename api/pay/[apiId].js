@@ -1,12 +1,12 @@
 import { Challenge, Credential, Receipt } from 'mppx';
 import { Mppx, stellar } from '@stellar/mpp/charge/server';
 import { USDC_SAC_TESTNET, fromBaseUnits, toBaseUnits } from '@stellar/mpp';
-import { getOrigin } from '../_lib/auth.js';
-import { decryptApiSecret } from '../_lib/apiSecret.js';
-import { creditEscrowPayment, getEscrowContractId, hasEscrowCreditConfig } from '../_lib/escrowContract.js';
-import { createMppReplayStore } from '../_lib/mppReplayStore.js';
-import { createPaymentId } from '../_lib/paymentId.js';
-import { getRegistryStore } from '../_lib/registryStore.js';
+import { getOrigin } from '../../server/lib/auth.js';
+import { decryptApiSecret } from '../../server/lib/apiSecret.js';
+import { creditEscrowPayment, getEscrowContractId, hasEscrowCreditConfig } from '../../server/lib/escrowContract.js';
+import { createMppReplayStore } from '../../server/lib/mppReplayStore.js';
+import { createPaymentId } from '../../server/lib/paymentId.js';
+import { getRegistryStore } from '../../server/lib/registryStore.js';
 
 const mppxByConfig = new Map();
 

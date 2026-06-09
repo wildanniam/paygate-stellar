@@ -1,7 +1,11 @@
 import { z } from 'zod';
-import { requireRegistryConfig, requireRegistrySession } from '../_lib/apiRegistry.js';
-import { readJsonBody } from '../_lib/body.js';
-import { readEscrowBalances, submitEscrowWithdrawal } from '../_lib/escrowContract.js';
+import { requireRegistryConfig, requireRegistrySession } from '../../server/lib/apiRegistry.js';
+import { readJsonBody } from '../../server/lib/body.js';
+import {
+  prepareEscrowWithdrawal,
+  readEscrowBalances,
+  submitEscrowWithdrawal,
+} from '../../server/lib/escrowContract.js';
 
 const submitSchema = z.object({
   signedTransactionXdr: z.string().min(20),
@@ -11,7 +15,48 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-export default async function handler(req, res) {
+function getAction(req) {
+  const queryAction = req.query?.action;
+  if (Array.isArray(queryAction)) return queryAction[0];
+  if (queryAction) return String(queryAction);
+
+  const parts = (req.url || '').split('?')[0].split('/').filter(Boolean);
+  return parts[parts.length - 1] || '';
+}
+
+export async function handlePrepare(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const session = requireRegistrySession(req, res);
+  if (!session) return undefined;
+
+  const store = requireRegistryConfig(res);
+  if (!store) return undefined;
+
+  try {
+    const prepared = await prepareEscrowWithdrawal(session.walletAddress);
+    return res.status(200).json({
+      walletAddress: session.walletAddress,
+      ...prepared,
+    });
+  } catch (err) {
+    if (err.code === 'NO_WITHDRAWABLE_BALANCE') {
+      return res.status(400).json({ error: 'No withdrawable balance' });
+    }
+    if (err.message?.includes('not configured')) {
+      return res.status(503).json({
+        error: err.message,
+        requiredEnv: ['ESCROW_CONTRACT_ID'],
+      });
+    }
+    return res.status(500).json({ error: err.message || 'Withdrawal preparation failed' });
+  }
+}
+
+export async function handleSubmit(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -82,4 +127,13 @@ export default async function handler(req, res) {
     }
     return res.status(500).json({ error: err.message || 'Withdrawal submission failed' });
   }
+}
+
+export default async function handler(req, res) {
+  const action = getAction(req);
+
+  if (action === 'prepare') return handlePrepare(req, res);
+  if (action === 'submit') return handleSubmit(req, res);
+
+  return res.status(404).json({ error: 'Withdrawal route not found' });
 }

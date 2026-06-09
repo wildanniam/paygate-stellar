@@ -1,10 +1,9 @@
 import { createServer } from 'node:http';
-import { createSessionToken, SESSION_COOKIE } from '../api/_lib/auth.js';
-import { clearRegistryForTest, getRawWithdrawalsForTest, getRegistryStore } from '../api/_lib/registryStore.js';
+import { createSessionToken, SESSION_COOKIE } from '../server/lib/auth.js';
+import { clearRegistryForTest, getRawWithdrawalsForTest, getRegistryStore } from '../server/lib/registryStore.js';
 import dashboardHandler from '../api/dashboard/summary.js';
-import prepareHandler from '../api/withdraw/prepare.js';
-import submitHandler from '../api/withdraw/submit.js';
-import { withdrawPlatformFees } from '../api/_lib/escrowContract.js';
+import { handlePrepare as prepareHandler, handleSubmit as submitHandler } from '../api/withdraw/[action].js';
+import { withdrawPlatformFees } from '../server/lib/escrowContract.js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
 process.env.API_SECRET_ENCRYPTION_KEY = process.env.API_SECRET_ENCRYPTION_KEY || 'paygate-phase8-smoke-api-secret-key-32';

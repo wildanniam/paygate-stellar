@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Keypair } from '@stellar/stellar-sdk';
-import { consumeChallenge, createChallenge, getAuthChallengeStore, getChallenge } from '../api/_lib/authStore.js';
+import { consumeChallenge, createChallenge, getAuthChallengeStore, getChallenge } from '../server/lib/authStore.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

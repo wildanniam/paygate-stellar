@@ -1,6 +1,6 @@
-import { createRegisteredApi, createApiSchema, requireRegistryConfig, requireRegistrySession, toApiResponse } from '../_lib/apiRegistry.js';
-import { methodNotAllowed } from '../_lib/auth.js';
-import { readJsonBody } from '../_lib/body.js';
+import { createRegisteredApi, createApiSchema, requireRegistryConfig, requireRegistrySession, toApiResponse } from '../../server/lib/apiRegistry.js';
+import { methodNotAllowed } from '../../server/lib/auth.js';
+import { readJsonBody } from '../../server/lib/body.js';
 
 export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) {

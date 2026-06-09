@@ -1,17 +1,16 @@
 import crypto from 'node:crypto';
 import { Keypair } from '@stellar/stellar-sdk';
-import { clearChallengesForTest, expireChallengeForTest } from '../api/_lib/authStore.js';
+import { clearChallengesForTest, expireChallengeForTest } from '../server/lib/authStore.js';
 
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-phase2-smoke-session-secret-32';
 process.env.PAYGATE_AUTH_CHALLENGE_STORE = 'memory';
 
-const [{ default: challengeHandler }, { default: verifyHandler }, { default: meHandler }, { default: logoutHandler }] =
-  await Promise.all([
-    import('../api/auth/challenge.js'),
-    import('../api/auth/verify.js'),
-    import('../api/auth/me.js'),
-    import('../api/auth/logout.js'),
-  ]);
+const {
+  handleChallenge: challengeHandler,
+  handleVerify: verifyHandler,
+  handleMe: meHandler,
+  handleLogout: logoutHandler,
+} = await import('../api/auth/[action].js');
 
 const SIGN_MESSAGE_PREFIX = 'Stellar Signed Message:\n';
 

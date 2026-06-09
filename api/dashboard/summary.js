@@ -1,5 +1,5 @@
-import { toApiResponse, requireRegistryConfig, requireRegistrySession } from '../_lib/apiRegistry.js';
-import { readEscrowBalances } from '../_lib/escrowContract.js';
+import { toApiResponse, requireRegistryConfig, requireRegistrySession } from '../../server/lib/apiRegistry.js';
+import { readEscrowBalances } from '../../server/lib/escrowContract.js';
 
 function sumUsdc(rows, field) {
   return rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);

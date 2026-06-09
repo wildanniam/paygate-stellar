@@ -1,6 +1,6 @@
-import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, toApiResponse, updateApiSchema } from '../_lib/apiRegistry.js';
-import { methodNotAllowed } from '../_lib/auth.js';
-import { readJsonBody } from '../_lib/body.js';
+import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, toApiResponse, updateApiSchema } from '../../server/lib/apiRegistry.js';
+import { methodNotAllowed } from '../../server/lib/auth.js';
+import { readJsonBody } from '../../server/lib/body.js';
 
 function getApiId(req) {
   if (req.query?.apiId) return String(req.query.apiId);
