@@ -1,4 +1,4 @@
-import { signTransaction } from '@stellar/freighter-api';
+import freighterApi from '@stellar/freighter-api';
 import {
   Activity,
   AlertCircle,
@@ -18,6 +18,8 @@ import AppNavbar from '../components/AppNavbar.jsx';
 import CopyButton from '../components/CopyButton.jsx';
 import { C, MONO } from '../colors.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
+
+const { signTransaction } = freighterApi;
 
 function short(value, head = 7, tail = 5) {
   if (!value) return '-';

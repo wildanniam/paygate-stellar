@@ -1,6 +1,7 @@
-import { isConnected, requestAccess, signMessage } from '@stellar/freighter-api';
+import freighterApi from '@stellar/freighter-api';
 
 export const TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015';
+const { isConnected, requestAccess, signMessage } = freighterApi;
 
 export async function readJsonResponse(res) {
   const text = await res.text();
@@ -12,10 +13,29 @@ export async function readJsonResponse(res) {
   }
 }
 
-function normalizeSignedMessage(signedMessage) {
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.slice(index, index + chunkSize));
+  }
+  return btoa(binary);
+}
+
+export function normalizeSignedMessage(signedMessage) {
   if (typeof signedMessage === 'string') return signedMessage;
   if (signedMessage?.type === 'Buffer' && Array.isArray(signedMessage.data)) {
-    return btoa(String.fromCharCode(...signedMessage.data));
+    return bytesToBase64(Uint8Array.from(signedMessage.data));
+  }
+  if (signedMessage instanceof ArrayBuffer) {
+    return bytesToBase64(new Uint8Array(signedMessage));
+  }
+  if (ArrayBuffer.isView(signedMessage)) {
+    return bytesToBase64(new Uint8Array(
+      signedMessage.buffer,
+      signedMessage.byteOffset,
+      signedMessage.byteLength,
+    ));
   }
   if (signedMessage && typeof signedMessage.toString === 'function') {
     return signedMessage.toString('base64');
