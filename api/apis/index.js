@@ -1,4 +1,4 @@
-import { createRegisteredApi, createApiSchema, requireRegistryConfig, requireRegistrySession, toApiResponse } from '../../server/lib/apiRegistry.js';
+import { RegistryApiError, createRegisteredApi, createApiSchema, requireRegistryConfig, requireRegistrySession, toApiResponse } from '../../server/lib/apiRegistry.js';
 import { methodNotAllowed } from '../../server/lib/auth.js';
 import { readJsonBody } from '../../server/lib/body.js';
 
@@ -44,6 +44,18 @@ export default async function handler(req, res) {
 
     return res.status(201).json({ api });
   } catch (err) {
+    if (err instanceof RegistryApiError) {
+      return res.status(err.statusCode).json({
+        error: err.message,
+        ...err.details,
+      });
+    }
+    if (err?.code === '23505') {
+      return res.status(409).json({
+        error: 'This upstream API is already registered.',
+        code: 'duplicate_api',
+      });
+    }
     return res.status(500).json({ error: err.message || 'API registry error' });
   }
 }

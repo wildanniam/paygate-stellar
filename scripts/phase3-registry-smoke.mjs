@@ -1,5 +1,6 @@
 import { Keypair } from '@stellar/stellar-sdk';
-import { clearRegistryForTest, getRawApisForTest } from '../server/lib/registryStore.js';
+import { encryptApiSecret } from '../server/lib/apiSecret.js';
+import { clearRegistryForTest, getRawApisForTest, getRegistryStore } from '../server/lib/registryStore.js';
 
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-phase3-smoke-session-secret-32';
 process.env.API_SECRET_ENCRYPTION_KEY = process.env.API_SECRET_ENCRYPTION_KEY || 'paygate-phase3-smoke-api-secret-key-32';
@@ -60,6 +61,7 @@ function assert(condition, message) {
 }
 
 clearRegistryForTest();
+const store = getRegistryStore();
 
 const owner = Keypair.random().publicKey();
 const other = Keypair.random().publicKey();
@@ -106,6 +108,39 @@ assert(raw[0].owner_wallet === owner, 'raw owner mismatch');
 assert(!JSON.stringify(raw[0]).includes(created.body.api.secret), 'secret should not be stored plaintext');
 assert(raw[0].secret_ciphertext && raw[0].secret_iv && raw[0].secret_auth_tag, 'encrypted secret fields missing');
 
+const sameOwnerDuplicate = await call(
+  apisHandler,
+  makeReq({
+    method: 'POST',
+    cookie: ownerCookie,
+    body: {
+      name: 'Duplicate Market Signal API',
+      upstreamBaseUrl: 'https://example.com',
+      path: '/v1/market-signal',
+      priceUsdc: '0.01',
+    },
+  }),
+);
+assert(sameOwnerDuplicate.statusCode === 409, 'same owner duplicate should return 409');
+assert(sameOwnerDuplicate.body.code === 'duplicate_api', 'same owner duplicate should expose duplicate_api code');
+assert(sameOwnerDuplicate.body.existingApiId === created.body.api.id, 'same owner duplicate should return existing API id');
+
+const otherOwnerDuplicate = await call(
+  apisHandler,
+  makeReq({
+    method: 'POST',
+    cookie: otherCookie,
+    body: {
+      name: 'Claimed API',
+      upstreamBaseUrl: 'https://example.com',
+      path: '/v1/market-signal',
+      priceUsdc: '0.01',
+    },
+  }),
+);
+assert(otherOwnerDuplicate.statusCode === 409, 'other owner duplicate should return 409');
+assert(otherOwnerDuplicate.body.code === 'endpoint_claimed', 'other owner duplicate should expose endpoint_claimed code');
+
 const ownerList = await call(apisHandler, makeReq({ method: 'GET', cookie: ownerCookie }));
 assert(ownerList.statusCode === 200, 'owner list should return 200');
 assert(ownerList.body.apis.length === 1, 'owner should see one API');
@@ -113,6 +148,34 @@ assert(ownerList.body.apis.length === 1, 'owner should see one API');
 const otherList = await call(apisHandler, makeReq({ method: 'GET', cookie: otherCookie }));
 assert(otherList.statusCode === 200, 'other list should return 200');
 assert(otherList.body.apis.length === 0, 'other wallet should not see owner API');
+
+await store.createApi({
+  owner_wallet: other,
+  name: 'Archived API',
+  upstream_base_url: 'https://example.com',
+  path: '/v1/reusable-archived',
+  method: 'GET',
+  price_usdc: 0.01,
+  status: 'archived',
+  active: false,
+  archived_at: new Date().toISOString(),
+  ...encryptApiSecret('archived-secret'),
+});
+
+const reusedArchived = await call(
+  apisHandler,
+  makeReq({
+    method: 'POST',
+    cookie: ownerCookie,
+    body: {
+      name: 'Reusable Archived API',
+      upstreamBaseUrl: 'https://example.com',
+      path: '/v1/reusable-archived',
+      priceUsdc: '0.01',
+    },
+  }),
+);
+assert(reusedArchived.statusCode === 201, `archived endpoint reuse expected 201, got ${reusedArchived.statusCode}`);
 
 const detail = await call(
   apiDetailHandler,

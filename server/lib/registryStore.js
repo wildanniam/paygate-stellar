@@ -152,6 +152,18 @@ function createMemoryRegistry() {
       state.apis.set(row.id, row);
       return publicApiFields(row);
     },
+    async findLiveApiByEndpoint({ method, upstreamBaseUrl, path }) {
+      const row = [...state.apis.values()].find((record) => {
+        const normalized = normalizeApiRecord(record);
+        return (
+          ['pending_setup', 'active'].includes(normalized.status)
+          && normalized.method === method
+          && normalized.upstream_base_url.toLowerCase() === upstreamBaseUrl.toLowerCase()
+          && normalized.path === path
+        );
+      });
+      return row ? publicApiFields(row) : null;
+    },
     async getApi(apiId, ownerWallet) {
       const row = state.apis.get(apiId);
       if (!row || row.owner_wallet !== ownerWallet) return null;
@@ -346,6 +358,20 @@ function createSupabaseRegistry() {
         .single();
       if (error) throw error;
       return publicApiFields(data);
+    },
+    async findLiveApiByEndpoint({ method, upstreamBaseUrl, path }) {
+      const { data, error } = await client
+        .from('apis')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
+        .eq('method', method)
+        .eq('upstream_base_url', upstreamBaseUrl)
+        .eq('path', path)
+        .in('status', ['pending_setup', 'active'])
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? publicApiFields(data) : null;
     },
     async getApi(apiId, ownerWallet) {
       const { data, error } = await client
