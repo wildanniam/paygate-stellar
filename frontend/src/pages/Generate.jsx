@@ -1,6 +1,6 @@
 import { AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import { C, MONO } from '../colors.js';
 
@@ -108,15 +108,23 @@ export default function Generate() {
     <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif", backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
       <AppNavbar />
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '72px 24px 96px' }}>
+        <div style={{ maxWidth: 760, marginBottom: 28, display: 'flex', gap: 10, alignItems: 'flex-start', color: C.text2, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.24)', borderRadius: 10, padding: 14, lineHeight: 1.6 }}>
+          <AlertCircle size={18} color={C.amber} style={{ flex: '0 0 auto', marginTop: 2 }} />
+          <div>
+            <strong style={{ color: C.text1 }}>Legacy generator.</strong> This page is kept for V0/SOW middleware evidence. For the current PayGate V1 gateway flow, use{' '}
+            <Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Register API</Link>.
+          </div>
+        </div>
+
         <div style={{ maxWidth: 680 }}>
           <p style={{ ...MONO, color: C.cyan, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 14 }}>
-            MPP Code Generator
+            Legacy MPP Code Generator
           </p>
           <h1 style={{ fontSize: 'clamp(36px, 6vw, 58px)', lineHeight: 1.05, fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-            Generate an Express paywall in under five minutes.
+            Generate Express middleware for V0 testing.
           </h1>
           <p style={{ color: C.text2, fontSize: 17, lineHeight: 1.7, marginTop: 18 }}>
-            Enter your API base URL, the route you want to monetize, and the USDC price per request.
+            Use this only when you need the old copy-paste middleware flow. The V1 product creates paid proxy URLs from registered APIs.
           </p>
         </div>
 
@@ -190,7 +198,7 @@ export default function Generate() {
             }}
           >
             {loading ? <Loader2 size={16} className="spin" /> : <ArrowRight size={16} />}
-            {loading ? 'Generating...' : 'Generate Code'}
+            {loading ? 'Generating...' : 'Generate legacy code'}
           </button>
         </form>
       </main>

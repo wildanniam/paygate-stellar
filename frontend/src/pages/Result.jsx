@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import CodeBlock from '../components/CodeBlock.jsx';
 import AppNavbar from '../components/AppNavbar.jsx';
@@ -24,6 +24,13 @@ export default function Result() {
     <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif", backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
       <AppNavbar />
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '64px 24px 96px' }}>
+        <div style={{ marginBottom: 28, display: 'flex', gap: 10, alignItems: 'flex-start', color: C.text2, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.24)', borderRadius: 10, padding: 14, lineHeight: 1.6 }}>
+          <AlertCircle size={18} color={C.amber} style={{ flex: '0 0 auto', marginTop: 2 }} />
+          <div>
+            <strong style={{ color: C.text1 }}>Legacy generator output.</strong> This code is useful for V0/SOW evidence. For the current PayGate V1 product, register your API and use the generated proxy URL.
+          </div>
+        </div>
+
         <header style={{ marginBottom: 36 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.green, background: 'rgba(134,239,172,0.08)', border: '1px solid rgba(134,239,172,0.18)', borderRadius: 999, padding: '7px 12px', fontSize: 13, ...MONO }}>
             <CheckCircle2 size={15} />
@@ -83,10 +90,10 @@ export default function Result() {
         <div style={{ marginTop: 28, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <Link to="/generate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.text2, textDecoration: 'none', border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px' }}>
             <ArrowLeft size={16} />
-            Generate ulang
+            Generate another legacy snippet
           </Link>
-          <Link to="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.text1, textDecoration: 'none', background: C.accent, borderRadius: 8, padding: '10px 14px', fontWeight: 700 }}>
-            Monitor earnings di Dashboard
+          <Link to="/apis/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.text1, textDecoration: 'none', background: C.accent, borderRadius: 8, padding: '10px 14px', fontWeight: 700 }}>
+            Register API in V1
             <ArrowRight size={16} />
           </Link>
         </div>
@@ -94,4 +101,3 @@ export default function Result() {
     </div>
   );
 }
-
