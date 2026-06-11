@@ -4,7 +4,7 @@
 
 PayGate lets a developer put a paid gateway in front of a normal API. The developer connects a Freighter wallet, registers an API, receives a PayGate proxy URL, and lets machine clients or AI agents pay per request through Stellar MPP. Successful calls are logged in PayGate, credited into a Soroban escrow ledger, and shown in the developer dashboard.
 
-The original SOW/V0 code generator is still preserved at `/generate`, but the current product direction is **PayGate V1: a pay-per-call gateway for APIs**. Use `PAYGATE_V1_PRODUCT_SPEC.md` and `PAYGATE_V1_DEMO_GUIDE.md` as the current source of truth for the V1 demo.
+The original SOW/V0 code generator is still preserved at `/generate`, but the current product direction is **PayGate V1: a pay-per-call gateway for APIs**. Use `PAYGATE_V1_PRODUCT_SPEC.md`, `developer-guide.md`, and `PAYGATE_V1_DEMO_GUIDE.md` as the current source of truth for the V1 demo.
 
 ---
 
@@ -42,6 +42,10 @@ Developer connects Freighter
 
 The original `/generate` page still exists as a legacy MPP middleware generator. It is useful for SOW evidence and code-snippet experimentation, but it is not the main V1 product flow. For the V1 demo, use `/dashboard` and `/apis/new`.
 
+Developer onboarding guide:
+
+- [`developer-guide.md`](developer-guide.md) explains Proxy URL, API Secret, upstream guard setup, and `401`/`402`/`200` testing.
+
 ---
 
 ## Project Status
@@ -77,6 +81,7 @@ paygate/
 ├── docs/                     # Project docs, specs, agent memory, and README
 │   ├── README.md
 │   ├── evidence/
+│   ├── developer-guide.md
 │   ├── PAYGATE_V1_PRODUCT_SPEC.md
 │   ├── PAYGATE_V1_DEVELOPMENT_PLAN.md
 │   └── TECHNICAL_SPEC.md

@@ -6,7 +6,7 @@ It lets a developer register a normal API, expose it through a PayGate paid prox
 
 PayGate V1 is a **testnet beta candidate**. It is designed to prove the product loop, not to handle mainnet funds yet.
 
-[Detailed Docs](docs/README.md) · [V1 Product Spec](docs/PAYGATE_V1_PRODUCT_SPEC.md) · [Demo Guide](docs/PAYGATE_V1_DEMO_GUIDE.md) · [Beta Readiness](docs/evidence/PAYGATE_V1_BETA_READINESS.md) · [OpenSpec](openspec/README.md)
+[Detailed Docs](docs/README.md) · [Developer Guide](docs/developer-guide.md) · [V1 Product Spec](docs/PAYGATE_V1_PRODUCT_SPEC.md) · [Demo Guide](docs/PAYGATE_V1_DEMO_GUIDE.md) · [Beta Readiness](docs/evidence/PAYGATE_V1_BETA_READINESS.md) · [OpenSpec](openspec/README.md)
 
 ![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet-7c3aed)
 ![MPP Payments](https://img.shields.io/badge/Payments-MPP-0891b2)
@@ -63,6 +63,8 @@ The developer keeps their API normal. PayGate handles:
 - Developer withdrawal.
 
 The original SOW/V0 code generator still exists at `/generate`, but it is now treated as a legacy helper. The main V1 product flow starts at `/dashboard` and `/apis/new`.
+
+Developers integrating their own API should start with the [Developer Guide](docs/developer-guide.md). It explains the PayGate proxy URL, API secret, upstream guard, and `401`/`402`/`200` testing flow.
 
 ---
 
