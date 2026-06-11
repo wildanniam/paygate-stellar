@@ -218,18 +218,18 @@ export default function Landing() {
   const stepsCount = activeSteps.filter(Boolean).length;
 
   const codeLines = [
-    <>{KW('import')}{' { mppCharge } '}{KW('from')}{' '}{STR("'@stellar/mpp'")}{';\n'}</>,
+    <>{CMT('// Agent calls your PayGate proxy')}{'\n'}</>,
+    <>{KW('const')}{' response = '}{KW('await')}{' '}{FN('fetch')}{'(\n'}</>,
+    <>{'  '}{STR("'https://paygate.app/api/pay/api_123'")}{'\n'}</>,
+    <>{');\n'}</>,
     <>{'\n'}</>,
-    <>{KW('export')}{' '}{KW('const')}{' paywall = '}{FN('mppCharge')}{'({\n'}</>,
-    <>{'  '}{PROP('asset:')}{'       '}{STR("'USDC'")}{',\n'}</>,
-    <>{'  '}{PROP('amount:')}{'      '}{STR("'0.01'")}{',\n'}</>,
-    <>{'  '}{PROP('destination:')}{' process.env.STELLAR_ADDRESS,\n'}</>,
-    <>{'});\n'}</>,
+    <>{KW('if')}{' (response.'}{PROP('status')}{' === 402) {\n'}</>,
+    <>{'  '}{KW('await')}{' '}{FN('payWithStellarMPP')}{'(response);\n'}</>,
+    <>{'  '}{KW('return')}{' '}{FN('fetch')}{'('}{STR("'https://paygate.app/api/pay/api_123'")}{');\n'}</>,
+    <>{'}\n'}</>,
     <>{'\n'}</>,
-    <>{CMT("// Drop into any Express route. That's it.")}{'\n'}</>,
-    <>{'app.'}{FN('get')}{'('}{STR("'/api/data'")}{', paywall, (req, res) => {\n'}</>,
-    <>{'  res.'}{FN('json')}{'({ '}{PROP('data:')}{' '}{STR("'...'")} {' });\n'}</>,
-    <>{'});'}</>,
+    <>{KW('const')}{' data = '}{KW('await')}{' response.'}{FN('json')}{'();\n'}</>,
+    <>{CMT('// Paid API response')}</>,
   ];
 
   // Shared card transition (covers both stagger reveal + hover)
@@ -330,7 +330,7 @@ export default function Landing() {
             color: C.cyan, padding: '6px 16px', borderRadius: 9999,
             ...M, fontSize: 11, marginBottom: 32,
           }}>
-            ⚡ MPP launched March 2026. The tooling gap is real.
+            Stellar MPP for pay-per-call API access.
           </div>
 
           {/* Headline */}
@@ -338,27 +338,26 @@ export default function Landing() {
             fontSize: 'clamp(42px, 6vw, 64px)', fontWeight: 800,
             letterSpacing: '-0.02em', lineHeight: 1.1, maxWidth: 800, margin: 0,
           }}>
-            Monetize Your API.
+            Turn APIs into
             <br />
             <span className="gradient-headline" style={{
               background: 'linear-gradient(90deg, #7C3AED, #22D3EE)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
             }}>
-              No Protocol Knowledge Required.
+              paid proxy endpoints.
             </span>
           </h1>
 
           {/* Subheadline */}
           <p style={{ color: C.text2, fontSize: 18, lineHeight: 1.6, maxWidth: 520, marginTop: 20 }}>
-            PayGate generates MPP-ready middleware for your Node.js API
-            from a 3-field form. Paste it in. Start accepting USDC on Stellar.
+            Register your upstream API, create a PayGate proxy URL, and let agents pay per call with USDC on Stellar testnet.
           </p>
 
           {/* CTAs */}
           <div className="flex flex-wrap justify-center" style={{ gap: 12, marginTop: 36 }}>
             <Link
               ref={heroPrimaryRef}
-              to="/generate"
+              to="/apis/new"
               onMouseEnter={() => hov('heroPrimary', true)}
               onMouseLeave={() => { hov('heroPrimary', false); setMagnetHero({ x: 0, y: 0 }); }}
               onMouseMove={e => applyMagnet(e, heroPrimaryRef, setMagnetHero)}
@@ -372,7 +371,7 @@ export default function Landing() {
                 transform: `translate(${magnetHero.x}px, ${magnetHero.y}px)`,
               }}
             >
-              <Zap size={16} /> Generate Paywall
+              <Zap size={16} /> Register API
             </Link>
             <button
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
@@ -399,7 +398,7 @@ export default function Landing() {
             }}>
               <div className="flex items-center" style={{ background: '#111111', borderBottom: `1px solid ${C.border}`, padding: '10px 16px' }}>
                 <TerminalDots />
-                <span style={{ ...M, fontSize: 12, color: C.text3, flex: 1, textAlign: 'center' }}>paywall.js</span>
+                <span style={{ ...M, fontSize: 12, color: C.text3, flex: 1, textAlign: 'center' }}>paid-proxy.js</span>
                 <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', ...M, fontSize: 12, color: C.text3 }}>
                   <Copy size={12} /> Copy
                 </button>
@@ -485,7 +484,7 @@ export default function Landing() {
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '120px 24px' }}>
           <SectionLabel>How It Works</SectionLabel>
           <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 480, lineHeight: 1.1, marginBottom: 64 }}>
-            Three inputs.<br />One file. Done.
+            Register. Protect.<br />Get paid per call.
           </h2>
 
           <div style={{ position: 'relative', paddingLeft: 32 }}>
@@ -502,8 +501,8 @@ export default function Landing() {
 
             {[
               {
-                num: '01', title: 'Fill the form',
-                body: 'Enter your API endpoint URL, the path you want to gate, and your price per request in USDC. Nothing else.',
+                num: '01', title: 'Register your API',
+                body: 'Enter your upstream API base URL, the GET path you want to monetize, and the USDC price per call.',
                 visual: (
                   <div style={{
                     background: C.surface,
@@ -512,9 +511,9 @@ export default function Landing() {
                     boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
                   }}>
                     {[
-                      { label: 'API Endpoint URL', val: 'https://api.yourservice.com', active: false },
-                      { label: 'Path to gate', val: '/v1/data', active: false },
-                      { label: 'Price per request (USDC)', val: '0.01', active: true },
+                      { label: 'Upstream Base URL', val: 'https://api.yourservice.com', active: false },
+                      { label: 'GET Path', val: '/v1/data', active: false },
+                      { label: 'Price per call (USDC)', val: '0.01', active: true },
                     ].map((f, fi) => (
                       <div key={fi} style={{
                         padding: '12px 16px',
@@ -531,10 +530,9 @@ export default function Landing() {
                 ),
               },
               {
-                num: '02', title: 'Generate',
+                num: '02', title: 'Create paid proxy',
                 body: (
-                  <>Click Generate. PayGate processes your inputs and produces a complete, drop-in MPP middleware using{' '}
-                  <code style={{ ...M, fontSize: 13, color: C.green }}>@stellar/mpp</code>. No boilerplate. No configuration.</>
+                  <>PayGate gives you a proxy URL and API secret. Agents call the PayGate URL, not your original upstream API.</>
                 ),
                 visual: (
                   <div style={{
@@ -559,18 +557,18 @@ export default function Landing() {
                         color: C.green, borderRadius: 8,
                         padding: '10px 20px', fontSize: 14, ...M,
                       }}>
-                        Code Ready
+                        Proxy Ready
                       </div>
                       <p style={{ ...M, fontSize: 11, color: C.text3, textAlign: 'center', margin: 0 }}>
-                        paywall.js generated — 847 bytes
+                        /api/pay/api_123 created
                       </p>
                     </div>
                   </div>
                 ),
               },
               {
-                num: '03', title: 'Copy. Paste. Ship.',
-                body: 'One file. Drop it into your Express server. Every request to that endpoint now triggers an automatic USDC payment via Stellar before your handler runs.',
+                num: '03', title: 'Protect and monetize',
+                body: 'Add the secret guard to your upstream API. PayGate verifies payment, forwards paid requests, and tracks revenue in your dashboard.',
                 visual: (
                   <div style={{
                     background: C.codeBg,
@@ -580,13 +578,13 @@ export default function Landing() {
                   }}>
                     <div className="flex items-center justify-between" style={{ background: '#111111', borderBottom: `1px solid ${C.border}`, padding: '8px 14px' }}>
                       <TerminalDots />
-                      <span style={{ ...M, fontSize: 11, color: C.text3 }}>server.js</span>
+                      <span style={{ ...M, fontSize: 11, color: C.text3 }}>upstream-api.js</span>
                     </div>
                     <pre style={{ ...M, fontSize: 13, lineHeight: 1.8, padding: '16px 20px', margin: 0, overflowX: 'auto' }}>
                       <code>
-                        {CMT('// server.js')}{'\n'}
-                        {KW('import')}{' { paywall } '}{KW('from')}{' '}{STR("'./paywall.js'")}{';\n'}
-                        {'app.'}{FN('get')}{'('}{STR("'/api/data'")}{', paywall, handler);'}
+                        {KW('if')}{' (req.'}{FN('get')}{'('}{STR("'X-PayGate-Secret'")}{') !== PAYGATE_SECRET) {\n'}
+                        {'  '}{KW('return')}{' res.'}{FN('status')}{'(401).'}{FN('json')}{'({ error: '}{STR("'Unauthorized'")}{' });\n'}
+                        {'}'}
                       </code>
                     </pre>
                   </div>
@@ -640,23 +638,23 @@ export default function Landing() {
             {[
               {
                 icon: <Code2 size={20} color={C.accent} />,
-                title: 'MPP Code Generator',
-                body: (<>Generates fully compliant <code style={{ ...M, fontSize: 13, color: C.green }}>@stellar/mpp</code> middleware from a 3-field form. Node.js/Express ready. Zero additional configuration. One copy-paste away from a live paywall.</>),
+                title: 'Paid Proxy URLs',
+                body: 'Register an upstream endpoint and PayGate creates a public proxy URL that agents can call when they need paid API access.',
               },
               {
                 icon: <BarChart3 size={20} color={C.accent} />,
-                title: 'Real-Time Earnings Dashboard',
-                body: 'Monitor USDC earnings and API request counts live, pulled directly from Stellar. Every transaction is a verifiable on-chain hash you can inspect in Stellar Explorer.',
+                title: 'Revenue Dashboard',
+                body: 'Track registered APIs, paid calls, gross revenue, platform fees, request status, escrow balance, and testnet transaction hashes.',
               },
               {
                 icon: <Zap size={20} color={C.accent} />,
-                title: 'Zero Stellar Knowledge Required',
-                body: 'No wallets to configure manually. No keypairs to manage. No USDC onboarding. PayGate abstracts the entire protocol — you bring the API, we handle the rest.',
+                title: 'Simple Upstream Protection',
+                body: 'PayGate gives each API a secret header. Your upstream API checks that header so buyers cannot bypass the paid proxy.',
               },
               {
                 icon: <Globe size={20} color={C.accent} />,
-                title: 'Built on Open Standards',
-                body: 'MPP is co-authored by Stripe and Tempo Labs, adopted by Cloudflare, and already live across 50+ services including OpenAI and Google Gemini. PayGate puts you on that stack in minutes.',
+                title: 'Built for Machine Clients',
+                body: 'The demo flow is made for agents and scripts: request, receive 402, pay with Stellar MPP, retry, and receive JSON.',
               },
             ].map((feat, i) => (
               <div
@@ -723,22 +721,22 @@ export default function Landing() {
             letterSpacing: '-0.02em', lineHeight: 1.1,
             maxWidth: 640, margin: '0 auto',
           }}>
-            <span style={{ color: C.text1 }}>Your API is ready.</span>
+            <span style={{ color: C.text1 }}>Your API has value.</span>
             <br />
             <span className="gradient-headline" style={{
               background: 'linear-gradient(90deg, #7C3AED, #22D3EE)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
             }}>
-              The paywall isn't. Yet.
+              Make every call paid.
             </span>
           </h2>
           <p style={{ color: C.text2, fontSize: 18, marginTop: 20 }}>
-            Generate your first MPP-ready Express paywall.
+            Create a PayGate proxy and start testing pay-per-call access.
           </p>
           <div style={{ marginTop: 40 }}>
             <Link
               ref={ctaBottomRef}
-              to="/generate"
+              to="/apis/new"
               onMouseEnter={() => hov('ctaBtn', true)}
               onMouseLeave={() => { hov('ctaBtn', false); setMagnetCta({ x: 0, y: 0 }); }}
               onMouseMove={e => applyMagnet(e, ctaBottomRef, setMagnetCta)}
@@ -752,7 +750,7 @@ export default function Landing() {
                 transform: `translate(${magnetCta.x}px, ${magnetCta.y}px)`,
               }}
             >
-              <Zap size={18} /> Generate Paywall
+              <Zap size={18} /> Register API
             </Link>
           </div>
         </div>
