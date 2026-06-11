@@ -2,8 +2,8 @@ import { AlertCircle, CheckCircle2, Loader2, Plus, ShieldCheck } from 'lucide-re
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
-import CodeBlock from '../components/CodeBlock.jsx';
 import CopyButton from '../components/CopyButton.jsx';
+import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
 import ValueRow from '../components/ValueRow.jsx';
 import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
 import { C, MONO } from '../colors.js';
@@ -37,18 +37,6 @@ function helperStyle() {
     marginTop: 8,
     lineHeight: 1.5,
   };
-}
-
-function setupSnippet(api) {
-  return `const PAYGATE_SECRET = process.env.PAYGATE_SECRET;
-
-app.get('${api.path}', (req, res) => {
-  if (req.get('X-PayGate-Secret') !== PAYGATE_SECRET) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  res.json({ ok: true });
-});`;
 }
 
 export default function RegisterApi() {
@@ -229,7 +217,7 @@ export default function RegisterApi() {
                     </Link>
                   </div>
                 </div>
-                <CodeBlock code={setupSnippet(createdApi)} filename="upstream-api.js" maxHeight={360} />
+                <UpstreamGuardGuide api={createdApi} />
               </>
             ) : (
               <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
