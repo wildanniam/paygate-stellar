@@ -99,6 +99,10 @@ PayGate V1 currently supports the full testnet beta loop locally and in deploy-r
 | Freighter wallet login | Done |
 | Supabase-backed auth challenges | Done |
 | API registry | Done |
+| API lifecycle: pending setup -> active -> archived | Done |
+| Upstream ownership verification | Done |
+| Duplicate live endpoint prevention | Done |
+| API delete/archive for demo reset | Done |
 | API secret encryption | Done |
 | Paid proxy `/api/pay/:apiId` | Done |
 | MPP unpaid `402` flow | Done |
@@ -125,12 +129,14 @@ For a reviewer or demo session, the shortest path is:
 3. Open `/apis/new` and register the demo upstream API.
 4. Copy the generated proxy URL and API secret.
 5. Set `PAYGATE_DEMO_UPSTREAM_SECRET` to the generated secret.
-6. Call the original upstream without the secret and confirm `401`.
-7. Call the PayGate proxy without payment and confirm `402`.
-8. Run the local agent/client to pay with testnet USDC.
-9. Confirm the proxy returns `200` with the upstream JSON response.
-10. Open `/dashboard` and verify calls, payment tx, credit tx, revenue, fee, and withdrawable balance.
-11. Withdraw developer balance with Freighter.
+6. Redeploy the upstream so the secret guard is live.
+7. Open the API detail page and click `Verify setup`; the API should move from `Pending setup` to `Active`.
+8. Call the original upstream without the secret and confirm `401`.
+9. Call the PayGate proxy without payment and confirm `402`.
+10. Run the local agent/client to pay with testnet USDC.
+11. Confirm the proxy returns `200` with the upstream JSON response.
+12. Open `/dashboard` and verify calls, payment tx, credit tx, revenue, fee, and withdrawable balance.
+13. Withdraw developer balance with Freighter.
 
 The detailed replay script lives in [docs/PAYGATE_V1_DEMO_GUIDE.md](docs/PAYGATE_V1_DEMO_GUIDE.md).
 
@@ -149,7 +155,11 @@ sequenceDiagram
 
   Dev->>PayGate: Connect Freighter and sign login challenge
   Dev->>PayGate: Register API URL, path, and USDC price
-  PayGate-->>Dev: Return paid proxy URL and API secret
+  PayGate-->>Dev: Return paid proxy URL, API secret, and Pending setup state
+  Dev->>API: Add X-PayGate-Secret guard
+  Dev->>PayGate: Verify setup
+  PayGate->>API: Probe upstream with X-PayGate-Secret
+  PayGate-->>Dev: Mark API Active
   Agent->>PayGate: GET /api/pay/:apiId
   PayGate-->>Agent: 402 Payment Required
   Agent->>MPP: Pay USDC testnet
@@ -205,9 +215,10 @@ flowchart LR
 - Sign a challenge to prove wallet ownership.
 - Register a GET JSON API.
 - Set price per call in USDC.
-- Receive a PayGate paid proxy URL.
+- Receive a PayGate paid proxy URL while the API starts in `Pending setup`.
 - Receive a unique `X-PayGate-Secret` for upstream protection.
-- Toggle API active/inactive.
+- Verify setup before the API becomes `Active`.
+- Delete unused APIs or archive paid APIs for demo reset without losing history.
 - See API calls, successful calls, failed calls, and payment history.
 - See gross revenue, developer revenue, and PayGate fee.
 - Withdraw escrow balance with a Freighter-signed transaction.
@@ -242,7 +253,9 @@ flowchart LR
 | `GET` | `/api/apis` | Lists APIs owned by the connected wallet |
 | `POST` | `/api/apis` | Registers a new API |
 | `GET` | `/api/apis/:apiId` | Reads one registered API |
-| `PATCH` | `/api/apis/:apiId` | Updates API name or active state |
+| `PATCH` | `/api/apis/:apiId` | Updates API metadata such as name |
+| `DELETE` | `/api/apis/:apiId` | Deletes unused APIs or archives APIs with activity |
+| `POST` | `/api/apis/:apiId/verify` | Verifies upstream `X-PayGate-Secret` setup and activates the API |
 | `GET` | `/api/pay/:apiId` | Paid proxy endpoint |
 | `GET` | `/api/dashboard/summary` | Dashboard summary for the connected wallet |
 | `POST` | `/api/withdraw/prepare` | Prepares a Freighter-signed withdrawal transaction |
@@ -274,8 +287,13 @@ Example response:
   "api": {
     "id": "api_id",
     "name": "PayGate Demo Market Signal",
+    "status": "pending_setup",
+    "active": false,
     "proxyUrl": "https://your-paygate-domain.vercel.app/api/pay/api_id",
-    "secret": "pgsec_..."
+    "secret": "pgsec_...",
+    "setup": {
+      "requiredHeader": "X-PayGate-Secret"
+    }
   }
 }
 ```

@@ -26,13 +26,16 @@ This guide explains what a developer must do after registering an API in PayGate
    - upstream base URL,
    - GET path,
    - price per call in USDC.
-5. Copy the generated **Proxy URL**.
-6. Copy the generated **API Secret**.
-7. Store the API Secret in your upstream API server env.
-8. Add the guard code to your upstream API.
-9. Test direct upstream access returns `401`.
-10. Test PayGate proxy access returns `402` before payment.
-11. Run the agent/client payment script and confirm `200`.
+5. PayGate creates the API in **Pending setup**.
+6. Copy the generated **Proxy URL**.
+7. Copy the generated **API Secret**.
+8. Store the API Secret in your upstream API server env.
+9. Add the guard code to your upstream API.
+10. Test direct upstream access returns `401`.
+11. Click **Verify setup** in PayGate.
+12. Confirm the API changes to **Active**.
+13. Test PayGate proxy access returns `402` before payment.
+14. Run the agent/client payment script and confirm `200`.
 
 ---
 
@@ -56,6 +59,27 @@ Buyer / agent
 ```
 
 The buyer should not call your original API directly. They should call the PayGate proxy.
+
+---
+
+## API Lifecycle
+
+Every registered API has one lifecycle state:
+
+| State | Meaning |
+|---|---|
+| `Pending setup` | PayGate generated the proxy URL and secret, but has not proven your upstream guard is installed yet. |
+| `Active` | PayGate successfully called your upstream with `X-PayGate-Secret`; the paid proxy can now return `402` and accept paid retries. |
+| `Archived` | The API had history and was removed from the live demo flow. Its history remains visible for evidence. |
+
+Important rule:
+
+```text
+An API cannot become Active from a simple toggle.
+It becomes Active only after Verify setup succeeds.
+```
+
+PayGate also blocks duplicate live registrations for the same upstream URL + method + path. If you need to repeat a demo, delete the unused API or archive the used API first, then register it again.
 
 ---
 
@@ -161,6 +185,8 @@ Expected:
 
 ### 2. PayGate proxy should request payment
 
+Only run this after the API detail page shows **Active**.
+
 Call the PayGate proxy without payment:
 
 ```bash
@@ -237,7 +263,8 @@ Known caveat:
 
 ```text
 If you register the built-in demo upstream manually,
-the generated API secret must match PAYGATE_DEMO_UPSTREAM_SECRET.
+the generated API secret must be deployed as PAYGATE_DEMO_UPSTREAM_SECRET,
+then you must click Verify setup before the paid proxy becomes active.
 ```
 
 This is demo-specific. A real developer puts the generated API secret into their own API server env.
@@ -287,4 +314,3 @@ Run the agent/client with a funded Stellar testnet payer wallet.
 This is bad for monetization.
 
 It means buyers can bypass PayGate. Add the guard to your upstream API.
-

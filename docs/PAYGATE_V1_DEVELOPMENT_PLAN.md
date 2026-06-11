@@ -4,6 +4,8 @@
 > Created: 2026-06-04.
 > Branch target: `codex/paygate-v1`.
 
+> Update, 2026-06-11: API activation is no longer a manual active/inactive toggle. New APIs start as `pending_setup`, become `active` only after upstream `X-PayGate-Secret` verification, and can later be `archived` for demo reset while preserving history.
+
 This document translates the locked V1 product concept into a technical development plan.
 
 It is intentionally detailed because PayGate V1 touches payment, wallet auth, database state, proxying, and smart contract settlement. Agents must not improvise outside this plan without asking Wildan first.
@@ -658,7 +660,7 @@ Tests:
 - Unauthenticated user cannot create API.
 - Developer can list only owned APIs.
 - API secret is not stored plaintext.
-- Active/inactive state works.
+- Lifecycle state is exposed. Current implementation starts APIs as `pending_setup`; activation is handled by the later Verify setup hardening, not by a manual toggle.
 
 Commit checkpoint:
 

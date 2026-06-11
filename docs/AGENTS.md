@@ -135,6 +135,11 @@ As of June 4, 2026:
 - Phase 9 demo guide is documented in `docs/PAYGATE_V1_DEMO_GUIDE.md`. Testnet beta readiness evidence is tracked in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`. Demo video is still not recorded in this repository.
 - Beta hardening utilities now exist: `npm run beta:preflight` for deployed env/Supabase/rewrite checks, `npm run test:auth:supabase` for optional Supabase auth challenge regression, `npm run test:browser` for local desktop/mobile SPA route smoke, and `npm run evidence:init` for timestamped live replay evidence folders.
 - Vercel SPA rewrites include `/apis/new` and `/apis/:apiId`, so direct refreshes of V1 app routes should resolve to the React app after deployment.
+- API lifecycle hardening is implemented as of June 11, 2026. New registered APIs start as `pending_setup`; they become `active` only after `/api/apis/:apiId/verify` confirms the upstream responds with the generated `X-PayGate-Secret`; used APIs can be archived and unused APIs can be deleted.
+- Live duplicate registrations are blocked by normalized upstream base URL + method + path. Archived APIs are intentionally reusable so Wildan can repeat demos with the same demo upstream.
+- Direct PATCH activation is blocked. `PATCH /api/apis/:apiId` is for safe metadata updates such as name; activation must go through Verify setup.
+- Dashboard/API detail UX now exposes lifecycle badges, setup guidance, `Verify setup`, and delete/archive reset controls. Navbar active states were fixed so `Dashboard` and `Register API` are not ambiguous. Evidence: `docs/evidence/ui/PHASE5_API_LIFECYCLE_UX.md` and `docs/evidence/ui/PHASE6_NAVBAR_ACTIVE_STATE.md`.
+- Full internal V1 demo proof is covered by `npm run test:demo-flow`: register API -> pending setup -> verify setup -> unpaid `402` -> paid `200` -> dashboard update -> archive/delete reset -> re-register archived endpoint. Evidence: `docs/evidence/PAYGATE_V1_PHASE7_FULL_DEMO_FLOW_PROOF.md`.
 - `frontend/node_modules` and `frontend/dist` are ignored and should remain untracked. Use `npm run build` to regenerate build output locally.
 - `npm run test:beta` is the consolidated local beta smoke command.
 

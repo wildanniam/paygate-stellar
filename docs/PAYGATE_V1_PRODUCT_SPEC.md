@@ -89,7 +89,7 @@ Supabase stores API/product data:
 - path,
 - price per call,
 - encrypted secret header,
-- active/inactive status,
+- lifecycle status: `pending_setup`, `active`, or `archived`,
 - generated paid proxy URL,
 - request logs,
 - payment metadata,

@@ -14,7 +14,7 @@ tags:
   - instawards
 status: active
 created: 2026-04-26
-updated: 2026-06-02
+updated: 2026-06-11
 owner: Wildan
 grant_status: accepted
 grant_amount: 5000 USD in XLM
@@ -52,6 +52,25 @@ Current branch `codex/paygate-v1` has been hardened toward a testnet production-
 - Beta evidence is tracked in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`.
 
 Remaining manual evidence still requires live deployment secrets, funded testnet wallets, screenshots, and demo video recording.
+
+### 1.0.1 API Lifecycle Hardening Update - 2026-06-11
+
+PayGate V1 now uses a stricter API lifecycle for demo safety and clearer UX:
+
+- New APIs start as `Pending setup`, not active.
+- The developer must install the `X-PayGate-Secret` guard on their upstream API.
+- The API becomes `Active` only after `POST /api/apis/:apiId/verify` proves PayGate can reach the upstream with the secret.
+- Live duplicate API registrations are blocked by upstream base URL + method + path.
+- Used APIs can be archived for demo reset while preserving calls/payments; unused APIs can be deleted.
+- Dashboard and API detail pages now show lifecycle badges and setup guidance.
+- Navbar active state has been fixed so `Dashboard` and `Register API` are not ambiguous.
+- Full internal demo flow is covered by `npm run test:demo-flow`: register -> pending setup -> verify -> unpaid `402` -> paid `200` -> dashboard -> archive -> re-register.
+
+Current evidence:
+
+- `docs/evidence/ui/PHASE5_API_LIFECYCLE_UX.md`
+- `docs/evidence/ui/PHASE6_NAVBAR_ACTIVE_STATE.md`
+- `docs/evidence/PAYGATE_V1_PHASE7_FULL_DEMO_FLOW_PROOF.md`
 
 PayGate saat ini sudah berada di fase **accepted grant / functional alpha / POC foundation**.
 

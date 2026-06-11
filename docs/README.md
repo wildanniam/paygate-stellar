@@ -29,6 +29,10 @@ Payment is intended to settle into a Soroban escrow contract, with 90% credited 
 ```text
 Developer connects Freighter
 → Developer registers an API
+→ API starts in Pending setup
+→ Developer installs X-PayGate-Secret guard on the upstream API
+→ Developer clicks Verify setup
+→ PayGate activates the API after the guard responds
 → PayGate stores the API config in Supabase
 → PayGate creates /api/pay/:apiId as the paid proxy
 → Agent calls the proxy without payment
@@ -59,6 +63,10 @@ Developer onboarding guide:
 | Result/code copy page | Done |
 | V1 wallet auth | Done |
 | V1 API registry | Done |
+| V1 API lifecycle states | Done |
+| Upstream setup verification | Done |
+| Duplicate live API prevention | Done |
+| API delete/archive demo reset | Done |
 | Secret-protected demo upstream API | Done |
 | V1 paid proxy unpaid `402` flow | Done |
 | V1 paid proxy paid `200` flow | Done, live testnet proof captured |
