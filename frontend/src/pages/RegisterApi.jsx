@@ -2,6 +2,7 @@ import { AlertCircle, CheckCircle2, Loader2, Plus, ShieldCheck } from 'lucide-re
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
+import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
 import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
 import ValueRow from '../components/ValueRow.jsx';
@@ -201,10 +202,16 @@ export default function RegisterApi() {
             {createdApi ? (
               <>
                 <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: C.green, fontWeight: 800, marginBottom: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: C.amber, fontWeight: 800 }}>
                     <CheckCircle2 size={18} />
-                    API Registered
+                      API registered
+                    </div>
+                    <ApiStatusBadge status={createdApi.status} />
                   </div>
+                  <p style={{ color: C.text2, lineHeight: 1.6, margin: '0 0 14px', fontSize: 14 }}>
+                    This proxy is created but not active yet. Add the secret guard to your upstream API, then open the API detail page and verify setup.
+                  </p>
                   <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14, minWidth: 0 }}>
                     <ValueRow label="Proxy URL" value={createdApi.proxyUrl} />
                     <ValueRow label="Secret" value={createdApi.secret} />

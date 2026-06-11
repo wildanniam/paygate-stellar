@@ -1,7 +1,8 @@
-import { AlertCircle, CheckCircle2, Loader2, Power, RefreshCw } from 'lucide-react';
+import { AlertCircle, Archive, CheckCircle2, Loader2, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
+import ApiStatusBadge, { getApiStatusMeta } from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
 import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
 import ValueRow from '../components/ValueRow.jsx';
@@ -11,11 +12,13 @@ import { readJsonResponse } from '../lib/walletAuth.js';
 
 export default function ApiDetail() {
   const { apiId } = useParams();
+  const navigate = useNavigate();
   const [session, setSession] = useState({ authenticated: false });
   const [sessionStatus, setSessionStatus] = useState('loading');
   const [api, setApi] = useState(null);
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
   const loadApi = useCallback(async () => {
     setStatus('loading');
@@ -68,16 +71,15 @@ export default function ApiDetail() {
     };
   }, [loadApi]);
 
-  const toggleActive = async () => {
+  const verifySetup = async () => {
     if (!api) return;
-    setStatus('saving');
+    setStatus('verifying');
     setError('');
+    setNotice('');
     try {
-      const res = await fetch(`/api/apis/${api.id}`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/apis/${api.id}/verify`, {
+        method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ active: !api.active }),
       });
       const data = await readJsonResponse(res);
       if (res.status === 401) {
@@ -88,12 +90,53 @@ export default function ApiDetail() {
       }
       if (!res.ok) throw new Error(data.error || 'Failed to update API.');
       setApi((current) => ({ ...current, ...data.api }));
+      setNotice('Setup verified. This API is now active for paid proxy calls.');
       setStatus('loaded');
     } catch (err) {
-      setError(err.message || 'Failed to update API.');
+      setError(err.message || 'Failed to verify setup.');
       setStatus('error');
     }
   };
+
+  const removeApi = async () => {
+    if (!api) return;
+    const confirmed = window.confirm(
+      'Remove this API from PayGate? APIs with request/payment history will be archived instead of permanently deleted.',
+    );
+    if (!confirmed) return;
+
+    setStatus('removing');
+    setError('');
+    setNotice('');
+
+    try {
+      const res = await fetch(`/api/apis/${api.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const data = await readJsonResponse(res);
+      if (res.status === 401) {
+        setSession({ authenticated: false });
+        setApi(null);
+        setStatus('idle');
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to remove API.');
+      if (data.deleted) {
+        navigate('/dashboard');
+        return;
+      }
+      setApi((current) => ({ ...current, ...data.api }));
+      setNotice('API archived. Its history is preserved, and the endpoint can be registered again for a fresh demo.');
+      setStatus('loaded');
+    } catch (err) {
+      setError(err.message || 'Failed to remove API.');
+      setStatus('error');
+    }
+  };
+
+  const statusMeta = api ? getApiStatusMeta(api.status) : null;
+  const isBusy = ['loading', 'saving', 'verifying', 'removing'].includes(status);
 
   return (
     <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif" }}>
@@ -136,13 +179,28 @@ export default function ApiDetail() {
           </div>
         )}
 
+        {notice && (
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.green, background: 'rgba(134,239,172,0.08)', border: '1px solid rgba(134,239,172,0.18)', borderRadius: 8, padding: 14, fontSize: 14, marginBottom: 24 }}>
+            <CheckCircle2 size={17} style={{ flex: '0 0 auto', marginTop: 1 }} />
+            {notice}
+          </div>
+        )}
+
         {session.authenticated && api && (
           <section className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 20, alignItems: 'start' }}>
             <div style={{ display: 'grid', gap: 16 }}>
               <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: api.active ? C.green : C.amber, fontWeight: 800, marginBottom: 14 }}>
-                  <CheckCircle2 size={18} />
-                  {api.active ? 'Active' : 'Inactive'}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: statusMeta.color, fontWeight: 800, marginBottom: 7 }}>
+                      <statusMeta.Icon size={18} />
+                      {statusMeta.label}
+                    </div>
+                    <p style={{ color: C.text2, lineHeight: 1.6, margin: 0, fontSize: 14 }}>
+                      {statusMeta.description}
+                    </p>
+                  </div>
+                  <ApiStatusBadge status={api.status} />
                 </div>
                 <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14, minWidth: 0 }}>
                   <ValueRow label="Proxy URL" value={api.proxyUrl} />
@@ -150,12 +208,28 @@ export default function ApiDetail() {
                   <div><strong style={{ color: C.text1 }}>Price:</strong> {api.priceUsdc} USDC per call</div>
                   <ValueRow label="Secret" value={api.secret} />
                 </div>
+                {api.status === 'pending_setup' && (
+                  <div style={{ marginTop: 14, color: C.amber, background: 'rgba(252,211,77,0.08)', border: '1px solid rgba(252,211,77,0.18)', borderRadius: 8, padding: 12, fontSize: 13, lineHeight: 1.6 }}>
+                    The proxy URL is not active yet. Add the secret guard to your upstream API, then verify setup here.
+                  </div>
+                )}
+                {api.status === 'archived' && (
+                  <div style={{ marginTop: 14, color: C.text2, background: C.surfaceHover, border: `1px solid ${C.border}`, borderRadius: 8, padding: 12, fontSize: 13, lineHeight: 1.6 }}>
+                    This API is archived, so its proxy no longer accepts paid calls. You can register the same endpoint again for a fresh demo.
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>
                   <CopyButton value={api.proxyUrl} label="Copy proxy" />
                   <CopyButton value={api.secret} label="Copy secret" />
-                  <button type="button" onClick={toggleActive} disabled={status === 'saving'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: C.text2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}>
-                    <Power size={15} />
-                    {api.active ? 'Deactivate' : 'Activate'}
+                  {api.status === 'pending_setup' && (
+                    <button type="button" onClick={verifySetup} disabled={isBusy} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.accent, color: C.text1, border: 'none', borderRadius: 8, padding: '10px 14px', cursor: isBusy ? 'not-allowed' : 'pointer', fontWeight: 800 }}>
+                      {status === 'verifying' ? <Loader2 size={15} className="spin" /> : <ShieldCheck size={15} />}
+                      Verify setup
+                    </button>
+                  )}
+                  <button type="button" onClick={removeApi} disabled={isBusy} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: api.status === 'archived' ? C.text3 : C.red, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: isBusy ? 'not-allowed' : 'pointer' }}>
+                    {status === 'removing' ? <Loader2 size={15} className="spin" /> : api.status === 'archived' ? <Archive size={15} /> : <Trash2 size={15} />}
+                    {api.status === 'archived' ? 'Remove archived API' : 'Delete / Archive'}
                   </button>
                   <button type="button" onClick={loadApi} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: C.text2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}>
                     <RefreshCw size={15} />

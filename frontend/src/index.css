@@ -97,8 +97,26 @@ body {
   display: none;
 }
 
+.desktop-api-table {
+  display: none;
+}
+
+.mobile-api-list {
+  display: grid;
+}
+
 @media (min-width: 640px) {
   .desktop-nav-link {
     display: inline-flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .desktop-api-table {
+    display: block;
+  }
+
+  .mobile-api-list {
+    display: none;
   }
 }

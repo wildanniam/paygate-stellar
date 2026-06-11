@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
+import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
 import { C, MONO } from '../colors.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
@@ -240,6 +241,14 @@ export default function Dashboard() {
   const topApis = useMemo(() => {
     return [...(dashboard?.apis || [])].sort((a, b) => b.calls - a.calls).slice(0, 6);
   }, [dashboard]);
+  const apiLifecycleCounts = useMemo(() => {
+    const apis = dashboard?.apis || [];
+    return {
+      active: apis.filter((api) => api.status === 'active').length,
+      pending: apis.filter((api) => api.status === 'pending_setup').length,
+      archived: apis.filter((api) => api.status === 'archived').length,
+    };
+  }, [dashboard]);
 
   return (
     <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif", backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
@@ -329,7 +338,7 @@ export default function Dashboard() {
         {dashboard && (
           <div style={{ display: 'grid', gap: 22 }}>
             <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4" style={{ gap: 14 }}>
-              <SummaryCard icon={Database} label="APIs" value={`${summary.totalApis}`} hint={`${summary.activeApis} active`} />
+              <SummaryCard icon={Database} label="APIs" value={`${summary.totalApis}`} hint={`${apiLifecycleCounts.active} active · ${apiLifecycleCounts.pending} setup · ${apiLifecycleCounts.archived} archived`} />
               <SummaryCard icon={Activity} label="Paid Calls" value={`${summary.successfulCalls}/${summary.totalCalls}`} hint={`${summary.failedCalls} failed`} />
               <SummaryCard icon={DollarSign} label="Gross Revenue" value={formatUsdc(summary.grossRevenueUsdc)} hint={`Fee ${formatUsdc(summary.platformFeeUsdc)}`} />
               <SummaryCard icon={Wallet} label="Withdrawable" value={formatUsdc(dashboard.escrow?.developerBalance?.usdc)} hint={dashboard.escrow?.configured ? 'From escrow contract' : 'Contract not configured'} />
@@ -358,38 +367,69 @@ export default function Dashboard() {
                   action={<Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Register your first API</Link>}
                 />
               ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 920 }}>
-                    <thead>
-                      <tr style={{ color: C.text3, fontSize: 12, ...MONO, textAlign: 'left' }}>
-                        {['API', 'Proxy URL', 'Calls', 'Revenue', 'Status'].map((heading) => (
-                          <th key={heading} style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, fontWeight: 500 }}>
-                            {heading}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topApis.map((api) => (
-                        <tr key={api.id} style={{ borderBottom: `1px solid ${C.border}` }}>
-                          <td style={{ padding: '15px 16px' }}>
+                <>
+                  <div className="mobile-api-list" style={{ gap: 12, padding: 14 }}>
+                    {topApis.map((api) => (
+                      <div key={api.id} style={{ background: C.surfaceHover, border: `1px solid ${C.border}`, borderRadius: 8, padding: 14, display: 'grid', gap: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                          <div style={{ minWidth: 0 }}>
                             <Link to={`/apis/${api.id}`} style={{ color: C.text1, textDecoration: 'none', fontWeight: 800 }}>{api.name}</Link>
-                            <div style={{ color: C.text3, fontSize: 12, marginTop: 5, ...MONO }}>{api.method} {api.path}</div>
-                          </td>
-                          <td style={{ padding: '15px 16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <span style={{ color: C.text2, fontSize: 12, ...MONO }}>{short(api.proxyUrl, 30, 12)}</span>
-                              <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
-                            </div>
-                          </td>
-                          <td style={{ padding: '15px 16px', color: C.text2 }}>{api.successfulCalls}/{api.calls}</td>
-                          <td style={{ padding: '15px 16px', color: C.green, fontWeight: 800 }}>{formatUsdc(api.grossRevenueUsdc)}</td>
-                          <td style={{ padding: '15px 16px', color: api.active ? C.green : C.amber, fontWeight: 800 }}>{api.active ? 'Active' : 'Inactive'}</td>
+                            <div style={{ color: C.text3, fontSize: 12, marginTop: 5, ...MONO, overflowWrap: 'anywhere' }}>{api.method} {api.path}</div>
+                          </div>
+                          <ApiStatusBadge status={api.status} compact />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                          <div>
+                            <div style={{ color: C.text3, fontSize: 11, ...MONO }}>Calls</div>
+                            <div style={{ color: C.text2, fontWeight: 800, marginTop: 4 }}>{api.successfulCalls}/{api.calls}</div>
+                          </div>
+                          <div>
+                            <div style={{ color: C.text3, fontSize: 11, ...MONO }}>Revenue</div>
+                            <div style={{ color: C.green, fontWeight: 800, marginTop: 4 }}>{formatUsdc(api.grossRevenueUsdc)}</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                          <span style={{ color: C.text2, fontSize: 12, ...MONO, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{short(api.proxyUrl, 28, 8)}</span>
+                          <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="desktop-api-table" style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 920 }}>
+                      <thead>
+                        <tr style={{ color: C.text3, fontSize: 12, ...MONO, textAlign: 'left' }}>
+                          {['API', 'Proxy URL', 'Calls', 'Revenue', 'Status'].map((heading) => (
+                            <th key={heading} style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, fontWeight: 500 }}>
+                              {heading}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {topApis.map((api) => (
+                          <tr key={api.id} style={{ borderBottom: `1px solid ${C.border}` }}>
+                            <td style={{ padding: '15px 16px' }}>
+                              <Link to={`/apis/${api.id}`} style={{ color: C.text1, textDecoration: 'none', fontWeight: 800 }}>{api.name}</Link>
+                              <div style={{ color: C.text3, fontSize: 12, marginTop: 5, ...MONO }}>{api.method} {api.path}</div>
+                            </td>
+                            <td style={{ padding: '15px 16px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ color: C.text2, fontSize: 12, ...MONO }}>{short(api.proxyUrl, 30, 12)}</span>
+                                <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+                              </div>
+                            </td>
+                            <td style={{ padding: '15px 16px', color: C.text2 }}>{api.successfulCalls}/{api.calls}</td>
+                            <td style={{ padding: '15px 16px', color: C.green, fontWeight: 800 }}>{formatUsdc(api.grossRevenueUsdc)}</td>
+                            <td style={{ padding: '15px 16px' }}>
+                              <ApiStatusBadge status={api.status} compact />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </section>
 
