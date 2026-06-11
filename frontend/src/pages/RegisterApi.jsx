@@ -10,10 +10,10 @@ import { C, MONO } from '../colors.js';
 import { readJsonResponse } from '../lib/walletAuth.js';
 
 const initialForm = {
-  name: 'Market Signal API',
-  upstreamBaseUrl: 'https://example.com',
-  path: '/v1/market-signal',
-  priceUsdc: '0.01',
+  name: '',
+  upstreamBaseUrl: '',
+  path: '',
+  priceUsdc: '',
 };
 
 function inputStyle() {
@@ -26,6 +26,16 @@ function inputStyle() {
     padding: '13px 14px',
     outline: 'none',
     fontSize: 14,
+  };
+}
+
+function helperStyle() {
+  return {
+    display: 'block',
+    color: C.text3,
+    fontSize: 12,
+    marginTop: 8,
+    lineHeight: 1.5,
   };
 }
 
@@ -75,6 +85,16 @@ export default function RegisterApi() {
 
   const update = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
+  };
+
+  const fillDemoApi = () => {
+    const origin = window.location.origin;
+    setForm({
+      name: 'Market Signal API',
+      upstreamBaseUrl: origin,
+      path: '/api/upstream/market-signal',
+      priceUsdc: '0.01',
+    });
   };
 
   const handleSubmit = async (event) => {
@@ -140,24 +160,40 @@ export default function RegisterApi() {
         {sessionStatus !== 'loading' && session.authenticated && (
         <section className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 20, alignItems: 'start' }}>
           <form onSubmit={handleSubmit} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'grid', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontWeight: 800, marginBottom: 4 }}>API details</div>
+                <p style={{ color: C.text2, lineHeight: 1.6, margin: 0, fontSize: 14 }}>
+                  Use your own upstream API, or fill the hosted demo values to try the flow.
+                </p>
+              </div>
+              <button type="button" onClick={fillDemoApi} style={{ background: 'transparent', color: C.cyan, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 12px', cursor: 'pointer', fontWeight: 800 }}>
+                Fill demo API
+              </button>
+            </div>
+
             <label>
               <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>API Name</span>
-              <input value={form.name} onChange={update('name')} style={inputStyle()} />
+              <input value={form.name} onChange={update('name')} placeholder="e.g. Market Signal API" required style={inputStyle()} />
+              <span style={helperStyle()}>A readable name for your dashboard.</span>
             </label>
 
             <label>
               <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Upstream Base URL</span>
-              <input value={form.upstreamBaseUrl} onChange={update('upstreamBaseUrl')} placeholder="https://api.example.com" style={{ ...inputStyle(), ...MONO }} />
+              <input value={form.upstreamBaseUrl} onChange={update('upstreamBaseUrl')} placeholder="https://api.yourservice.com" required style={{ ...inputStyle(), ...MONO }} />
+              <span style={helperStyle()}>Base URL only. Do not include the endpoint path here.</span>
             </label>
 
             <label>
               <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>GET Path</span>
-              <input value={form.path} onChange={update('path')} placeholder="/v1/data" style={{ ...inputStyle(), ...MONO }} />
+              <input value={form.path} onChange={update('path')} placeholder="/v1/data" required style={{ ...inputStyle(), ...MONO }} />
+              <span style={helperStyle()}>The GET endpoint path that PayGate should monetize.</span>
             </label>
 
             <label>
               <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Price Per Call, USDC</span>
-              <input value={form.priceUsdc} onChange={update('priceUsdc')} inputMode="decimal" style={{ ...inputStyle(), ...MONO }} />
+              <input value={form.priceUsdc} onChange={update('priceUsdc')} placeholder="0.01" inputMode="decimal" required style={{ ...inputStyle(), ...MONO }} />
+              <span style={helperStyle()}>Testnet USDC amount charged for each successful API call.</span>
             </label>
 
             {error && (
