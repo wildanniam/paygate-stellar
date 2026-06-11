@@ -5,6 +5,36 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function resolveApiStatus(record) {
+  if (['pending_setup', 'active', 'archived'].includes(record.status)) return record.status;
+  if (record.archived_at) return 'archived';
+  return record.active ? 'active' : 'pending_setup';
+}
+
+function normalizeApiRecord(record) {
+  const status = resolveApiStatus(record);
+  return {
+    ...record,
+    status,
+    active: status === 'active',
+    verified_at: record.verified_at ?? null,
+    archived_at: record.archived_at ?? null,
+  };
+}
+
+function normalizeApiUpdates(updates) {
+  const next = { ...updates };
+  if (next.status) {
+    next.active = next.status === 'active';
+  } else if (next.archived_at !== undefined && next.archived_at !== null) {
+    next.status = 'archived';
+    next.active = false;
+  } else if (next.active !== undefined) {
+    next.status = next.active ? 'active' : 'pending_setup';
+  }
+  return next;
+}
+
 function getMemoryState() {
   if (!globalThis.__PAYGATE_REGISTRY_MEMORY) {
     globalThis.__PAYGATE_REGISTRY_MEMORY = {
@@ -20,17 +50,21 @@ function getMemoryState() {
 }
 
 function publicApiFields(record) {
+  const normalized = normalizeApiRecord(record);
   return {
-    id: record.id,
-    owner_wallet: record.owner_wallet,
-    name: record.name,
-    upstream_base_url: record.upstream_base_url,
-    path: record.path,
-    method: record.method,
-    price_usdc: record.price_usdc,
-    active: record.active,
-    created_at: record.created_at,
-    updated_at: record.updated_at,
+    id: normalized.id,
+    owner_wallet: normalized.owner_wallet,
+    name: normalized.name,
+    upstream_base_url: normalized.upstream_base_url,
+    path: normalized.path,
+    method: normalized.method,
+    price_usdc: normalized.price_usdc,
+    status: normalized.status,
+    active: normalized.active,
+    verified_at: normalized.verified_at,
+    archived_at: normalized.archived_at,
+    created_at: normalized.created_at,
+    updated_at: normalized.updated_at,
   };
 }
 
@@ -110,7 +144,7 @@ function createMemoryRegistry() {
     },
     async createApi(record) {
       const row = {
-        ...record,
+        ...normalizeApiRecord(record),
         id: crypto.randomUUID(),
         created_at: nowIso(),
         updated_at: nowIso(),
@@ -127,8 +161,7 @@ function createMemoryRegistry() {
       const row = state.apis.get(apiId);
       if (!row || row.owner_wallet !== ownerWallet) return null;
       const next = {
-        ...row,
-        ...updates,
+        ...normalizeApiRecord({ ...row, ...normalizeApiUpdates(updates) }),
         updated_at: nowIso(),
       };
       state.apis.set(apiId, next);
@@ -136,8 +169,8 @@ function createMemoryRegistry() {
     },
     async getPublicApi(apiId) {
       const row = state.apis.get(apiId);
-      if (!row || !row.active) return null;
-      return row;
+      if (!row || resolveApiStatus(row) !== 'active') return null;
+      return normalizeApiRecord(row);
     },
     async listProxyRequests(ownerWallet, limit = 100) {
       return [...state.proxyRequests.values()]
@@ -299,20 +332,20 @@ function createSupabaseRegistry() {
     async listApis(ownerWallet) {
       const { data, error } = await client
         .from('apis')
-        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, active, created_at, updated_at')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
         .eq('owner_wallet', ownerWallet)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []).map(publicApiFields);
     },
     async createApi(record) {
       const { data, error } = await client
         .from('apis')
-        .insert(record)
-        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, active, created_at, updated_at')
+        .insert(normalizeApiRecord(record))
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
         .single();
       if (error) throw error;
-      return data;
+      return publicApiFields(data);
     },
     async getApi(apiId, ownerWallet) {
       const { data, error } = await client
@@ -327,23 +360,23 @@ function createSupabaseRegistry() {
     async updateApi(apiId, ownerWallet, updates) {
       const { data, error } = await client
         .from('apis')
-        .update(updates)
+        .update(normalizeApiUpdates(updates))
         .eq('id', apiId)
         .eq('owner_wallet', ownerWallet)
-        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, active, created_at, updated_at')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data ? publicApiFields(data) : null;
     },
     async getPublicApi(apiId) {
       const { data, error } = await client
         .from('apis')
         .select('*')
         .eq('id', apiId)
-        .eq('active', true)
+        .eq('status', 'active')
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data ? normalizeApiRecord(data) : null;
     },
     async listProxyRequests(ownerWallet, limit = 100) {
       const { data, error } = await client

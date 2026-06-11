@@ -97,6 +97,8 @@ assert(created.statusCode === 201, `create expected 201, got ${created.statusCod
 assert(created.body.api.ownerWallet === owner, 'owner wallet should come from session');
 assert(created.body.api.secret?.startsWith('pgsec_'), 'generated secret missing');
 assert(created.body.api.proxyUrl.endsWith(`/api/pay/${created.body.api.id}`), 'proxy URL missing API id');
+assert(created.body.api.status === 'pending_setup', 'new API should start in pending_setup');
+assert(created.body.api.active === false, 'new API should not be active before setup verification');
 
 const raw = getRawApisForTest();
 assert(raw.length === 1, 'raw API record missing');
@@ -122,6 +124,7 @@ const detail = await call(
 );
 assert(detail.statusCode === 200, 'owner detail should return 200');
 assert(detail.body.api.secret === created.body.api.secret, 'detail should decrypt owner secret');
+assert(detail.body.api.status === 'pending_setup', 'detail should expose pending setup status');
 
 const otherPatch = await call(
   apiDetailHandler,

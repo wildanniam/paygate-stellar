@@ -3,6 +3,12 @@ import { decryptApiSecret, encryptApiSecret, generateApiSecret, hasApiSecretEncr
 import { getOrigin, getSession } from './auth.js';
 import { getRegistryStore } from './registryStore.js';
 
+export const API_STATUSES = {
+  PENDING_SETUP: 'pending_setup',
+  ACTIVE: 'active',
+  ARCHIVED: 'archived',
+};
+
 export const createApiSchema = z.object({
   name: z.string().trim().min(2).max(80),
   upstreamBaseUrl: z.string().trim().url(),
@@ -39,7 +45,14 @@ export function requireRegistryConfig(res) {
   return store;
 }
 
+export function resolveApiStatus(api) {
+  if (Object.values(API_STATUSES).includes(api.status)) return api.status;
+  if (api.archived_at) return API_STATUSES.ARCHIVED;
+  return api.active ? API_STATUSES.ACTIVE : API_STATUSES.PENDING_SETUP;
+}
+
 export function toApiResponse(req, api, extra = {}) {
+  const status = resolveApiStatus(api);
   return {
     id: api.id,
     ownerWallet: api.owner_wallet,
@@ -48,10 +61,13 @@ export function toApiResponse(req, api, extra = {}) {
     path: api.path,
     method: api.method,
     priceUsdc: Number(api.price_usdc),
-    active: api.active,
+    status,
+    active: status === API_STATUSES.ACTIVE,
     proxyUrl: `${getOrigin(req)}/api/pay/${api.id}`,
     createdAt: api.created_at,
     updatedAt: api.updated_at,
+    verifiedAt: api.verified_at,
+    archivedAt: api.archived_at,
     ...extra,
   };
 }
@@ -68,7 +84,10 @@ export async function createRegisteredApi({ req, store, walletAddress, input }) 
     path: input.path,
     method: 'GET',
     price_usdc: input.priceUsdc,
-    active: true,
+    status: API_STATUSES.PENDING_SETUP,
+    active: false,
+    verified_at: null,
+    archived_at: null,
     ...encrypted,
   });
 
