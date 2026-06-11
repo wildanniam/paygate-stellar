@@ -6,18 +6,20 @@ export default function AppNavbar() {
   const { pathname } = useLocation();
 
   const navLink = (to, label, variant = 'plain') => {
-    const active = pathname === to || (to === '/apis/new' && pathname.startsWith('/apis/'));
+    const active = pathname === to;
+    const isPrimary = variant === 'primary';
     return (
     <Link
       to={to}
       style={{
-        color: active ? C.text1 : C.text2,
+        color: active || isPrimary ? C.text1 : C.text2,
         fontSize: 13,
         textDecoration: 'none',
-        padding: variant === 'primary' ? '8px 13px' : '6px 12px',
+        padding: isPrimary ? '8px 13px' : '6px 12px',
         borderRadius: 6,
-        background: variant === 'primary' ? C.accent : active ? C.accentDim : 'transparent',
-        fontWeight: variant === 'primary' ? 800 : 500,
+        background: active ? C.accent : isPrimary ? C.accentDim : 'transparent',
+        border: isPrimary && !active ? `1px solid ${C.borderHover}` : '1px solid transparent',
+        fontWeight: isPrimary ? 800 : 500,
         transition: 'all 0.15s ease',
         ...MONO,
       }}
