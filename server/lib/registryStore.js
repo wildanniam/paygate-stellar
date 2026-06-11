@@ -179,6 +179,17 @@ function createMemoryRegistry() {
       state.apis.set(apiId, next);
       return publicApiFields(next);
     },
+    async deleteApi(apiId, ownerWallet) {
+      const row = state.apis.get(apiId);
+      if (!row || row.owner_wallet !== ownerWallet) return false;
+      state.apis.delete(apiId);
+      return true;
+    },
+    async getApiActivityCounts(apiId) {
+      const proxyRequests = [...state.proxyRequests.values()].filter((record) => record.api_id === apiId).length;
+      const payments = [...state.payments.values()].filter((record) => record.api_id === apiId).length;
+      return { proxyRequests, payments, total: proxyRequests + payments };
+    },
     async getPublicApi(apiId) {
       const row = state.apis.get(apiId);
       if (!row || resolveApiStatus(row) !== 'active') return null;
@@ -393,6 +404,36 @@ function createSupabaseRegistry() {
         .maybeSingle();
       if (error) throw error;
       return data ? publicApiFields(data) : null;
+    },
+    async deleteApi(apiId, ownerWallet) {
+      const { data, error } = await client
+        .from('apis')
+        .delete()
+        .eq('id', apiId)
+        .eq('owner_wallet', ownerWallet)
+        .select('id')
+        .maybeSingle();
+      if (error) throw error;
+      return Boolean(data);
+    },
+    async getApiActivityCounts(apiId) {
+      const [{ count: proxyRequests, error: proxyError }, { count: payments, error: paymentError }] = await Promise.all([
+        client
+          .from('proxy_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('api_id', apiId),
+        client
+          .from('payments')
+          .select('id', { count: 'exact', head: true })
+          .eq('api_id', apiId),
+      ]);
+      if (proxyError) throw proxyError;
+      if (paymentError) throw paymentError;
+      return {
+        proxyRequests: proxyRequests ?? 0,
+        payments: payments ?? 0,
+        total: (proxyRequests ?? 0) + (payments ?? 0),
+      };
     },
     async getPublicApi(apiId) {
       const { data, error } = await client

@@ -2,6 +2,10 @@ import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, toApi
 import { methodNotAllowed } from '../../server/lib/auth.js';
 import { readJsonBody } from '../../server/lib/body.js';
 
+function nowIso() {
+  return new Date().toISOString();
+}
+
 function getApiId(req) {
   if (req.query?.apiId) return String(req.query.apiId);
   const parts = (req.url || '').split('?')[0].split('/').filter(Boolean);
@@ -9,7 +13,7 @@ function getApiId(req) {
 }
 
 export default async function handler(req, res) {
-  if (!['GET', 'PATCH'].includes(req.method)) return methodNotAllowed(res, 'GET, PATCH');
+  if (!['GET', 'PATCH', 'DELETE'].includes(req.method)) return methodNotAllowed(res, 'GET, PATCH, DELETE');
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;
@@ -24,6 +28,36 @@ export default async function handler(req, res) {
       const api = await store.getApi(apiId, session.walletAddress);
       if (!api) return res.status(404).json({ error: 'API not found' });
       return res.status(200).json({ api: apiDetailResponse(req, api) });
+    }
+
+    if (req.method === 'DELETE') {
+      const api = await store.getApi(apiId, session.walletAddress);
+      if (!api) return res.status(404).json({ error: 'API not found' });
+
+      const activity = await store.getApiActivityCounts(apiId);
+      if (activity.total === 0) {
+        const deleted = await store.deleteApi(apiId, session.walletAddress);
+        if (!deleted) return res.status(404).json({ error: 'API not found' });
+        return res.status(200).json({
+          deleted: true,
+          archived: false,
+          apiId,
+          activity,
+        });
+      }
+
+      const archived = await store.updateApi(apiId, session.walletAddress, {
+        status: 'archived',
+        active: false,
+        archived_at: nowIso(),
+      });
+
+      return res.status(200).json({
+        deleted: false,
+        archived: true,
+        activity,
+        api: toApiResponse(req, archived),
+      });
     }
 
     let body;
