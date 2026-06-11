@@ -77,7 +77,6 @@ export default async function handler(req, res) {
 
     const updates = {};
     if (parsed.data.name !== undefined) updates.name = parsed.data.name;
-    if (parsed.data.active !== undefined) updates.active = parsed.data.active;
 
     const api = await store.updateApi(apiId, session.walletAddress, updates);
     if (!api) return res.status(404).json({ error: 'API not found' });

@@ -195,10 +195,21 @@ const otherPatch = await call(
     method: 'PATCH',
     cookie: otherCookie,
     url: `/api/apis/${created.body.api.id}`,
-    body: { active: false },
+    body: { name: 'Other Wallet Rename Attempt' },
   }),
 );
 assert(otherPatch.statusCode === 404, 'other wallet should not update owner API');
+
+const activePatch = await call(
+  apiDetailHandler,
+  makeReq({
+    method: 'PATCH',
+    cookie: ownerCookie,
+    url: `/api/apis/${created.body.api.id}`,
+    body: { active: true },
+  }),
+);
+assert(activePatch.statusCode === 400, 'PATCH should not activate APIs directly');
 
 const patch = await call(
   apiDetailHandler,
@@ -206,10 +217,12 @@ const patch = await call(
     method: 'PATCH',
     cookie: ownerCookie,
     url: `/api/apis/${created.body.api.id}`,
-    body: { active: false },
+    body: { name: 'Renamed Market Signal API' },
   }),
 );
 assert(patch.statusCode === 200, 'owner patch should return 200');
-assert(patch.body.api.active === false, 'active state should update');
+assert(patch.body.api.name === 'Renamed Market Signal API', 'name should update');
+assert(patch.body.api.status === 'pending_setup', 'PATCH should not change lifecycle status');
+assert(patch.body.api.active === false, 'PATCH should not activate the API');
 
 console.log('Phase 3 registry smoke test passed');

@@ -18,7 +18,6 @@ export const createApiSchema = z.object({
 
 export const updateApiSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),
-  active: z.boolean().optional(),
 }).refine((value) => Object.keys(value).length > 0, {
   message: 'At least one field must be updated',
 });
