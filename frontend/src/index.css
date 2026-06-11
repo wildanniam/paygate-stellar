@@ -92,3 +92,13 @@ body {
   background-color: white;
   filter: url(#grain);
 }
+
+.desktop-nav-link {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .desktop-nav-link {
+    display: inline-flex;
+  }
+}

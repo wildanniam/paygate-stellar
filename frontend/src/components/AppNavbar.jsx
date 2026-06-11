@@ -5,23 +5,27 @@ import { C, MONO } from '../colors.js';
 export default function AppNavbar() {
   const { pathname } = useLocation();
 
-  const navLink = (to, label) => (
+  const navLink = (to, label, variant = 'plain') => {
+    const active = pathname === to || (to === '/apis/new' && pathname.startsWith('/apis/'));
+    return (
     <Link
       to={to}
       style={{
-        color: pathname === to ? C.text1 : C.text2,
+        color: active ? C.text1 : C.text2,
         fontSize: 13,
         textDecoration: 'none',
-        padding: '6px 12px',
+        padding: variant === 'primary' ? '8px 13px' : '6px 12px',
         borderRadius: 6,
-        background: pathname === to ? C.accentDim : 'transparent',
+        background: variant === 'primary' ? C.accent : active ? C.accentDim : 'transparent',
+        fontWeight: variant === 'primary' ? 800 : 500,
         transition: 'all 0.15s ease',
         ...MONO,
       }}
     >
       {label}
     </Link>
-  );
+    );
+  };
 
   return (
     <nav
@@ -43,11 +47,11 @@ export default function AppNavbar() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 16,
+          gap: 10,
         }}
       >
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <span style={{ ...MONO, fontWeight: 700, fontSize: 15 }}>
+          <span style={{ ...MONO, fontWeight: 700, fontSize: 15, whiteSpace: 'nowrap' }}>
             <span style={{ color: C.accent }}>{'{ '}</span>
             <span style={{ color: C.text1 }}>PayGate</span>
             <span style={{ color: C.accent }}>{' }'}</span>
@@ -56,13 +60,13 @@ export default function AppNavbar() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {navLink('/dashboard', 'Dashboard')}
-          {navLink('/apis/new', 'New API')}
+          {navLink('/apis/new', 'Register API', 'primary')}
           <a
+            className="desktop-nav-link"
             href="https://github.com/wildanniam/paygate-stellar"
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: 'flex',
               alignItems: 'center',
               gap: 6,
               color: C.text2,
@@ -76,7 +80,7 @@ export default function AppNavbar() {
             }}
           >
             <Github size={14} />
-            GitHub
+            <span className="hidden sm:inline">GitHub</span>
           </a>
         </div>
       </div>

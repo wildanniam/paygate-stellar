@@ -274,26 +274,46 @@ export default function Landing() {
         borderBottom: `1px solid ${C.border}`,
       }}>
         <div className="flex items-center justify-between"
-          style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', height: 56 }}>
-          <span style={{ ...M, fontWeight: 700, fontSize: 16 }}>
+          style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', minHeight: 56, gap: 10 }}>
+          <span style={{ ...M, fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap' }}>
             <span style={{ color: C.accent }}>{'{ '}</span>PayGate<span style={{ color: C.accent }}>{' }'}</span>
           </span>
-          <a
-            href="https://github.com/wildanniam/paygate-stellar"
-            target="_blank" rel="noopener noreferrer"
-            onMouseEnter={() => hov('navCta', true)}
-            onMouseLeave={() => hov('navCta', false)}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              border: `1px solid ${C.border}`,
-              background: h.navCta ? C.accentDim : 'transparent',
-              color: C.text1, textDecoration: 'none',
-              padding: '6px 16px', borderRadius: 6, fontSize: 13,
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <Github size={14} /> View on GitHub
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <Link to="/dashboard" style={{ color: C.text2, textDecoration: 'none', padding: '6px 10px', borderRadius: 6, fontSize: 13, ...M }}>
+              Dashboard
+            </Link>
+            <Link
+              to="/apis/new"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: C.accent,
+                color: C.text1, textDecoration: 'none',
+                padding: '8px 13px', borderRadius: 6, fontSize: 13, fontWeight: 800,
+                transition: 'all 0.15s ease',
+                ...M,
+              }}
+            >
+              Register API
+            </Link>
+            <a
+              className="desktop-nav-link"
+              href="https://github.com/wildanniam/paygate-stellar"
+              target="_blank" rel="noopener noreferrer"
+              aria-label="View PayGate on GitHub"
+              onMouseEnter={() => hov('navCta', true)}
+              onMouseLeave={() => hov('navCta', false)}
+              style={{
+                alignItems: 'center', gap: 6,
+                border: `1px solid ${C.border}`,
+                background: h.navCta ? C.accentDim : 'transparent',
+                color: C.text1, textDecoration: 'none',
+                padding: '8px 10px', borderRadius: 6, fontSize: 13,
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Github size={14} />
+            </a>
+          </div>
         </div>
       </nav>
 
