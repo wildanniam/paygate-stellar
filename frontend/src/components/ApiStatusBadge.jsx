@@ -1,5 +1,6 @@
 import { AlertTriangle, Archive, CheckCircle2, Clock3 } from 'lucide-react';
-import { C, MONO } from '../colors.js';
+import { C } from '../colors.js';
+import Badge from './ui/Badge.jsx';
 
 export function getApiStatusMeta(status) {
   if (status === 'active') {
@@ -9,6 +10,7 @@ export function getApiStatusMeta(status) {
       color: C.green,
       bg: 'rgba(134,239,172,0.08)',
       border: 'rgba(134,239,172,0.22)',
+      tone: 'success',
       Icon: CheckCircle2,
     };
   }
@@ -19,6 +21,7 @@ export function getApiStatusMeta(status) {
       color: C.text3,
       bg: 'rgba(148,163,184,0.06)',
       border: 'rgba(148,163,184,0.14)',
+      tone: 'muted',
       Icon: Archive,
     };
   }
@@ -29,6 +32,7 @@ export function getApiStatusMeta(status) {
       color: C.amber,
       bg: 'rgba(252,211,77,0.08)',
       border: 'rgba(252,211,77,0.22)',
+      tone: 'warning',
       Icon: Clock3,
     };
   }
@@ -38,6 +42,7 @@ export function getApiStatusMeta(status) {
     color: C.red,
     bg: 'rgba(252,165,165,0.08)',
     border: 'rgba(252,165,165,0.22)',
+    tone: 'danger',
     Icon: AlertTriangle,
   };
 }
@@ -47,26 +52,13 @@ export default function ApiStatusBadge({ status, compact = false }) {
   const Icon = meta.Icon;
 
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 7,
-        width: 'fit-content',
-        color: meta.color,
-        background: meta.bg,
-        border: `1px solid ${meta.border}`,
-        borderRadius: 999,
-        padding: compact ? '5px 8px' : '7px 10px',
-        fontSize: compact ? 11 : 12,
-        fontWeight: 800,
-        whiteSpace: 'nowrap',
-        ...MONO,
-      }}
+    <Badge
+      tone={meta.tone}
+      size={compact ? 'sm' : 'md'}
       title={meta.description}
+      icon={<Icon size={compact ? 12 : 14} aria-hidden="true" />}
     >
-      <Icon size={compact ? 12 : 14} />
       {meta.label}
-    </span>
+    </Badge>
   );
 }

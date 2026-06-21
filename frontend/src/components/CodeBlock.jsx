@@ -1,6 +1,7 @@
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { C, MONO } from '../colors.js';
+import Button from './ui/Button.jsx';
 
 function highlight(code) {
   return code.split('\n').map((line, i) => (
@@ -70,63 +71,33 @@ export default function CodeBlock({ code, filename, maxHeight = 500 }) {
 
   return (
     <div
-      style={{
-        background: C.codeBg,
-        border: `1px solid ${C.border}`,
-        borderRadius: 12,
-        overflow: 'hidden',
-        boxShadow: `inset 0 0 40px rgba(124,58,237,0.04), 0 0 0 1px ${C.border}`,
-      }}
+      className="pg-code-block"
     >
       <div
-        style={{
-          background: '#111111',
-          borderBottom: `1px solid ${C.border}`,
-          padding: '10px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 16,
-        }}
+        className="pg-code-block-header"
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-          {['#FF5F57', '#FEBC2E', '#28C840'].map((color) => (
-            <div key={color} style={{ width: 10, height: 10, borderRadius: '50%', background: color, flex: '0 0 auto' }} />
-          ))}
-          <span style={{ ...MONO, fontSize: 12, color: C.text3, marginLeft: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span className="pg-code-title">
             {filename}
           </span>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleCopy}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: copied ? C.green : C.text3,
-            fontSize: 12,
-            ...MONO,
-            transition: 'color 0.15s ease',
-            flex: '0 0 auto',
-          }}
+          className="pg-copy-button"
+          data-state={copied ? 'copied' : 'idle'}
+          icon={copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
         >
-          {copied ? <Check size={12} /> : <Copy size={12} />}
           {copied ? 'Copied!' : 'Copy'}
-        </button>
+        </Button>
       </div>
 
       <div
+        className="pg-code-content"
         style={{
-          padding: '20px 24px',
           ...MONO,
-          fontSize: 13,
-          lineHeight: 1.8,
-          overflowY: 'auto',
           maxHeight,
-          overflowX: 'auto',
         }}
       >
         {highlight(code)}
@@ -134,4 +105,3 @@ export default function CodeBlock({ code, filename, maxHeight = 500 }) {
     </div>
   );
 }
-

@@ -10,11 +10,37 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--pg-bg-canvas);
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.10), transparent 34rem),
+    var(--pg-bg-canvas);
+  color: var(--pg-text-primary);
+  font-family: var(--pg-font-sans);
+  letter-spacing: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(124, 58, 237, 0.36);
+  color: var(--pg-text-primary);
 }
 
 /* ── Cursor blink ── */
@@ -56,7 +82,7 @@ body {
 }
 .gradient-headline {
   display: inline-block;
-  animation: hue-shift 8s ease-in-out infinite;
+  animation: none;
 }
 
 /* ── Hero code block: animated gradient border ── */
@@ -67,9 +93,9 @@ body {
 .shimmer-border {
   border-radius: 13px;
   padding: 1px;
-  background: linear-gradient(90deg, #7C3AED, #22D3EE, #a855f7, #7C3AED);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.75), rgba(124, 58, 237, 0.65));
   background-size: 300% 100%;
-  animation: shimmer-sweep 4s linear infinite;
+  animation: none;
 }
 
 /* ── Code typewriter: each line slides in from left ── */
@@ -118,5 +144,16 @@ body {
 
   .mobile-api-list {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
