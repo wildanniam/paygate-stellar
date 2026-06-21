@@ -1,13 +1,15 @@
-import { Github, Code2, BarChart3, Zap, Globe, Copy } from 'lucide-react';
+import { ArrowRight, BarChart3, CheckCircle2, CircleDollarSign, Code2, Github, Globe, Link2, ShieldCheck, Zap } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { C, MONO as M } from '../colors.js';
+import Badge from '../components/ui/Badge.jsx';
+import Button from '../components/ui/Button.jsx';
 
 const KW   = t => <span style={{ color: C.purple }}>{t}</span>;
 const STR  = t => <span style={{ color: C.green }}>{t}</span>;
-const PROP = t => <span style={{ color: C.blue }}>{t}</span>;
 const FN   = t => <span style={{ color: C.amber }}>{t}</span>;
-const CMT  = t => <span style={{ color: C.text3 }}>{t}</span>;
 
 function useCountUp(target, duration, active, delay = 0) {
   const [value, setValue] = useState(0);
@@ -46,31 +48,24 @@ function TerminalDots() {
   );
 }
 
-const CODE_LINE_COUNT = 12;
-
 export default function Landing() {
   const [h, setH] = useState({
-    navCta: false, heroPrimary: false, heroSecondary: false,
-    ctaBtn: false, card: null, feat: null,
+    navCta: false, ctaBtn: false, card: null, feat: null,
   });
   const hov = (key, val) => setH(prev => ({ ...prev, [key]: val }));
 
-  const [heroGlow, setHeroGlow]       = useState({ x: 50, y: 40 });
   const [scrollPct, setScrollPct]     = useState(0);
   const [statsActive, setStatsActive] = useState(false);
   const [activeSteps, setActiveSteps] = useState([false, false, false]);
-  const [visibleLines, setVisibleLines] = useState(0);
-  const [magnetHero, setMagnetHero]   = useState({ x: 0, y: 0 });
   const [magnetCta, setMagnetCta]     = useState({ x: 0, y: 0 });
 
   // Card stagger states
   const [problemVis, setProblemVis] = useState([false, false, false]);
   const [featVis, setFeatVis]       = useState([false, false, false, false]);
 
-  const heroRef        = useRef(null);
+  const heroRailRef    = useRef(null);
   const problemRef     = useRef(null);
   const howItWorksRef  = useRef(null);
-  const heroPrimaryRef = useRef(null);
   const ctaBottomRef   = useRef(null);
   const problemCardsRef = useRef(null);
   const featCardsRef    = useRef(null);
@@ -138,17 +133,6 @@ export default function Landing() {
     return () => obs.disconnect();
   }, []);
 
-  // ── Code typewriter ──
-  useEffect(() => {
-    let count = 0;
-    const id = setInterval(() => {
-      count++;
-      setVisibleLines(count);
-      if (count >= CODE_LINE_COUNT) clearInterval(id);
-    }, 100);
-    return () => clearInterval(id);
-  }, []);
-
   // ── Problem cards stagger ──
   useEffect(() => {
     const el = problemCardsRef.current;
@@ -181,15 +165,33 @@ export default function Landing() {
     return () => obs.disconnect();
   }, []);
 
-  // ── Hero mouse glow ──
-  const handleHeroMouseMove = useCallback(e => {
-    const rect = heroRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setHeroGlow({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top)  / rect.height) * 100,
-    });
-  }, []);
+  // ── Hero transformation rail ──
+  useGSAP(() => {
+    const root = heroRailRef.current;
+    if (!root) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const steps = root.querySelectorAll('[data-hero-step]');
+    const path = root.querySelector('[data-hero-path]');
+    const pulses = root.querySelectorAll('[data-flow-pulse]');
+
+    if (prefersReducedMotion) {
+      gsap.set([...steps, path, ...pulses].filter(Boolean), { clearProps: 'all' });
+      return;
+    }
+
+    gsap.set(steps, { autoAlpha: 0, y: 12 });
+    gsap.set(path, { scaleX: 0, transformOrigin: 'left center' });
+    gsap.set(pulses, { autoAlpha: 0, x: -14 });
+
+    const timeline = gsap.timeline({ defaults: { ease: 'power2.out' } });
+    timeline
+      .to(path, { scaleX: 1, duration: 1.05 }, 0)
+      .to(steps, { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.12 }, 0.08)
+      .to(pulses, { autoAlpha: 1, x: 0, duration: 0.38, stagger: 0.1 }, 0.42);
+
+    return () => timeline.kill();
+  }, { scope: heroRailRef });
 
   // ── Magnetic CTA ──
   const applyMagnet = useCallback((e, ref, setter) => {
@@ -217,33 +219,11 @@ export default function Landing() {
 
   const stepsCount = activeSteps.filter(Boolean).length;
 
-  const codeLines = [
-    <>{CMT('// Agent calls your PayGate proxy')}{'\n'}</>,
-    <>{KW('const')}{' response = '}{KW('await')}{' '}{FN('fetch')}{'(\n'}</>,
-    <>{'  '}{STR("'https://paygate.app/api/pay/api_123'")}{'\n'}</>,
-    <>{');\n'}</>,
-    <>{'\n'}</>,
-    <>{KW('if')}{' (response.'}{PROP('status')}{' === 402) {\n'}</>,
-    <>{'  '}{KW('await')}{' '}{FN('payWithStellarMPP')}{'(response);\n'}</>,
-    <>{'  '}{KW('return')}{' '}{FN('fetch')}{'('}{STR("'https://paygate.app/api/pay/api_123'")}{');\n'}</>,
-    <>{'}\n'}</>,
-    <>{'\n'}</>,
-    <>{KW('const')}{' data = '}{KW('await')}{' response.'}{FN('json')}{'();\n'}</>,
-    <>{CMT('// Paid API response')}</>,
-  ];
-
   // Shared card transition (covers both stagger reveal + hover)
   const cardTransition = 'opacity 0.5s ease-out, transform 0.5s ease-out, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease';
 
   return (
-    <div style={{
-      fontFamily: "'Inter', sans-serif",
-      background: C.bg,
-      color: C.text1,
-      minHeight: '100vh',
-      backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
-      backgroundSize: '24px 24px',
-    }}>
+    <div className="paygate-landing">
 
       {/* SVG noise filter */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
@@ -279,7 +259,7 @@ export default function Landing() {
             <span style={{ color: C.accent }}>{'{ '}</span>PayGate<span style={{ color: C.accent }}>{' }'}</span>
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <Link to="/dashboard" style={{ color: C.text2, textDecoration: 'none', padding: '6px 10px', borderRadius: 6, fontSize: 13, ...M }}>
+            <Link className="landing-nav-secondary" to="/dashboard" style={{ color: C.text2, textDecoration: 'none', padding: '6px 10px', borderRadius: 6, fontSize: 13, ...M }}>
               Dashboard
             </Link>
             <Link
@@ -293,7 +273,7 @@ export default function Landing() {
                 ...M,
               }}
             >
-              Register API
+              Create paid endpoint
             </Link>
             <a
               className="desktop-nav-link"
@@ -318,127 +298,99 @@ export default function Landing() {
       </nav>
 
       {/* ── HERO ── */}
-      <section
-        ref={heroRef}
-        onMouseMove={handleHeroMouseMove}
-        style={{
-          minHeight: '100vh', display: 'flex', flexDirection: 'column',
-          justifyContent: 'center', alignItems: 'center', textAlign: 'center',
-          padding: '120px 24px 80px', position: 'relative', overflow: 'hidden',
-        }}
-      >
-        {/* Primary violet mouse-tracking glow */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
-          background: `radial-gradient(ellipse 65% 45% at ${heroGlow.x}% ${heroGlow.y}%, rgba(124,58,237,0.22) 0%, transparent 70%)`,
-          transition: 'background 0.1s ease',
-        }} />
-        {/* Secondary static cyan ambient glow (bottom-right) */}
-        <div style={{
-          position: 'absolute', right: '10%', bottom: '15%',
-          width: 440, height: 280,
-          background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.07) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-          pointerEvents: 'none', zIndex: 0,
-        }} />
+      <section className="paygate-hero">
+        <div className="paygate-hero-inner">
+          <Badge tone="brand" icon={<ShieldCheck size={13} aria-hidden="true" />}>
+            Pay-per-call API gateway
+          </Badge>
 
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Badge */}
-          <div className="badge-pulse" style={{
-            display: 'inline-flex', alignItems: 'center',
-            border: '1px solid rgba(34,211,238,0.28)', background: C.accentDim,
-            color: C.cyan, padding: '6px 16px', borderRadius: 9999,
-            ...M, fontSize: 11, marginBottom: 32,
-          }}>
-            Stellar MPP for pay-per-call API access.
-          </div>
-
-          {/* Headline */}
-          <h1 style={{
-            fontSize: 'clamp(42px, 6vw, 64px)', fontWeight: 800,
-            letterSpacing: '-0.02em', lineHeight: 1.1, maxWidth: 800, margin: 0,
-          }}>
-            Turn APIs into
-            <br />
-            <span className="gradient-headline" style={{
-              background: 'linear-gradient(90deg, #7C3AED, #22D3EE)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>
-              paid proxy endpoints.
-            </span>
+          <h1 className="paygate-hero-title">
+            Paste an API URL.
+            <span>Charge per call.</span>
           </h1>
 
-          {/* Subheadline */}
-          <p style={{ color: C.text2, fontSize: 18, lineHeight: 1.6, maxWidth: 520, marginTop: 20 }}>
-            Register your upstream API, create a PayGate proxy URL, and let agents pay per call with USDC on Stellar testnet.
+          <p className="paygate-hero-copy">
+            PayGate turns ordinary API endpoints into paid endpoints for agents, apps, and machine clients without forcing you to build payment rails first.
           </p>
 
-          {/* CTAs */}
-          <div className="flex flex-wrap justify-center" style={{ gap: 12, marginTop: 36 }}>
-            <Link
-              ref={heroPrimaryRef}
+          <div className="paygate-hero-actions">
+            <Button
+              as={Link}
               to="/apis/new"
-              onMouseEnter={() => hov('heroPrimary', true)}
-              onMouseLeave={() => { hov('heroPrimary', false); setMagnetHero({ x: 0, y: 0 }); }}
-              onMouseMove={e => applyMagnet(e, heroPrimaryRef, setMagnetHero)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: h.heroPrimary ? '#6D28D9' : C.accent,
-                color: C.text1, textDecoration: 'none',
-                padding: '12px 24px', borderRadius: 8, fontSize: 15, fontWeight: 600,
-                boxShadow: h.heroPrimary ? '0 0 28px rgba(124,58,237,0.55)' : '0 0 0 rgba(0,0,0,0)',
-                transition: 'background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease',
-                transform: `translate(${magnetHero.x}px, ${magnetHero.y}px)`,
-              }}
+              size="lg"
+              icon={<ArrowRight size={17} aria-hidden="true" />}
             >
-              <Zap size={16} /> Register API
-            </Link>
-            <button
+              Create paid endpoint
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-              onMouseEnter={() => hov('heroSecondary', true)}
-              onMouseLeave={() => hov('heroSecondary', false)}
-              style={{
-                display: 'inline-flex', alignItems: 'center',
-                background: 'transparent',
-                border: `1px solid ${h.heroSecondary ? C.borderHover : C.border}`,
-                color: h.heroSecondary ? C.text1 : C.text2,
-                padding: '12px 24px', borderRadius: 8, fontSize: 15,
-                cursor: 'pointer', transition: 'all 0.15s ease',
-              }}
+              icon={<Link2 size={17} aria-hidden="true" />}
             >
-              See How It Works ↓
-            </button>
+              See the flow
+            </Button>
           </div>
 
-          {/* Code block — shimmer border + typewriter */}
-          <div className="shimmer-border" style={{ marginTop: 64, maxWidth: 680, width: '100%' }}>
-            <div style={{
-              background: C.codeBg, borderRadius: 12, overflow: 'hidden',
-              boxShadow: 'inset 0 0 60px rgba(124,58,237,0.06)',
-            }}>
-              <div className="flex items-center" style={{ background: '#111111', borderBottom: `1px solid ${C.border}`, padding: '10px 16px' }}>
-                <TerminalDots />
-                <span style={{ ...M, fontSize: 12, color: C.text3, flex: 1, textAlign: 'center' }}>paid-proxy.js</span>
-                <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', ...M, fontSize: 12, color: C.text3 }}>
-                  <Copy size={12} /> Copy
-                </button>
+          <div
+            ref={heroRailRef}
+            className="paygate-hero-visual"
+            aria-label="PayGate turns an original API URL into a paid proxy URL, blocks unpaid requests with 402, accepts MPP payment, forwards the request upstream, and records revenue."
+          >
+            <div className="paygate-rail-main">
+              <div className="paygate-endpoint-card" data-hero-step>
+                <span>Original API</span>
+                <code>https://api.weather.dev/v1/forecast</code>
               </div>
-              <pre style={{ ...M, fontSize: 13, lineHeight: 1.8, padding: '20px 24px', margin: 0, overflowX: 'auto', textAlign: 'left' }}>
-                <code>
-                  {codeLines.map((line, i) => (
-                    <span
-                      key={i}
-                      className={i < visibleLines ? 'code-line' : ''}
-                      style={{ opacity: i < visibleLines ? undefined : 0 }}
-                    >
-                      {line}
-                    </span>
-                  ))}
-                  {visibleLines >= CODE_LINE_COUNT && (
-                    <span className="cursor-blink" style={{ color: C.text2, marginLeft: 1 }}>|</span>
-                  )}
-                </code>
-              </pre>
+
+              <div className="paygate-gateway-node" data-hero-step>
+                <div>
+                  <CircleDollarSign size={18} aria-hidden="true" />
+                  PayGate
+                </div>
+                <strong>$0.01 / call</strong>
+              </div>
+
+              <div className="paygate-endpoint-card is-paid" data-hero-step>
+                <span>Paid proxy URL</span>
+                <code>https://paygate.app/p/api_7K2</code>
+              </div>
+            </div>
+
+            <div className="paygate-hero-path" aria-hidden="true">
+              <span data-hero-path />
+              <i data-flow-pulse />
+              <i data-flow-pulse />
+              <i data-flow-pulse />
+            </div>
+
+            <div className="paygate-state-row">
+              <div className="paygate-state-chip is-warning" data-hero-step>
+                <span>Unpaid client</span>
+                <strong>402 Required</strong>
+              </div>
+              <div className="paygate-state-chip is-flow" data-hero-step>
+                <span>Machine payment</span>
+                <strong>MPP paid</strong>
+              </div>
+              <div className="paygate-state-chip is-success" data-hero-step>
+                <span>Upstream response</span>
+                <strong>200 OK</strong>
+              </div>
+              <div className="paygate-state-chip is-revenue" data-hero-step>
+                <span>Developer revenue</span>
+                <strong>+$0.009</strong>
+              </div>
+            </div>
+
+            <div className="paygate-revenue-row" data-hero-step>
+              <div>
+                <CheckCircle2 size={15} aria-hidden="true" />
+                Verified via Stellar MPP
+              </div>
+              <div>
+                Escrow split: <strong>$0.009 developer</strong> / <strong>$0.001 fee</strong>
+              </div>
             </div>
           </div>
         </div>
