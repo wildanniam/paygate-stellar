@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, CheckCircle2, CircleDollarSign, Code2, Github, Globe, Link2, ShieldCheck, Zap } from 'lucide-react';
+import { Activity, ArrowRight, BarChart3, CalendarDays, CheckCircle2, Code2, Copy, Database, Github, Globe, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -171,24 +171,40 @@ export default function Landing() {
     if (!root) return;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const steps = root.querySelectorAll('[data-hero-step]');
-    const path = root.querySelector('[data-hero-path]');
-    const pulses = root.querySelectorAll('[data-flow-pulse]');
+    const leftPill = root.querySelector('[data-flow-pill="source"]');
+    const rightPill = root.querySelector('[data-flow-pill="proxy"]');
+    const node = root.querySelector('[data-flow-node]');
+    const lines = root.querySelectorAll('[data-flow-line]');
+    const arrows = root.querySelectorAll('[data-flow-arrow]');
+    const statuses = root.querySelectorAll('[data-status-step]');
+    const revenue = root.querySelector('[data-revenue-split]');
+    const dashboard = root.querySelector('[data-dashboard-preview]');
+    const animated = [leftPill, rightPill, node, revenue, dashboard, ...lines, ...arrows, ...statuses].filter(Boolean);
 
     if (prefersReducedMotion) {
-      gsap.set([...steps, path, ...pulses].filter(Boolean), { clearProps: 'all' });
+      gsap.set(animated, { clearProps: 'all' });
       return;
     }
 
-    gsap.set(steps, { autoAlpha: 0, y: 12 });
-    gsap.set(path, { scaleX: 0, transformOrigin: 'left center' });
-    gsap.set(pulses, { autoAlpha: 0, x: -14 });
+    gsap.set(leftPill, { autoAlpha: 0, x: -32 });
+    gsap.set(rightPill, { autoAlpha: 0, x: 32 });
+    gsap.set(node, { autoAlpha: 0, scale: 0.9, y: 8 });
+    gsap.set(lines, { scaleX: 0, transformOrigin: 'center center' });
+    gsap.set(arrows, { autoAlpha: 0, scale: 0.75 });
+    gsap.set(statuses, { autoAlpha: 0, y: 14 });
+    gsap.set(revenue, { autoAlpha: 0, y: 16 });
+    gsap.set(dashboard, { autoAlpha: 0, y: 28 });
 
     const timeline = gsap.timeline({ defaults: { ease: 'power2.out' } });
     timeline
-      .to(path, { scaleX: 1, duration: 1.05 }, 0)
-      .to(steps, { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.12 }, 0.08)
-      .to(pulses, { autoAlpha: 1, x: 0, duration: 0.38, stagger: 0.1 }, 0.42);
+      .to(node, { autoAlpha: 1, scale: 1, y: 0, duration: 0.55 }, 0)
+      .to(leftPill, { autoAlpha: 1, x: 0, duration: 0.48 }, 0.1)
+      .to(rightPill, { autoAlpha: 1, x: 0, duration: 0.48 }, 0.22)
+      .to(lines, { scaleX: 1, duration: 0.72, stagger: 0.08 }, 0.34)
+      .to(arrows, { autoAlpha: 1, scale: 1, duration: 0.26, stagger: 0.08 }, 0.7)
+      .to(statuses, { autoAlpha: 1, y: 0, duration: 0.36, stagger: 0.12 }, 0.88)
+      .to(revenue, { autoAlpha: 1, y: 0, duration: 0.44 }, 1.28)
+      .to(dashboard, { autoAlpha: 1, y: 0, duration: 0.62 }, 1.42);
 
     return () => timeline.kill();
   }, { scope: heroRailRef });
@@ -310,7 +326,7 @@ export default function Landing() {
           </h1>
 
           <p className="paygate-hero-copy">
-            PayGate turns ordinary API endpoints into paid endpoints for agents, apps, and machine clients without forcing you to build payment rails first.
+            PayGate creates a paid proxy, verifies MPP payments, and tracks API revenue.
           </p>
 
           <div className="paygate-hero-actions">
@@ -334,63 +350,124 @@ export default function Landing() {
 
           <div
             ref={heroRailRef}
-            className="paygate-hero-visual"
+            className="paygate-flow-stage"
             aria-label="PayGate turns an original API URL into a paid proxy URL, blocks unpaid requests with 402, accepts MPP payment, forwards the request upstream, and records revenue."
           >
-            <div className="paygate-rail-main">
-              <div className="paygate-endpoint-card" data-hero-step>
-                <span>Original API</span>
-                <code>https://api.weather.dev/v1/forecast</code>
+            <div className="paygate-flow-grid">
+              <div className="paygate-flow-label paygate-flow-label-left">Your API URL</div>
+              <div className="paygate-flow-label paygate-flow-label-right">Your paid endpoint</div>
+
+              <div className="paygate-flow-pill is-source" data-flow-pill="source">
+                <span className="paygate-flow-pill-icon">
+                  <Link2 size={19} aria-hidden="true" />
+                </span>
+                <code>https://api.company.com/v1/signal</code>
               </div>
 
-              <div className="paygate-gateway-node" data-hero-step>
-                <div>
-                  <CircleDollarSign size={18} aria-hidden="true" />
-                  PayGate
+              <div className="paygate-flow-connector is-left" aria-hidden="true">
+                <span data-flow-line />
+                <ArrowRight data-flow-arrow size={34} strokeWidth={2.4} />
+              </div>
+
+              <div className="paygate-node-wrap" data-flow-node>
+                <div className="paygate-node-matrix" aria-hidden="true" />
+                <div className="paygate-node-card">
+                  <img src="/brand/paygate-mark.svg" alt="" />
+                  <strong>PayGate</strong>
+                  <span>Paid proxy</span>
                 </div>
-                <strong>$0.01 / call</strong>
               </div>
 
-              <div className="paygate-endpoint-card is-paid" data-hero-step>
-                <span>Paid proxy URL</span>
-                <code>https://paygate.app/p/api_7K2</code>
+              <div className="paygate-flow-connector is-right" aria-hidden="true">
+                <span data-flow-line />
+                <ArrowRight data-flow-arrow size={34} strokeWidth={2.4} />
+              </div>
+
+              <div className="paygate-flow-pill is-proxy" data-flow-pill="proxy">
+                <span className="paygate-flow-pill-icon">
+                  <Copy size={19} aria-hidden="true" />
+                </span>
+                <code>https://paygate.app/api/pay/api_123</code>
               </div>
             </div>
 
-            <div className="paygate-hero-path" aria-hidden="true">
-              <span data-hero-path />
-              <i data-flow-pulse />
-              <i data-flow-pulse />
-              <i data-flow-pulse />
+            <div className="paygate-status-track" aria-hidden="true">
+              <span />
             </div>
 
-            <div className="paygate-state-row">
-              <div className="paygate-state-chip is-warning" data-hero-step>
-                <span>Unpaid client</span>
+            <div className="paygate-status-row">
+              <div className="paygate-lifecycle-chip is-warning" data-status-step>
+                <span className="paygate-lifecycle-number">1</span>
+                <ShieldCheck size={20} aria-hidden="true" />
                 <strong>402 Required</strong>
               </div>
-              <div className="paygate-state-chip is-flow" data-hero-step>
-                <span>Machine payment</span>
-                <strong>MPP paid</strong>
+              <div className="paygate-lifecycle-chip is-paid" data-status-step>
+                <span className="paygate-lifecycle-number">2</span>
+                <CheckCircle2 size={20} aria-hidden="true" />
+                <strong>MPP Paid</strong>
               </div>
-              <div className="paygate-state-chip is-success" data-hero-step>
-                <span>Upstream response</span>
+              <div className="paygate-lifecycle-chip is-success" data-status-step>
+                <span className="paygate-lifecycle-number">3</span>
+                <CheckCircle2 size={20} aria-hidden="true" />
                 <strong>200 OK</strong>
-              </div>
-              <div className="paygate-state-chip is-revenue" data-hero-step>
-                <span>Developer revenue</span>
-                <strong>+$0.009</strong>
               </div>
             </div>
 
-            <div className="paygate-revenue-row" data-hero-step>
+            <div className="paygate-revenue-split" data-revenue-split>
               <div>
-                <CheckCircle2 size={15} aria-hidden="true" />
-                Verified via Stellar MPP
+                <TrendingUp size={30} aria-hidden="true" />
+                <span>
+                  <strong>+0.009 USDC</strong>
+                  developer
+                </span>
               </div>
+              <i aria-hidden="true" />
               <div>
-                Escrow split: <strong>$0.009 developer</strong> / <strong>$0.001 fee</strong>
+                <span>
+                  <strong>+0.001 fee</strong>
+                  PayGate fee
+                </span>
               </div>
+            </div>
+
+            <div className="paygate-dashboard-preview" data-dashboard-preview aria-hidden="true">
+              <aside>
+                <div className="paygate-preview-brand">
+                  <img src="/brand/paygate-mark.svg" alt="" />
+                  <strong>PayGate</strong>
+                </div>
+                <div className="paygate-preview-nav is-active">
+                  <LayoutDashboard size={15} />
+                  Dashboard
+                </div>
+                <div className="paygate-preview-nav">
+                  <Database size={15} />
+                  APIs
+                </div>
+              </aside>
+              <main>
+                <div className="paygate-preview-head">
+                  <strong>Overview</strong>
+                  <div>
+                    <span><CalendarDays size={14} /> May 15 - Jun 15, 2026</span>
+                    <span className="is-selected">30D</span>
+                  </div>
+                </div>
+                <div className="paygate-preview-metrics">
+                  {[
+                    ['Total Calls', '12.4k'],
+                    ['Gross Revenue', '$124.00'],
+                    ['Developer Revenue', '$111.60'],
+                    ['Withdrawable', '$84.20'],
+                  ].map(([label, value]) => (
+                    <div key={label}>
+                      <span>{label}</span>
+                      <strong>{value}</strong>
+                      <small><Activity size={12} /> live revenue</small>
+                    </div>
+                  ))}
+                </div>
+              </main>
             </div>
           </div>
         </div>
