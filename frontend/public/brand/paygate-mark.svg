@@ -1,0 +1,45 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayGate logo mark">
+  <defs>
+    <linearGradient id="paygate-mark-gradient" x1="280" y1="214" x2="760" y2="768" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="0.56" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="paygate-node-gradient" x1="590" y1="440" x2="704" y2="556" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <filter id="paygate-mark-glow" x="198" y="138" width="668" height="748" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.486 0 0 0 0 0.227 0 0 0 0 0.929 0 0 0 0.55 0"/>
+      <feBlend in2="BackgroundImageFix" mode="screen" result="glow"/>
+      <feBlend in="SourceGraphic" in2="glow" mode="normal" result="shape"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#paygate-mark-glow)">
+    <path
+      d="M360 760V280C360 244.7 388.7 216 424 216H584C710.5 216 792 295.8 792 408C792 520.2 710.5 600 584 600H456"
+      stroke="url(#paygate-mark-gradient)"
+      stroke-width="80"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M460 512H604"
+      stroke="#080808"
+      stroke-width="48"
+      stroke-linecap="round"
+    />
+    <path
+      d="M452 512H612"
+      stroke="#F8FAFC"
+      stroke-width="22"
+      stroke-linecap="round"
+    />
+    <circle cx="660" cy="512" r="54" fill="#080808"/>
+    <circle cx="660" cy="512" r="38" fill="url(#paygate-node-gradient)"/>
+    <circle cx="660" cy="512" r="16" fill="#080808"/>
+  </g>
+</svg>

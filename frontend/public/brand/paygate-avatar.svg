@@ -1,0 +1,76 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayGate profile logo">
+  <defs>
+    <radialGradient id="paygate-avatar-violet" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(430 518) rotate(65) scale(430 430)">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.42"/>
+      <stop offset="0.62" stop-color="#7C3AED" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="paygate-avatar-cyan" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(690 642) rotate(34) scale(300 300)">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="paygate-avatar-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1.25" fill="#F8FAFC" opacity="0.09"/>
+    </pattern>
+    <linearGradient id="paygate-avatar-ring" x1="232" y1="166" x2="820" y2="858" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1A1A1A"/>
+      <stop offset="0.5" stop-color="#2A2A2A"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0.42"/>
+    </linearGradient>
+    <linearGradient id="paygate-avatar-mark-gradient" x1="280" y1="214" x2="760" y2="768" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="0.56" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="paygate-avatar-node-gradient" x1="590" y1="440" x2="704" y2="556" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <filter id="paygate-avatar-soft-shadow" x="132" y="100" width="760" height="824" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="30" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="paygate-avatar-mark-glow" x="198" y="138" width="668" height="748" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.486 0 0 0 0 0.227 0 0 0 0 0.929 0 0 0 0.55 0"/>
+      <feBlend in2="BackgroundImageFix" mode="screen" result="glow"/>
+      <feBlend in="SourceGraphic" in2="glow" mode="normal" result="shape"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#080808"/>
+  <rect width="1024" height="1024" fill="url(#paygate-avatar-grid)"/>
+  <rect width="1024" height="1024" fill="url(#paygate-avatar-violet)"/>
+  <rect width="1024" height="1024" fill="url(#paygate-avatar-cyan)"/>
+
+  <g filter="url(#paygate-avatar-soft-shadow)">
+    <circle cx="512" cy="512" r="368" fill="#0F0F0F" fill-opacity="0.82"/>
+    <circle cx="512" cy="512" r="368" stroke="url(#paygate-avatar-ring)" stroke-width="3"/>
+    <circle cx="512" cy="512" r="304" stroke="#1A1A1A" stroke-width="2" stroke-dasharray="4 24" opacity="0.9"/>
+  </g>
+
+  <g filter="url(#paygate-avatar-mark-glow)">
+    <path
+      d="M360 760V280C360 244.7 388.7 216 424 216H584C710.5 216 792 295.8 792 408C792 520.2 710.5 600 584 600H456"
+      stroke="url(#paygate-avatar-mark-gradient)"
+      stroke-width="80"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M460 512H604"
+      stroke="#080808"
+      stroke-width="48"
+      stroke-linecap="round"
+    />
+    <path
+      d="M452 512H612"
+      stroke="#F8FAFC"
+      stroke-width="22"
+      stroke-linecap="round"
+    />
+    <circle cx="660" cy="512" r="54" fill="#080808"/>
+    <circle cx="660" cy="512" r="38" fill="url(#paygate-avatar-node-gradient)"/>
+    <circle cx="660" cy="512" r="16" fill="#080808"/>
+  </g>
+</svg>

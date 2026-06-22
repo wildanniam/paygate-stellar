@@ -1,0 +1,51 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayGate paywall P logo concept">
+  <defs>
+    <radialGradient id="bg-violet" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(418 436) rotate(58) scale(430 430)">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.35"/>
+      <stop offset="0.62" stop-color="#7C3AED" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bg-cyan" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(666 588) rotate(42) scale(270 270)">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1.2" fill="#F8FAFC" opacity="0.08"/>
+    </pattern>
+    <linearGradient id="mark" x1="310" y1="214" x2="784" y2="790" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA"/>
+      <stop offset="0.42" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="gate" x1="512" y1="392" x2="688" y2="582" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <filter id="shadow" x="176" y="144" width="704" height="760" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="30" stdDeviation="34" flood-color="#000000" flood-opacity="0.52"/>
+    </filter>
+    <filter id="glow" x="244" y="148" width="632" height="728" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.486 0 0 0 0 0.227 0 0 0 0 0.929 0 0 0 0.48 0"/>
+      <feBlend in2="SourceGraphic" mode="screen"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#080808"/>
+  <rect width="1024" height="1024" fill="url(#grid)"/>
+  <rect width="1024" height="1024" fill="url(#bg-violet)"/>
+  <rect width="1024" height="1024" fill="url(#bg-cyan)"/>
+  <circle cx="512" cy="512" r="360" fill="#0F0F0F" opacity="0.72"/>
+
+  <g filter="url(#shadow)">
+    <g filter="url(#glow)">
+      <path fill="url(#mark)" fill-rule="evenodd" d="M320 790V292C320 247.8 355.8 212 400 212H578C724 212 812 299.4 812 422C812 544.6 724 632 578 632H462V790H320ZM462 336V508H578C646.8 508 692 475.2 692 422C692 368.8 646.8 336 578 336H462Z"/>
+      <path fill="#080808" d="M516 558V438C516 392.7 552.7 356 598 356C643.3 356 680 392.7 680 438V558H624V438C624 423.6 612.4 412 598 412C583.6 412 572 423.6 572 438V558H516Z"/>
+      <path d="M526 558V450C526 410.2 558.2 378 598 378C637.8 378 670 410.2 670 450V558" stroke="url(#gate)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="518" y="540" width="164" height="42" rx="21" fill="#080808"/>
+      <rect x="530" y="530" width="140" height="28" rx="14" fill="url(#gate)"/>
+      <circle cx="600" cy="600" r="27" fill="#080808"/>
+      <circle cx="600" cy="600" r="17" fill="#22D3EE"/>
+    </g>
+  </g>
+</svg>
