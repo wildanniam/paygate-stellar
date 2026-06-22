@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, Github, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
+import { Activity, ArrowDown, ArrowRight, Bot, CalendarDays, CheckCircle2, ClipboardCheck, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ReceiptText, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -15,6 +15,54 @@ const HERO_FLOW_URLS = {
   source: 'https://api.company.com/v1/signal',
   proxy: 'https://paygate.app/api/pay/api_123',
 };
+
+const PROOF_SEQUENCE = ['received', 'required', 'mpp', 'ok'];
+
+const PROOF_ROWS = [
+  {
+    key: 'received',
+    tone: 'blue',
+    label: 'Request received',
+    value: 'GET /api/pay/api_123',
+    time: '13:23:45.213',
+    icon: ArrowDown,
+    copyValue: 'GET /api/pay/api_123',
+  },
+  {
+    key: 'required',
+    tone: 'amber',
+    label: 'Payment required',
+    value: '402 Required',
+    time: '13:23:45.276',
+    icon: ShieldCheck,
+    copyValue: '402 Required',
+  },
+  {
+    key: 'mpp',
+    tone: 'purple',
+    label: 'MPP verified',
+    value: 'pay_8d7a2c0e',
+    time: '13:23:45.312',
+    icon: CheckCircle2,
+    copyValue: 'pay_8d7a2c0e',
+  },
+  {
+    key: 'ok',
+    tone: 'green',
+    label: 'Upstream returned',
+    value: '200 OK',
+    time: '13:23:45.589',
+    icon: CheckCircle2,
+    copyValue: '200 OK',
+  },
+];
+
+const PROOF_CHIPS = [
+  { label: 'Request IDs', icon: Fingerprint },
+  { label: 'Escrow split', icon: Layers3 },
+  { label: 'Dashboard logs', icon: FileText },
+  { label: 'Agent-ready', icon: Bot },
+];
 
 function useCountUp(target, duration, active, delay = 0) {
   const [value, setValue] = useState(0);
@@ -73,13 +121,18 @@ export default function Landing() {
   const [magnetCta, setMagnetCta]     = useState({ x: 0, y: 0 });
   const [heroActive, setHeroActive]   = useState('idle');
   const [copiedFlow, setCopiedFlow]   = useState(null);
+  const [proofActive, setProofActive] = useState('mpp');
+  const [proofVisible, setProofVisible] = useState(false);
+  const [copiedProof, setCopiedProof] = useState(null);
 
   // Card stagger states
   const [problemVis, setProblemVis] = useState([false, false, false]);
   const [featVis, setFeatVis]       = useState([false, false, false, false]);
 
   const heroRailRef    = useRef(null);
+  const proofRef       = useRef(null);
   const copyTimerRef   = useRef(null);
+  const proofCopyTimerRef = useRef(null);
   const problemRef     = useRef(null);
   const howItWorksRef  = useRef(null);
   const ctaBottomRef   = useRef(null);
@@ -124,6 +177,41 @@ export default function Landing() {
     return 'idle';
   };
 
+  const copyProofValue = useCallback(async (key, value) => {
+    if (!value) return;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+
+      window.clearTimeout(proofCopyTimerRef.current);
+      setCopiedProof(key);
+      setProofActive(key);
+      proofCopyTimerRef.current = window.setTimeout(() => setCopiedProof(null), 1500);
+    } catch {
+      window.clearTimeout(proofCopyTimerRef.current);
+      setCopiedProof(`${key}-error`);
+      proofCopyTimerRef.current = window.setTimeout(() => setCopiedProof(null), 1500);
+    }
+  }, []);
+
+  const getProofCopyState = key => {
+    if (copiedProof === key) return 'copied';
+    if (copiedProof === `${key}-error`) return 'error';
+    return 'idle';
+  };
+
   // ── Fade-in: JS-driven so SSR/no-JS sees content; IO with rootMargin + 800ms fallback ──
   useEffect(() => {
     const els = [...document.querySelectorAll('.fs')];
@@ -148,7 +236,10 @@ export default function Landing() {
     return () => { obs.disconnect(); clearTimeout(fallback); };
   }, []);
 
-  useEffect(() => () => window.clearTimeout(copyTimerRef.current), []);
+  useEffect(() => () => {
+    window.clearTimeout(copyTimerRef.current);
+    window.clearTimeout(proofCopyTimerRef.current);
+  }, []);
 
   // ── Scroll progress ──
   useEffect(() => {
@@ -203,6 +294,38 @@ export default function Landing() {
     }, { threshold: 0.1, rootMargin: '0px 0px 80px 0px' });
     obs.observe(el);
     return () => obs.disconnect();
+  }, []);
+
+  // ── Request-time proof activation ──
+  useEffect(() => {
+    const el = proofRef.current;
+    if (!el) return;
+
+    let intervalId = null;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+
+      setProofVisible(true);
+      setProofActive('mpp');
+
+      if (!prefersReducedMotion) {
+        let index = PROOF_SEQUENCE.indexOf('mpp');
+        intervalId = window.setInterval(() => {
+          index = (index + 1) % PROOF_SEQUENCE.length;
+          setProofActive(PROOF_SEQUENCE[index]);
+        }, 1450);
+      }
+
+      obs.disconnect();
+    }, { threshold: 0.24, rootMargin: '0px 0px -8% 0px' });
+
+    obs.observe(el);
+
+    return () => {
+      obs.disconnect();
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   // ── Features cards stagger ──
@@ -580,6 +703,129 @@ export default function Landing() {
                 </div>
               </main>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="proof"
+        ref={proofRef}
+        className="paygate-proof-section fs"
+        data-proof-visible={proofVisible ? 'true' : 'false'}
+        data-proof-active={proofActive}
+        aria-labelledby="paygate-proof-title"
+      >
+        <div className="paygate-proof-inner">
+          <div className="paygate-proof-grid">
+            <div className="paygate-proof-copy">
+              <p className="paygate-proof-eyebrow">Proof at request time</p>
+              <h2 id="paygate-proof-title">
+                Every paid call leaves a <span>receipt.</span>
+              </h2>
+              <p>
+                PayGate rejects unpaid traffic, verifies MPP, forwards valid requests, and posts revenue to your dashboard.
+              </p>
+            </div>
+
+            <div className="paygate-receipt-panel" aria-label="Live request receipt for a paid API call">
+              <div className="paygate-receipt-head">
+                <div>
+                  <span className="paygate-receipt-head-icon">
+                    <ReceiptText size={22} aria-hidden="true" />
+                  </span>
+                  <strong>Live request receipt</strong>
+                </div>
+                <button
+                  type="button"
+                  className="paygate-receipt-id"
+                  data-copy-state={getProofCopyState('req')}
+                  onClick={() => copyProofValue('req', 'req_01HZ8XQ4F2J7Q9K3T6V1')}
+                  aria-label="Copy request id req_01HZ8XQ4F2J7Q9K3T6V1"
+                >
+                  <span>REQ ID:</span>
+                  <code>req_01HZ8XQ4F2J7Q9K3T6V1</code>
+                  {getProofCopyState('req') === 'copied' ? <CheckCircle2 size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+                </button>
+              </div>
+
+              <div className="paygate-receipt-rows">
+                {PROOF_ROWS.map(row => {
+                  const Icon = row.icon;
+                  const copyState = getProofCopyState(row.key);
+
+                  return (
+                    <button
+                      key={row.key}
+                      type="button"
+                      className="paygate-receipt-row"
+                      data-tone={row.tone}
+                      data-active={proofActive === row.key ? 'true' : 'false'}
+                      data-copy-state={copyState}
+                      onMouseEnter={() => setProofActive(row.key)}
+                      onFocus={() => setProofActive(row.key)}
+                      onClick={() => copyProofValue(row.key, row.copyValue)}
+                      aria-label={`Copy ${row.label}: ${row.copyValue}`}
+                    >
+                      <span className="paygate-receipt-status">
+                        <Icon size={23} aria-hidden="true" />
+                      </span>
+                      <span className="paygate-receipt-label">{row.label}</span>
+                      <i className="paygate-receipt-divider" aria-hidden="true" />
+                      <code className="paygate-receipt-value">{row.value}</code>
+                      <span className="paygate-receipt-copy" aria-hidden="true">
+                        {copyState === 'copied' ? <CheckCircle2 size={17} /> : <Copy size={17} />}
+                      </span>
+                      <time>{row.time}</time>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="paygate-receipt-foot">
+                <span className="is-live"><i aria-hidden="true" /> Live</span>
+                <span>Region: <strong>SGP</strong></span>
+                <span>Latency: <strong>142ms</strong></span>
+                <span className="is-forwarded">Forwarded to upstream <Activity size={15} aria-hidden="true" /></span>
+              </div>
+            </div>
+
+            <aside className="paygate-proof-metrics" aria-label="Revenue outcome after a successful paid call">
+              <div className="paygate-proof-metric">
+                <span className="paygate-proof-metric-icon">
+                  <TrendingUp size={24} aria-hidden="true" />
+                </span>
+                <span>Developer revenue</span>
+                <strong>+0.009 USDC</strong>
+                <small><TrendingUp size={15} aria-hidden="true" /> +12.4% vs last hour</small>
+              </div>
+              <i className="paygate-proof-metric-divider" aria-hidden="true" />
+              <div className="paygate-proof-metric">
+                <span className="paygate-proof-metric-icon">
+                  <Layers3 size={24} aria-hidden="true" />
+                </span>
+                <span>PayGate fee</span>
+                <strong>+0.001 USDC</strong>
+                <small><TrendingUp size={15} aria-hidden="true" /> +8.7% vs last hour</small>
+              </div>
+              <p>
+                Escrow split posted after success
+                <Info size={15} aria-hidden="true" />
+              </p>
+            </aside>
+          </div>
+
+          <div className="paygate-proof-chips" aria-label="Request-time proof capabilities">
+            {PROOF_CHIPS.map(chip => {
+              const Icon = chip.icon;
+
+              return (
+                <div key={chip.label} className="paygate-proof-chip">
+                  <Icon size={28} aria-hidden="true" />
+                  <span>{chip.label}</span>
+                  <ClipboardCheck size={21} aria-hidden="true" />
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
