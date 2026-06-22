@@ -28,16 +28,18 @@ The hero already explains the product model: original API URL becomes a PayGate 
 - IntersectionObserver activates a calm request lifecycle cycle.
 - Reduced-motion users get the static state without cycling transitions.
 - Bottom proof chips use circular green status checks and subtle dark-surface hover states.
+- Revenue metrics use compact icon-and-label headers so the right panel no longer drives excessive vertical height.
+- The receipt panel uses a header / rows / telemetry-footer grid, keeping equal-height cards without an empty lower pocket.
 
 ## Verification
 
 - `npm --prefix frontend run build` passed.
 - Browser console showed 0 errors and only existing development warnings.
 - Copy interaction check returned `copied`.
-- Desktop section screenshot: `output/playwright/paygate-phase3-proof-desktop-refined-1440.png`
-- Mobile section screenshot: `output/playwright/paygate-phase3-proof-mobile-refined-390.png`
+- Desktop section screenshot: `output/playwright/paygate-phase3-proof-density-desktop-1440.png`
+- Mobile section screenshot: `output/playwright/paygate-phase3-proof-density-mobile-390.png`
 - Hover-state screenshot: `output/playwright/paygate-phase3-proof-hover-refined-1440.png`
-- Reference comparison: `output/playwright/paygate-phase3-proof-comparison-refined-desktop.png`
+- Reference comparison: `output/playwright/paygate-phase3-proof-comparison-density-desktop.png`
 - Design QA report: `design-qa.md`
 
 ## Acceptance

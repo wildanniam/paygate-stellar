@@ -1796,8 +1796,10 @@
 
 .paygate-receipt-panel {
   position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
-  min-height: 438px;
+  min-height: 416px;
   border-radius: 16px;
 }
 
@@ -1900,6 +1902,9 @@
 .paygate-receipt-rows {
   position: relative;
   z-index: 1;
+  display: grid;
+  grid-template-rows: repeat(4, minmax(70px, 1fr));
+  min-height: 0;
 }
 
 .paygate-receipt-row {
@@ -1908,7 +1913,7 @@
   grid-template-columns: 72px minmax(150px, 0.9fr) 1px minmax(150px, 0.95fr) 32px 112px;
   align-items: center;
   width: 100%;
-  min-height: 79px;
+  min-height: 0;
   border: 0;
   border-bottom: 1px solid rgba(82, 94, 118, 0.28);
   background: transparent;
@@ -2058,7 +2063,7 @@
   grid-template-columns: auto auto auto minmax(0, 1fr);
   align-items: center;
   gap: 0;
-  min-height: 62px;
+  min-height: 58px;
   color: var(--pg-text-secondary);
   font-size: 14px;
   padding: 0 28px;
@@ -2099,6 +2104,7 @@
   border-radius: 999px;
   background: #4ADE80;
   box-shadow: 0 0 16px rgba(74, 222, 128, 0.62);
+  animation: pg-live-dot 2.4s ease-in-out infinite;
 }
 
 .paygate-receipt-foot .is-forwarded {
@@ -2108,24 +2114,28 @@
 
 .paygate-receipt-foot .is-forwarded svg {
   color: #4ADE80;
+  animation: pg-forwarded-pulse 2.8s ease-in-out infinite;
 }
 
 .paygate-proof-metrics {
   display: grid;
-  min-height: 438px;
-  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  min-height: 416px;
+  grid-template-rows: auto auto auto auto;
+  align-content: center;
   border-color: rgba(82, 94, 118, 0.34);
   border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(7, 10, 15, 0.97), rgba(4, 6, 10, 0.985)),
     radial-gradient(circle at 88% 8%, rgba(124, 58, 237, 0.050), transparent 36%);
-  padding: 28px;
+  padding: 24px;
 }
 
 .paygate-proof-metric {
   display: grid;
-  align-content: center;
-  gap: 14px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 10px;
   min-width: 0;
 }
 
@@ -2133,8 +2143,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  grid-column: 1;
+  width: 42px;
+  height: 42px;
   border: 1px solid rgba(167, 139, 250, 0.24);
   border-radius: 14px;
   background:
@@ -2145,15 +2156,18 @@
 }
 
 .paygate-proof-metric > span:not(.paygate-proof-metric-icon) {
+  grid-column: 2;
   color: var(--pg-text-secondary);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
+  line-height: 1.15;
 }
 
 .paygate-proof-metric strong {
+  grid-column: 1 / -1;
   color: #4ADE80;
   font-family: var(--pg-font-mono);
-  font-size: clamp(28px, 2.7vw, 38px);
+  font-size: clamp(24px, 2.2vw, 32px);
   font-weight: 800;
   letter-spacing: 0;
   line-height: 1;
@@ -2161,6 +2175,7 @@
 }
 
 .paygate-proof-metric small {
+  grid-column: 1 / -1;
   display: inline-flex;
   align-items: center;
   justify-self: start;
@@ -2169,8 +2184,8 @@
   border-radius: 999px;
   background: rgba(13, 17, 23, 0.7);
   color: var(--pg-text-secondary);
-  font-size: 13px;
-  padding: 8px 12px;
+  font-size: 12px;
+  padding: 7px 10px;
 }
 
 .paygate-proof-metric small svg {
@@ -2180,7 +2195,7 @@
 .paygate-proof-metric-divider {
   width: 100%;
   height: 1px;
-  margin: 22px 0;
+  margin: 18px 0;
   background: rgba(82, 94, 118, 0.38);
 }
 
@@ -2188,10 +2203,32 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   color: var(--pg-text-secondary);
   font-size: 14px;
   line-height: 1.35;
+}
+
+@keyframes pg-live-dot {
+  0%, 100% {
+    opacity: 0.82;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.34);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 18px rgba(74, 222, 128, 0.70);
+  }
+}
+
+@keyframes pg-forwarded-pulse {
+  0%, 100% {
+    opacity: 0.74;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
 }
 
 .paygate-proof-metrics > p svg {
@@ -3029,6 +3066,8 @@
   .paygate-dashboard-preview,
   .paygate-receipt-panel,
   .paygate-receipt-panel::before,
+  .paygate-receipt-foot .is-live i,
+  .paygate-receipt-foot .is-forwarded svg,
   .paygate-receipt-row,
   .paygate-receipt-row::before,
   .paygate-proof-chip,
