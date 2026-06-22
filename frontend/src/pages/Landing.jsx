@@ -50,15 +50,10 @@ function ReceiptHeaderIcon({ size = 22, ...props }) {
 function RequestReceivedIcon({ size = 24, ...props }) {
   return (
     <ReceiptSvg size={size} {...props}>
-      <path d="M12 4.8v8.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="m8.4 10.1 3.6 3.6 3.6-3.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path
-        d="M6.2 16.2v1.3c0 1 .8 1.8 1.8 1.8h8c1 0 1.8-.8 1.8-1.8v-1.3"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path d="M8.4 16.2h7.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M12 4.8v8.2" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
+      <path d="m8.6 10 3.4 3.4 3.4-3.4" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7 15.8v1.4c0 1 .8 1.8 1.8 1.8h6.4c1 0 1.8-.8 1.8-1.8v-1.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M9.2 15.8h5.6" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
     </ReceiptSvg>
   );
 }
@@ -66,12 +61,12 @@ function RequestReceivedIcon({ size = 24, ...props }) {
 function PaymentRequiredIcon({ size = 24, ...props }) {
   return (
     <ReceiptSvg size={size} {...props}>
-      <rect x="6.3" y="10.1" width="11.4" height="8.4" rx="2.1" stroke="currentColor" strokeWidth="1.9" />
-      <path d="M8.9 10.1V8.4a3.1 3.1 0 0 1 6.2 0v1.7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-      <circle cx="12" cy="14" r="1" fill="currentColor" />
+      <rect x="6.7" y="10" width="10.6" height="8.6" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M9.1 10V8.2a2.9 2.9 0 0 1 5.8 0V10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="14.1" r="1" fill="currentColor" />
       <path d="M12 15.1v1.2" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-      <circle cx="17.4" cy="6.3" r="2.1" fill="currentColor" opacity="0.18" />
-      <path d="M16.5 6.3h1.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="17.6" cy="6.8" r="2.2" fill="currentColor" opacity="0.20" />
+      <path d="M16.7 6.8h1.8" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" />
     </ReceiptSvg>
   );
 }
@@ -79,10 +74,11 @@ function PaymentRequiredIcon({ size = 24, ...props }) {
 function MppVerifiedIcon({ size = 24, ...props }) {
   return (
     <ReceiptSvg size={size} {...props}>
-      <circle cx="12" cy="12" r="7.3" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M8.7 12.2 11 14.5l4.5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 4.7v2.2M19.3 12h-2.1M12 19.3v-2.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.72" />
-      <circle cx="17.4" cy="6.6" r="1.4" fill="currentColor" />
+      <circle cx="12" cy="12" r="6.9" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8.8 12.2 11 14.4l4.3-4.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 12h2M17 12h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.74" />
+      <circle cx="17" cy="7" r="1.6" fill="currentColor" />
+      <path d="M12 5.1v1.7M12 17.2v1.7" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" opacity="0.52" />
     </ReceiptSvg>
   );
 }
@@ -90,10 +86,11 @@ function MppVerifiedIcon({ size = 24, ...props }) {
 function UpstreamReturnedIcon({ size = 24, ...props }) {
   return (
     <ReceiptSvg size={size} {...props}>
-      <path d="M18 7.2h-6.4a5 5 0 0 0-5 5v.3" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-      <path d="m9 9.8-2.4 2.5L9 14.7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="16.3" cy="16.5" r="3.1" stroke="currentColor" strokeWidth="1.7" />
-      <path d="m14.9 16.4 1 1 1.8-2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m8.8 5.9-3.2 3.2 3.2 3.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.1 9.1h6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <rect x="9.5" y="12.4" width="9.2" height="6.1" rx="2" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M11.8 15.5h2.1" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" opacity="0.62" />
+      <path d="m15 15.5.9.9 1.5-1.7" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
     </ReceiptSvg>
   );
 }
