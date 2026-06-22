@@ -106,6 +106,96 @@ function ReceiptCopiedIcon({ size = 17, ...props }) {
   );
 }
 
+function TransformIcon({ size = 22, children, ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      {...props}
+    >
+      {children}
+    </svg>
+  );
+}
+
+function BillingIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <path d="M7.1 4.4h9.8c.8 0 1.4.6 1.4 1.4v13.8l-2-1.1-2.1 1.1-2.2-1.1-2.1 1.1-2.2-1.1-2 1.1V5.8c0-.8.6-1.4 1.4-1.4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M9 8.4h6M9 11.7h6M9 15h3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </TransformIcon>
+  );
+}
+
+function GuardIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <path d="M12 4.1 18.2 6v5.3c0 4-2.5 6.7-6.2 8.6-3.7-1.9-6.2-4.6-6.2-8.6V6L12 4.1Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="m8.9 12 2.1 2.1 4.3-4.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </TransformIcon>
+  );
+}
+
+function RevenueLineIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <path d="M4.6 16.7 9 12.4l3.3 2.7 6.7-7.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M14.7 7.7H19v4.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4.6 19.3h14.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.36" />
+    </TransformIcon>
+  );
+}
+
+function AgentNodesIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <circle cx="7.4" cy="8" r="2.4" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="16.6" cy="8" r="2.4" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M4.4 18.3c.5-2.2 1.8-3.4 3.7-3.4s3.2 1.2 3.7 3.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M12.2 18.3c.5-2.2 1.8-3.4 3.7-3.4s3.2 1.2 3.7 3.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M10 10.4h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.58" />
+    </TransformIcon>
+  );
+}
+
+function CodeTileIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <path d="m9.1 8.2-3.5 3.7 3.5 3.9M14.9 8.2l3.5 3.7-3.5 3.9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m12.9 6.8-1.8 10.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.64" />
+    </TransformIcon>
+  );
+}
+
+function ApiTileIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <rect x="4.5" y="6.2" width="15" height="11.6" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8.1 14.5V10l2.2 4.5 2.2-4.5v4.5M14.7 10v4.5M16.8 10v4.5" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" />
+    </TransformIcon>
+  );
+}
+
+function SignalTileIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <path d="M6.5 14.8V9.2M10.2 17V7M13.9 15.7V8.3M17.5 13.7v-3.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </TransformIcon>
+  );
+}
+
+function EndpointSparkIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <path d="M12 3.8 13.4 8l4.1 1.4-4.1 1.4L12 15l-1.4-4.2-4.1-1.4 4.1-1.4L12 3.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M18.4 14.2 19 16l1.8.6-1.8.6-.6 1.8-.6-1.8-1.8-.6 1.8-.6.6-1.8ZM5.6 14.2l.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5.5-1.4Z" fill="currentColor" />
+    </TransformIcon>
+  );
+}
+
 const PROOF_ROWS = [
   {
     key: 'received',
@@ -156,22 +246,22 @@ const TRANSFORM_PROBLEMS = [
   {
     label: 'Manual billing',
     body: 'Invoices, spreadsheets, chasing payments',
-    icon: FileText,
+    icon: BillingIcon,
   },
   {
     label: 'Custom auth',
     body: 'Build and maintain your own access layer',
-    icon: ShieldCheck,
+    icon: GuardIcon,
   },
   {
     label: 'No per-call revenue',
     body: 'Useful calls stay free and unmonetized',
-    icon: TrendingUp,
+    icon: RevenueLineIcon,
   },
   {
     label: 'Hard to share with agents',
     body: 'Complex setup for AI agents and clients',
-    icon: Bot,
+    icon: AgentNodesIcon,
   },
 ];
 
@@ -181,14 +271,14 @@ const TRANSFORM_OUTCOMES = [
     label: '402',
     body: 'Before payment',
     detail: 'Access blocked until paid',
-    icon: ShieldCheck,
+    icon: GuardIcon,
   },
   {
     tone: 'purple',
     label: 'MPP verified',
     body: 'Payment verified on Stellar',
     detail: 'Credential accepted',
-    icon: ShieldCheck,
+    icon: GuardIcon,
   },
   {
     tone: 'green',
@@ -202,7 +292,7 @@ const TRANSFORM_OUTCOMES = [
     label: '+0.009 USDC',
     body: 'Your revenue per call',
     detail: 'Posted to dashboard',
-    icon: TrendingUp,
+    icon: RevenueLineIcon,
   },
 ];
 
@@ -933,10 +1023,12 @@ export default function Landing() {
           <div className="paygate-transform-stage" aria-label="PayGate transforms an ordinary API into a paid endpoint">
             <div className="paygate-transform-beam" aria-hidden="true" />
             <div className="paygate-transform-floaters" aria-hidden="true">
-              <span className="is-code"><img src="/brand/paygate-asset-code.svg" alt="" /></span>
-              <span className="is-api"><img src="/brand/paygate-asset-api.svg" alt="" /></span>
-              <span className="is-chart"><img src="/brand/paygate-asset-chart.svg" alt="" /></span>
-              <span className="is-signal"><img src="/brand/paygate-asset-signal.svg" alt="" /></span>
+              <span className="is-code"><CodeTileIcon size={25} /></span>
+              <span className="is-api"><ApiTileIcon size={25} /></span>
+              <span className="is-chart"><RevenueLineIcon size={25} /></span>
+              <span className="is-guard"><GuardIcon size={25} /></span>
+              <span className="is-money"><RevenueLineIcon size={25} /></span>
+              <span className="is-signal"><SignalTileIcon size={25} /></span>
             </div>
 
             <article
@@ -1036,7 +1128,7 @@ export default function Landing() {
                     as={Link}
                     to="/apis/new"
                     className="paygate-transform-generate"
-                    icon={<img src="/brand/paygate-mark.svg" alt="" />}
+                    icon={<span className="paygate-transform-button-mark"><img src="/brand/paygate-mark.svg" alt="" /></span>}
                   >
                     Generate paid endpoint
                   </Button>
@@ -1051,7 +1143,7 @@ export default function Landing() {
               onFocus={() => setTransformActive('generate')}
             >
               <div className="paygate-transform-after-title">
-                <span><img src="/brand/paygate-mark.svg" alt="" /></span>
+                <span><EndpointSparkIcon size={25} /></span>
                 <h3>Paid endpoint</h3>
               </div>
 

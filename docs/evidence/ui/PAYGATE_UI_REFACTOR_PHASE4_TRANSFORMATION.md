@@ -21,10 +21,17 @@ This keeps the landing page focused on the locked product promise: PayGate shoul
 - Centered heading: `From ordinary API to paid endpoint`.
 - Desktop three-panel layout:
   - Left muted panel for the ordinary API and operational friction.
-  - Center setup panel with URL, price, and glossy `Generate paid endpoint` action.
-  - Right active paid endpoint panel with MPP guard, request ID, revenue, and success rate.
+  - Center setup panel with URL, price, glossy `Generate paid endpoint` action, and contextual floating API assets.
+  - Right active paid endpoint panel with stronger purple edge light, MPP guard, request ID, revenue, and success rate.
 - Bottom proof rail with `402`, `MPP verified`, `200`, and `+0.009 USDC`.
 - Mobile layout intentionally reorders to action first, result second, and current API/problem last.
+
+## Fidelity Pass
+
+- Replaced generic transformation icons with PayGate-specific inline SVG primitives for billing, guard, revenue, agent sharing, API/code, and endpoint sparkle.
+- Tightened desktop section height, heading scale, panel spacing, and outcome rail density to match the locked visual direction more closely.
+- Added left-to-center and center-to-endpoint connector energy, dotted matrix depth, and premium dark card material.
+- Compact mobile keeps the core sequence readable without turning the section into a long stacked wall.
 
 ## Interaction
 
@@ -38,9 +45,9 @@ This keeps the landing page focused on the locked product promise: PayGate shoul
 - `npm --prefix frontend run build` passed.
 - Browser console showed 0 errors and only existing development warnings.
 - Proxy URL copy interaction returned `copied`.
-- Desktop section screenshot: `output/playwright/paygate-phase4-transform-desktop-1440-v2.png`
-- Mobile section screenshot: `output/playwright/paygate-phase4-transform-mobile-390-v2.png`
-- Hover-state screenshot: `output/playwright/paygate-phase4-transform-hover-1440-v2.png`
+- Desktop section screenshot: `output/playwright/paygate-phase4-transform-desktop-1440-v4.png`
+- Mobile section screenshot: `output/playwright/paygate-phase4-transform-mobile-390-v4.png`
+- Hover-state screenshot: `output/playwright/paygate-phase4-transform-hover-1440-v4.png`
 
 ## Acceptance
 

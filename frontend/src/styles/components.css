@@ -2516,10 +2516,10 @@
   position: relative;
   overflow: hidden;
   scroll-margin-top: 76px;
-  padding: clamp(58px, 5.5vw, 78px) 24px clamp(84px, 7vw, 110px);
+  padding: clamp(42px, 4.3vw, 58px) 24px clamp(58px, 5.5vw, 78px);
   background:
-    linear-gradient(180deg, rgba(5, 6, 9, 0.98), rgba(5, 7, 11, 0.99)),
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.08), transparent 44%);
+    linear-gradient(180deg, rgba(5, 6, 9, 0.99), rgba(4, 6, 10, 0.995)),
+    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.10), transparent 42%);
 }
 
 .paygate-transform-section::before {
@@ -2528,12 +2528,12 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 55% 45%, rgba(96, 165, 250, 0.055), transparent 34%),
-    radial-gradient(ellipse at 70% 52%, rgba(124, 58, 237, 0.12), transparent 26%),
-    linear-gradient(90deg, rgba(82, 94, 118, 0.030) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(82, 94, 118, 0.022) 1px, transparent 1px);
+    radial-gradient(ellipse at 50% 46%, rgba(96, 165, 250, 0.075), transparent 32%),
+    radial-gradient(ellipse at 71% 52%, rgba(124, 58, 237, 0.15), transparent 25%),
+    linear-gradient(90deg, rgba(82, 94, 118, 0.028) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px);
   background-size: auto, auto, 76px 76px, 76px 76px;
-  opacity: 0.82;
+  opacity: 0.86;
 }
 
 .paygate-transform-section::after {
@@ -2550,21 +2550,21 @@
 .paygate-transform-inner {
   position: relative;
   z-index: 1;
-  width: min(100%, 1480px);
+  width: min(100% - 64px, 1328px);
   margin: 0 auto;
 }
 
 .paygate-transform-head {
-  max-width: 1160px;
-  margin: 0 auto clamp(36px, 4.5vw, 56px);
+  max-width: 1040px;
+  margin: 0 auto clamp(24px, 3vw, 34px);
   text-align: center;
 }
 
 .paygate-transform-head p:first-child {
-  margin: 0 0 16px;
+  margin: 0 0 11px;
   color: var(--pg-brand-purple-soft);
   font-family: var(--pg-font-mono);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.10em;
   text-transform: uppercase;
@@ -2573,10 +2573,10 @@
 .paygate-transform-head h2 {
   margin: 0;
   color: var(--pg-text-primary);
-  font-size: clamp(40px, 4.8vw, 64px);
+  font-size: clamp(38px, 4.15vw, 58px);
   font-weight: 800;
   letter-spacing: 0;
-  line-height: 1.02;
+  line-height: 1.03;
 }
 
 .paygate-transform-head h2 span {
@@ -2584,39 +2584,89 @@
 }
 
 .paygate-transform-head p:last-child {
-  max-width: 680px;
-  margin: 20px auto 0;
+  max-width: 640px;
+  margin: 13px auto 0;
   color: var(--pg-text-secondary);
-  font-size: 18px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.52;
 }
 
 .paygate-transform-stage {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(300px, 0.96fr) minmax(300px, 0.84fr) minmax(330px, 1fr);
+  isolation: isolate;
+  grid-template-columns: minmax(310px, 0.96fr) minmax(288px, 0.82fr) minmax(330px, 1fr);
   align-items: stretch;
-  gap: clamp(24px, 3.6vw, 72px);
+  gap: clamp(22px, 3vw, 52px);
+}
+
+.paygate-transform-stage::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 18px 20%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.11) 1px, transparent 1.7px);
+  background-size: 12px 12px;
+  opacity: 0.34;
+  mask-image: radial-gradient(ellipse at center, #000 0 58%, transparent 78%);
+}
+
+.paygate-transform-stage::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 52%;
+  right: 64%;
+  left: 29.5%;
+  height: 2px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(56, 189, 248, 0), rgba(56, 189, 248, 0.54) 38%, rgba(167, 139, 250, 0.64), rgba(124, 58, 237, 0));
+  box-shadow:
+    0 0 24px rgba(56, 189, 248, 0.24),
+    0 0 34px rgba(124, 58, 237, 0.22);
+  opacity: 0.44;
+  transform: translateY(-50%) scaleX(0.86);
+  transform-origin: right center;
+  transition:
+    opacity 220ms ease,
+    transform 260ms ease;
+}
+
+.paygate-transform-section[data-transform-active='paste'] .paygate-transform-stage::after,
+.paygate-transform-section[data-transform-active='price'] .paygate-transform-stage::after {
+  opacity: 0.82;
+  transform: translateY(-50%) scaleX(1);
 }
 
 .paygate-transform-beam {
   position: absolute;
-  top: 50%;
-  right: 19%;
-  left: 51%;
-  height: 2px;
+  z-index: 0;
+  top: 52%;
+  right: 15.5%;
+  left: 48%;
+  height: 3px;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(124, 58, 237, 0), rgba(167, 139, 250, 0.74) 34%, rgba(56, 189, 248, 0.92), rgba(56, 189, 248, 0));
+    linear-gradient(90deg, rgba(124, 58, 237, 0), rgba(167, 139, 250, 0.78) 22%, rgba(56, 189, 248, 0.95) 55%, rgba(74, 222, 128, 0.34) 77%, rgba(56, 189, 248, 0));
   box-shadow:
-    0 0 22px rgba(124, 58, 237, 0.36),
-    0 0 38px rgba(56, 189, 248, 0.30);
-  opacity: 0.62;
+    0 0 26px rgba(124, 58, 237, 0.42),
+    0 0 46px rgba(56, 189, 248, 0.34);
+  opacity: 0.66;
   transform: translateY(-50%) scaleX(0.92);
   transform-origin: left center;
   transition:
     opacity 220ms ease,
     transform 260ms ease;
+}
+
+.paygate-transform-beam::before {
+  content: '';
+  position: absolute;
+  inset: -18px -22px;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0), rgba(124, 58, 237, 0.16), rgba(56, 189, 248, 0.18), rgba(74, 222, 128, 0));
+  filter: blur(12px);
 }
 
 .paygate-transform-section[data-transform-active='generate'] .paygate-transform-beam,
@@ -2627,6 +2677,7 @@
 
 .paygate-transform-floaters {
   position: absolute;
+  z-index: 2;
   inset: 0;
   pointer-events: none;
 }
@@ -2636,59 +2687,72 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border: 1px solid rgba(82, 94, 118, 0.34);
-  border-radius: 13px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(82, 94, 118, 0.42);
+  border-radius: 12px;
   background:
-    linear-gradient(180deg, rgba(10, 14, 22, 0.90), rgba(5, 7, 11, 0.92)),
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.14), transparent 70%);
+    linear-gradient(180deg, rgba(10, 14, 22, 0.94), rgba(4, 6, 10, 0.96)),
+    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 70%);
   box-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  opacity: 0.76;
-}
-
-.paygate-transform-floaters img {
-  width: 34px;
-  height: 34px;
+    0 18px 44px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  opacity: 0.82;
+  color: var(--pg-brand-purple-soft);
+  backdrop-filter: blur(12px);
 }
 
 .paygate-transform-floaters .is-code {
-  top: 33%;
-  left: 32.2%;
+  top: 29%;
+  left: 34.7%;
+  color: var(--pg-brand-purple-soft);
 }
 
 .paygate-transform-floaters .is-api {
-  top: 48%;
-  left: 32.2%;
+  top: 44.5%;
+  left: 36.4%;
+  color: var(--pg-flow-blue);
 }
 
 .paygate-transform-floaters .is-chart {
   top: 62%;
-  left: 32.2%;
+  left: 34.1%;
+  color: #4ADE80;
+}
+
+.paygate-transform-floaters .is-guard {
+  top: 30%;
+  right: 34.4%;
+  color: var(--pg-brand-purple-soft);
+}
+
+.paygate-transform-floaters .is-money {
+  top: 47.5%;
+  right: 36.3%;
+  color: #4ADE80;
 }
 
 .paygate-transform-floaters .is-signal {
-  top: 48%;
-  right: 32.2%;
+  top: 64%;
+  right: 34%;
+  color: var(--pg-flow-blue);
 }
 
 .paygate-transform-panel {
   position: relative;
   z-index: 1;
   min-width: 0;
-  min-height: 412px;
+  min-height: 390px;
   overflow: hidden;
-  border: 1px solid rgba(82, 94, 118, 0.38);
-  border-radius: 18px;
+  border: 1px solid rgba(82, 94, 118, 0.44);
+  border-radius: 20px;
   background:
-    linear-gradient(180deg, rgba(9, 12, 18, 0.96), rgba(5, 7, 11, 0.985)),
-    radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.040), transparent 42%);
+    linear-gradient(180deg, rgba(8, 11, 17, 0.97), rgba(4, 6, 10, 0.99)),
+    radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.055), transparent 42%);
   box-shadow:
-    0 26px 90px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  padding: clamp(22px, 2.2vw, 28px);
+    0 28px 84px rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  padding: clamp(20px, 2vw, 26px);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -2697,11 +2761,12 @@
 
 .paygate-transform-panel:hover,
 .paygate-transform-panel:focus-within {
-  border-color: rgba(167, 139, 250, 0.30);
+  border-color: rgba(167, 139, 250, 0.42);
   box-shadow:
-    0 30px 94px rgba(0, 0, 0, 0.46),
-    inset 0 1px 0 rgba(255, 255, 255, 0.048);
-  transform: translateY(-1px);
+    0 32px 96px rgba(0, 0, 0, 0.50),
+    0 0 0 1px rgba(124, 58, 237, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.052);
+  transform: translateY(-2px);
 }
 
 .paygate-transform-panel.is-before {
@@ -2710,24 +2775,54 @@
 }
 
 .paygate-transform-panel.is-action {
-  border-color: rgba(167, 139, 250, 0.24);
+  border-color: rgba(167, 139, 250, 0.28);
+}
+
+.paygate-transform-panel.is-action::before,
+.paygate-transform-panel.is-after::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.paygate-transform-panel.is-action::before {
+  inset: 42% 8% 20% 8%;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.16), transparent 62%),
+    radial-gradient(ellipse at 58% 55%, rgba(56, 189, 248, 0.08), transparent 48%);
+  filter: blur(16px);
+  opacity: 0.76;
 }
 
 .paygate-transform-panel.is-after {
-  border-color: rgba(167, 139, 250, 0.54);
+  border-color: rgba(167, 139, 250, 0.60);
   background:
-    linear-gradient(180deg, rgba(9, 12, 18, 0.96), rgba(5, 7, 11, 0.99)),
-    radial-gradient(circle at 84% 7%, rgba(124, 58, 237, 0.12), transparent 39%);
+    linear-gradient(180deg, rgba(10, 13, 20, 0.98), rgba(5, 7, 11, 0.99)),
+    radial-gradient(circle at 82% 8%, rgba(124, 58, 237, 0.17), transparent 38%),
+    radial-gradient(circle at 12% 100%, rgba(56, 189, 248, 0.07), transparent 42%);
   box-shadow:
-    0 26px 94px rgba(0, 0, 0, 0.46),
-    0 0 0 1px rgba(124, 58, 237, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 30px 96px rgba(0, 0, 0, 0.50),
+    0 0 0 1px rgba(124, 58, 237, 0.16),
+    0 0 58px rgba(124, 58, 237, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.paygate-transform-panel.is-after::before {
+  top: 0;
+  right: -20%;
+  bottom: 0;
+  width: 58%;
+  background:
+    radial-gradient(ellipse at center, rgba(124, 58, 237, 0.22), transparent 60%),
+    radial-gradient(ellipse at 66% 52%, rgba(74, 222, 128, 0.075), transparent 54%);
+  filter: blur(18px);
+  opacity: 0.84;
 }
 
 .paygate-transform-panel h3 {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   color: var(--pg-text-primary);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: 0;
 }
@@ -2754,10 +2849,20 @@
 
 .paygate-transform-url {
   grid-template-columns: 38px minmax(0, 1fr) 28px;
-  gap: 12px;
-  min-height: 54px;
+  gap: 11px;
+  min-height: 52px;
   border-radius: 12px;
   padding: 8px 10px;
+}
+
+.paygate-transform-panel.is-after .paygate-transform-url {
+  border-color: rgba(167, 139, 250, 0.36);
+  background:
+    linear-gradient(180deg, rgba(17, 23, 34, 0.90), rgba(12, 15, 24, 0.92)),
+    radial-gradient(circle at 90% 0%, rgba(124, 58, 237, 0.12), transparent 58%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.048),
+    0 0 24px rgba(124, 58, 237, 0.075);
 }
 
 .paygate-transform-url:hover,
@@ -2795,7 +2900,7 @@
   overflow: hidden;
   color: var(--pg-text-primary);
   font-family: var(--pg-font-mono);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2814,7 +2919,7 @@
 
 .paygate-transform-problem-divider {
   height: 1px;
-  margin: 20px 0 22px;
+  margin: 18px 0 18px;
   background: rgba(82, 94, 118, 0.34);
 }
 
@@ -2831,12 +2936,12 @@
 
 .paygate-transform-problems {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .paygate-transform-problem-row {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: 40px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
 }
@@ -2845,13 +2950,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid rgba(167, 139, 250, 0.16);
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(167, 139, 250, 0.22);
   border-radius: 12px;
   background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.12), rgba(13, 17, 23, 0.76));
+    linear-gradient(180deg, rgba(124, 58, 237, 0.15), rgba(13, 17, 23, 0.78));
   color: var(--pg-brand-purple-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .paygate-transform-problem-row strong,
@@ -2862,22 +2968,22 @@
 
 .paygate-transform-problem-row strong {
   color: var(--pg-text-primary);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 800;
 }
 
 .paygate-transform-problem-row small {
-  margin-top: 3px;
+  margin-top: 2px;
   color: var(--pg-text-secondary);
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 11.5px;
+  line-height: 1.32;
 }
 
 .paygate-transform-step {
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
+  grid-template-columns: 36px minmax(0, 1fr);
   gap: 12px;
-  padding: 0 0 22px;
+  padding: 0 0 18px;
   transition:
     opacity 180ms ease,
     transform 180ms ease;
@@ -2885,7 +2991,7 @@
 
 .paygate-transform-step:not(:last-child) {
   border-bottom: 1px solid rgba(82, 94, 118, 0.28);
-  margin-bottom: 20px;
+  margin-bottom: 17px;
 }
 
 .paygate-transform-step:focus-visible {
@@ -2896,32 +3002,32 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: 1px solid rgba(167, 139, 250, 0.54);
   border-radius: 999px;
   background: rgba(124, 58, 237, 0.16);
   color: var(--pg-brand-purple-soft);
   font-family: var(--pg-font-mono);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.055);
 }
 
 .paygate-transform-step strong {
   display: block;
-  margin: 4px 0 10px;
+  margin: 3px 0 9px;
   color: var(--pg-text-primary);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 750;
 }
 
 .paygate-transform-step small,
 .paygate-transform-step p {
-  margin: 9px 0 0;
+  margin: 8px 0 0;
   color: var(--pg-text-secondary);
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.42;
 }
 
 .paygate-transform-step[data-active='true'] .paygate-transform-step-number {
@@ -2933,7 +3039,7 @@
 .paygate-transform-mini-url {
   grid-template-columns: 24px minmax(0, 1fr) 22px;
   gap: 9px;
-  min-height: 46px;
+  min-height: 43px;
   border-radius: 10px;
   padding: 8px 10px;
 }
@@ -2944,9 +3050,9 @@
 
 .paygate-transform-price-control {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 96px;
+  grid-template-columns: 44px minmax(0, 1fr) 90px;
   align-items: center;
-  min-height: 54px;
+  min-height: 50px;
   overflow: hidden;
   border: 1px solid rgba(82, 94, 118, 0.40);
   border-radius: 12px;
@@ -2966,10 +3072,10 @@
 .paygate-transform-price-control code {
   display: inline-flex;
   align-items: center;
-  min-height: 54px;
-  padding: 0 16px;
+  min-height: 50px;
+  padding: 0 14px;
   font-family: var(--pg-font-mono);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .paygate-transform-price-control span {
@@ -2988,29 +3094,49 @@
 
 .paygate-transform-generate {
   width: 100%;
-  min-height: 48px;
+  min-height: 46px;
   margin-top: 2px;
-  font-size: 15px;
+  font-size: 14px;
 }
 
-.paygate-transform-generate img {
+.paygate-transform-button-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 22px;
   height: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.paygate-transform-button-mark img {
+  width: 18px;
+  height: 18px;
 }
 
 .paygate-transform-after-title {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .paygate-transform-after-title span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(167, 139, 250, 0.30);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 60% 20%, rgba(124, 58, 237, 0.28), transparent 62%),
+    rgba(124, 58, 237, 0.11);
+  color: var(--pg-brand-purple-soft);
+  box-shadow:
+    0 0 24px rgba(124, 58, 237, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .paygate-transform-after-title img {
@@ -3025,22 +3151,22 @@
 .paygate-transform-chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .paygate-transform-chip-row span {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 34px;
+  min-height: 32px;
   border: 1px solid rgba(82, 94, 118, 0.32);
   border-radius: 10px;
   background: rgba(124, 58, 237, 0.12);
   color: var(--pg-brand-purple-soft);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
-  padding: 0 12px;
+  padding: 0 11px;
 }
 
 .paygate-transform-chip-row span:last-child {
@@ -3049,21 +3175,22 @@
 }
 
 .paygate-transform-live {
-  margin-top: 20px;
-  padding-top: 18px;
+  margin-top: 17px;
+  padding-top: 16px;
   border-top: 1px solid rgba(82, 94, 118, 0.34);
 }
 
 .paygate-transform-live > div {
   display: grid;
-  grid-template-columns: 12px auto minmax(0, 1fr) auto 18px;
+  grid-template-columns: 10px auto minmax(0, 1fr) auto 18px;
   align-items: center;
-  gap: 10px;
-  min-height: 46px;
-  border: 1px solid rgba(82, 94, 118, 0.30);
+  gap: 9px;
+  min-height: 43px;
+  border: 1px solid rgba(82, 94, 118, 0.34);
   border-radius: 11px;
-  background: rgba(10, 14, 21, 0.66);
-  padding: 0 12px;
+  background:
+    linear-gradient(180deg, rgba(10, 14, 21, 0.72), rgba(6, 8, 13, 0.78));
+  padding: 0 11px;
 }
 
 .paygate-transform-live > div > span {
@@ -3107,16 +3234,18 @@
 .paygate-transform-result-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .paygate-transform-result-grid div {
   min-width: 0;
-  border: 1px solid rgba(82, 94, 118, 0.30);
+  border: 1px solid rgba(82, 94, 118, 0.34);
   border-radius: 12px;
-  background: rgba(10, 14, 21, 0.72);
-  padding: 16px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(74, 222, 128, 0.075), transparent 58%),
+    rgba(10, 14, 21, 0.75);
+  padding: 14px;
 }
 
 .paygate-transform-result-grid span,
@@ -3137,10 +3266,10 @@
 
 .paygate-transform-result-grid strong {
   display: block;
-  margin: 10px 0 6px;
+  margin: 8px 0 6px;
   color: #4ADE80;
   font-family: var(--pg-font-mono);
-  font-size: clamp(20px, 1.55vw, 24px);
+  font-size: clamp(18px, 1.35vw, 22px);
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
@@ -3156,9 +3285,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin: 18px 0 0;
+  margin: 15px 0 0;
   color: var(--pg-text-secondary);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .paygate-transform-after-note i {
@@ -3173,25 +3302,26 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
-  margin-top: 36px;
+  margin-top: 28px;
   overflow: hidden;
-  border: 1px solid rgba(82, 94, 118, 0.34);
-  border-radius: 18px;
+  border: 1px solid rgba(82, 94, 118, 0.38);
+  border-radius: 20px;
   background:
-    linear-gradient(180deg, rgba(8, 10, 15, 0.90), rgba(5, 7, 11, 0.96));
+    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.09), transparent 46%),
+    linear-gradient(180deg, rgba(8, 10, 15, 0.92), rgba(4, 6, 10, 0.97));
   box-shadow:
-    0 26px 80px rgba(0, 0, 0, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    0 26px 78px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.040);
 }
 
 .paygate-transform-outcome {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
+  grid-template-columns: 50px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
-  min-height: 96px;
+  gap: 13px;
+  min-height: 90px;
   border-right: 1px solid rgba(82, 94, 118, 0.30);
-  padding: 18px 28px;
+  padding: 16px 22px;
 }
 
 .paygate-transform-outcome:last-child {
@@ -3202,11 +3332,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: 1px solid currentColor;
   border-radius: 999px;
-  background: rgba(13, 17, 23, 0.72);
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, currentColor 18%, transparent), transparent 65%),
+    rgba(13, 17, 23, 0.74);
+  box-shadow: 0 0 22px color-mix(in srgb, currentColor 10%, transparent);
 }
 
 .paygate-transform-outcome[data-tone='amber'] > span,
@@ -3230,7 +3363,7 @@
   display: block;
   color: var(--pg-text-primary);
   font-family: var(--pg-font-mono);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.05;
 }
@@ -3240,8 +3373,8 @@
   display: block;
   margin: 0;
   color: var(--pg-text-secondary);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: 12.5px;
+  line-height: 1.32;
 }
 
 .paygate-transform-outcome p {
@@ -3297,6 +3430,10 @@
     gap: 22px;
   }
 
+  .paygate-transform-inner {
+    width: min(100% - 40px, 980px);
+  }
+
   .paygate-transform-panel.is-before {
     grid-column: 1 / -1;
     min-height: auto;
@@ -3311,7 +3448,9 @@
   }
 
   .paygate-transform-floaters,
-  .paygate-transform-beam {
+  .paygate-transform-beam,
+  .paygate-transform-stage::before,
+  .paygate-transform-stage::after {
     display: none;
   }
 
@@ -3380,15 +3519,15 @@
 
 @media (max-width: 900px) {
   .paygate-transform-section {
-    padding: 76px 20px 86px;
+    padding: 58px 20px 68px;
   }
 
   .paygate-transform-head {
-    margin-bottom: 34px;
+    margin-bottom: 26px;
   }
 
   .paygate-transform-head h2 {
-    font-size: 38px;
+    font-size: 36px;
     line-height: 1.06;
   }
 
@@ -3405,7 +3544,7 @@
   .paygate-transform-panel {
     min-height: auto;
     border-radius: 16px;
-    padding: 22px;
+    padding: 20px;
   }
 
   .paygate-transform-panel.is-action {
@@ -4055,29 +4194,41 @@
   }
 
   .paygate-transform-section {
-    padding: 66px 16px 74px;
+    padding: 54px 16px 62px;
+  }
+
+  .paygate-transform-inner {
+    width: 100%;
+  }
+
+  .paygate-transform-head {
+    margin-bottom: 22px;
   }
 
   .paygate-transform-head p:first-child {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     font-size: 11px;
   }
 
   .paygate-transform-head h2 {
-    font-size: 34px;
+    font-size: 31px;
   }
 
   .paygate-transform-head p:last-child {
-    margin-top: 14px;
+    margin-top: 12px;
     font-size: 15px;
   }
 
+  .paygate-transform-stage {
+    gap: 12px;
+  }
+
   .paygate-transform-panel {
-    padding: 18px;
+    padding: 16px;
   }
 
   .paygate-transform-panel h3 {
-    font-size: 19px;
+    font-size: 18px;
   }
 
   .paygate-transform-url {
@@ -4098,18 +4249,37 @@
   }
 
   .paygate-transform-problems {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .paygate-transform-problem-row {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .paygate-transform-problem-row > span {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .paygate-transform-problem-row strong {
+    font-size: 12px;
+  }
+
+  .paygate-transform-problem-row small {
+    display: none;
   }
 
   .paygate-transform-step {
     grid-template-columns: 34px minmax(0, 1fr);
     gap: 10px;
-    padding-bottom: 18px;
+    padding-bottom: 15px;
   }
 
   .paygate-transform-step:not(:last-child) {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   .paygate-transform-step-number {
@@ -4128,7 +4298,7 @@
   }
 
   .paygate-transform-generate {
-    min-height: 46px;
+    min-height: 44px;
     font-size: 13px;
   }
 
@@ -4149,27 +4319,54 @@
   }
 
   .paygate-transform-result-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
+  .paygate-transform-result-grid div {
+    padding: 12px 10px;
+  }
+
+  .paygate-transform-result-grid strong {
+    font-size: 15px;
+  }
+
+  .paygate-transform-result-grid small {
+    display: none;
+  }
+
   .paygate-transform-outcomes {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     border-radius: 16px;
   }
 
-  .paygate-transform-outcome,
-  .paygate-transform-outcome:nth-child(2) {
+  .paygate-transform-outcome:nth-child(2),
+  .paygate-transform-outcome:nth-child(4) {
     border-right: 0;
   }
 
-  .paygate-transform-outcome:not(:last-child) {
+  .paygate-transform-outcome:nth-child(-n + 2) {
     border-bottom: 1px solid rgba(82, 94, 118, 0.30);
   }
 
   .paygate-transform-outcome {
-    min-height: 78px;
-    padding: 14px 16px;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 9px;
+    min-height: 70px;
+    padding: 12px 10px;
+  }
+
+  .paygate-transform-outcome > span {
+    width: 32px;
+    height: 32px;
+  }
+
+  .paygate-transform-outcome strong {
+    font-size: 12px;
+  }
+
+  .paygate-transform-outcome p {
+    font-size: 11px;
   }
 
   .paygate-transform-outcome small {
