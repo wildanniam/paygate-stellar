@@ -1973,10 +1973,10 @@
   content: '';
   position: absolute;
   right: 0;
-  left: 0;
+  left: -8px;
   bottom: -1px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--receipt-tone-rgb), 0.68), transparent);
+  background: linear-gradient(90deg, rgba(var(--receipt-tone-rgb), 0.72), rgba(var(--receipt-tone-rgb), 0.48) 42%, rgba(var(--receipt-tone-rgb), 0.16) 74%, transparent);
   box-shadow:
     0 0 14px rgba(var(--receipt-tone-rgb), 0.22),
     0 0 24px rgba(var(--receipt-tone-rgb), 0.10);
@@ -1987,10 +1987,22 @@
     transform 220ms ease;
 }
 
+.paygate-receipt-row::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: -8px;
+  width: 2px;
+  background: rgba(var(--receipt-tone-rgb), 0.72);
+  box-shadow: 0 0 16px rgba(var(--receipt-tone-rgb), 0.20);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
 .paygate-receipt-row[data-active='true'] {
   background:
     linear-gradient(90deg, rgba(var(--receipt-tone-rgb), 0.060), rgba(var(--receipt-tone-rgb), 0.014), transparent 78%);
-  box-shadow: inset 2px 0 0 rgba(var(--receipt-tone-rgb), 0.42);
 }
 
 .paygate-receipt-row:hover {
@@ -2000,6 +2012,10 @@
 .paygate-receipt-row[data-active='true']::before {
   opacity: 1;
   transform: scaleX(1);
+}
+
+.paygate-receipt-row[data-active='true']::after {
+  opacity: 1;
 }
 
 .paygate-receipt-status {
@@ -2118,6 +2134,7 @@
 .paygate-receipt-value {
   justify-self: start;
   min-width: 0;
+  margin-left: 18px;
   overflow: hidden;
   border-radius: var(--pg-radius-md);
   font-family: var(--pg-font-mono);
@@ -3052,6 +3069,7 @@
     grid-column: 2;
     grid-row: 2;
     max-width: 100%;
+    margin-left: 0;
     padding: 5px 0;
     font-size: 12px;
   }

@@ -86,11 +86,11 @@ function MppVerifiedIcon({ size = 24, ...props }) {
 function UpstreamReturnedIcon({ size = 24, ...props }) {
   return (
     <ReceiptSvg size={size} {...props}>
-      <path d="m8.8 5.9-3.2 3.2 3.2 3.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6.1 9.1h6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <rect x="9.5" y="12.4" width="9.2" height="6.1" rx="2" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M11.8 15.5h2.1" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" opacity="0.62" />
-      <path d="m15 15.5.9.9 1.5-1.7" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15.8 5.8h-5.4a3.9 3.9 0 0 0-3.9 3.9v.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="m8.7 8.1-2.3 2.3 2.3 2.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="6.8" y="11.9" width="11.4" height="6.6" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M9.4 15.2h2.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.62" />
+      <path d="m13.4 15.2 1.1 1.1 2.1-2.3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
     </ReceiptSvg>
   );
 }
