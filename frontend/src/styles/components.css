@@ -1856,7 +1856,29 @@
 }
 
 .paygate-receipt-head-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(167, 139, 250, 0.30);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.12), rgba(5, 7, 11, 0.72)),
+    rgba(12, 16, 24, 0.86);
   color: var(--pg-brand-purple-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 8px 22px rgba(0, 0, 0, 0.24);
+}
+
+.paygate-receipt-head-icon svg,
+.paygate-receipt-status svg,
+.paygate-receipt-copy svg,
+.paygate-receipt-id svg {
+  display: block;
+  overflow: visible;
 }
 
 .paygate-receipt-id {
@@ -1890,12 +1912,25 @@
 .paygate-receipt-id svg {
   color: var(--pg-text-secondary);
   flex: 0 0 auto;
+  opacity: 0.82;
+  transition:
+    color 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .paygate-receipt-id:hover code,
 .paygate-receipt-id:focus-visible code,
 .paygate-receipt-id[data-copy-state='copied'] code {
   color: var(--pg-brand-purple-soft);
+}
+
+.paygate-receipt-id:hover svg,
+.paygate-receipt-id:focus-visible svg,
+.paygate-receipt-id[data-copy-state='copied'] svg {
+  color: var(--pg-brand-purple-soft);
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
 .paygate-receipt-id:focus-visible,
@@ -1913,6 +1948,7 @@
 }
 
 .paygate-receipt-row {
+  --receipt-tone-rgb: 167, 139, 250;
   position: relative;
   display: grid;
   grid-template-columns: 72px minmax(150px, 0.9fr) 1px minmax(150px, 0.95fr) 32px 112px;
@@ -1929,7 +1965,8 @@
   text-align: left;
   transition:
     background-color 180ms ease,
-    box-shadow 180ms ease;
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .paygate-receipt-row::before {
@@ -1956,6 +1993,10 @@
   box-shadow: inset 2px 0 0 rgba(124, 58, 237, 0.46);
 }
 
+.paygate-receipt-row:hover {
+  transform: translateX(1px);
+}
+
 .paygate-receipt-row[data-active='true']::before {
   opacity: 1;
   transform: scaleX(1);
@@ -1970,8 +2011,47 @@
   height: 48px;
   border: 1px solid currentColor;
   border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--receipt-tone-rgb), 0.15), transparent 64%),
+    rgba(7, 10, 15, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px rgba(var(--receipt-tone-rgb), 0.02),
+    0 10px 26px rgba(0, 0, 0, 0.20);
   justify-self: start;
   z-index: 1;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.paygate-receipt-status svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 8px rgba(var(--receipt-tone-rgb), 0.10));
+  transition:
+    filter 180ms ease,
+    transform 180ms ease;
+}
+
+.paygate-receipt-row:hover .paygate-receipt-status,
+.paygate-receipt-row:focus-visible .paygate-receipt-status,
+.paygate-receipt-row[data-active='true'] .paygate-receipt-status {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--receipt-tone-rgb), 0.20), transparent 66%),
+    rgba(7, 10, 15, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 4px rgba(var(--receipt-tone-rgb), 0.055),
+    0 12px 32px rgba(0, 0, 0, 0.24);
+  transform: translateY(-1px);
+}
+
+.paygate-receipt-row:hover .paygate-receipt-status svg,
+.paygate-receipt-row:focus-visible .paygate-receipt-status svg,
+.paygate-receipt-row[data-active='true'] .paygate-receipt-status svg {
+  filter: drop-shadow(0 0 10px rgba(var(--receipt-tone-rgb), 0.20));
 }
 
 .paygate-receipt-row:not(:last-child) .paygate-receipt-status::after {
@@ -1990,9 +2070,17 @@
   color: var(--pg-flow-blue);
 }
 
+.paygate-receipt-row[data-tone='blue'] {
+  --receipt-tone-rgb: 56, 189, 248;
+}
+
 .paygate-receipt-row[data-tone='amber'] .paygate-receipt-status,
 .paygate-receipt-row[data-tone='amber'] .paygate-receipt-value {
   color: var(--pg-warning);
+}
+
+.paygate-receipt-row[data-tone='amber'] {
+  --receipt-tone-rgb: 245, 158, 11;
 }
 
 .paygate-receipt-row[data-tone='purple'] .paygate-receipt-status,
@@ -2000,9 +2088,17 @@
   color: var(--pg-brand-purple-soft);
 }
 
+.paygate-receipt-row[data-tone='purple'] {
+  --receipt-tone-rgb: 167, 139, 250;
+}
+
 .paygate-receipt-row[data-tone='green'] .paygate-receipt-status,
 .paygate-receipt-row[data-tone='green'] .paygate-receipt-value {
   color: #4ADE80;
+}
+
+.paygate-receipt-row[data-tone='green'] {
+  --receipt-tone-rgb: 74, 222, 128;
 }
 
 .paygate-receipt-label {
@@ -2045,6 +2141,10 @@
   display: inline-flex;
   color: var(--pg-text-secondary);
   opacity: 0.82;
+  transition:
+    color 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .paygate-receipt-row:hover .paygate-receipt-copy,
@@ -2052,6 +2152,7 @@
 .paygate-receipt-row[data-copy-state='copied'] .paygate-receipt-copy {
   color: var(--pg-brand-purple-soft);
   opacity: 1;
+  transform: translateY(-1px);
 }
 
 .paygate-receipt-row time {

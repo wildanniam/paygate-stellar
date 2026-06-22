@@ -1,4 +1,4 @@
-import { Activity, ArrowDown, ArrowRight, Bot, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ReceiptText, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
+import { Activity, ArrowRight, Bot, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -17,6 +17,105 @@ const HERO_FLOW_URLS = {
 
 const PROOF_SEQUENCE = ['received', 'required', 'mpp', 'ok'];
 
+function ReceiptSvg({ size = 24, children, ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      {...props}
+    >
+      {children}
+    </svg>
+  );
+}
+
+function ReceiptHeaderIcon({ size = 22, ...props }) {
+  return (
+    <ReceiptSvg size={size} {...props}>
+      <path
+        d="M7.4 3.8h9.2c.9 0 1.6.7 1.6 1.6v15l-2.1-1.2-2.1 1.2-2-1.2-2.1 1.2-2-1.2-2.1 1.2v-15c0-.9.7-1.6 1.6-1.6Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M9.1 8h5.8M9.1 11.4h5.8M9.1 14.8h3.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="16.9" cy="14.8" r="1.2" fill="currentColor" />
+    </ReceiptSvg>
+  );
+}
+
+function RequestReceivedIcon({ size = 24, ...props }) {
+  return (
+    <ReceiptSvg size={size} {...props}>
+      <path d="M12 4.8v8.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="m8.4 10.1 3.6 3.6 3.6-3.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M6.2 16.2v1.3c0 1 .8 1.8 1.8 1.8h8c1 0 1.8-.8 1.8-1.8v-1.3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path d="M8.4 16.2h7.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </ReceiptSvg>
+  );
+}
+
+function PaymentRequiredIcon({ size = 24, ...props }) {
+  return (
+    <ReceiptSvg size={size} {...props}>
+      <rect x="6.3" y="10.1" width="11.4" height="8.4" rx="2.1" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M8.9 10.1V8.4a3.1 3.1 0 0 1 6.2 0v1.7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <circle cx="12" cy="14" r="1" fill="currentColor" />
+      <path d="M12 15.1v1.2" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <circle cx="17.4" cy="6.3" r="2.1" fill="currentColor" opacity="0.18" />
+      <path d="M16.5 6.3h1.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </ReceiptSvg>
+  );
+}
+
+function MppVerifiedIcon({ size = 24, ...props }) {
+  return (
+    <ReceiptSvg size={size} {...props}>
+      <circle cx="12" cy="12" r="7.3" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8.7 12.2 11 14.5l4.5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 4.7v2.2M19.3 12h-2.1M12 19.3v-2.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.72" />
+      <circle cx="17.4" cy="6.6" r="1.4" fill="currentColor" />
+    </ReceiptSvg>
+  );
+}
+
+function UpstreamReturnedIcon({ size = 24, ...props }) {
+  return (
+    <ReceiptSvg size={size} {...props}>
+      <path d="M18 7.2h-6.4a5 5 0 0 0-5 5v.3" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <path d="m9 9.8-2.4 2.5L9 14.7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="16.3" cy="16.5" r="3.1" stroke="currentColor" strokeWidth="1.7" />
+      <path d="m14.9 16.4 1 1 1.8-2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </ReceiptSvg>
+  );
+}
+
+function ReceiptCopyIcon({ size = 17, ...props }) {
+  return (
+    <ReceiptSvg size={size} {...props}>
+      <rect x="8.1" y="7" width="9" height="9" rx="1.9" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M6 12.7H5.4c-.9 0-1.6-.7-1.6-1.6V5.4c0-.9.7-1.6 1.6-1.6h5.7c.9 0 1.6.7 1.6 1.6V6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </ReceiptSvg>
+  );
+}
+
+function ReceiptCopiedIcon({ size = 17, ...props }) {
+  return (
+    <ReceiptSvg size={size} {...props}>
+      <circle cx="12" cy="12" r="7.4" stroke="currentColor" strokeWidth="1.8" />
+      <path d="m8.8 12.1 2.1 2.1 4.4-4.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </ReceiptSvg>
+  );
+}
+
 const PROOF_ROWS = [
   {
     key: 'received',
@@ -24,7 +123,7 @@ const PROOF_ROWS = [
     label: 'Request received',
     value: 'GET /api/pay/api_123',
     time: '13:23:45.213',
-    icon: ArrowDown,
+    icon: RequestReceivedIcon,
     copyValue: 'GET /api/pay/api_123',
   },
   {
@@ -33,7 +132,7 @@ const PROOF_ROWS = [
     label: 'Payment required',
     value: '402 Required',
     time: '13:23:45.276',
-    icon: ShieldCheck,
+    icon: PaymentRequiredIcon,
     copyValue: '402 Required',
   },
   {
@@ -42,7 +141,7 @@ const PROOF_ROWS = [
     label: 'MPP verified',
     value: 'pay_8d7a2c0e',
     time: '13:23:45.312',
-    icon: CheckCircle2,
+    icon: MppVerifiedIcon,
     copyValue: 'pay_8d7a2c0e',
   },
   {
@@ -51,7 +150,7 @@ const PROOF_ROWS = [
     label: 'Upstream returned',
     value: '200 OK',
     time: '13:23:45.589',
-    icon: CheckCircle2,
+    icon: UpstreamReturnedIcon,
     copyValue: '200 OK',
   },
 ];
@@ -723,7 +822,7 @@ export default function Landing() {
               <div className="paygate-receipt-head">
                 <div>
                   <span className="paygate-receipt-head-icon">
-                    <ReceiptText size={22} aria-hidden="true" />
+                    <ReceiptHeaderIcon size={22} />
                   </span>
                   <strong>Live request receipt</strong>
                 </div>
@@ -736,7 +835,7 @@ export default function Landing() {
                 >
                   <span>REQ ID:</span>
                   <code>req_01HZ8XQ4F2J7Q9K3T6V1</code>
-                  {getProofCopyState('req') === 'copied' ? <CheckCircle2 size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+                  {getProofCopyState('req') === 'copied' ? <ReceiptCopiedIcon size={16} /> : <ReceiptCopyIcon size={16} />}
                 </button>
               </div>
 
@@ -759,13 +858,13 @@ export default function Landing() {
                       aria-label={`Copy ${row.label}: ${row.copyValue}`}
                     >
                       <span className="paygate-receipt-status">
-                        <Icon size={23} aria-hidden="true" />
+                        <Icon size={24} />
                       </span>
                       <span className="paygate-receipt-label">{row.label}</span>
                       <i className="paygate-receipt-divider" aria-hidden="true" />
                       <code className="paygate-receipt-value">{row.value}</code>
                       <span className="paygate-receipt-copy" aria-hidden="true">
-                        {copyState === 'copied' ? <CheckCircle2 size={17} /> : <Copy size={17} />}
+                        {copyState === 'copied' ? <ReceiptCopiedIcon size={17} /> : <ReceiptCopyIcon size={17} />}
                       </span>
                       <time>{row.time}</time>
                     </button>
