@@ -6,10 +6,6 @@ import { Link } from 'react-router-dom';
 import { C, MONO as M } from '../colors.js';
 import Button from '../components/ui/Button.jsx';
 
-const KW   = t => <span style={{ color: C.purple }}>{t}</span>;
-const STR  = t => <span style={{ color: C.green }}>{t}</span>;
-const FN   = t => <span style={{ color: C.amber }}>{t}</span>;
-
 const HERO_FLOW_URLS = {
   source: 'https://api.company.com/v1/signal',
   proxy: 'https://paygate.app/api/pay/api_123',
@@ -156,34 +152,59 @@ const PROOF_CHIPS = [
   { label: 'Agent-ready', icon: Bot },
 ];
 
-function useCountUp(target, duration, active, delay = 0) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!active) return;
-    const tid = setTimeout(() => {
-      let startTime = null;
-      const step = ts => {
-        if (!startTime) startTime = ts;
-        const p = Math.min((ts - startTime) / duration, 1);
-        setValue((1 - Math.pow(1 - p, 3)) * target);
-        if (p < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }, delay);
-    return () => clearTimeout(tid);
-  }, [active, target, duration, delay]);
-  return value;
-}
+const TRANSFORM_PROBLEMS = [
+  {
+    label: 'Manual billing',
+    body: 'Invoices, spreadsheets, chasing payments',
+    icon: FileText,
+  },
+  {
+    label: 'Custom auth',
+    body: 'Build and maintain your own access layer',
+    icon: ShieldCheck,
+  },
+  {
+    label: 'No per-call revenue',
+    body: 'Useful calls stay free and unmonetized',
+    icon: TrendingUp,
+  },
+  {
+    label: 'Hard to share with agents',
+    body: 'Complex setup for AI agents and clients',
+    icon: Bot,
+  },
+];
 
-function TerminalDots() {
-  return (
-    <div className="flex" style={{ gap: 6 }}>
-      {['#FF5F57', '#FEBC2E', '#28C840'].map((bg, i) => (
-        <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: bg }} />
-      ))}
-    </div>
-  );
-}
+const TRANSFORM_OUTCOMES = [
+  {
+    tone: 'amber',
+    label: '402',
+    body: 'Before payment',
+    detail: 'Access blocked until paid',
+    icon: ShieldCheck,
+  },
+  {
+    tone: 'purple',
+    label: 'MPP verified',
+    body: 'Payment verified on Stellar',
+    detail: 'Credential accepted',
+    icon: ShieldCheck,
+  },
+  {
+    tone: 'green',
+    label: '200',
+    body: 'Forwarded',
+    detail: 'Request sent to your API',
+    icon: CheckCircle2,
+  },
+  {
+    tone: 'revenue',
+    label: '+0.009 USDC',
+    body: 'Your revenue per call',
+    detail: 'Posted to dashboard',
+    icon: TrendingUp,
+  },
+];
 
 function BrandFeatureIcon({ src, alt }) {
   return (
@@ -195,32 +216,29 @@ function BrandFeatureIcon({ src, alt }) {
 
 export default function Landing() {
   const [h, setH] = useState({
-    navCta: false, card: null, feat: null,
+    navCta: false, feat: null,
   });
   const hov = (key, val) => setH(prev => ({ ...prev, [key]: val }));
 
   const [scrollPct, setScrollPct]     = useState(0);
-  const [statsActive, setStatsActive] = useState(false);
-  const [activeSteps, setActiveSteps] = useState([false, false, false]);
   const [magnetCta, setMagnetCta]     = useState({ x: 0, y: 0 });
   const [heroActive, setHeroActive]   = useState('idle');
   const [copiedFlow, setCopiedFlow]   = useState(null);
   const [proofActive, setProofActive] = useState('mpp');
   const [proofVisible, setProofVisible] = useState(false);
   const [copiedProof, setCopiedProof] = useState(null);
+  const [transformActive, setTransformActive] = useState('generate');
+  const [copiedTransform, setCopiedTransform] = useState(null);
 
   // Card stagger states
-  const [problemVis, setProblemVis] = useState([false, false, false]);
   const [featVis, setFeatVis]       = useState([false, false, false, false]);
 
   const heroRailRef    = useRef(null);
   const proofRef       = useRef(null);
   const copyTimerRef   = useRef(null);
   const proofCopyTimerRef = useRef(null);
-  const problemRef     = useRef(null);
-  const howItWorksRef  = useRef(null);
+  const transformCopyTimerRef = useRef(null);
   const ctaBottomRef   = useRef(null);
-  const problemCardsRef = useRef(null);
   const featCardsRef    = useRef(null);
 
   const resetHeroActive = useCallback(() => setHeroActive('idle'), []);
@@ -296,6 +314,41 @@ export default function Landing() {
     return 'idle';
   };
 
+  const copyTransformValue = useCallback(async (key, value) => {
+    if (!value) return;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+
+      window.clearTimeout(transformCopyTimerRef.current);
+      setTransformActive(key);
+      setCopiedTransform(key);
+      transformCopyTimerRef.current = window.setTimeout(() => setCopiedTransform(null), 1500);
+    } catch {
+      window.clearTimeout(transformCopyTimerRef.current);
+      setCopiedTransform(`${key}-error`);
+      transformCopyTimerRef.current = window.setTimeout(() => setCopiedTransform(null), 1500);
+    }
+  }, []);
+
+  const getTransformCopyState = key => {
+    if (copiedTransform === key) return 'copied';
+    if (copiedTransform === `${key}-error`) return 'error';
+    return 'idle';
+  };
+
   // ── Fade-in: JS-driven so SSR/no-JS sees content; IO with rootMargin + 800ms fallback ──
   useEffect(() => {
     const els = [...document.querySelectorAll('.fs')];
@@ -323,6 +376,7 @@ export default function Landing() {
   useEffect(() => () => {
     window.clearTimeout(copyTimerRef.current);
     window.clearTimeout(proofCopyTimerRef.current);
+    window.clearTimeout(transformCopyTimerRef.current);
   }, []);
 
   // ── Scroll progress ──
@@ -333,51 +387,6 @@ export default function Landing() {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // ── Stats count-up ──
-  useEffect(() => {
-    const el = problemRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setStatsActive(true); obs.disconnect(); }
-    }, { threshold: 0.2 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  // ── How It Works step activation ──
-  useEffect(() => {
-    const el = howItWorksRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) {
-        [0, 1, 2].forEach(i =>
-          setTimeout(() => {
-            setActiveSteps(prev => { const n = [...prev]; n[i] = true; return n; });
-          }, 400 + i * 480)
-        );
-        obs.disconnect();
-      }
-    }, { threshold: 0.08 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  // ── Problem cards stagger ──
-  useEffect(() => {
-    const el = problemCardsRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) {
-        [0, 1, 2].forEach(i =>
-          setTimeout(() => setProblemVis(p => { const n = [...p]; n[i] = true; return n; }), i * 130)
-        );
-        obs.disconnect();
-      }
-    }, { threshold: 0.1, rootMargin: '0px 0px 80px 0px' });
-    obs.observe(el);
-    return () => obs.disconnect();
   }, []);
 
   // ── Request-time proof activation ──
@@ -484,19 +493,6 @@ export default function Landing() {
       y: clamp((e.clientY - cy) * 0.14, -3, 3),
     });
   }, []);
-
-  // ── Count-up values ──
-  const cents     = useCountUp(30, 1500, statsActive, 300);
-  const wks       = useCountUp(4,  1200, statsActive, 400);
-  const trillions = useCountUp(5,  1800, statsActive, 500);
-
-  const statDisplays = [
-    `$0.${Math.round(cents).toString().padStart(2, '0')} + 2.9%`,
-    `2–${Math.ceil(wks) || 0} weeks`,
-    `$3–${Math.ceil(trillions) || 0}T`,
-  ];
-
-  const stepsCount = activeSteps.filter(Boolean).length;
 
   // Shared card transition (covers both stagger reveal + hover)
   const cardTransition = 'opacity 0.5s ease-out, transform 0.5s ease-out, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease';
@@ -916,206 +912,212 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── PROBLEM ── */}
-      <section id="problem" ref={problemRef} className="fs">
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '120px 24px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 640, margin: '0 auto', lineHeight: 1.1 }}>
-            Micropayment monetization<br />is fundamentally broken.
-          </h2>
-          <p style={{ color: C.text2, fontSize: 17, maxWidth: 620, margin: '16px auto 56px', lineHeight: 1.65 }}>
-            The protocol that fixes this launched in March 2026.<br />
-            Most developers still can't access it.
-          </p>
-
-          <div ref={problemCardsRef} className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 16 }}>
-            {[
-              {
-                stat: statDisplays[0],
-                sub: 'per Stripe transaction',
-                body: "Charging $0.01 per API call? Traditional payment rails eat the entire margin before you see a cent.",
-              },
-              {
-                stat: statDisplays[1],
-                sub: 'to integrate MPP manually',
-                body: "The protocol exists. The SDK exists. But wiring it into a real API requires deep knowledge of Stellar internals, HTTP 402 flows, and USDC — knowledge most developers don't have time to acquire.",
-              },
-              {
-                stat: statDisplays[2],
-                sub: 'projected agentic commerce by 2030',
-                body: "Galaxy Research estimates $3–5 trillion in agentic commerce by 2030. MPP is the protocol that enables it. PayGate is the tool that makes it accessible.",
-              },
-            ].map((card, i) => (
-              <div
-                key={i}
-                onMouseEnter={() => hov('card', i)}
-                onMouseLeave={() => hov('card', null)}
-                style={{
-                  opacity: problemVis[i] ? 1 : 0,
-                  transform: problemVis[i] ? 'translateY(0)' : 'translateY(24px)',
-                  background: h.card === i ? C.surfaceHover : C.surface,
-                  border: `1px solid ${h.card === i ? C.borderHover : C.border}`,
-                  borderTopColor: h.card === i ? 'rgba(135,146,166,0.36)' : 'rgba(255,255,255,0.06)',
-                  borderRadius: 12, padding: 32, textAlign: 'left',
-                  boxShadow: h.card === i ? '0 18px 42px rgba(0,0,0,0.28)' : 'none',
-                  transition: cardTransition,
-                }}
-              >
-                <div style={{ ...M, fontSize: 28, fontWeight: 800, color: C.text1 }}>{card.stat}</div>
-                <div style={{ ...M, fontSize: 12, color: C.text3, marginTop: 4 }}>{card.sub}</div>
-                <div style={{ borderTop: `1px solid ${C.border}`, margin: '20px 0' }} />
-                <p style={{ color: C.text2, fontSize: 15, lineHeight: 1.6 }}>{card.body}</p>
-              </div>
-            ))}
+      {/* ── TRANSFORMATION ── */}
+      <section
+        id="how-it-works"
+        className="paygate-transform-section fs"
+        data-transform-active={transformActive}
+        aria-labelledby="paygate-transform-title"
+      >
+        <div className="paygate-transform-inner">
+          <div className="paygate-transform-head">
+            <p>Transform in minutes</p>
+            <h2 id="paygate-transform-title">
+              From ordinary API to <span>paid endpoint</span>
+            </h2>
+            <p>
+              Paste your URL, choose a price, and share a proxy that handles payment before every call.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" ref={howItWorksRef} className="fs">
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '120px 24px' }}>
-          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 520, lineHeight: 1.1, marginBottom: 18 }}>
-            Register. Protect.<br />Get paid per call.
-          </h2>
-          <p style={{ color: C.text2, fontSize: 17, maxWidth: 620, lineHeight: 1.65, margin: '0 0 64px' }}>
-            PayGate keeps the setup short: create the paid endpoint, guard your upstream API, then let the proxy handle request payment evidence.
-          </p>
+          <div className="paygate-transform-stage" aria-label="PayGate transforms an ordinary API into a paid endpoint">
+            <div className="paygate-transform-beam" aria-hidden="true" />
+            <div className="paygate-transform-floaters" aria-hidden="true">
+              <span className="is-code"><img src="/brand/paygate-asset-code.svg" alt="" /></span>
+              <span className="is-api"><img src="/brand/paygate-asset-api.svg" alt="" /></span>
+              <span className="is-chart"><img src="/brand/paygate-asset-chart.svg" alt="" /></span>
+              <span className="is-signal"><img src="/brand/paygate-asset-signal.svg" alt="" /></span>
+            </div>
 
-          <div style={{ position: 'relative', paddingLeft: 32 }}>
-            {/* Connector track */}
-            <div style={{ position: 'absolute', left: 4, top: 0, bottom: 0, width: 1, background: C.border }} />
-            {/* Connector fill */}
-            <div style={{
-              position: 'absolute', left: 4, top: 0, bottom: 0, width: 1,
-              background: `linear-gradient(to bottom, ${C.accentSoft}, rgba(124,58,237,0.28))`,
-              opacity: 0.8,
-              transform: `scaleY(${stepsCount / 3})`,
-              transformOrigin: 'top center',
-              transition: 'transform 0.65s ease-out',
-            }} />
+            <article
+              className="paygate-transform-panel is-before"
+              onMouseEnter={() => setTransformActive('paste')}
+              onFocus={() => setTransformActive('paste')}
+            >
+              <h3>Your API today</h3>
+              <button
+                type="button"
+                className="paygate-transform-url"
+                data-copy-state={getTransformCopyState('source')}
+                onClick={() => copyTransformValue('source', HERO_FLOW_URLS.source)}
+                aria-label={`Copy original API URL ${HERO_FLOW_URLS.source}`}
+              >
+                <span className="paygate-transform-url-icon"><Link2 size={18} aria-hidden="true" /></span>
+                <code>{HERO_FLOW_URLS.source}</code>
+                <span className="paygate-transform-copy">
+                  {getTransformCopyState('source') === 'copied' ? <CheckCircle2 size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />}
+                </span>
+              </button>
 
-            {[
-              {
-                num: '01', title: 'Register your API',
-                body: 'Enter your upstream API base URL, the GET path you want to monetize, and the USDC price per call.',
-                visual: (
-                  <div style={{
-                    background: C.surface,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 12, overflow: 'hidden',
-                    boxShadow: '0 16px 34px rgba(0,0,0,0.24)',
-                  }}>
-                    {[
-                      { label: 'Upstream Base URL', val: 'https://api.yourservice.com', active: false },
-                      { label: 'GET Path', val: '/v1/data', active: false },
-                      { label: 'Price per call (USDC)', val: '0.01', active: true },
-                    ].map((f, fi) => (
-                      <div key={fi} style={{
-                        padding: '12px 16px',
-                        background: f.active ? '#161616' : C.surfaceHover,
-                        borderBottom: fi < 2 ? `1px solid ${C.border}` : 'none',
-                        borderLeft: f.active ? `2px solid ${C.accent}` : '2px solid transparent',
-                        transition: 'all 0.2s ease',
-                      }}>
-                        <div style={{ ...M, fontSize: 12, color: f.active ? C.text2 : C.text3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{f.label}</div>
-                        <div style={{ ...M, fontSize: 13, color: f.active ? C.text1 : C.text2 }}>{f.val}</div>
+              <div className="paygate-transform-problem-divider" />
+              <p className="paygate-transform-label">The problem</p>
+
+              <div className="paygate-transform-problems">
+                {TRANSFORM_PROBLEMS.map(problem => {
+                  const Icon = problem.icon;
+                  return (
+                    <div key={problem.label} className="paygate-transform-problem-row">
+                      <span><Icon size={18} aria-hidden="true" /></span>
+                      <div>
+                        <strong>{problem.label}</strong>
+                        <small>{problem.body}</small>
                       </div>
-                    ))}
-                  </div>
-                ),
-              },
-              {
-                num: '02', title: 'Create paid proxy',
-                body: (
-                  <>PayGate gives you a proxy URL and API secret. Agents call the PayGate URL, not your original upstream API.</>
-                ),
-                visual: (
-                  <div style={{
-                    background: C.surface,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 12, padding: '32px 24px',
-                    boxShadow: '0 16px 34px rgba(0,0,0,0.24)',
-                  }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-                      <div style={{
-                        width: 48, height: 48, borderRadius: '50%',
-                        background: 'rgba(134,239,172,0.12)',
-                        border: '1px solid rgba(134,239,172,0.3)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 20, color: C.green,
-                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
-                      }}>✓</div>
-                      <div style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 8,
-                        background: 'rgba(134,239,172,0.08)',
-                        border: '1px solid rgba(134,239,172,0.2)',
-                        color: C.green, borderRadius: 8,
-                        padding: '10px 20px', fontSize: 14, ...M,
-                      }}>
-                        Proxy Ready
-                      </div>
-                      <p style={{ ...M, fontSize: 12, color: C.text3, textAlign: 'center', margin: 0 }}>
-                        /api/pay/api_123 created
-                      </p>
                     </div>
-                  </div>
-                ),
-              },
-              {
-                num: '03', title: 'Protect and monetize',
-                body: 'Add the secret guard to your upstream API. PayGate verifies payment, forwards paid requests, and tracks revenue in your dashboard.',
-                visual: (
-                  <div style={{
-                    background: C.codeBg,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 12, overflow: 'hidden',
-                    boxShadow: '0 16px 34px rgba(0,0,0,0.24)',
-                  }}>
-                    <div className="flex items-center justify-between" style={{ background: '#111111', borderBottom: `1px solid ${C.border}`, padding: '8px 14px' }}>
-                      <TerminalDots />
-                      <span style={{ ...M, fontSize: 12, color: C.text3 }}>upstream-api.js</span>
-                    </div>
-                    <pre style={{ ...M, fontSize: 13, lineHeight: 1.8, padding: '16px 20px', margin: 0, overflowX: 'auto' }}>
-                      <code>
-                        {KW('if')}{' (req.'}{FN('get')}{'('}{STR("'X-PayGate-Secret'")}{') !== PAYGATE_SECRET) {\n'}
-                        {'  '}{KW('return')}{' res.'}{FN('status')}{'(401).'}{FN('json')}{'({ error: '}{STR("'Unauthorized'")}{' });\n'}
-                        {'}'}
-                      </code>
-                    </pre>
-                  </div>
-                ),
-              },
-            ].map((step, i) => (
-              <div key={i} style={{ position: 'relative', marginBottom: i < 2 ? 72 : 0 }}>
-                {/* Step dot */}
-                <div style={{
-                  position: 'absolute', left: -37, top: 6,
-                  width: 10, height: 10, borderRadius: '50%',
-                  background: activeSteps[i] ? C.accent : C.border,
-                  boxShadow: activeSteps[i] ? '0 0 0 5px rgba(124,58,237,0.12)' : 'none',
-                  transition: 'background 0.35s ease, box-shadow 0.35s ease',
-                }} />
-                <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 56, alignItems: 'center' }}>
-                  <div style={{ opacity: activeSteps[i] ? 1 : 0.4, transition: 'opacity 0.5s ease' }}>
-                    <div style={{
-                      ...M, fontSize: 12, marginBottom: 10,
-                      color: activeSteps[i] ? C.accentSoft : 'rgba(167,139,250,0.46)',
-                      transition: 'color 0.35s ease',
-                    }}>
-                      {step.num}
-                    </div>
-                    <h3 style={{ fontSize: 22, fontWeight: 700, color: C.text1, marginBottom: 12 }}>{step.title}</h3>
-                    <p style={{ color: C.text2, lineHeight: 1.6 }}>{step.body}</p>
-                  </div>
-                  <div className="hidden md:block" style={{
-                    opacity: activeSteps[i] ? 1 : 0.25,
-                    transform: activeSteps[i] ? 'translateY(0)' : 'translateY(10px)',
-                    transition: 'opacity 0.55s ease 0.1s, transform 0.55s ease 0.1s',
-                  }}>
-                    {step.visual}
-                  </div>
+                  );
+                })}
+              </div>
+            </article>
+
+            <article className="paygate-transform-panel is-action" aria-label="PayGate setup actions">
+              <div
+                className="paygate-transform-step"
+                data-active={transformActive === 'paste' ? 'true' : 'false'}
+                onMouseEnter={() => setTransformActive('paste')}
+                onFocus={() => setTransformActive('paste')}
+                tabIndex={0}
+              >
+                <span className="paygate-transform-step-number">1</span>
+                <div>
+                  <strong>Paste URL</strong>
+                  <button
+                    type="button"
+                    className="paygate-transform-mini-url"
+                    data-copy-state={getTransformCopyState('paste')}
+                    onClick={() => copyTransformValue('paste', HERO_FLOW_URLS.source)}
+                    aria-label={`Copy pasted API URL ${HERO_FLOW_URLS.source}`}
+                  >
+                    <Link2 size={15} aria-hidden="true" />
+                    <code>{HERO_FLOW_URLS.source}</code>
+                    {getTransformCopyState('paste') === 'copied' ? <CheckCircle2 size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
+                  </button>
                 </div>
               </div>
-            ))}
+
+              <div
+                className="paygate-transform-step"
+                data-active={transformActive === 'price' ? 'true' : 'false'}
+                onMouseEnter={() => setTransformActive('price')}
+                onFocus={() => setTransformActive('price')}
+                tabIndex={0}
+              >
+                <span className="paygate-transform-step-number">2</span>
+                <div>
+                  <strong>Set price per call</strong>
+                  <div className="paygate-transform-price-control" aria-hidden="true">
+                    <span>$</span>
+                    <code>0.009</code>
+                    <span>USDC</span>
+                  </div>
+                  <small>You earn $0.009 per successful call</small>
+                </div>
+              </div>
+
+              <div
+                className="paygate-transform-step"
+                data-active={transformActive === 'generate' ? 'true' : 'false'}
+                onMouseEnter={() => setTransformActive('generate')}
+                onFocus={() => setTransformActive('generate')}
+                tabIndex={0}
+              >
+                <span className="paygate-transform-step-number">3</span>
+                <div>
+                  <strong>Generate proxy</strong>
+                  <Button
+                    as={Link}
+                    to="/apis/new"
+                    className="paygate-transform-generate"
+                    icon={<img src="/brand/paygate-mark.svg" alt="" />}
+                  >
+                    Generate paid endpoint
+                  </Button>
+                  <p>PayGate handles payment and forwards successful calls.</p>
+                </div>
+              </div>
+            </article>
+
+            <article
+              className="paygate-transform-panel is-after"
+              onMouseEnter={() => setTransformActive('generate')}
+              onFocus={() => setTransformActive('generate')}
+            >
+              <div className="paygate-transform-after-title">
+                <span><img src="/brand/paygate-mark.svg" alt="" /></span>
+                <h3>Paid endpoint</h3>
+              </div>
+
+              <button
+                type="button"
+                className="paygate-transform-url"
+                data-copy-state={getTransformCopyState('proxy')}
+                onClick={() => copyTransformValue('proxy', HERO_FLOW_URLS.proxy)}
+                aria-label={`Copy paid endpoint URL ${HERO_FLOW_URLS.proxy}`}
+              >
+                <span className="paygate-transform-url-icon"><Link2 size={18} aria-hidden="true" /></span>
+                <code>{HERO_FLOW_URLS.proxy}</code>
+                <span className="paygate-transform-copy">
+                  {getTransformCopyState('proxy') === 'copied' ? <CheckCircle2 size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />}
+                </span>
+              </button>
+
+              <div className="paygate-transform-chip-row">
+                <span>$0.009 / call</span>
+                <span><ShieldCheck size={14} aria-hidden="true" /> MPP guard enabled</span>
+              </div>
+
+              <div className="paygate-transform-live">
+                <p>Live example</p>
+                <div>
+                  <span aria-hidden="true" />
+                  <small>REQ ID</small>
+                  <code>req_01HZ8XQ4F2J7Q9K3T6V1</code>
+                  <time>13:23:45</time>
+                  <ReceiptCopyIcon size={16} />
+                </div>
+              </div>
+
+              <div className="paygate-transform-result-grid">
+                <div>
+                  <span>Revenue today</span>
+                  <strong>+0.009 USDC</strong>
+                  <small><TrendingUp size={15} aria-hidden="true" /> posted after success</small>
+                </div>
+                <div>
+                  <span>Success rate</span>
+                  <strong>99.8%</strong>
+                  <small>200 OK</small>
+                </div>
+              </div>
+
+              <p className="paygate-transform-after-note">
+                <i aria-hidden="true" /> Payment collected before every call
+              </p>
+            </article>
+          </div>
+
+          <div className="paygate-transform-outcomes" aria-label="Paid endpoint outcomes">
+            {TRANSFORM_OUTCOMES.map(outcome => {
+              const Icon = outcome.icon;
+              return (
+                <div key={outcome.label} className="paygate-transform-outcome" data-tone={outcome.tone}>
+                  <span><Icon size={24} aria-hidden="true" /></span>
+                  <div>
+                    <strong>{outcome.label}</strong>
+                    <p>{outcome.body}</p>
+                    <small>{outcome.detail}</small>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
