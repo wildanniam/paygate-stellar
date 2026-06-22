@@ -27,15 +27,17 @@ The hero already explains the product model: original API URL becomes a PayGate 
 - Clicking request id or receipt rows copies the relevant value and switches the row to copied state.
 - IntersectionObserver activates a calm request lifecycle cycle.
 - Reduced-motion users get the static state without cycling transitions.
+- Bottom proof chips use circular green status checks and subtle dark-surface hover states.
 
 ## Verification
 
 - `npm --prefix frontend run build` passed.
 - Browser console showed 0 errors and only existing development warnings.
 - Copy interaction check returned `copied`.
-- Desktop section screenshot: `output/playwright/paygate-phase3-proof-desktop-1440-v3.png`
-- Mobile section screenshot: `output/playwright/paygate-phase3-proof-mobile-390-v3.png`
-- Reference comparison: `output/playwright/paygate-phase3-proof-comparison-desktop-v3.png`
+- Desktop section screenshot: `output/playwright/paygate-phase3-proof-desktop-refined-1440.png`
+- Mobile section screenshot: `output/playwright/paygate-phase3-proof-mobile-refined-390.png`
+- Hover-state screenshot: `output/playwright/paygate-phase3-proof-hover-refined-1440.png`
+- Reference comparison: `output/playwright/paygate-phase3-proof-comparison-refined-desktop.png`
 - Design QA report: `design-qa.md`
 
 ## Acceptance

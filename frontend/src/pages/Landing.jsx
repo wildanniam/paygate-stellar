@@ -1,4 +1,4 @@
-import { Activity, ArrowDown, ArrowRight, Bot, CalendarDays, CheckCircle2, ClipboardCheck, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ReceiptText, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
+import { Activity, ArrowDown, ArrowRight, Bot, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ReceiptText, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -822,7 +822,7 @@ export default function Landing() {
                 <div key={chip.label} className="paygate-proof-chip">
                   <Icon size={28} aria-hidden="true" />
                   <span>{chip.label}</span>
-                  <ClipboardCheck size={21} aria-hidden="true" />
+                  <CheckCircle2 size={21} aria-hidden="true" />
                 </div>
               );
             })}
