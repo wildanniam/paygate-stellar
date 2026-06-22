@@ -24,3 +24,11 @@ yarn-error.log*
 
 # Vercel local project metadata
 .vercel/
+
+# Local agent/tooling artifacts
+.claude/
+.playwright-cli/
+
+# Local UI QA artifacts
+output/playwright/
+output/impeccable/
