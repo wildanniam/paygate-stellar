@@ -34,3 +34,29 @@ patches made since previous QA pass:
 - Compacted the right revenue panel, reduced metric value size, and converted the receipt panel to a header / rows / footer grid.
 
 final result: passed
+
+---
+
+source audit: Impeccable detector after anti-slop foundation pass
+static source evidence: output/impeccable/impeccable-after-static-v2.json
+rendered browser evidence: output/impeccable/impeccable-after-localhost-5173-v2.json
+desktop screenshot: output/playwright/paygate-anti-slop-desktop-1440.png
+mobile screenshot: output/playwright/paygate-anti-slop-mobile-390.png
+proof desktop screenshot: output/playwright/paygate-anti-slop-proof-desktop-1440.png
+proof mobile screenshot: output/playwright/paygate-anti-slop-proof-mobile-390.png
+viewport: 1440x900 desktop and 390x844 mobile
+state: landing page after PRODUCT.md context, reduced section-kicker usage, calmer glow, stronger muted contrast, and transform-based progress/step motion
+
+**Anti-Slop Findings**
+- Static Impeccable scan for `Landing.jsx` and `components.css`: 0 issues.
+- Rendered Impeccable warning count reduced from 106 to 47.
+- Removed detected layout-transition, repeated-section-kickers, and hero-eyebrow-chip issues.
+- Remaining rendered warnings are mostly palette sensitivity around the locked purple/cyan-on-dark PayGate identity plus clipping false positives for intentionally clipped hero/pill surfaces.
+
+**Visual QA**
+- Desktop and mobile screenshots show no horizontal overflow.
+- Browser console shows 0 runtime errors. Only existing React Router future-flag warnings remain.
+- Hero keeps the locked URL-to-paid-endpoint product proof while removing the generic SaaS badge.
+- Proof strip remains aligned and readable after darker surface and hover/glow refinements.
+
+final result: passed

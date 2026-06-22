@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { C, MONO as M } from '../colors.js';
-import Badge from '../components/ui/Badge.jsx';
 import Button from '../components/ui/Button.jsx';
 
 const KW   = t => <span style={{ color: C.purple }}>{t}</span>;
@@ -81,14 +80,6 @@ function useCountUp(target, duration, active, delay = 0) {
     return () => clearTimeout(tid);
   }, [active, target, duration, delay]);
   return value;
-}
-
-function SectionLabel({ children }) {
-  return (
-    <p style={{ ...M, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(34,211,238,0.7)', marginBottom: 12 }}>
-      {children}
-    </p>
-  );
 }
 
 function TerminalDots() {
@@ -435,10 +426,12 @@ export default function Landing() {
       <div style={{
         position: 'fixed', top: 0, left: 0, zIndex: 100,
         height: 2, pointerEvents: 'none',
-        width: `${scrollPct}%`,
-        background: `linear-gradient(90deg, ${C.accent}, ${C.cyan})`,
-        boxShadow: `0 0 10px ${C.accent}`,
-        transition: 'width 0.08s linear',
+        width: '100%',
+        transform: `scaleX(${scrollPct / 100})`,
+        transformOrigin: 'left center',
+        background: `linear-gradient(90deg, ${C.accent}, ${C.flowBlue})`,
+        opacity: 0.92,
+        transition: 'transform 0.08s linear',
       }} />
 
       {/* ── NAVBAR ── */}
@@ -486,10 +479,6 @@ export default function Landing() {
       {/* ── HERO ── */}
       <section className="paygate-hero">
         <div className="paygate-hero-inner">
-          <Badge tone="brand" icon={<ShieldCheck size={13} aria-hidden="true" />}>
-            Pay-per-call API gateway
-          </Badge>
-
           <h1 className="paygate-hero-title">
             Paste an API URL.
             <span>Charge per call.</span>
@@ -718,7 +707,10 @@ export default function Landing() {
         <div className="paygate-proof-inner">
           <div className="paygate-proof-grid">
             <div className="paygate-proof-copy">
-              <p className="paygate-proof-eyebrow">Proof at request time</p>
+              <p className="paygate-proof-eyebrow">
+                <span aria-hidden="true" />
+                Request-time receipt
+              </p>
               <h2 id="paygate-proof-title">
                 Every paid call leaves a <span>receipt.</span>
               </h2>
@@ -833,11 +825,10 @@ export default function Landing() {
       {/* ── PROBLEM ── */}
       <section id="problem" ref={problemRef} className="fs">
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '120px 24px', textAlign: 'center' }}>
-          <SectionLabel>The Problem</SectionLabel>
-          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 600, margin: '12px auto 0', lineHeight: 1.1 }}>
+          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 640, margin: '0 auto', lineHeight: 1.1 }}>
             Micropayment monetization<br />is fundamentally broken.
           </h2>
-          <p style={{ color: C.text2, fontSize: 17, marginTop: 16, marginBottom: 56 }}>
+          <p style={{ color: C.text2, fontSize: 17, maxWidth: 620, margin: '16px auto 56px', lineHeight: 1.65 }}>
             The protocol that fixes this launched in March 2026.<br />
             Most developers still can't access it.
           </p>
@@ -869,13 +860,13 @@ export default function Landing() {
                   transform: problemVis[i] ? 'translateY(0)' : 'translateY(24px)',
                   background: h.card === i ? C.surfaceHover : C.surface,
                   border: `1px solid ${h.card === i ? C.borderHover : C.border}`,
-                  borderTopColor: h.card === i ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.06)',
+                  borderTopColor: h.card === i ? 'rgba(135,146,166,0.36)' : 'rgba(255,255,255,0.06)',
                   borderRadius: 12, padding: 32, textAlign: 'left',
-                  boxShadow: h.card === i ? `0 0 0 1px rgba(124,58,237,0.1), 0 8px 32px rgba(0,0,0,0.3)` : 'none',
+                  boxShadow: h.card === i ? '0 18px 42px rgba(0,0,0,0.28)' : 'none',
                   transition: cardTransition,
                 }}
               >
-                <div style={{ ...M, fontSize: 28, fontWeight: 800, color: C.accent }}>{card.stat}</div>
+                <div style={{ ...M, fontSize: 28, fontWeight: 800, color: C.text1 }}>{card.stat}</div>
                 <div style={{ ...M, fontSize: 12, color: C.text3, marginTop: 4 }}>{card.sub}</div>
                 <div style={{ borderTop: `1px solid ${C.border}`, margin: '20px 0' }} />
                 <p style={{ color: C.text2, fontSize: 15, lineHeight: 1.6 }}>{card.body}</p>
@@ -888,21 +879,24 @@ export default function Landing() {
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" ref={howItWorksRef} className="fs">
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '120px 24px' }}>
-          <SectionLabel>How It Works</SectionLabel>
-          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 480, lineHeight: 1.1, marginBottom: 64 }}>
+          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 520, lineHeight: 1.1, marginBottom: 18 }}>
             Register. Protect.<br />Get paid per call.
           </h2>
+          <p style={{ color: C.text2, fontSize: 17, maxWidth: 620, lineHeight: 1.65, margin: '0 0 64px' }}>
+            PayGate keeps the setup short: create the paid endpoint, guard your upstream API, then let the proxy handle request payment evidence.
+          </p>
 
           <div style={{ position: 'relative', paddingLeft: 32 }}>
             {/* Connector track */}
             <div style={{ position: 'absolute', left: 4, top: 0, bottom: 0, width: 1, background: C.border }} />
             {/* Connector fill */}
             <div style={{
-              position: 'absolute', left: 4, top: 0, width: 1,
-              height: `${(stepsCount / 3) * 100}%`,
-              background: `linear-gradient(to bottom, ${C.accent}, rgba(124,58,237,0.35))`,
-              boxShadow: `0 0 8px ${C.accent}`,
-              transition: 'height 0.65s ease-out',
+              position: 'absolute', left: 4, top: 0, bottom: 0, width: 1,
+              background: `linear-gradient(to bottom, ${C.accentSoft}, rgba(124,58,237,0.28))`,
+              opacity: 0.8,
+              transform: `scaleY(${stepsCount / 3})`,
+              transformOrigin: 'top center',
+              transition: 'transform 0.65s ease-out',
             }} />
 
             {[
@@ -914,7 +908,7 @@ export default function Landing() {
                     background: C.surface,
                     border: `1px solid ${C.border}`,
                     borderRadius: 12, overflow: 'hidden',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+                    boxShadow: '0 16px 34px rgba(0,0,0,0.24)',
                   }}>
                     {[
                       { label: 'Upstream Base URL', val: 'https://api.yourservice.com', active: false },
@@ -928,7 +922,7 @@ export default function Landing() {
                         borderLeft: f.active ? `2px solid ${C.accent}` : '2px solid transparent',
                         transition: 'all 0.2s ease',
                       }}>
-                        <div style={{ ...M, fontSize: 10, color: f.active ? 'rgba(124,58,237,0.7)' : C.text3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{f.label}</div>
+                        <div style={{ ...M, fontSize: 12, color: f.active ? C.text2 : C.text3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{f.label}</div>
                         <div style={{ ...M, fontSize: 13, color: f.active ? C.text1 : C.text2 }}>{f.val}</div>
                       </div>
                     ))}
@@ -945,7 +939,7 @@ export default function Landing() {
                     background: C.surface,
                     border: `1px solid ${C.border}`,
                     borderRadius: 12, padding: '32px 24px',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+                    boxShadow: '0 16px 34px rgba(0,0,0,0.24)',
                   }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
                       <div style={{
@@ -954,7 +948,7 @@ export default function Landing() {
                         border: '1px solid rgba(134,239,172,0.3)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 20, color: C.green,
-                        boxShadow: '0 0 20px rgba(134,239,172,0.12)',
+                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
                       }}>✓</div>
                       <div style={{
                         display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -965,7 +959,7 @@ export default function Landing() {
                       }}>
                         Proxy Ready
                       </div>
-                      <p style={{ ...M, fontSize: 11, color: C.text3, textAlign: 'center', margin: 0 }}>
+                      <p style={{ ...M, fontSize: 12, color: C.text3, textAlign: 'center', margin: 0 }}>
                         /api/pay/api_123 created
                       </p>
                     </div>
@@ -980,11 +974,11 @@ export default function Landing() {
                     background: C.codeBg,
                     border: `1px solid ${C.border}`,
                     borderRadius: 12, overflow: 'hidden',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+                    boxShadow: '0 16px 34px rgba(0,0,0,0.24)',
                   }}>
                     <div className="flex items-center justify-between" style={{ background: '#111111', borderBottom: `1px solid ${C.border}`, padding: '8px 14px' }}>
                       <TerminalDots />
-                      <span style={{ ...M, fontSize: 11, color: C.text3 }}>upstream-api.js</span>
+                      <span style={{ ...M, fontSize: 12, color: C.text3 }}>upstream-api.js</span>
                     </div>
                     <pre style={{ ...M, fontSize: 13, lineHeight: 1.8, padding: '16px 20px', margin: 0, overflowX: 'auto' }}>
                       <code>
@@ -1003,14 +997,14 @@ export default function Landing() {
                   position: 'absolute', left: -37, top: 6,
                   width: 10, height: 10, borderRadius: '50%',
                   background: activeSteps[i] ? C.accent : C.border,
-                  boxShadow: activeSteps[i] ? `0 0 12px rgba(124,58,237,0.9), 0 0 24px rgba(124,58,237,0.35)` : 'none',
+                  boxShadow: activeSteps[i] ? '0 0 0 5px rgba(124,58,237,0.12)' : 'none',
                   transition: 'background 0.35s ease, box-shadow 0.35s ease',
                 }} />
                 <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 56, alignItems: 'center' }}>
                   <div style={{ opacity: activeSteps[i] ? 1 : 0.4, transition: 'opacity 0.5s ease' }}>
                     <div style={{
-                      ...M, fontSize: 11, marginBottom: 10,
-                      color: activeSteps[i] ? C.accent : 'rgba(124,58,237,0.35)',
+                      ...M, fontSize: 12, marginBottom: 10,
+                      color: activeSteps[i] ? C.accentSoft : 'rgba(167,139,250,0.46)',
                       transition: 'color 0.35s ease',
                     }}>
                       {step.num}
@@ -1035,10 +1029,12 @@ export default function Landing() {
       {/* ── FEATURES ── */}
       <section id="features" className="fs">
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '120px 24px' }}>
-          <SectionLabel>What You Get</SectionLabel>
-          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 480, lineHeight: 1.1, marginBottom: 48 }}>
+          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 560, lineHeight: 1.1, marginBottom: 18 }}>
             Built for developers<br />who want to ship.
           </h2>
+          <p style={{ color: C.text2, fontSize: 17, maxWidth: 640, lineHeight: 1.65, margin: '0 0 48px' }}>
+            The product primitives stay close to the API workflow: proxy URLs, revenue evidence, upstream protection, and machine-client payment behavior.
+          </p>
 
           <div ref={featCardsRef} className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 16 }}>
             {[
@@ -1072,9 +1068,9 @@ export default function Landing() {
                   transform: featVis[i] ? 'translateY(0)' : 'translateY(24px)',
                   background: h.feat === i ? C.surfaceHover : C.surface,
                   border: `1px solid ${h.feat === i ? C.borderHover : C.border}`,
-                  borderTopColor: h.feat === i ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.06)',
+                  borderTopColor: h.feat === i ? 'rgba(135,146,166,0.36)' : 'rgba(255,255,255,0.06)',
                   borderRadius: 12, padding: 32,
-                  boxShadow: h.feat === i ? '0 0 0 1px rgba(124,58,237,0.08), 0 8px 32px rgba(0,0,0,0.25)' : 'none',
+                  boxShadow: h.feat === i ? '0 18px 42px rgba(0,0,0,0.26)' : 'none',
                   transition: cardTransition,
                 }}
               >
@@ -1093,22 +1089,15 @@ export default function Landing() {
       <section className="fs" style={{
         width: '100%', padding: '120px 24px', textAlign: 'center',
         position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(to bottom, #080808, #0D0816)',
+        background: 'linear-gradient(180deg, #050609, #080A0F)',
+        borderTop: `1px solid ${C.border}`,
       }}>
         <div style={{
-          position: 'absolute', left: '50%', top: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 900, height: 550,
-          background: 'radial-gradient(ellipse at center, rgba(124,58,237,0.18) 0%, transparent 65%)',
-          filter: 'blur(60px)',
+          position: 'absolute', inset: 0,
+          background:
+            'linear-gradient(90deg, transparent, rgba(135,146,166,0.055), transparent), repeating-linear-gradient(90deg, transparent 0 92px, rgba(135,146,166,0.035) 93px, transparent 94px)',
           pointerEvents: 'none', zIndex: 0,
-        }} />
-        <div style={{
-          position: 'absolute', right: '20%', top: '30%',
-          width: 300, height: 300,
-          background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.06) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-          pointerEvents: 'none', zIndex: 0,
+          opacity: 0.75,
         }} />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
           <h2 style={{
@@ -1118,10 +1107,7 @@ export default function Landing() {
           }}>
             <span style={{ color: C.text1 }}>Your API has value.</span>
             <br />
-            <span className="gradient-headline" style={{
-              background: 'linear-gradient(90deg, #7C3AED, #22D3EE)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>
+            <span style={{ color: '#D9D2FF' }}>
               Make every call paid.
             </span>
           </h2>
@@ -1140,12 +1126,12 @@ export default function Landing() {
                 background: h.ctaBtn ? '#6D28D9' : C.accent,
                 color: C.text1, textDecoration: 'none',
                 padding: '16px 32px', borderRadius: 8, fontSize: 16, fontWeight: 600,
-                boxShadow: h.ctaBtn ? '0 0 32px rgba(124,58,237,0.55)' : '0 0 0 rgba(0,0,0,0)',
+                boxShadow: h.ctaBtn ? '0 18px 38px rgba(0,0,0,0.34)' : '0 0 0 rgba(0,0,0,0)',
                 transition: 'background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease',
                 transform: `translate(${magnetCta.x}px, ${magnetCta.y}px)`,
               }}
             >
-              <Zap size={18} /> Register API
+              <Zap size={18} /> Create paid endpoint
             </Link>
           </div>
         </div>

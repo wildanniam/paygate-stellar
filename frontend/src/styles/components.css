@@ -99,7 +99,7 @@
   background: var(--pg-brand-purple);
   border-color: rgba(167, 139, 250, 0.28);
   color: var(--pg-text-primary);
-  box-shadow: 0 10px 28px rgba(124, 58, 237, 0.24);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
 }
 
 .pg-button[data-variant='primary']:hover:not(:disabled) {
@@ -553,7 +553,7 @@
   padding: 0 16px;
   text-decoration: none;
   box-shadow:
-    0 10px 30px rgba(124, 58, 237, 0.24),
+    0 12px 28px rgba(0, 0, 0, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
   transition:
     border-color 160ms ease,
@@ -564,8 +564,7 @@
 .paygate-nav-cta:hover {
   border-color: rgba(196, 181, 253, 0.46);
   box-shadow:
-    0 14px 36px rgba(124, 58, 237, 0.32),
-    0 0 28px rgba(124, 58, 237, 0.16),
+    0 16px 34px rgba(0, 0, 0, 0.30),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transform: translateY(-1px);
 }
@@ -612,8 +611,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.10), transparent 34%),
-    linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.055), transparent);
+    linear-gradient(180deg, rgba(124, 58, 237, 0.06), transparent 34%),
+    linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.035), transparent);
 }
 
 .paygate-hero-inner {
@@ -969,7 +968,7 @@
     rgba(13, 17, 23, 0.96);
   box-shadow:
     0 18px 54px rgba(0, 0, 0, 0.32),
-    0 0 34px rgba(59, 130, 246, 0.18),
+    0 10px 30px rgba(59, 130, 246, 0.10),
     inset 0 1px 0 rgba(255, 255, 255, 0.075);
 }
 
@@ -982,7 +981,7 @@
     rgba(13, 17, 23, 0.96);
   box-shadow:
     0 18px 54px rgba(0, 0, 0, 0.32),
-    0 0 38px rgba(124, 58, 237, 0.24),
+    0 10px 32px rgba(124, 58, 237, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.075);
 }
 
@@ -1017,7 +1016,7 @@
   border-color: rgba(96, 165, 250, 0.36);
   background: rgba(96, 165, 250, 0.12);
   color: #93C5FD;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .paygate-flow-pill.is-proxy:hover .paygate-flow-pill-icon,
@@ -1025,14 +1024,14 @@
   border-color: rgba(167, 139, 250, 0.38);
   background: rgba(124, 58, 237, 0.14);
   color: #C4B5FD;
-  box-shadow: 0 0 22px rgba(124, 58, 237, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .paygate-flow-pill[data-copy-state='copied'] .paygate-flow-pill-icon {
   border-color: rgba(74, 222, 128, 0.38);
   background: rgba(34, 197, 94, 0.12);
   color: #86EFAC;
-  box-shadow: 0 0 22px rgba(34, 197, 94, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .paygate-flow-pill[data-copy-state='error'] .paygate-flow-pill-icon {
@@ -1063,7 +1062,7 @@
   z-index: 2;
   color: var(--pg-text-muted);
   font-family: var(--pg-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
   opacity: 0;
@@ -1118,7 +1117,7 @@
     transparent 10px 18px
   );
   background-size: 28px 3px;
-  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.55));
+  filter: drop-shadow(0 0 7px rgba(59, 130, 246, 0.34));
   animation: paygate-dash-flow 1.2s linear infinite;
   opacity: 0.72;
   transition:
@@ -1135,7 +1134,7 @@
   height: 8px;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(147, 197, 253, 0), #93C5FD 48%, rgba(147, 197, 253, 0));
-  box-shadow: 0 0 18px rgba(96, 165, 250, 0.95);
+  box-shadow: 0 0 14px rgba(96, 165, 250, 0.58);
   opacity: 0.78;
   transform: translate(-20px, -50%);
   animation: paygate-packet-flow 2.05s cubic-bezier(0.42, 0, 0.2, 1) infinite;
@@ -1149,7 +1148,7 @@
   position: absolute;
   left: calc(50% - 17px);
   color: #60A5FA;
-  filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.82));
+  filter: drop-shadow(0 0 9px rgba(59, 130, 246, 0.46));
   transition:
     color 180ms ease,
     filter 180ms ease,
@@ -1161,7 +1160,7 @@
 .paygate-flow-stage[data-hero-active='paid'] .paygate-flow-connector span,
 .paygate-flow-stage[data-hero-active='success'] .paygate-flow-connector span,
 .paygate-flow-stage[data-hero-active='proxy'] .paygate-flow-connector.is-right span {
-  filter: drop-shadow(0 0 14px rgba(96, 165, 250, 0.9));
+  filter: drop-shadow(0 0 9px rgba(96, 165, 250, 0.52));
   opacity: 1;
 }
 
@@ -1171,7 +1170,7 @@
 .paygate-flow-stage[data-hero-active='success'] .paygate-flow-connector svg,
 .paygate-flow-stage[data-hero-active='proxy'] .paygate-flow-connector.is-right svg {
   color: #93C5FD;
-  filter: drop-shadow(0 0 16px rgba(96, 165, 250, 0.94));
+  filter: drop-shadow(0 0 11px rgba(96, 165, 250, 0.56));
   transform: translateX(3px);
 }
 
@@ -1438,8 +1437,7 @@
 .paygate-flow-stage[data-hero-active='challenge'] .paygate-lifecycle-chip.is-warning {
   background: rgba(245, 158, 11, 0.16);
   box-shadow:
-    0 16px 38px rgba(0, 0, 0, 0.28),
-    0 0 26px rgba(245, 158, 11, 0.18);
+    0 16px 38px rgba(0, 0, 0, 0.28);
 }
 
 .paygate-lifecycle-chip.is-warning .paygate-lifecycle-number {
@@ -1459,8 +1457,7 @@
 .paygate-flow-stage[data-hero-active='node'] .paygate-lifecycle-chip.is-paid {
   background: rgba(59, 130, 246, 0.16);
   box-shadow:
-    0 16px 38px rgba(0, 0, 0, 0.28),
-    0 0 28px rgba(59, 130, 246, 0.20);
+    0 16px 38px rgba(0, 0, 0, 0.28);
 }
 
 .paygate-lifecycle-chip.is-paid .paygate-lifecycle-number {
@@ -1480,8 +1477,7 @@
 .paygate-flow-stage[data-hero-active='proxy'] .paygate-lifecycle-chip.is-success {
   background: rgba(34, 197, 94, 0.16);
   box-shadow:
-    0 16px 38px rgba(0, 0, 0, 0.28),
-    0 0 28px rgba(34, 197, 94, 0.18);
+    0 16px 38px rgba(0, 0, 0, 0.28);
 }
 
 .paygate-lifecycle-chip.is-success .paygate-lifecycle-number {
@@ -1512,8 +1508,7 @@
 .paygate-flow-stage[data-hero-active='proxy'] .paygate-revenue-split {
   border-color: rgba(74, 222, 128, 0.38);
   box-shadow:
-    0 18px 56px rgba(0, 0, 0, 0.26),
-    0 0 30px rgba(34, 197, 94, 0.10);
+    0 18px 56px rgba(0, 0, 0, 0.26);
   transform: translateY(-2px);
 }
 
@@ -1574,8 +1569,7 @@
 .paygate-flow-stage[data-hero-active='proxy'] .paygate-dashboard-preview {
   border-color: rgba(124, 58, 237, 0.38);
   box-shadow:
-    0 -12px 80px rgba(0, 0, 0, 0.18),
-    0 0 38px rgba(124, 58, 237, 0.10);
+    0 -12px 80px rgba(0, 0, 0, 0.18);
   transform: translateY(-2px);
 }
 
@@ -1685,7 +1679,7 @@
   align-items: center;
   gap: 5px;
   color: var(--pg-text-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .paygate-proof-section {
@@ -1695,8 +1689,8 @@
   padding: clamp(82px, 8.5vw, 116px) 24px clamp(88px, 8vw, 110px);
   background:
     linear-gradient(180deg, rgba(5, 6, 9, 0.96), rgba(5, 6, 9, 0.98)),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(135, 146, 166, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(135, 146, 166, 0.026) 1px, transparent 1px);
   background-size: auto, 86px 86px, 86px 86px;
 }
 
@@ -1706,10 +1700,10 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 52% 0%, rgba(124, 58, 237, 0.18), transparent 42%),
-    linear-gradient(90deg, transparent 0 12%, rgba(56, 189, 248, 0.075) 12.2%, transparent 12.5% 87%, rgba(56, 189, 248, 0.055) 87.2%, transparent 87.5%),
-    repeating-linear-gradient(12deg, transparent 0 58px, rgba(56, 189, 248, 0.035) 59px, transparent 61px);
-  opacity: 0.72;
+    radial-gradient(ellipse at 52% 0%, rgba(124, 58, 237, 0.10), transparent 42%),
+    linear-gradient(90deg, transparent 0 12%, rgba(96, 165, 250, 0.045) 12.2%, transparent 12.5% 87%, rgba(96, 165, 250, 0.035) 87.2%, transparent 87.5%),
+    repeating-linear-gradient(12deg, transparent 0 58px, rgba(135, 146, 166, 0.028) 59px, transparent 61px);
+  opacity: 0.68;
 }
 
 .paygate-proof-section::after {
@@ -1720,10 +1714,10 @@
   width: 42%;
   height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.28), transparent);
+  background: linear-gradient(90deg, transparent, rgba(135, 146, 166, 0.20), transparent);
   box-shadow:
-    -980px 84px 0 rgba(56, 189, 248, 0.10),
-    -760px -120px 0 rgba(124, 58, 237, 0.11);
+    -980px 84px 0 rgba(96, 165, 250, 0.055),
+    -760px -120px 0 rgba(124, 58, 237, 0.065);
 }
 
 .paygate-proof-inner {
@@ -1746,13 +1740,22 @@
 }
 
 .paygate-proof-eyebrow {
-  margin: 0 0 24px;
-  color: var(--pg-brand-purple-soft);
-  font-family: var(--pg-font-mono);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 22px;
+  color: var(--pg-text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.paygate-proof-eyebrow span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pg-success);
 }
 
 .paygate-proof-copy h2 {
@@ -1783,7 +1786,7 @@
   border: 1px solid rgba(82, 94, 118, 0.36);
   background:
     linear-gradient(180deg, rgba(8, 10, 15, 0.96), rgba(5, 7, 11, 0.98)),
-    radial-gradient(circle at 82% 12%, rgba(124, 58, 237, 0.055), transparent 38%);
+    radial-gradient(circle at 82% 12%, rgba(124, 58, 237, 0.032), transparent 38%);
   box-shadow:
     0 24px 86px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.035);
@@ -1801,6 +1804,7 @@
   overflow: hidden;
   min-height: 416px;
   border-radius: 16px;
+  padding: 8px;
 }
 
 .paygate-receipt-panel::before {
@@ -1809,8 +1813,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.20), transparent),
-    radial-gradient(circle at 100% 70%, rgba(124, 58, 237, 0.20), transparent 24%);
+    linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.12), transparent),
+    radial-gradient(circle at 100% 70%, rgba(124, 58, 237, 0.12), transparent 24%);
   opacity: 0;
   transform: translateY(0);
   transition: opacity 220ms ease;
@@ -1818,11 +1822,11 @@
 
 .paygate-proof-section[data-proof-visible='true'] .paygate-receipt-panel::before,
 .paygate-receipt-panel:hover::before {
-  opacity: 0.28;
+  opacity: 0.20;
 }
 
 .paygate-receipt-panel:hover::before {
-  opacity: 0.38;
+  opacity: 0.28;
 }
 
 .paygate-receipt-head {
@@ -1834,7 +1838,8 @@
   gap: 20px;
   min-height: 76px;
   border-bottom: 1px solid rgba(82, 94, 118, 0.28);
-  padding: 0 28px;
+  border-radius: 10px 10px 0 0;
+  padding: 0 20px;
 }
 
 .paygate-receipt-head > div,
@@ -1920,7 +1925,7 @@
   color: var(--pg-text-primary);
   cursor: pointer;
   font: inherit;
-  padding: 0 28px 0 24px;
+  padding: 0 20px 0 18px;
   text-align: left;
   transition:
     background-color 180ms ease,
@@ -1934,10 +1939,10 @@
   left: 0;
   bottom: -1px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.92), rgba(56, 189, 248, 0.48), transparent);
+  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.72), rgba(96, 165, 250, 0.32), transparent);
   box-shadow:
-    0 0 22px rgba(124, 58, 237, 0.52),
-    0 0 44px rgba(56, 189, 248, 0.20);
+    0 0 14px rgba(124, 58, 237, 0.30),
+    0 0 26px rgba(96, 165, 250, 0.12);
   opacity: 0;
   transform: scaleX(0.86);
   transition:
@@ -1947,8 +1952,8 @@
 
 .paygate-receipt-row[data-active='true'] {
   background:
-    linear-gradient(90deg, rgba(124, 58, 237, 0.08), rgba(56, 189, 248, 0.025), transparent 78%);
-  box-shadow: inset 3px 0 0 rgba(124, 58, 237, 0.52);
+    linear-gradient(90deg, rgba(124, 58, 237, 0.065), rgba(96, 165, 250, 0.018), transparent 78%);
+  box-shadow: inset 2px 0 0 rgba(124, 58, 237, 0.46);
 }
 
 .paygate-receipt-row[data-active='true']::before {
@@ -2066,7 +2071,8 @@
   min-height: 58px;
   color: var(--pg-text-secondary);
   font-size: 14px;
-  padding: 0 28px;
+  border-radius: 0 0 10px 10px;
+  padding: 0 20px;
 }
 
 .paygate-receipt-foot span {
@@ -2103,7 +2109,7 @@
   height: 10px;
   border-radius: 999px;
   background: #4ADE80;
-  box-shadow: 0 0 16px rgba(74, 222, 128, 0.62);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.38);
   animation: pg-live-dot 2.4s ease-in-out infinite;
 }
 
@@ -2126,7 +2132,7 @@
   border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(7, 10, 15, 0.97), rgba(4, 6, 10, 0.985)),
-    radial-gradient(circle at 88% 8%, rgba(124, 58, 237, 0.050), transparent 36%);
+    radial-gradient(circle at 88% 8%, rgba(124, 58, 237, 0.030), transparent 36%);
   padding: 24px;
 }
 
@@ -2256,7 +2262,7 @@
   min-height: 76px;
   border-color: rgba(82, 94, 118, 0.34);
   border-radius: var(--pg-radius-lg);
-  padding: 0 18px;
+  padding: 14px 18px;
   color: var(--pg-text-primary);
 }
 
@@ -2301,7 +2307,6 @@
   border-color: rgba(167, 139, 250, 0.26);
   box-shadow:
     0 26px 88px rgba(0, 0, 0, 0.46),
-    0 0 26px rgba(124, 58, 237, 0.075),
     inset 0 1px 0 rgba(255, 255, 255, 0.042);
 }
 
@@ -2309,25 +2314,22 @@
   border-color: rgba(167, 139, 250, 0.30);
   background:
     linear-gradient(180deg, rgba(9, 12, 18, 0.98), rgba(5, 7, 11, 0.99)),
-    radial-gradient(circle at 12% 50%, rgba(124, 58, 237, 0.075), transparent 30%);
+    radial-gradient(circle at 12% 50%, rgba(124, 58, 237, 0.045), transparent 30%);
   box-shadow:
     0 18px 58px rgba(0, 0, 0, 0.38),
-    0 0 22px rgba(124, 58, 237, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   transform: translateY(-1px);
 }
 
 .paygate-proof-chip:hover > svg:first-child {
   color: #B8A2FF;
-  filter:
-    drop-shadow(0 0 16px rgba(124, 58, 237, 0.24))
-    drop-shadow(0 0 6px rgba(34, 211, 238, 0.10));
+  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.16));
   transform: translateY(-1px);
 }
 
 .paygate-proof-chip:hover > svg:last-child {
   color: #4ADE80;
-  filter: drop-shadow(0 0 14px rgba(74, 222, 128, 0.24));
+  filter: drop-shadow(0 0 9px rgba(74, 222, 128, 0.16));
   transform: scale(1.04);
 }
 
@@ -2338,12 +2340,12 @@
   width: 58px;
   height: 58px;
   margin-bottom: 20px;
-  border: 1px solid rgba(124, 58, 237, 0.22);
+  border: 1px solid rgba(135, 146, 166, 0.24);
   border-radius: 14px;
   background:
-    radial-gradient(circle at 70% 70%, rgba(34, 211, 238, 0.10), transparent 46%),
-    rgba(124, 58, 237, 0.10);
-  box-shadow: inset 0 0 16px rgba(124, 58, 237, 0.06);
+    radial-gradient(circle at 70% 70%, rgba(96, 165, 250, 0.055), transparent 46%),
+    rgba(124, 58, 237, 0.075);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
@@ -2354,11 +2356,11 @@
 .paygate-feature-icon-shell[data-active='true'] {
   border-color: rgba(167, 139, 250, 0.42);
   background:
-    radial-gradient(circle at 70% 70%, rgba(34, 211, 238, 0.16), transparent 48%),
-    rgba(124, 58, 237, 0.16);
+    radial-gradient(circle at 70% 70%, rgba(96, 165, 250, 0.08), transparent 48%),
+    rgba(124, 58, 237, 0.12);
   box-shadow:
-    0 0 26px rgba(124, 58, 237, 0.18),
-    inset 0 0 16px rgba(124, 58, 237, 0.08);
+    0 14px 30px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transform: translateY(-2px);
 }
 
@@ -2874,7 +2876,7 @@
 
   .paygate-proof-eyebrow {
     margin-bottom: 14px;
-    font-size: 10px;
+    font-size: 13px;
   }
 
   .paygate-proof-copy h2 {

@@ -16,13 +16,13 @@
 
   --pg-text-primary: #F7F8FB;
   --pg-text-secondary: #A5ADBD;
-  --pg-text-muted: #6B7487;
-  --pg-text-faint: #475569;
+  --pg-text-muted: #8792A6;
+  --pg-text-faint: #68758A;
 
   --pg-brand-purple: #7C3AED;
   --pg-brand-purple-soft: #A78BFA;
-  --pg-brand-purple-dim: rgba(124, 58, 237, 0.14);
-  --pg-brand-purple-glow: rgba(124, 58, 237, 0.24);
+  --pg-brand-purple-dim: rgba(124, 58, 237, 0.12);
+  --pg-brand-purple-glow: rgba(124, 58, 237, 0.14);
 
   --pg-flow-blue: #38BDF8;
   --pg-flow-cyan: #22D3EE;
@@ -39,8 +39,8 @@
   --pg-radius-lg: 12px;
 
   --pg-shadow-panel: 0 18px 60px rgba(0, 0, 0, 0.28);
-  --pg-shadow-focus: 0 0 0 3px rgba(124, 58, 237, 0.28);
-  --pg-shadow-glow: 0 0 32px rgba(124, 58, 237, 0.18);
+  --pg-shadow-focus: 0 0 0 3px rgba(124, 58, 237, 0.24);
+  --pg-shadow-glow: 0 18px 48px rgba(0, 0, 0, 0.34);
 
   --pg-font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --pg-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;

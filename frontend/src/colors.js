@@ -18,14 +18,14 @@ export const PALETTE = {
   text: {
     primary: '#F7F8FB',
     secondary: '#A5ADBD',
-    muted: '#6B7487',
-    faint: '#475569',
+    muted: '#8792A6',
+    faint: '#68758A',
   },
   brand: {
     purple: '#7C3AED',
     purpleSoft: '#A78BFA',
-    purpleDim: 'rgba(124,58,237,0.14)',
-    purpleGlow: 'rgba(124,58,237,0.24)',
+    purpleDim: 'rgba(124,58,237,0.12)',
+    purpleGlow: 'rgba(124,58,237,0.14)',
   },
   flow: {
     blue: '#38BDF8',
@@ -54,9 +54,9 @@ export const RADIUS = {
 };
 
 export const SHADOW = {
-  focus: '0 0 0 3px rgba(124,58,237,0.28)',
+  focus: '0 0 0 3px rgba(124,58,237,0.24)',
   panel: '0 18px 60px rgba(0,0,0,0.28)',
-  glow: '0 0 32px rgba(124,58,237,0.18)',
+  glow: '0 18px 48px rgba(0,0,0,0.34)',
 };
 
 export const C = {
