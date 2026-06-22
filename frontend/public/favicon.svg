@@ -1,0 +1,20 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayGate">
+  <defs>
+    <linearGradient id="pg-favicon-fill" x1="15" y1="12" x2="49" y2="53" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B26BFF"/>
+      <stop offset="0.46" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#4F8DFF"/>
+    </linearGradient>
+    <linearGradient id="pg-favicon-cyan" x1="28" y1="37" x2="48" y2="39" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="0.36" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#67E8F9"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#07080C"/>
+  <path fill="url(#pg-favicon-fill)" fill-rule="evenodd" d="M16 55V20L23 13H40C51 13 58 20 58 30C58 40 51 48 40 48H28L16 55ZM28 25V36H40C45 36 48 34 48 30C48 27 45 25 40 25H28Z" clip-rule="evenodd"/>
+  <path d="M29 38H43" stroke="#06070C" stroke-width="5" stroke-linecap="round"/>
+  <path d="M29 38H43" stroke="url(#pg-favicon-cyan)" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="47" cy="38" r="4.8" fill="#06070C"/>
+  <circle cx="47" cy="38" r="3.2" fill="#67E8F9"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Code badge">
+  <defs>
+    <linearGradient id="pg-code-stroke" x1="24" y1="20" x2="98" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <rect x="25" y="22" width="70" height="76" rx="17" fill="#0D1117" fill-opacity="0.92"/>
+  <rect x="25" y="22" width="70" height="76" rx="17" stroke="url(#pg-code-stroke)" stroke-width="2"/>
+  <path d="M52 47L39 60L52 73" stroke="#F7F8FB" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M68 47L81 60L68 73" stroke="#F7F8FB" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M64 42L56 78" stroke="#22D3EE" stroke-width="5" stroke-linecap="round"/>
+</svg>

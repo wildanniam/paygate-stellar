@@ -1,45 +1,57 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayGate logo mark">
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayGate logo mark">
   <defs>
-    <linearGradient id="paygate-mark-gradient" x1="280" y1="214" x2="760" y2="768" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7C3AED"/>
-      <stop offset="0.56" stop-color="#7C3AED"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+    <linearGradient id="pg-mark-fill" x1="122" y1="94" x2="390" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B26BFF"/>
+      <stop offset="0.46" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#4F8DFF"/>
     </linearGradient>
-    <linearGradient id="paygate-node-gradient" x1="590" y1="440" x2="704" y2="556" gradientUnits="userSpaceOnUse">
+    <linearGradient id="pg-mark-depth" x1="214" y1="202" x2="344" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#070A12" stop-opacity="0.18"/>
+      <stop offset="0.64" stop-color="#070A12" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#070A12" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="pg-mark-cyan" x1="226" y1="292" x2="380" y2="314" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#F8FAFC"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+      <stop offset="0.36" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#67E8F9"/>
     </linearGradient>
-    <filter id="paygate-mark-glow" x="198" y="138" width="668" height="748" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur"/>
-      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.486 0 0 0 0 0.227 0 0 0 0 0.929 0 0 0 0.55 0"/>
-      <feBlend in2="BackgroundImageFix" mode="screen" result="glow"/>
-      <feBlend in="SourceGraphic" in2="glow" mode="normal" result="shape"/>
+    <filter id="pg-mark-glow" x="64" y="52" width="400" height="424" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.486 0 0 0 0 0.227 0 0 0 0 0.929 0 0 0 0.42 0"/>
+      <feBlend in2="SourceGraphic" mode="screen"/>
     </filter>
   </defs>
 
-  <g filter="url(#paygate-mark-glow)">
+  <g filter="url(#pg-mark-glow)">
     <path
-      d="M360 760V280C360 244.7 388.7 216 424 216H584C710.5 216 792 295.8 792 408C792 520.2 710.5 600 584 600H456"
-      stroke="url(#paygate-mark-gradient)"
-      stroke-width="80"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      fill="url(#pg-mark-fill)"
+      fill-rule="evenodd"
+      d="M132 438V158L186 104H316C406 104 462 161 462 242C462 323 406 380 316 380H222L132 438ZM222 196V292H314C352 292 376 274 376 242C376 210 352 196 314 196H222Z"
+      clip-rule="evenodd"
     />
     <path
-      d="M460 512H604"
-      stroke="#080808"
-      stroke-width="48"
+      fill="url(#pg-mark-depth)"
+      d="M222 294H314C352 294 376 274 376 242C376 304 336 348 274 348H222V294Z"
+    />
+    <path
+      d="M232 306H340"
+      stroke="#06070C"
+      stroke-width="30"
       stroke-linecap="round"
     />
     <path
-      d="M452 512H612"
-      stroke="#F8FAFC"
-      stroke-width="22"
+      d="M232 306H340"
+      stroke="url(#pg-mark-cyan)"
+      stroke-width="14"
       stroke-linecap="round"
     />
-    <circle cx="660" cy="512" r="54" fill="#080808"/>
-    <circle cx="660" cy="512" r="38" fill="url(#paygate-node-gradient)"/>
-    <circle cx="660" cy="512" r="16" fill="#080808"/>
+    <circle cx="366" cy="306" r="30" fill="#06070C"/>
+    <circle cx="366" cy="306" r="21" fill="url(#pg-mark-cyan)"/>
+    <circle cx="366" cy="306" r="9" fill="#06070C"/>
+    <path
+      d="M132 158L186 104H232L176 160V420L132 438V158Z"
+      fill="#D8C6FF"
+      opacity="0.16"
+    />
   </g>
 </svg>

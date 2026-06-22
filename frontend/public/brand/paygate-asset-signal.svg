@@ -1,0 +1,14 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Machine signal badge">
+  <defs>
+    <linearGradient id="pg-signal-stroke" x1="24" y1="24" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <rect x="22" y="28" width="76" height="64" rx="16" fill="#0D1117" fill-opacity="0.92"/>
+  <rect x="22" y="28" width="76" height="64" rx="16" stroke="url(#pg-signal-stroke)" stroke-width="2"/>
+  <path d="M42 69V51" stroke="#22D3EE" stroke-width="6" stroke-linecap="round"/>
+  <path d="M54 76V44" stroke="#A78BFA" stroke-width="6" stroke-linecap="round"/>
+  <path d="M66 70V50" stroke="#22D3EE" stroke-width="6" stroke-linecap="round"/>
+  <path d="M78 63V57" stroke="#F7F8FB" stroke-width="6" stroke-linecap="round"/>
+</svg>

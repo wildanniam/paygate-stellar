@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, BarChart3, CalendarDays, CheckCircle2, Code2, Copy, Database, Github, Globe, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
+import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, Github, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -50,6 +50,14 @@ function TerminalDots() {
         <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: bg }} />
       ))}
     </div>
+  );
+}
+
+function BrandFeatureIcon({ src, alt }) {
+  return (
+    <span className="paygate-feature-brand-icon">
+      <img src={src} alt={alt} />
+    </span>
   );
 }
 
@@ -311,49 +319,40 @@ export default function Landing() {
       }} />
 
       {/* ── NAVBAR ── */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        backdropFilter: 'blur(12px)',
-        background: 'rgba(8,8,8,0.85)',
-        borderBottom: `1px solid ${C.border}`,
-      }}>
-        <div className="flex items-center justify-between"
-          style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', minHeight: 56, gap: 10 }}>
-          <span style={{ ...M, fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap' }}>
-            <span style={{ color: C.accent }}>{'{ '}</span>PayGate<span style={{ color: C.accent }}>{' }'}</span>
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <Link className="landing-nav-secondary" to="/dashboard" style={{ color: C.text2, textDecoration: 'none', padding: '6px 10px', borderRadius: 6, fontSize: 13, ...M }}>
+      <nav className="paygate-nav">
+        <div className="paygate-nav-inner">
+          <Link className="paygate-brand-link" to="/" aria-label="PayGate home">
+            <span className="paygate-brand-mark" aria-hidden="true">
+              <img src="/brand/paygate-mark.svg" alt="" />
+            </span>
+            <span>PayGate</span>
+          </Link>
+
+          <div className="paygate-nav-center" aria-label="Primary navigation">
+            <a href="#features">Product</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="https://github.com/wildanniam/paygate-stellar" target="_blank" rel="noopener noreferrer">Docs</a>
+            <a href="#features">Pricing</a>
+          </div>
+
+          <div className="paygate-nav-actions">
+            <Link className="paygate-nav-secondary" to="/dashboard">
               Dashboard
             </Link>
             <Link
+              className="paygate-nav-cta"
               to="/apis/new"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                background: C.accent,
-                color: C.text1, textDecoration: 'none',
-                padding: '8px 13px', borderRadius: 6, fontSize: 13, fontWeight: 800,
-                transition: 'all 0.15s ease',
-                ...M,
-              }}
             >
               Create paid endpoint
             </Link>
             <a
-              className="desktop-nav-link"
+              className="paygate-nav-icon desktop-nav-link"
               href="https://github.com/wildanniam/paygate-stellar"
               target="_blank" rel="noopener noreferrer"
               aria-label="View PayGate on GitHub"
               onMouseEnter={() => hov('navCta', true)}
               onMouseLeave={() => hov('navCta', false)}
-              style={{
-                alignItems: 'center', gap: 6,
-                border: `1px solid ${C.border}`,
-                background: h.navCta ? C.accentDim : 'transparent',
-                color: C.text1, textDecoration: 'none',
-                padding: '8px 10px', borderRadius: 6, fontSize: 13,
-                transition: 'all 0.15s ease',
-              }}
+              data-active={h.navCta ? 'true' : 'false'}
             >
               <Github size={14} />
             </a>
@@ -798,22 +797,22 @@ export default function Landing() {
           <div ref={featCardsRef} className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 16 }}>
             {[
               {
-                icon: <Code2 size={20} color={C.accent} />,
+                icon: <BrandFeatureIcon src="/brand/paygate-asset-api.svg" alt="" />,
                 title: 'Paid Proxy URLs',
                 body: 'Register an upstream endpoint and PayGate creates a public proxy URL that agents can call when they need paid API access.',
               },
               {
-                icon: <BarChart3 size={20} color={C.accent} />,
+                icon: <BrandFeatureIcon src="/brand/paygate-asset-chart.svg" alt="" />,
                 title: 'Revenue Dashboard',
                 body: 'Track registered APIs, paid calls, gross revenue, platform fees, request status, escrow balance, and testnet transaction hashes.',
               },
               {
-                icon: <Zap size={20} color={C.accent} />,
+                icon: <BrandFeatureIcon src="/brand/paygate-asset-code.svg" alt="" />,
                 title: 'Simple Upstream Protection',
                 body: 'PayGate gives each API a secret header. Your upstream API checks that header so buyers cannot bypass the paid proxy.',
               },
               {
-                icon: <Globe size={20} color={C.accent} />,
+                icon: <BrandFeatureIcon src="/brand/paygate-asset-signal.svg" alt="" />,
                 title: 'Built for Machine Clients',
                 body: 'The demo flow is made for agents and scripts: request, receive 402, pay with Stellar MPP, retry, and receive JSON.',
               },
@@ -833,18 +832,7 @@ export default function Landing() {
                   transition: cardTransition,
                 }}
               >
-                <div style={{
-                  width: 48, height: 48,
-                  background: h.feat === i
-                    ? 'rgba(124,58,237,0.18)'
-                    : C.accentDim,
-                  border: `1px solid ${h.feat === i ? 'rgba(124,58,237,0.5)' : 'rgba(124,58,237,0.2)'}`,
-                  borderRadius: 10,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 20,
-                  boxShadow: h.feat === i ? '0 0 20px rgba(124,58,237,0.25), inset 0 0 12px rgba(124,58,237,0.08)' : 'none',
-                  transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
-                }}>
+                <div className="paygate-feature-icon-shell" data-active={h.feat === i ? 'true' : 'false'}>
                   {feat.icon}
                 </div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: C.text1, marginBottom: 10 }}>{feat.title}</h3>
