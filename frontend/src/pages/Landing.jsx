@@ -11,6 +11,11 @@ const KW   = t => <span style={{ color: C.purple }}>{t}</span>;
 const STR  = t => <span style={{ color: C.green }}>{t}</span>;
 const FN   = t => <span style={{ color: C.amber }}>{t}</span>;
 
+const HERO_FLOW_URLS = {
+  source: 'https://api.company.com/v1/signal',
+  proxy: 'https://paygate.app/api/pay/api_123',
+};
+
 function useCountUp(target, duration, active, delay = 0) {
   const [value, setValue] = useState(0);
   useEffect(() => {
@@ -58,17 +63,58 @@ export default function Landing() {
   const [statsActive, setStatsActive] = useState(false);
   const [activeSteps, setActiveSteps] = useState([false, false, false]);
   const [magnetCta, setMagnetCta]     = useState({ x: 0, y: 0 });
+  const [heroActive, setHeroActive]   = useState('idle');
+  const [copiedFlow, setCopiedFlow]   = useState(null);
 
   // Card stagger states
   const [problemVis, setProblemVis] = useState([false, false, false]);
   const [featVis, setFeatVis]       = useState([false, false, false, false]);
 
   const heroRailRef    = useRef(null);
+  const copyTimerRef   = useRef(null);
   const problemRef     = useRef(null);
   const howItWorksRef  = useRef(null);
   const ctaBottomRef   = useRef(null);
   const problemCardsRef = useRef(null);
   const featCardsRef    = useRef(null);
+
+  const resetHeroActive = useCallback(() => setHeroActive('idle'), []);
+
+  const copyHeroUrl = useCallback(async key => {
+    const value = HERO_FLOW_URLS[key];
+    if (!value) return;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+
+      window.clearTimeout(copyTimerRef.current);
+      setHeroActive(key);
+      setCopiedFlow(key);
+      copyTimerRef.current = window.setTimeout(() => setCopiedFlow(null), 1500);
+    } catch {
+      window.clearTimeout(copyTimerRef.current);
+      setCopiedFlow(`${key}-error`);
+      copyTimerRef.current = window.setTimeout(() => setCopiedFlow(null), 1500);
+    }
+  }, []);
+
+  const getHeroCopyState = key => {
+    if (copiedFlow === key) return 'copied';
+    if (copiedFlow === `${key}-error`) return 'error';
+    return 'idle';
+  };
 
   // ── Fade-in: JS-driven so SSR/no-JS sees content; IO with rootMargin + 800ms fallback ──
   useEffect(() => {
@@ -93,6 +139,8 @@ export default function Landing() {
     }, 800);
     return () => { obs.disconnect(); clearTimeout(fallback); };
   }, []);
+
+  useEffect(() => () => window.clearTimeout(copyTimerRef.current), []);
 
   // ── Scroll progress ──
   useEffect(() => {
@@ -351,25 +399,49 @@ export default function Landing() {
           <div
             ref={heroRailRef}
             className="paygate-flow-stage"
+            data-hero-active={heroActive}
+            data-copy-state={copiedFlow || 'idle'}
+            onMouseLeave={resetHeroActive}
             aria-label="PayGate turns an original API URL into a paid proxy URL, blocks unpaid requests with 402, accepts MPP payment, forwards the request upstream, and records revenue."
           >
             <div className="paygate-flow-grid">
               <div className="paygate-flow-label paygate-flow-label-left">Your API URL</div>
               <div className="paygate-flow-label paygate-flow-label-right">Your paid endpoint</div>
 
-              <div className="paygate-flow-pill is-source" data-flow-pill="source">
+              <button
+                type="button"
+                className="paygate-flow-pill is-source"
+                data-flow-pill="source"
+                data-copy-state={getHeroCopyState('source')}
+                onClick={() => copyHeroUrl('source')}
+                onMouseEnter={() => setHeroActive('source')}
+                onFocus={() => setHeroActive('source')}
+                onBlur={resetHeroActive}
+                aria-label={`Copy original API URL ${HERO_FLOW_URLS.source}`}
+              >
                 <span className="paygate-flow-pill-icon">
-                  <Link2 size={19} aria-hidden="true" />
+                  {getHeroCopyState('source') === 'copied' ? <CheckCircle2 size={19} aria-hidden="true" /> : <Link2 size={19} aria-hidden="true" />}
                 </span>
-                <code>https://api.company.com/v1/signal</code>
-              </div>
+                <code>{HERO_FLOW_URLS.source}</code>
+                <span className="paygate-copy-feedback" aria-hidden="true">
+                  {getHeroCopyState('source') === 'copied' ? 'Copied' : getHeroCopyState('source') === 'error' ? 'Error' : 'Copy'}
+                </span>
+              </button>
 
               <div className="paygate-flow-connector is-left" aria-hidden="true">
                 <span data-flow-line />
                 <ArrowRight data-flow-arrow size={34} strokeWidth={2.4} />
               </div>
 
-              <div className="paygate-node-wrap" data-flow-node>
+              <div
+                className="paygate-node-wrap"
+                data-flow-node
+                onMouseEnter={() => setHeroActive('node')}
+                onFocus={() => setHeroActive('node')}
+                onBlur={resetHeroActive}
+                tabIndex={0}
+                aria-label="PayGate paid proxy verifies payment and forwards authorized API calls."
+              >
                 <div className="paygate-node-matrix" aria-hidden="true" />
                 <div className="paygate-node-card">
                   <img src="/brand/paygate-mark.svg" alt="" />
@@ -383,12 +455,25 @@ export default function Landing() {
                 <ArrowRight data-flow-arrow size={34} strokeWidth={2.4} />
               </div>
 
-              <div className="paygate-flow-pill is-proxy" data-flow-pill="proxy">
+              <button
+                type="button"
+                className="paygate-flow-pill is-proxy"
+                data-flow-pill="proxy"
+                data-copy-state={getHeroCopyState('proxy')}
+                onClick={() => copyHeroUrl('proxy')}
+                onMouseEnter={() => setHeroActive('proxy')}
+                onFocus={() => setHeroActive('proxy')}
+                onBlur={resetHeroActive}
+                aria-label={`Copy paid endpoint URL ${HERO_FLOW_URLS.proxy}`}
+              >
                 <span className="paygate-flow-pill-icon">
-                  <Copy size={19} aria-hidden="true" />
+                  {getHeroCopyState('proxy') === 'copied' ? <CheckCircle2 size={19} aria-hidden="true" /> : <Copy size={19} aria-hidden="true" />}
                 </span>
-                <code>https://paygate.app/api/pay/api_123</code>
-              </div>
+                <code>{HERO_FLOW_URLS.proxy}</code>
+                <span className="paygate-copy-feedback" aria-hidden="true">
+                  {getHeroCopyState('proxy') === 'copied' ? 'Copied' : getHeroCopyState('proxy') === 'error' ? 'Error' : 'Copy'}
+                </span>
+              </button>
             </div>
 
             <div className="paygate-status-track" aria-hidden="true">
@@ -396,21 +481,48 @@ export default function Landing() {
             </div>
 
             <div className="paygate-status-row">
-              <div className="paygate-lifecycle-chip is-warning" data-status-step>
+              <button
+                type="button"
+                className="paygate-lifecycle-chip is-warning"
+                data-status-step
+                onMouseEnter={() => setHeroActive('challenge')}
+                onFocus={() => setHeroActive('challenge')}
+                onBlur={resetHeroActive}
+                onClick={() => setHeroActive('challenge')}
+                aria-label="Step one, unpaid request receives a 402 payment required response."
+              >
                 <span className="paygate-lifecycle-number">1</span>
                 <ShieldCheck size={20} aria-hidden="true" />
                 <strong>402 Required</strong>
-              </div>
-              <div className="paygate-lifecycle-chip is-paid" data-status-step>
+              </button>
+              <button
+                type="button"
+                className="paygate-lifecycle-chip is-paid"
+                data-status-step
+                onMouseEnter={() => setHeroActive('paid')}
+                onFocus={() => setHeroActive('paid')}
+                onBlur={resetHeroActive}
+                onClick={() => setHeroActive('paid')}
+                aria-label="Step two, the machine client pays with MPP."
+              >
                 <span className="paygate-lifecycle-number">2</span>
                 <CheckCircle2 size={20} aria-hidden="true" />
                 <strong>MPP Paid</strong>
-              </div>
-              <div className="paygate-lifecycle-chip is-success" data-status-step>
+              </button>
+              <button
+                type="button"
+                className="paygate-lifecycle-chip is-success"
+                data-status-step
+                onMouseEnter={() => setHeroActive('success')}
+                onFocus={() => setHeroActive('success')}
+                onBlur={resetHeroActive}
+                onClick={() => setHeroActive('success')}
+                aria-label="Step three, paid request is forwarded and receives a 200 OK response."
+              >
                 <span className="paygate-lifecycle-number">3</span>
                 <CheckCircle2 size={20} aria-hidden="true" />
                 <strong>200 OK</strong>
-              </div>
+              </button>
             </div>
 
             <div className="paygate-revenue-split" data-revenue-split>
