@@ -1,31 +1,45 @@
 import { Github } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { C, MONO } from '../colors.js';
+import Button from './ui/Button.jsx';
 
 export default function AppNavbar() {
   const { pathname } = useLocation();
 
   const navLink = (to, label, variant = 'plain') => {
     const active = pathname === to;
-    const isPrimary = variant === 'primary';
+    if (variant === 'primary') {
+      return (
+        <Button
+          as={Link}
+          to={to}
+          size="sm"
+          className="pg-app-nav-primary"
+          aria-current={active ? 'page' : undefined}
+        >
+          {label}
+        </Button>
+      );
+    }
+
     return (
-    <Link
-      to={to}
-      style={{
-        color: active || isPrimary ? C.text1 : C.text2,
-        fontSize: 13,
-        textDecoration: 'none',
-        padding: isPrimary ? '8px 13px' : '6px 12px',
-        borderRadius: 6,
-        background: active ? C.accent : isPrimary ? C.accentDim : 'transparent',
-        border: isPrimary && !active ? `1px solid ${C.borderHover}` : '1px solid transparent',
-        fontWeight: isPrimary ? 800 : 500,
-        transition: 'all 0.15s ease',
-        ...MONO,
-      }}
-    >
-      {label}
-    </Link>
+      <Link
+        to={to}
+        style={{
+          color: active ? C.text1 : C.text2,
+          fontSize: 13,
+          textDecoration: 'none',
+          padding: '6px 12px',
+          borderRadius: 6,
+          background: active ? C.accent : 'transparent',
+          border: '1px solid transparent',
+          fontWeight: 500,
+          transition: 'all 0.15s ease',
+          ...MONO,
+        }}
+      >
+        {label}
+      </Link>
     );
   };
 

@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
+import Button from '../components/ui/Button.jsx';
 import { C, MONO } from '../colors.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
 
@@ -274,10 +275,9 @@ export default function Dashboard() {
                 Refresh
               </button>
             )}
-            <Link to="/apis/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.accent, color: C.text1, borderRadius: 8, padding: '11px 16px', fontWeight: 800, textDecoration: 'none' }}>
-              <Database size={16} />
+            <Button as={Link} to="/apis/new" icon={<Database size={16} aria-hidden="true" />}>
               Register API
-            </Link>
+            </Button>
           </div>
         </header>
 
@@ -299,10 +299,14 @@ export default function Dashboard() {
               Logout
             </button>
           ) : (
-            <button type="button" onClick={handleConnectWallet} disabled={authStatus === 'connecting' || authStatus === 'loading'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.accent, color: C.text1, border: 'none', borderRadius: 8, padding: '11px 16px', fontWeight: 800, cursor: 'pointer' }}>
-              {authStatus === 'connecting' ? <Loader2 size={16} className="spin" /> : <Wallet size={16} />}
+            <Button
+              type="button"
+              onClick={handleConnectWallet}
+              disabled={authStatus === 'connecting' || authStatus === 'loading'}
+              icon={authStatus === 'connecting' ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Wallet size={16} aria-hidden="true" />}
+            >
               Connect Freighter
-            </button>
+            </Button>
           )}
         </section>
 
@@ -319,10 +323,9 @@ export default function Dashboard() {
               title="Wallet login required"
               body="The V1 dashboard is scoped to the developer wallet. Connect Freighter and sign the challenge so PayGate can show only APIs, payments, and escrow balance owned by that wallet."
               action={(
-                <button type="button" onClick={handleConnectWallet} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.accent, color: C.text1, border: 'none', borderRadius: 8, padding: '11px 16px', fontWeight: 800, cursor: 'pointer' }}>
-                  <Wallet size={16} />
+                <Button type="button" onClick={handleConnectWallet} icon={<Wallet size={16} aria-hidden="true" />}>
                   Connect Freighter
-                </button>
+                </Button>
               )}
             />
           </section>
@@ -519,10 +522,15 @@ export default function Dashboard() {
                 <div style={{ color: C.amber, fontWeight: 800, marginTop: 8 }}>{formatUsdc(dashboard.escrow?.platformFeeBalance?.usdc)}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <button type="button" onClick={handleWithdraw} disabled={!canWithdraw} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: canWithdraw ? C.accent : C.surfaceHover, color: canWithdraw ? C.text1 : C.text3, border: canWithdraw ? 'none' : `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', fontWeight: 800, cursor: canWithdraw ? 'pointer' : 'not-allowed' }}>
-                  {isWithdrawing ? <Loader2 size={15} className="spin" /> : <Wallet size={15} />}
+                <Button
+                  type="button"
+                  onClick={handleWithdraw}
+                  disabled={!canWithdraw}
+                  variant={canWithdraw ? 'primary' : 'secondary'}
+                  icon={isWithdrawing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <Wallet size={15} aria-hidden="true" />}
+                >
                   {withdrawStatus === 'signing' ? 'Sign in Freighter' : withdrawStatus === 'submitting' ? 'Submitting' : 'Withdraw'}
-                </button>
+                </Button>
                 <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>
                   Open Explorer
                   <ArrowUpRight size={16} />

@@ -56,13 +56,16 @@
 }
 
 .pg-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 40px;
   border: 1px solid transparent;
-  border-radius: var(--pg-radius-md);
+  border-radius: 999px;
   padding: 0 14px;
   font-family: var(--pg-font-sans);
   font-size: 14px;
@@ -74,9 +77,32 @@
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
+    box-shadow 160ms ease,
     color 160ms ease,
     transform 160ms ease,
     opacity 160ms ease;
+}
+
+.pg-button::before,
+.pg-button::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.pg-button-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .pg-button:hover:not(:disabled) {
@@ -96,14 +122,47 @@
 }
 
 .pg-button[data-variant='primary'] {
-  background: var(--pg-brand-purple);
-  border-color: rgba(167, 139, 250, 0.28);
+  background:
+    linear-gradient(180deg, #8F83FF 0%, #735CFA 46%, #4B44AA 100%);
+  border-color: rgba(255, 255, 255, 0.16);
   color: var(--pg-text-primary);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
+  box-shadow:
+    0 8px 24px rgba(73, 66, 170, 0.42),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.pg-button[data-variant='primary']::before {
+  inset: -8px;
+  background:
+    radial-gradient(120% 120% at 50% 118%, rgba(124, 114, 254, 0.28) 0%, rgba(124, 114, 254, 0) 62%);
+  filter: blur(7px);
+  opacity: 1;
+}
+
+.pg-button[data-variant='primary']::after {
+  inset: 0;
+  background:
+    radial-gradient(120% 66% at 50% -28%, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0.18) 28%, rgba(255, 255, 255, 0) 66%);
+  opacity: 0.92;
 }
 
 .pg-button[data-variant='primary']:hover:not(:disabled) {
-  background: #8B5CF6;
+  border-color: rgba(255, 255, 255, 0.24);
+  background:
+    linear-gradient(180deg, #9A90FF 0%, #7C63FF 46%, #554BBC 100%);
+  box-shadow:
+    0 12px 28px rgba(73, 66, 170, 0.58),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.pg-button[data-variant='primary']:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    0 6px 18px rgba(73, 66, 170, 0.44),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .pg-button[data-variant='secondary'] {
@@ -150,6 +209,13 @@
   width: 36px;
   min-width: 36px;
   padding: 0;
+}
+
+.pg-app-nav-primary {
+  min-height: 34px;
+  padding: 0 13px;
+  font-family: var(--pg-font-mono);
+  font-size: 13px;
 }
 
 .pg-badge {
@@ -538,34 +604,12 @@
 }
 
 .paygate-nav-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   min-height: 40px;
-  border: 1px solid rgba(167, 139, 250, 0.28);
-  border-radius: var(--pg-radius-md);
-  background:
-    linear-gradient(180deg, rgba(139, 92, 246, 0.98), rgba(124, 58, 237, 0.98));
-  color: var(--pg-text-primary);
   font-size: 14px;
-  font-weight: 800;
-  line-height: 1;
   padding: 0 16px;
-  text-decoration: none;
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease;
 }
 
 .paygate-nav-cta:hover {
-  border-color: rgba(196, 181, 253, 0.46);
-  box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transform: translateY(-1px);
 }
 
@@ -654,6 +698,23 @@
   justify-content: center;
   gap: 12px;
   margin-top: clamp(20px, 2.8vh, 28px);
+}
+
+.paygate-bottom-cta {
+  --pg-magnet-x: 0px;
+  --pg-magnet-y: 0px;
+  min-height: 54px;
+  padding: 0 30px;
+  font-size: 16px;
+  transform: translate(var(--pg-magnet-x), var(--pg-magnet-y));
+}
+
+.paygate-bottom-cta:hover:not(:disabled) {
+  transform: translate(var(--pg-magnet-x), calc(var(--pg-magnet-y) - 1px));
+}
+
+.paygate-bottom-cta:active:not(:disabled) {
+  transform: translate(var(--pg-magnet-x), var(--pg-magnet-y));
 }
 
 .paygate-hero-visual {

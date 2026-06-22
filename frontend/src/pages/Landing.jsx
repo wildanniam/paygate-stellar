@@ -195,7 +195,7 @@ function BrandFeatureIcon({ src, alt }) {
 
 export default function Landing() {
   const [h, setH] = useState({
-    navCta: false, ctaBtn: false, card: null, feat: null,
+    navCta: false, card: null, feat: null,
   });
   const hov = (key, val) => setH(prev => ({ ...prev, [key]: val }));
 
@@ -548,12 +548,13 @@ export default function Landing() {
             <Link className="paygate-nav-secondary" to="/dashboard">
               Dashboard
             </Link>
-            <Link
+            <Button
+              as={Link}
               className="paygate-nav-cta"
               to="/apis/new"
             >
               Create paid endpoint
-            </Link>
+            </Button>
             <a
               className="paygate-nav-icon desktop-nav-link"
               href="https://github.com/wildanniam/paygate-stellar"
@@ -1208,24 +1209,22 @@ export default function Landing() {
             Create a PayGate proxy and start testing pay-per-call access.
           </p>
           <div style={{ marginTop: 40 }}>
-            <Link
+            <Button
+              as={Link}
               ref={ctaBottomRef}
               to="/apis/new"
-              onMouseEnter={() => hov('ctaBtn', true)}
-              onMouseLeave={() => { hov('ctaBtn', false); setMagnetCta({ x: 0, y: 0 }); }}
+              size="lg"
+              className="paygate-bottom-cta"
+              onMouseLeave={() => setMagnetCta({ x: 0, y: 0 })}
               onMouseMove={e => applyMagnet(e, ctaBottomRef, setMagnetCta)}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: h.ctaBtn ? '#6D28D9' : C.accent,
-                color: C.text1, textDecoration: 'none',
-                padding: '16px 32px', borderRadius: 8, fontSize: 16, fontWeight: 600,
-                boxShadow: h.ctaBtn ? '0 18px 38px rgba(0,0,0,0.34)' : '0 0 0 rgba(0,0,0,0)',
-                transition: 'background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease',
-                transform: `translate(${magnetCta.x}px, ${magnetCta.y}px)`,
+                '--pg-magnet-x': `${magnetCta.x}px`,
+                '--pg-magnet-y': `${magnetCta.y}px`,
               }}
+              icon={<Zap size={18} aria-hidden="true" />}
             >
-              <Zap size={18} /> Create paid endpoint
-            </Link>
+              Create paid endpoint
+            </Button>
           </div>
         </div>
       </section>
