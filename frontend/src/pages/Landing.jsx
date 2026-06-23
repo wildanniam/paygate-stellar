@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
+import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, Plus, ShieldCheck, TrendingUp, Upload, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -362,6 +362,24 @@ const PROTECTED_FACTS = [
   { label: 'Upstream URL stays private', icon: UpstreamLockIcon },
   { label: 'Secret header forwarding', icon: SecretKeyIcon },
   { label: 'Receipt per request', icon: ReceiptHeaderIcon },
+];
+
+const DASHBOARD_METRICS = [
+  { label: 'Total calls', value: '12.4k', delta: '+18.6% vs last 30 days' },
+  { label: 'Gross revenue', value: '$124.00', delta: '+21.3% vs last 30 days' },
+  { label: 'Developer revenue', value: '$111.60', delta: '+21.7% vs last 30 days' },
+  { label: 'Withdrawable', value: '$84.20', delta: '+16.4% vs last 30 days' },
+];
+
+const DASHBOARD_APIS = [
+  { name: 'Weather signal', status: 'active', price: '$0.009/call', calls: '8.2k calls', revenue: '$73.80' },
+  { name: 'Market feed', status: 'active', price: '$0.015/call', calls: '4.2k calls', revenue: '$50.20' },
+];
+
+const DASHBOARD_ACTIVITY = [
+  { id: 'req_01HZ8XQ4', event: 'MPP verified', tone: 'purple', result: '200 OK', resultTone: 'green', revenue: '+0.009 USDC' },
+  { id: 'req_01HZ8XR1', event: '402 required', tone: 'amber', result: 'blocked', resultTone: 'red', revenue: '$0.000' },
+  { id: 'req_01HZ8XS9', event: 'forwarded', tone: 'blue', result: '200 OK', resultTone: 'green', revenue: '+0.015 USDC' },
 ];
 
 function BrandFeatureIcon({ src, alt }) {
@@ -1426,6 +1444,139 @@ export default function Landing() {
                 </p>
               </aside>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="workspace"
+        className="paygate-ops-section fs"
+        aria-labelledby="paygate-ops-title"
+      >
+        <div className="paygate-ops-inner">
+          <div className="paygate-ops-head">
+            <p>Operate API revenue</p>
+            <h2 id="paygate-ops-title">
+              Monitor calls, revenue, and endpoints in <span>one workspace.</span>
+            </h2>
+            <p>
+              Track calls, revenue, fees, escrow balance, and request activity without building billing infrastructure.
+            </p>
+          </div>
+
+          <div className="paygate-ops-shell" aria-label="PayGate API revenue workspace preview">
+            <aside className="paygate-ops-sidebar">
+              <div className="paygate-ops-brand">
+                <img src="/brand/paygate-mark.svg" alt="" />
+                <strong>PayGate</strong>
+              </div>
+
+              <nav className="paygate-ops-nav" aria-label="Dashboard preview navigation">
+                <span className="is-active"><LayoutDashboard size={22} aria-hidden="true" /> Overview</span>
+                <span><CodeTileIcon size={22} aria-hidden="true" /> APIs</span>
+                <span><Database size={22} aria-hidden="true" /> Payments</span>
+                <span><Upload size={22} aria-hidden="true" /> Withdrawals</span>
+              </nav>
+
+              <div className="paygate-ops-live">
+                <span><i aria-hidden="true" /> Live</span>
+                <small>Stellar MPP</small>
+                <ArrowRight size={16} aria-hidden="true" />
+              </div>
+            </aside>
+
+            <main className="paygate-ops-main">
+              <div className="paygate-ops-topbar">
+                <h3>API revenue</h3>
+                <div className="paygate-ops-controls">
+                  <span className="paygate-ops-date"><CalendarDays size={17} aria-hidden="true" /> May 15 - Jun 15, 2026</span>
+                  <span className="paygate-ops-range">
+                    <button type="button">7D</button>
+                    <button type="button" className="is-selected">30D</button>
+                    <button type="button">90D</button>
+                  </span>
+                  <Button as={Link} to="/apis/new" size="sm" icon={<Plus size={18} aria-hidden="true" />} className="paygate-ops-create">
+                    Create paid endpoint
+                  </Button>
+                </div>
+              </div>
+
+              <div className="paygate-ops-metrics" aria-label="API revenue metrics">
+                {DASHBOARD_METRICS.map(metric => (
+                  <div key={metric.label} className="paygate-ops-metric">
+                    <span>{metric.label}</span>
+                    <strong>{metric.value}</strong>
+                    <small><TrendingUp size={15} aria-hidden="true" /> {metric.delta}</small>
+                  </div>
+                ))}
+              </div>
+
+              <div className="paygate-ops-panels">
+                <section className="paygate-ops-panel" aria-labelledby="paygate-ops-registry-title">
+                  <div className="paygate-ops-panel-head">
+                    <h4 id="paygate-ops-registry-title">API registry</h4>
+                  </div>
+                  <div className="paygate-ops-table is-registry">
+                    <div className="paygate-ops-table-head" aria-hidden="true">
+                      <span>API</span>
+                      <span>Status</span>
+                      <span>Price per call</span>
+                      <span>Calls</span>
+                      <span>Revenue</span>
+                    </div>
+                    {DASHBOARD_APIS.map(api => (
+                      <div key={api.name} className="paygate-ops-table-row">
+                        <span className="paygate-ops-api-name"><Database size={18} aria-hidden="true" /> {api.name}</span>
+                        <span className="paygate-ops-badge is-green">{api.status}</span>
+                        <span>{api.price}</span>
+                        <span>{api.calls}</span>
+                        <strong>{api.revenue}</strong>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" className="paygate-ops-link">View all APIs <ArrowRight size={16} aria-hidden="true" /></button>
+                </section>
+
+                <section className="paygate-ops-panel" aria-labelledby="paygate-ops-ledger-title">
+                  <div className="paygate-ops-panel-head">
+                    <h4 id="paygate-ops-ledger-title">Activity ledger</h4>
+                    <button type="button">View all</button>
+                  </div>
+                  <div className="paygate-ops-table is-ledger">
+                    <div className="paygate-ops-table-head" aria-hidden="true">
+                      <span>Request ID</span>
+                      <span>Event</span>
+                      <span>Result</span>
+                      <span>Revenue</span>
+                    </div>
+                    {DASHBOARD_ACTIVITY.map(row => (
+                      <div key={row.id} className="paygate-ops-table-row">
+                        <span className="paygate-ops-mono">{row.id}</span>
+                        <span className={`paygate-ops-badge is-${row.tone}`}>{row.event}</span>
+                        <span className={`paygate-ops-badge is-${row.resultTone}`}>{row.result}</span>
+                        <strong className={row.revenue.startsWith('+') ? 'is-positive' : undefined}>{row.revenue}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+
+              <div className="paygate-ops-withdraw">
+                <span className="paygate-ops-withdraw-icon"><GuardIcon size={28} aria-hidden="true" /></span>
+                <div>
+                  <small>Escrow balance</small>
+                  <strong>$84.20 <span>USDC</span></strong>
+                </div>
+                <i aria-hidden="true" />
+                <div>
+                  <small>Ready to withdraw</small>
+                  <strong>$84.20 <span>USDC</span></strong>
+                </div>
+                <Button type="button" icon={<Upload size={18} aria-hidden="true" />} className="paygate-ops-withdraw-button">
+                  Withdraw
+                </Button>
+              </div>
+            </main>
           </div>
         </div>
       </section>
