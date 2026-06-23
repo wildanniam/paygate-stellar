@@ -196,6 +196,46 @@ function EndpointSparkIcon(props) {
   );
 }
 
+function MachineClientIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <rect x="6.2" y="7.4" width="11.6" height="9.4" rx="2.6" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M9.5 7.4V5.6M14.5 7.4V5.6M8.2 12.2h.1M15.7 12.2h.1" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M10.2 15.8h3.6M4.7 11.6H3.4M20.6 11.6h-1.3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </TransformIcon>
+  );
+}
+
+function UpstreamLockIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <rect x="6.4" y="10.1" width="11.2" height="8.2" rx="2" stroke="currentColor" strokeWidth="1.85" />
+      <path d="M9 10.1V8.2a3 3 0 0 1 6 0v1.9" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" />
+      <circle cx="12" cy="14.2" r="1" fill="currentColor" />
+      <path d="M12 15.2v1.1" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </TransformIcon>
+  );
+}
+
+function SecretKeyIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <circle cx="8.7" cy="13.8" r="3.3" stroke="currentColor" strokeWidth="1.85" />
+      <path d="M11.2 11.4 18.3 4.3M16.2 6.4l2.1 2.1M14.3 8.3l1.5 1.5" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="8.7" cy="13.8" r="0.85" fill="currentColor" />
+    </TransformIcon>
+  );
+}
+
+function BlockedTrafficIcon(props) {
+  return (
+    <TransformIcon {...props}>
+      <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="1.9" />
+      <path d="m7.4 7.4 9.2 9.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </TransformIcon>
+  );
+}
+
 const PROOF_ROWS = [
   {
     key: 'received',
@@ -296,6 +336,20 @@ const TRANSFORM_OUTCOMES = [
   },
 ];
 
+const PROTECTED_GUARD_ROWS = [
+  { tone: 'blocked', label: 'Unpaid blocked', icon: BlockedTrafficIcon },
+  { tone: 'green', label: 'Payment verified', icon: CheckCircle2 },
+  { tone: 'blue', label: 'Request ID issued', icon: Fingerprint },
+  { tone: 'purple', label: 'Secret header attached', icon: SecretKeyIcon },
+];
+
+const PROTECTED_FACTS = [
+  { label: 'Unpaid traffic blocked', icon: GuardIcon },
+  { label: 'Upstream URL stays private', icon: UpstreamLockIcon },
+  { label: 'Secret header forwarding', icon: SecretKeyIcon },
+  { label: 'Receipt per request', icon: ReceiptHeaderIcon },
+];
+
 function BrandFeatureIcon({ src, alt }) {
   return (
     <span className="paygate-feature-brand-icon">
@@ -319,6 +373,7 @@ export default function Landing() {
   const [copiedProof, setCopiedProof] = useState(null);
   const [transformActive, setTransformActive] = useState('generate');
   const [copiedTransform, setCopiedTransform] = useState(null);
+  const [protectedActive, setProtectedActive] = useState('forwarded');
 
   // Card stagger states
   const [featVis, setFeatVis]       = useState([false, false, false, false]);
@@ -1206,6 +1261,150 @@ export default function Landing() {
                     <p>{outcome.body}</p>
                     <small>{outcome.detail}</small>
                   </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROTECTED PAID CALLS ── */}
+      <section
+        id="protected-calls"
+        className="paygate-protected-section fs"
+        data-protected-active={protectedActive}
+        aria-labelledby="paygate-protected-title"
+      >
+        <div className="paygate-protected-inner">
+          <div className="paygate-protected-head">
+            <p>Protected paid calls</p>
+            <h2 id="paygate-protected-title">
+              Keep your upstream API <span>private.</span>
+            </h2>
+            <p>
+              PayGate verifies payment before forwarding and sends valid requests with your upstream secret header.
+            </p>
+          </div>
+
+          <div className="paygate-protected-stage" aria-label="PayGate blocks unpaid traffic and forwards valid requests to a protected upstream API.">
+            <article
+              className="paygate-protected-card is-client"
+              onMouseEnter={() => setProtectedActive('client')}
+              onFocus={() => setProtectedActive('client')}
+              tabIndex={0}
+            >
+              <div className="paygate-protected-card-title">
+                <span><MachineClientIcon size={26} /></span>
+                <h3>Machine client</h3>
+              </div>
+
+              <div className="paygate-protected-request">
+                <span>GET</span>
+                <code>/api/pay/api_123</code>
+              </div>
+
+              <div className="paygate-protected-client-divider" />
+
+              <p>Typical clients</p>
+              <div className="paygate-protected-client-chips">
+                <span><MachineClientIcon size={17} /> agent</span>
+                <span><CodeTileIcon size={17} /> script</span>
+                <span><Database size={16} /> app</span>
+              </div>
+            </article>
+
+            <button
+              type="button"
+              className="paygate-protected-branch is-blocked"
+              onMouseEnter={() => setProtectedActive('blocked')}
+              onFocus={() => setProtectedActive('blocked')}
+              onBlur={() => setProtectedActive('forwarded')}
+              aria-label="Unpaid request receives 402 blocked before reaching PayGate forwarding."
+            >
+              <span>Unpaid</span>
+              <strong><BlockedTrafficIcon size={16} /> 402 blocked</strong>
+              <i aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              className="paygate-protected-branch is-paid-left"
+              onMouseEnter={() => setProtectedActive('forwarded')}
+              onFocus={() => setProtectedActive('forwarded')}
+              aria-label="Paid request is forwarded from the machine client to PayGate guard."
+            >
+              <span>Paid</span>
+              <strong><CheckCircle2 size={16} /> forwarded</strong>
+            </button>
+
+            <article
+              className="paygate-protected-card is-guard"
+              onMouseEnter={() => setProtectedActive('guard')}
+              onFocus={() => setProtectedActive('guard')}
+              tabIndex={0}
+            >
+              <img src="/brand/paygate-mark.svg" alt="" />
+              <h3>PayGate guard</h3>
+              <span className="paygate-protected-gate-label">Payment gate</span>
+              <div className="paygate-protected-guard-list">
+                {PROTECTED_GUARD_ROWS.map(row => {
+                  const Icon = row.icon;
+                  return (
+                    <div key={row.label} data-tone={row.tone}>
+                      <Icon size={20} aria-hidden="true" />
+                      <span>{row.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </article>
+
+            <button
+              type="button"
+              className="paygate-protected-branch is-paid-right"
+              onMouseEnter={() => setProtectedActive('forwarded')}
+              onFocus={() => setProtectedActive('forwarded')}
+              aria-label="Paid request is forwarded from PayGate guard to the protected upstream API."
+            >
+              <span>Paid</span>
+              <strong><CheckCircle2 size={16} /> forwarded</strong>
+            </button>
+
+            <article
+              className="paygate-protected-card is-upstream"
+              onMouseEnter={() => setProtectedActive('upstream')}
+              onFocus={() => setProtectedActive('upstream')}
+              tabIndex={0}
+            >
+              <div className="paygate-protected-card-title">
+                <span><UpstreamLockIcon size={27} /></span>
+                <h3>Protected upstream API</h3>
+              </div>
+
+              <div className="paygate-protected-upstream-url">
+                <code>https://api.••••••.com/v1/signal</code>
+                <span aria-hidden="true">hidden</span>
+              </div>
+
+              <div className="paygate-protected-code-label">Secret header check</div>
+
+              <div className="paygate-protected-code" aria-label="X-PayGate-Secret upstream guard code snippet">
+                <div>
+                  <span>X-PayGate-Secret</span>
+                  <Copy size={16} aria-hidden="true" />
+                </div>
+                <pre><code><span>1</span> if header !== <strong>PAYGATE_SECRET</strong>{'\n'}<span>2</span>   return 401</code></pre>
+              </div>
+            </article>
+          </div>
+
+          <div className="paygate-protected-facts" aria-label="Protected paid call guarantees">
+            {PROTECTED_FACTS.map(fact => {
+              const Icon = fact.icon;
+              return (
+                <div key={fact.label} className="paygate-protected-fact">
+                  <Icon size={28} aria-hidden="true" />
+                  <span>{fact.label}</span>
                 </div>
               );
             })}

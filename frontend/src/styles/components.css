@@ -3570,6 +3570,657 @@
   color: var(--pg-text-muted);
 }
 
+.paygate-protected-section {
+  position: relative;
+  overflow: hidden;
+  scroll-margin-top: 76px;
+  padding: clamp(76px, 6.5vw, 112px) 24px clamp(78px, 6vw, 104px);
+  background:
+    radial-gradient(ellipse at 50% 22%, rgba(124, 58, 237, 0.10), transparent 42%),
+    linear-gradient(180deg, rgba(4, 6, 10, 0.995), rgba(5, 6, 9, 0.99));
+}
+
+.paygate-protected-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(82, 94, 118, 0.022) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(82, 94, 118, 0.018) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 50%, rgba(56, 189, 248, 0.055), transparent 46%);
+  background-size: 66px 66px, 66px 66px, auto;
+  opacity: 0.78;
+}
+
+.paygate-protected-section::after {
+  content: '';
+  position: absolute;
+  inset: auto 8% 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.22), transparent);
+}
+
+.paygate-protected-inner {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 56px, 1340px);
+  margin: 0 auto;
+}
+
+.paygate-protected-head {
+  max-width: 1140px;
+  margin: 0 auto clamp(42px, 4.4vw, 62px);
+  text-align: center;
+}
+
+.paygate-protected-head p:first-child {
+  margin: 0 0 12px;
+  color: var(--pg-brand-purple-soft);
+  font-family: var(--pg-font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.paygate-protected-head h2 {
+  margin: 0;
+  color: var(--pg-text-primary);
+  font-size: clamp(44px, 4.35vw, 64px);
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.02;
+}
+
+.paygate-protected-head h2 span {
+  color: var(--pg-brand-purple-soft);
+}
+
+.paygate-protected-head p:last-child {
+  max-width: 620px;
+  margin: 18px auto 0;
+  color: var(--pg-text-secondary);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.paygate-protected-stage {
+  --protected-left-col: 330px;
+  --protected-center-col: 300px;
+  --protected-right-col: 380px;
+  --protected-gap: clamp(132px, 11.45vw, 165px);
+  --protected-branch-width: 158px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--protected-left-col) var(--protected-center-col) var(--protected-right-col);
+  gap: var(--protected-gap);
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+}
+
+.paygate-protected-stage::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: -26px 17%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(96, 165, 250, 0.10) 1px, transparent 1.7px);
+  background-size: 12px 12px;
+  opacity: 0.22;
+  mask-image: radial-gradient(ellipse at center, #000 0 52%, transparent 78%);
+}
+
+.paygate-protected-card {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(82, 94, 118, 0.42);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.065), transparent 48%),
+    linear-gradient(180deg, rgba(9, 13, 20, 0.96), rgba(4, 6, 10, 0.985));
+  box-shadow:
+    0 30px 92px rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  padding: clamp(20px, 2.05vw, 26px);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.paygate-protected-card:hover,
+.paygate-protected-card:focus-visible {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.44);
+  box-shadow:
+    0 34px 104px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(124, 58, 237, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  transform: translateY(-2px);
+}
+
+.paygate-protected-card-title {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 22px;
+}
+
+.paygate-protected-card-title > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(167, 139, 250, 0.30);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.20), transparent 64%),
+    rgba(124, 58, 237, 0.10);
+  color: var(--pg-brand-purple-soft);
+  box-shadow:
+    0 0 24px rgba(124, 58, 237, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.paygate-protected-card h3 {
+  margin: 0;
+  color: var(--pg-text-primary);
+  font-size: 21px;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.paygate-protected-card.is-client,
+.paygate-protected-card.is-upstream {
+  min-height: 326px;
+}
+
+.paygate-protected-request {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  min-height: 56px;
+  border: 1px solid rgba(56, 189, 248, 0.42);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(56, 189, 248, 0.12), transparent 54%),
+    rgba(10, 14, 22, 0.78);
+  color: var(--pg-flow-blue);
+  padding: 8px 12px;
+}
+
+.paygate-protected-request span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border: 1px solid rgba(56, 189, 248, 0.26);
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.08);
+  font-family: var(--pg-font-mono);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.paygate-protected-request code,
+.paygate-protected-upstream-url code,
+.paygate-protected-code code {
+  min-width: 0;
+  font-family: var(--pg-font-mono);
+}
+
+.paygate-protected-request code {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paygate-protected-client-divider {
+  height: 1px;
+  margin: 34px 0 27px;
+  background: linear-gradient(90deg, rgba(82, 94, 118, 0.30), rgba(82, 94, 118, 0.12));
+}
+
+.paygate-protected-card.is-client p,
+.paygate-protected-code-label {
+  margin: 0 0 14px;
+  color: var(--pg-text-muted);
+  font-family: var(--pg-font-mono);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.paygate-protected-client-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.paygate-protected-client-chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  border: 1px solid rgba(82, 94, 118, 0.36);
+  border-radius: 9px;
+  background: rgba(13, 17, 23, 0.72);
+  color: var(--pg-text-secondary);
+  font-size: 13px;
+  padding: 0 11px;
+}
+
+.paygate-protected-client-chips svg {
+  color: var(--pg-brand-purple-soft);
+}
+
+.paygate-protected-card.is-guard {
+  min-height: 386px;
+  border-color: rgba(167, 139, 250, 0.70);
+  background:
+    radial-gradient(circle at 50% -16%, rgba(167, 139, 250, 0.22), transparent 40%),
+    radial-gradient(ellipse at 50% 74%, rgba(124, 58, 237, 0.08), transparent 60%),
+    linear-gradient(180deg, rgba(10, 13, 20, 0.985), rgba(5, 7, 12, 0.995));
+  box-shadow:
+    0 34px 112px rgba(0, 0, 0, 0.58),
+    0 0 0 1px rgba(124, 58, 237, 0.24),
+    0 0 54px rgba(124, 58, 237, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  text-align: center;
+}
+
+.paygate-protected-card.is-guard > img {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 15px;
+  filter: drop-shadow(0 0 24px rgba(124, 58, 237, 0.34));
+}
+
+.paygate-protected-card.is-guard h3 {
+  font-size: 24px;
+}
+
+.paygate-protected-gate-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  margin-top: 11px;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.17);
+  color: var(--pg-brand-purple-soft);
+  font-family: var(--pg-font-mono);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  padding: 0 13px;
+  text-transform: uppercase;
+}
+
+.paygate-protected-guard-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 23px;
+  text-align: left;
+}
+
+.paygate-protected-guard-list div {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  border: 1px solid rgba(82, 94, 118, 0.36);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(17, 23, 34, 0.76), rgba(9, 13, 20, 0.82));
+  color: var(--pg-text-primary);
+  padding: 0 13px;
+}
+
+.paygate-protected-guard-list div[data-tone='blocked'] svg {
+  color: var(--pg-warning);
+}
+
+.paygate-protected-guard-list div[data-tone='green'] svg {
+  color: #4ADE80;
+}
+
+.paygate-protected-guard-list div[data-tone='blue'] svg {
+  color: var(--pg-flow-blue);
+}
+
+.paygate-protected-guard-list div[data-tone='purple'] svg {
+  color: var(--pg-brand-purple-soft);
+}
+
+.paygate-protected-guard-list span {
+  min-width: 0;
+  color: var(--pg-text-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.paygate-protected-upstream-url {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 26px;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  border: 1px solid rgba(82, 94, 118, 0.42);
+  border-radius: 12px;
+  background: rgba(10, 14, 22, 0.78);
+  padding: 8px 13px;
+}
+
+.paygate-protected-upstream-url code {
+  overflow: hidden;
+  color: var(--pg-text-secondary);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paygate-protected-upstream-url span {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+  color: var(--pg-text-muted);
+  font-size: 0;
+}
+
+.paygate-protected-upstream-url span::before,
+.paygate-protected-upstream-url span::after {
+  content: '';
+  position: absolute;
+}
+
+.paygate-protected-upstream-url span::before {
+  width: 15px;
+  height: 15px;
+  border: 1.8px solid currentColor;
+  border-radius: 999px;
+}
+
+.paygate-protected-upstream-url span::after {
+  width: 19px;
+  height: 1.8px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: rotate(38deg);
+}
+
+.paygate-protected-code-label {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(82, 94, 118, 0.28);
+}
+
+.paygate-protected-code {
+  overflow: hidden;
+  border: 1px solid rgba(82, 94, 118, 0.42);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.08), transparent 54%),
+    rgba(8, 11, 17, 0.86);
+}
+
+.paygate-protected-code > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 16px;
+}
+
+.paygate-protected-code > div span {
+  color: #4ADE80;
+  font-family: var(--pg-font-mono);
+  font-size: 12.5px;
+  font-weight: 850;
+}
+
+.paygate-protected-code > div svg {
+  color: var(--pg-text-secondary);
+}
+
+.paygate-protected-code pre {
+  margin: 0;
+  border-top: 1px solid rgba(82, 94, 118, 0.26);
+  padding: 14px 16px 16px;
+}
+
+.paygate-protected-code code {
+  display: block;
+  color: var(--pg-brand-purple-soft);
+  font-size: 13px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+
+.paygate-protected-code code > span {
+  display: inline-flex;
+  justify-content: flex-end;
+  width: 20px;
+  margin-right: 16px;
+  color: var(--pg-text-muted);
+  opacity: 0.72;
+}
+
+.paygate-protected-code code strong {
+  color: var(--pg-flow-blue);
+  font-weight: 850;
+}
+
+.paygate-protected-branch {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--protected-branch-width);
+  height: 64px;
+  border: 0;
+  background: transparent;
+  color: var(--pg-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.paygate-protected-branch::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc((var(--protected-gap) - var(--protected-branch-width)) / -2);
+  right: calc((var(--protected-gap) - var(--protected-branch-width)) / -2);
+  z-index: -1;
+  height: 2px;
+  transform: translateY(-50%);
+  transition:
+    opacity 180ms ease,
+    box-shadow 180ms ease,
+    height 180ms ease;
+}
+
+.paygate-protected-branch > span {
+  position: absolute;
+  top: 0;
+  color: currentColor;
+  font-family: var(--pg-font-mono);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.paygate-protected-branch strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, currentColor 15%, transparent), rgba(8, 11, 17, 0.92));
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.34),
+    0 0 18px color-mix(in srgb, currentColor 16%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  font-family: var(--pg-font-sans);
+  font-size: 13.5px;
+  font-weight: 800;
+  padding: 0 15px;
+  white-space: nowrap;
+}
+
+.paygate-protected-branch.is-blocked {
+  top: 28.5%;
+  left: calc(var(--protected-left-col) + (var(--protected-gap) - var(--protected-branch-width)) / 2);
+  color: var(--pg-warning);
+}
+
+.paygate-protected-branch.is-blocked::before {
+  background: repeating-linear-gradient(90deg, var(--pg-warning) 0 8px, transparent 8px 14px);
+  opacity: 0.86;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.20);
+}
+
+.paygate-protected-branch.is-blocked i {
+  position: absolute;
+  right: -22px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.paygate-protected-branch.is-blocked i::before,
+.paygate-protected-branch.is-blocked i::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--pg-warning);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.30);
+  transform: translate(-50%, -50%);
+}
+
+.paygate-protected-branch.is-blocked i::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.paygate-protected-branch.is-paid-left {
+  top: 56%;
+  left: calc(var(--protected-left-col) + (var(--protected-gap) - var(--protected-branch-width)) / 2);
+  color: #4ADE80;
+}
+
+.paygate-protected-branch.is-paid-right {
+  top: 56%;
+  right: calc(var(--protected-right-col) + (var(--protected-gap) - var(--protected-branch-width)) / 2);
+  color: #4ADE80;
+}
+
+.paygate-protected-branch.is-paid-left::before,
+.paygate-protected-branch.is-paid-right::before {
+  height: 3px;
+  background: linear-gradient(90deg, rgba(74, 222, 128, 0.12), #4ADE80 42%, rgba(56, 189, 248, 0.82), rgba(74, 222, 128, 0.12));
+  opacity: 0.82;
+  box-shadow:
+    0 0 20px rgba(74, 222, 128, 0.26),
+    0 0 30px rgba(56, 189, 248, 0.16);
+}
+
+.paygate-protected-branch.is-paid-left::after,
+.paygate-protected-branch.is-paid-right::after {
+  content: '';
+  position: absolute;
+  right: calc((var(--protected-gap) - var(--protected-branch-width)) / -2 - 5px);
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-top: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+  transform: translateY(-50%) rotate(45deg);
+  filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.32));
+}
+
+.paygate-protected-section[data-protected-active='blocked'] .paygate-protected-branch.is-blocked::before,
+.paygate-protected-section[data-protected-active='forwarded'] .paygate-protected-branch.is-paid-left::before,
+.paygate-protected-section[data-protected-active='forwarded'] .paygate-protected-branch.is-paid-right::before {
+  opacity: 1;
+  height: 4px;
+}
+
+.paygate-protected-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  width: min(100%, 1280px);
+  margin: clamp(48px, 5.2vw, 70px) auto 0;
+}
+
+.paygate-protected-fact {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 74px;
+  border: 1px solid rgba(82, 94, 118, 0.34);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(9, 13, 20, 0.88), rgba(4, 6, 10, 0.92));
+  color: var(--pg-text-primary);
+  padding: 0 26px;
+  box-shadow:
+    0 20px 56px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.paygate-protected-fact:hover {
+  border-color: rgba(167, 139, 250, 0.38);
+  box-shadow:
+    0 24px 66px rgba(0, 0, 0, 0.34),
+    0 0 20px rgba(124, 58, 237, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  transform: translateY(-1px);
+}
+
+.paygate-protected-fact > svg:first-child {
+  color: var(--pg-brand-purple-soft);
+}
+
+.paygate-protected-fact span {
+  min-width: 0;
+  color: var(--pg-text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .paygate-feature-icon-shell {
   display: flex;
   align-items: center;
@@ -3609,6 +4260,60 @@
 }
 
 @media (max-width: 1180px) {
+  .paygate-protected-inner {
+    width: min(100% - 40px, 920px);
+  }
+
+  .paygate-protected-stage {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .paygate-protected-stage::before {
+    display: none;
+  }
+
+  .paygate-protected-card.is-client,
+  .paygate-protected-card.is-upstream,
+  .paygate-protected-card.is-guard {
+    min-height: auto;
+  }
+
+  .paygate-protected-branch {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: 100%;
+    height: 54px;
+  }
+
+  .paygate-protected-branch.is-blocked,
+  .paygate-protected-branch.is-paid-left {
+    top: auto;
+    left: auto;
+  }
+
+  .paygate-protected-branch.is-paid-right {
+    top: auto;
+    right: auto;
+  }
+
+  .paygate-protected-branch::before {
+    left: 6%;
+    right: 6%;
+  }
+
+  .paygate-protected-branch.is-blocked i,
+  .paygate-protected-branch.is-paid-left::after,
+  .paygate-protected-branch.is-paid-right::after {
+    display: none;
+  }
+
+  .paygate-protected-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .paygate-transform-stage {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 22px;
@@ -3702,6 +4407,50 @@
 }
 
 @media (max-width: 900px) {
+  .paygate-protected-section {
+    padding: 72px 20px 82px;
+  }
+
+  .paygate-protected-head {
+    margin-bottom: 34px;
+  }
+
+  .paygate-protected-head h2 {
+    font-size: 38px;
+    line-height: 1.06;
+  }
+
+  .paygate-protected-head p:last-child {
+    font-size: 16px;
+  }
+
+  .paygate-protected-card {
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  .paygate-protected-card.is-guard {
+    text-align: left;
+  }
+
+  .paygate-protected-card.is-guard > img {
+    width: 42px;
+    height: 42px;
+    margin: 0 0 14px;
+  }
+
+  .paygate-protected-card.is-guard h3 {
+    font-size: 21px;
+  }
+
+  .paygate-protected-card-title {
+    margin-bottom: 18px;
+  }
+
+  .paygate-protected-request code {
+    font-size: 15px;
+  }
+
   .paygate-transform-section {
     padding: 58px 20px 68px;
   }
@@ -3826,6 +4575,173 @@
 
   .pg-button {
     max-width: 100%;
+    white-space: normal;
+  }
+
+  .paygate-protected-section {
+    padding: 62px 16px 72px;
+  }
+
+  .paygate-protected-inner {
+    width: 100%;
+  }
+
+  .paygate-protected-head {
+    margin-bottom: 28px;
+  }
+
+  .paygate-protected-head p:first-child {
+    font-size: 11px;
+  }
+
+  .paygate-protected-head h2 {
+    font-size: 32px;
+  }
+
+  .paygate-protected-head p:last-child {
+    margin-top: 12px;
+    font-size: 15px;
+  }
+
+  .paygate-protected-stage {
+    gap: 12px;
+  }
+
+  .paygate-protected-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .paygate-protected-card h3 {
+    font-size: 18px;
+  }
+
+  .paygate-protected-card-title {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .paygate-protected-card-title > span {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .paygate-protected-request {
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 9px;
+    min-height: 50px;
+    padding: 7px 9px;
+  }
+
+  .paygate-protected-request span {
+    min-height: 32px;
+    font-size: 12px;
+  }
+
+  .paygate-protected-request code,
+  .paygate-protected-upstream-url code {
+    font-size: 12px;
+  }
+
+  .paygate-protected-client-divider {
+    margin: 22px 0 18px;
+  }
+
+  .paygate-protected-card.is-client p,
+  .paygate-protected-code-label {
+    font-size: 10px;
+  }
+
+  .paygate-protected-client-chips {
+    gap: 7px;
+  }
+
+  .paygate-protected-client-chips span {
+    min-height: 34px;
+    font-size: 12px;
+    padding: 0 9px;
+  }
+
+  .paygate-protected-branch {
+    height: 50px;
+  }
+
+  .paygate-protected-branch > span {
+    font-size: 10px;
+  }
+
+  .paygate-protected-branch strong {
+    min-height: 34px;
+    font-size: 12px;
+    padding: 0 12px;
+  }
+
+  .paygate-protected-gate-label {
+    min-height: 26px;
+    font-size: 10px;
+  }
+
+  .paygate-protected-guard-list {
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .paygate-protected-guard-list div {
+    min-height: 44px;
+    gap: 9px;
+    padding: 0 11px;
+  }
+
+  .paygate-protected-guard-list span {
+    font-size: 13px;
+  }
+
+  .paygate-protected-upstream-url {
+    min-height: 50px;
+    padding: 7px 10px;
+  }
+
+  .paygate-protected-code-label {
+    margin-top: 22px;
+    padding-top: 18px;
+  }
+
+  .paygate-protected-code > div {
+    min-height: 40px;
+    padding: 0 12px;
+  }
+
+  .paygate-protected-code > div span,
+  .paygate-protected-code code {
+    font-size: 11px;
+  }
+
+  .paygate-protected-code pre {
+    padding: 12px;
+  }
+
+  .paygate-protected-code code > span {
+    width: 16px;
+    margin-right: 10px;
+  }
+
+  .paygate-protected-facts {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .paygate-protected-fact {
+    grid-template-columns: 36px minmax(0, 1fr) 24px;
+    gap: 10px;
+    min-height: 58px;
+    border-radius: 14px;
+    padding: 0 13px;
+  }
+
+  .paygate-protected-fact span {
+    font-size: 13px;
     white-space: normal;
   }
 
@@ -4579,6 +5495,10 @@
   .paygate-receipt-row::before,
   .paygate-proof-chip,
   .paygate-proof-metrics,
+  .paygate-protected-card,
+  .paygate-protected-branch,
+  .paygate-protected-branch::before,
+  .paygate-protected-fact,
   .paygate-transform-panel,
   .paygate-transform-beam,
   .paygate-transform-beam::before,
