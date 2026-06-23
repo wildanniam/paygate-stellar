@@ -1128,7 +1128,6 @@ export default function Landing() {
                     as={Link}
                     to="/apis/new"
                     className="paygate-transform-generate"
-                    icon={<span className="paygate-transform-button-mark"><img src="/brand/paygate-mark.svg" alt="" /></span>}
                   >
                     Generate paid endpoint
                   </Button>
@@ -1139,8 +1138,8 @@ export default function Landing() {
 
             <article
               className="paygate-transform-panel is-after"
-              onMouseEnter={() => setTransformActive('generate')}
-              onFocus={() => setTransformActive('generate')}
+              onMouseEnter={() => setTransformActive('proxy')}
+              onFocus={() => setTransformActive('proxy')}
             >
               <div className="paygate-transform-after-title">
                 <span><EndpointSparkIcon size={25} /></span>

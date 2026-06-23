@@ -33,13 +33,15 @@ This keeps the landing page focused on the locked product promise: PayGate shoul
 - Tightened desktop section height, heading scale, panel spacing, and outcome rail density to match the locked visual direction more closely.
 - Added left-to-center and center-to-endpoint connector energy, dotted matrix depth, and premium dark card material.
 - Refined the right `Paid endpoint` card as the generated output by strengthening its purple result edge, paid URL pill, and revenue-state material while leaving the other cards structurally unchanged.
+- Moved the stronger result-card glow, revenue emphasis, and connector beam into hover/focus states so the default view stays restrained and the result state feels interactive.
+- Removed the small PayGate logo from the center CTA and repositioned floating assets away from step numbers and primary controls.
 - Compact mobile keeps the core sequence readable without turning the section into a long stacked wall.
 
 ## Interaction
 
 - Original API URL and paid endpoint URL can be copied.
 - Copy interaction updates `data-copy-state` to `copied`.
-- Hovering the result side strengthens the endpoint panel and connector beam.
+- Hovering the result side switches the transform state to `proxy`, strengthening the endpoint panel, connector beam, floating assets, URL pill, and revenue card.
 - Reduced motion disables transform transitions for this section.
 
 ## Verification
@@ -47,9 +49,9 @@ This keeps the landing page focused on the locked product promise: PayGate shoul
 - `npm --prefix frontend run build` passed.
 - Browser console showed 0 errors and only existing development warnings.
 - Proxy URL copy interaction returned `copied`.
-- Desktop section screenshot: `output/playwright/paygate-phase4-result-highlight-desktop-1440-v5.png`
-- Mobile section screenshot: `output/playwright/paygate-phase4-result-highlight-mobile-390-v5.png`
-- Hover-state screenshot: `output/playwright/paygate-phase4-result-highlight-hover-1440-v5.png`
+- Desktop section screenshot: `output/playwright/paygate-phase4-interactions-desktop-1440-v6.png`
+- Mobile section screenshot: `output/playwright/paygate-phase4-interactions-mobile-default-390-v6.png`
+- Hover-state screenshot: `output/playwright/paygate-phase4-interactions-hover-1440-v6.png`
 
 ## Acceptance
 
