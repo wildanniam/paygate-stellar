@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, Bot, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
+import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -275,11 +275,25 @@ const PROOF_ROWS = [
   },
 ];
 
-const PROOF_CHIPS = [
-  { label: 'Request IDs', icon: Fingerprint },
-  { label: 'Escrow split', icon: Layers3 },
-  { label: 'Dashboard logs', icon: FileText },
-  { label: 'Agent-ready', icon: Bot },
+const PROOF_REASONS = [
+  {
+    tone: 'blue',
+    label: 'Request identity',
+    body: 'Unique request ID and timestamp.',
+    icon: Fingerprint,
+  },
+  {
+    tone: 'amber',
+    label: 'Payment verification',
+    body: 'Payment checked before forwarding.',
+    icon: ShieldCheck,
+  },
+  {
+    tone: 'green',
+    label: 'Upstream result',
+    body: 'Response and revenue are recorded.',
+    icon: FileText,
+  },
 ];
 
 const TRANSFORM_PROBLEMS = [
@@ -931,132 +945,6 @@ export default function Landing() {
         </div>
       </section>
 
-      <section
-        id="proof"
-        ref={proofRef}
-        className="paygate-proof-section fs"
-        data-proof-visible={proofVisible ? 'true' : 'false'}
-        data-proof-active={proofActive}
-        aria-labelledby="paygate-proof-title"
-      >
-        <div className="paygate-proof-inner">
-          <div className="paygate-proof-grid">
-            <div className="paygate-proof-copy">
-              <p className="paygate-proof-eyebrow">
-                <span aria-hidden="true" />
-                Request-time receipt
-              </p>
-              <h2 id="paygate-proof-title">
-                Every paid call leaves a <span>receipt.</span>
-              </h2>
-              <p>
-                PayGate rejects unpaid traffic, verifies MPP, forwards valid requests, and posts revenue to your dashboard.
-              </p>
-            </div>
-
-            <div className="paygate-receipt-panel" aria-label="Live request receipt for a paid API call">
-              <div className="paygate-receipt-head">
-                <div>
-                  <span className="paygate-receipt-head-icon">
-                    <ReceiptHeaderIcon size={22} />
-                  </span>
-                  <strong>Live request receipt</strong>
-                </div>
-                <button
-                  type="button"
-                  className="paygate-receipt-id"
-                  data-copy-state={getProofCopyState('req')}
-                  onClick={() => copyProofValue('req', 'req_01HZ8XQ4F2J7Q9K3T6V1')}
-                  aria-label="Copy request id req_01HZ8XQ4F2J7Q9K3T6V1"
-                >
-                  <span>REQ ID:</span>
-                  <code>req_01HZ8XQ4F2J7Q9K3T6V1</code>
-                  {getProofCopyState('req') === 'copied' ? <ReceiptCopiedIcon size={16} /> : <ReceiptCopyIcon size={16} />}
-                </button>
-              </div>
-
-              <div className="paygate-receipt-rows">
-                {PROOF_ROWS.map(row => {
-                  const Icon = row.icon;
-                  const copyState = getProofCopyState(row.key);
-
-                  return (
-                    <button
-                      key={row.key}
-                      type="button"
-                      className="paygate-receipt-row"
-                      data-tone={row.tone}
-                      data-active={proofActive === row.key ? 'true' : 'false'}
-                      data-copy-state={copyState}
-                      onMouseEnter={() => setProofActive(row.key)}
-                      onFocus={() => setProofActive(row.key)}
-                      onClick={() => copyProofValue(row.key, row.copyValue)}
-                      aria-label={`Copy ${row.label}: ${row.copyValue}`}
-                    >
-                      <span className="paygate-receipt-status">
-                        <Icon size={24} />
-                      </span>
-                      <span className="paygate-receipt-label">{row.label}</span>
-                      <i className="paygate-receipt-divider" aria-hidden="true" />
-                      <code className="paygate-receipt-value">{row.value}</code>
-                      <span className="paygate-receipt-copy" aria-hidden="true">
-                        {copyState === 'copied' ? <ReceiptCopiedIcon size={17} /> : <ReceiptCopyIcon size={17} />}
-                      </span>
-                      <time>{row.time}</time>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="paygate-receipt-foot">
-                <span className="is-live"><i aria-hidden="true" /> Live</span>
-                <span>Region: <strong>SGP</strong></span>
-                <span>Latency: <strong>142ms</strong></span>
-                <span className="is-forwarded">Forwarded to upstream <Activity size={15} aria-hidden="true" /></span>
-              </div>
-            </div>
-
-            <aside className="paygate-proof-metrics" aria-label="Revenue outcome after a successful paid call">
-              <div className="paygate-proof-metric">
-                <span className="paygate-proof-metric-icon">
-                  <TrendingUp size={24} aria-hidden="true" />
-                </span>
-                <span>Developer revenue</span>
-                <strong>+0.009 USDC</strong>
-                <small><TrendingUp size={15} aria-hidden="true" /> +12.4% vs last hour</small>
-              </div>
-              <i className="paygate-proof-metric-divider" aria-hidden="true" />
-              <div className="paygate-proof-metric">
-                <span className="paygate-proof-metric-icon">
-                  <Layers3 size={24} aria-hidden="true" />
-                </span>
-                <span>PayGate fee</span>
-                <strong>+0.001 USDC</strong>
-                <small><TrendingUp size={15} aria-hidden="true" /> +8.7% vs last hour</small>
-              </div>
-              <p>
-                Escrow split posted after success
-                <Info size={15} aria-hidden="true" />
-              </p>
-            </aside>
-          </div>
-
-          <div className="paygate-proof-chips" aria-label="Request-time proof capabilities">
-            {PROOF_CHIPS.map(chip => {
-              const Icon = chip.icon;
-
-              return (
-                <div key={chip.label} className="paygate-proof-chip">
-                  <Icon size={28} aria-hidden="true" />
-                  <span>{chip.label}</span>
-                  <CheckCircle2 size={21} aria-hidden="true" />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* ── TRANSFORMATION ── */}
       <section
         id="how-it-works"
@@ -1408,6 +1296,136 @@ export default function Landing() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="proof"
+        ref={proofRef}
+        className="paygate-proof-section fs"
+        data-proof-visible={proofVisible ? 'true' : 'false'}
+        data-proof-active={proofActive}
+        aria-labelledby="paygate-proof-title"
+      >
+        <div className="paygate-proof-inner">
+          <div className="paygate-proof-grid">
+            <div className="paygate-proof-copy">
+              <p className="paygate-proof-eyebrow">
+                <span aria-hidden="true" />
+                Request receipt
+              </p>
+              <h2 id="paygate-proof-title">
+                Every paid call leaves a <span>receipt.</span>
+              </h2>
+              <p>
+                Track request identity, payment verification, upstream forwarding, and posted revenue from a single call.
+              </p>
+
+              <div className="paygate-proof-reasons" aria-label="What each receipt proves">
+                {PROOF_REASONS.map(reason => {
+                  const Icon = reason.icon;
+
+                  return (
+                    <div key={reason.label} className="paygate-proof-reason" data-tone={reason.tone}>
+                      <span className="paygate-proof-reason-icon">
+                        <Icon size={30} aria-hidden="true" />
+                      </span>
+                      <span>
+                        <strong>{reason.label}</strong>
+                        <small>{reason.body}</small>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="paygate-proof-stack">
+              <div className="paygate-receipt-panel" aria-label="Live request receipt for a paid API call">
+                <div className="paygate-receipt-head">
+                  <div>
+                    <span className="paygate-receipt-head-icon">
+                      <ReceiptHeaderIcon size={26} />
+                    </span>
+                    <strong>Live request receipt</strong>
+                  </div>
+                  <button
+                    type="button"
+                    className="paygate-receipt-id"
+                    data-copy-state={getProofCopyState('req')}
+                    onClick={() => copyProofValue('req', 'req_01HZ8XQ4F2J7Q9K3T6V1')}
+                    aria-label="Copy request id req_01HZ8XQ4F2J7Q9K3T6V1"
+                  >
+                    <span>REQ ID:</span>
+                    <code>req_01HZ8XQ4F2J7Q9K3T6V1</code>
+                    {getProofCopyState('req') === 'copied' ? <ReceiptCopiedIcon size={18} /> : <ReceiptCopyIcon size={18} />}
+                  </button>
+                </div>
+
+                <div className="paygate-receipt-rows">
+                  {PROOF_ROWS.map(row => {
+                    const Icon = row.icon;
+                    const copyState = getProofCopyState(row.key);
+
+                    return (
+                      <button
+                        key={row.key}
+                        type="button"
+                        className="paygate-receipt-row"
+                        data-tone={row.tone}
+                        data-active={proofActive === row.key ? 'true' : 'false'}
+                        data-copy-state={copyState}
+                        onMouseEnter={() => setProofActive(row.key)}
+                        onFocus={() => setProofActive(row.key)}
+                        onClick={() => copyProofValue(row.key, row.copyValue)}
+                        aria-label={`Copy ${row.label}: ${row.copyValue}`}
+                      >
+                        <span className="paygate-receipt-status">
+                          <Icon size={28} />
+                        </span>
+                        <span className="paygate-receipt-label">{row.label}</span>
+                        <i className="paygate-receipt-divider" aria-hidden="true" />
+                        <code className="paygate-receipt-value">{row.value}</code>
+                        <span className="paygate-receipt-copy" aria-hidden="true">
+                          {copyState === 'copied' ? <ReceiptCopiedIcon size={19} /> : <ReceiptCopyIcon size={19} />}
+                        </span>
+                        <time>{row.time}</time>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="paygate-receipt-foot">
+                  <span className="is-live"><i aria-hidden="true" /> Live</span>
+                  <span>Region: <strong>SGP</strong></span>
+                  <span>Latency: <strong>142ms</strong></span>
+                  <span className="is-forwarded">Forwarded to upstream <Activity size={17} aria-hidden="true" /></span>
+                </div>
+              </div>
+
+              <aside className="paygate-proof-metrics" aria-label="Revenue outcome after a successful paid call">
+                <div className="paygate-proof-metric">
+                  <span className="paygate-proof-metric-icon">
+                    <TrendingUp size={26} aria-hidden="true" />
+                  </span>
+                  <span>Developer revenue</span>
+                  <strong>+0.009 USDC</strong>
+                </div>
+                <i className="paygate-proof-metric-divider" aria-hidden="true" />
+                <div className="paygate-proof-metric">
+                  <span className="paygate-proof-metric-icon">
+                    <Layers3 size={26} aria-hidden="true" />
+                  </span>
+                  <span>PayGate fee</span>
+                  <strong>+0.001 USDC</strong>
+                </div>
+                <p>
+                  Escrow split posted after success
+                  <Info size={15} aria-hidden="true" />
+                </p>
+              </aside>
+            </div>
           </div>
         </div>
       </section>
