@@ -27,7 +27,7 @@ The UI should make that flow feel obvious, trustworthy, and premium.
 - Wallet: `@stellar/freighter-api`.
 - Current app style: mostly inline styles plus a small global CSS layer.
 - Build status: `npm --prefix frontend run build` succeeds.
-- No GSAP dependency is currently installed.
+- GSAP and `@gsap/react` are installed and already used for restrained landing-page interactions.
 
 ### Main Files
 
@@ -43,14 +43,15 @@ The UI should make that flow feel obvious, trustworthy, and premium.
 
 ### Current UI Problems
 
-- The landing page leans toward generic purple/cyan AI SaaS: gradient headline, terminal hero, shimmer, dot-grid, and decorative motion.
-- The hero explains code more than the business transformation. It should instead show ordinary API URL -> paid endpoint -> paid call -> revenue.
+- The landing page now has strong visual pieces, but the narrative order still needs to be corrected so sections do not repeat the same paid-call idea.
+- The current hero, receipt proof, and transformation sections all reference paid-call mechanics; the next work should make every section answer a different user question.
 - `Landing.jsx` and `Dashboard.jsx` are too monolithic for a controlled premium refactor.
 - The dashboard has useful data, but the layout feels like cards on a page instead of an operational workspace.
 - "Register API" sounds technical and passive. The desired product action is closer to "Create paid endpoint".
 - The legacy generator still exists and should be visually demoted so it does not confuse V1 positioning.
-- Current color tokens are too limited for semantic product states.
-- Current motion is decorative in places. New motion should teach the paid API lifecycle.
+- Current landing copy still uses some mechanism-first language (`MPP`, `paid proxy`, `402`) before the user has enough context.
+- The old generic feature section remains and should be removed or replaced with audience/conversion content.
+- Motion should continue to teach product states, but the revised plan should avoid adding another full lifecycle scrollytelling section.
 
 ### Current UI Strengths To Preserve
 
@@ -59,6 +60,9 @@ The UI should make that flow feel obvious, trustworthy, and premium.
 - `CopyButton`, `ApiStatusBadge`, and `ValueRow` are useful primitives that can be upgraded rather than discarded.
 - Brand mark assets already exist under `frontend/public/brand`.
 - Dashboard API response already contains the right operational concepts: total APIs, calls, revenue, escrow, requests, payments, withdrawals.
+- The current hero direction is strong: centered product promise plus a visual API URL -> PayGate -> paid endpoint rail.
+- The current transformation section has a strong before/action/after layout and should be retained with narrative polish.
+- The current receipt component is valuable, but should be positioned as auditability proof instead of another flow explanation.
 
 ## 3. Locked Design Principles
 
@@ -105,7 +109,7 @@ Motion should be used only where it explains the product:
 - URL transforms into paid proxy.
 - Status changes from `402` to `MPP paid` to `200 OK`.
 - Revenue increments after a successful request.
-- Scroll section reveals the paid-call lifecycle.
+- Trust and proof sections reveal different product truths instead of repeating the same paid-call lifecycle.
 - Dashboard rows or metrics update with restraint.
 
 Every motion feature must have a reduced-motion fallback.
@@ -181,6 +185,90 @@ Decision needed before implementation: use reliable Google/local fonts or introd
 ## 5. Development Sequence
 
 The refactor should be done section by section. Each section should be visually checked before moving forward.
+
+### Updated Landing Narrative
+
+The old landing sequence risked repeating the same story in different visual forms: API URL -> paid endpoint -> `402` -> MPP -> `200 OK` -> revenue. The revised sequence keeps the locked premium visual direction, but gives each section a distinct job.
+
+Recommended landing order:
+
+1. Hero: explain the product in seconds.
+2. Transformation: show how an API owner creates a paid endpoint.
+3. Protected paid calls: answer the upstream-safety objection.
+4. Receipt proof: show that every paid call is auditable.
+5. Dashboard preview: show PayGate as an operating workspace.
+6. Use cases and final CTA: make the right users recognize themselves and act.
+
+This is the product narrative to protect during implementation:
+
+```txt
+What is PayGate?
+  Paste an API URL. Charge per call.
+
+How easy is it?
+  Paste URL -> set price -> generate paid endpoint.
+
+Is my upstream safe?
+  PayGate blocks unpaid traffic and forwards valid requests with the upstream secret header.
+
+Can I prove what happened?
+  Every paid call has a request receipt.
+
+Can I operate this as a product?
+  Dashboard shows endpoints, calls, revenue, fees, escrow, and withdrawable balance.
+
+Who is this for?
+  API owners and builders who want paid machine-readable access without rebuilding billing infrastructure.
+```
+
+Do not add another full paid-call lifecycle section unless a future product need makes it clearly different from the hero, proof, and transformation sections.
+
+### Locked Visual Baseline Pack
+
+These images are the visual contract for autonomous implementation. Generated baselines define layout, hierarchy, density, copy, and visual intent. Actual screenshots define the already-implemented sections. Do not replace or reinterpret these baselines during development unless the user explicitly approves a new baseline.
+
+| Phase | Section | Baseline |
+| --- | --- | --- |
+| Phase 2 | Hero | `docs/evidence/ui/landing-baselines/phase-2-hero-actual-baseline.png` |
+| Phase 3 | Transformation | `docs/evidence/ui/landing-baselines/phase-3-transformation-actual-baseline.png` |
+| Phase 4 | Protected paid calls | `docs/evidence/ui/landing-baselines/phase-4-protected-paid-calls-baseline.png` |
+| Phase 5 | Receipt proof | `docs/evidence/ui/landing-baselines/phase-5-receipt-proof-baseline.png` |
+| Phase 6 | Dashboard preview | `docs/evidence/ui/landing-baselines/phase-6-dashboard-preview-baseline.png` |
+| Phase 7 | Use cases and final CTA | `docs/evidence/ui/landing-baselines/phase-7-use-cases-cta-baseline.png` |
+
+Baseline interpretation rules:
+
+- Match the baseline section's layout, content hierarchy, spacing rhythm, color intent, density, and interaction affordances.
+- Generated image details that conflict with implemented design-system primitives should defer to the existing PayGate design system. For example, primary CTA buttons must continue using the custom `Button` / `.pg-button` styling even if a generated baseline button appears slightly flatter.
+- Do not copy image-generation artifacts literally if they reduce implementation quality; preserve the intended product UI.
+- Every section must still be responsive and accessible, even if the desktop baseline is the primary visual reference.
+
+### Phase Gate Protocol
+
+Every landing phase after this point must follow the same acceptance gate:
+
+1. Implement only the selected section and any supporting shared styles/components required for that section.
+2. Run `npm --prefix frontend run build`.
+3. Run `git diff --check`.
+4. Capture Playwright screenshots:
+   - desktop `1440px` section screenshot,
+   - mobile `390x844` section screenshot,
+   - hover/focus screenshot when the baseline includes an interactive emphasis state.
+5. Compare the implementation screenshot against the locked baseline for the active phase.
+6. Iterate until the implementation matches the baseline's layout, visual hierarchy, tone, density, and copy closely enough for acceptance.
+7. Update or add the phase evidence document under `docs/evidence/ui/`.
+8. Commit only after the acceptance criteria pass.
+9. Do not start the next phase until the current phase has been committed.
+
+Required commit messages:
+
+```txt
+Phase 4: feat: add protected paid calls section
+Phase 5: feat: add request receipt proof section
+Phase 6: feat: add landing dashboard preview
+Phase 7: content: add landing audience and conversion close
+Phase 8: style: polish landing narrative flow
+```
 
 ## Phase 0: Baseline And Refactor Safety
 
@@ -279,32 +367,9 @@ Acceptance:
 - No purple-only gradient dependency.
 - Screenshot check at 1440 desktop and 390 mobile.
 - No text overlap.
+- Desktop and mobile screenshots remain consistent with `docs/evidence/ui/landing-baselines/phase-2-hero-actual-baseline.png`.
 
-## Phase 3: Landing Proof Strip
-
-Goal: immediately prove the product mechanics after the hero.
-
-Section content:
-
-```txt
-Original API URL       -> paid proxy URL
-Unpaid request         -> 402 Payment Required
-Paid MPP request       -> 200 OK
-Successful call        -> escrow split and withdrawable revenue
-```
-
-Design:
-
-- Dense horizontal strip on desktop.
-- Compact stacked proof cards on mobile.
-- Use semantic status chips, not decorative cards.
-
-Acceptance:
-
-- Reinforces product truth without long explanation.
-- Helps users understand PayGate is not just a landing page promise.
-
-## Phase 4: Landing Transformation Section
+## Phase 3: Landing Transformation Section
 
 Goal: replace vague feature cards with a clear before/after product story.
 
@@ -328,40 +393,182 @@ Acceptance:
 
 - Feels like Bitly/Linktree simplicity applied to APIs.
 - Does not hide the upstream protection requirement.
+- The right-side result card is clearly the outcome, but does not become a second dashboard section.
+- The section avoids repeating the full hero lifecycle.
+- Desktop and mobile screenshots remain consistent with `docs/evidence/ui/landing-baselines/phase-3-transformation-actual-baseline.png`.
 
-## Phase 5: Landing Paid-Call Scrollytelling
+Implementation status:
 
-Goal: use GSAP for one memorable product story section.
+- The current Phase 4 implementation already establishes this direction.
+- If we keep the existing commit history naming, this remains the completed transformation work even though the plan order now labels it as Phase 3 for narrative clarity.
+
+Commit message after final narrative-polish acceptance:
+
+```txt
+content: rebalance landing transformation narrative
+```
+
+## Phase 4: Landing Protected Paid Calls
+
+Goal: answer the strongest API-owner objection after the user understands setup simplicity.
+
+Core user question:
+
+> If buyers can call my paid endpoint, how do I keep the original upstream API private?
+
+Recommended title:
+
+> Keep your upstream API private.
+
+Supporting copy:
+
+> PayGate verifies payment before forwarding and sends valid requests with your upstream secret header.
+
+Avoid saying `signs valid requests` unless the implementation actually performs cryptographic request signing. The current product truth is better described as guarded forwarding with `X-PayGate-Secret`.
 
 Section concept:
 
-Pinned or semi-pinned paid-call lifecycle:
+```txt
+Machine client / agent
+  calls the PayGate paid endpoint
 
-1. Agent calls proxy endpoint.
-2. Proxy returns `402 Payment Required`.
-3. Agent pays using Stellar MPP.
-4. PayGate verifies payment.
-5. PayGate forwards upstream with `X-PayGate-Secret`.
-6. API response returns.
-7. Revenue is logged and withdrawable.
+PayGate guard
+  blocks unpaid traffic
+  verifies payment
+  issues request identity
+  forwards valid requests with X-PayGate-Secret
+
+Protected upstream API
+  rejects direct traffic without the secret
+  accepts PayGate-forwarded traffic
+```
+
+Primary visual:
+
+- Three-zone architecture composition:
+  - Left: machine client card with `GET /api/pay/api_123`.
+  - Center: PayGate guard card as the focal point.
+  - Right: protected upstream API card with masked upstream URL and a small guard snippet.
+- Two connector states:
+  - Amber branch: `Unpaid -> 402 blocked`, stopping at PayGate.
+  - Green/blue branch: `Paid -> forwarded`, continuing to upstream.
+- Bottom compact trust facts:
+  - `Unpaid traffic blocked`
+  - `Upstream URL stays private`
+  - `Secret header forwarding`
+  - `Receipt per request`
+
+Recommended snippet:
+
+```js
+if (request.headers.get("X-PayGate-Secret") !== PAYGATE_SECRET) {
+  return new Response("Unauthorized", { status: 401 });
+}
+```
+
+Visual direction:
+
+- Premium security architecture, not generic security SaaS.
+- Use one strong PayGate guard focal card instead of many shield icons.
+- Keep purple on the guard, amber only for blocked traffic, green only for verified/forwarded traffic.
+- Do not add a large revenue card in this section.
+- Do not repeat the full `402 -> MPP -> 200 -> revenue` lifecycle.
 
 Implementation:
 
-- Use GSAP ScrollTrigger after adding `gsap`.
-- Keep duration short and controlled.
-- Do not scroll-jack the whole page.
-- On mobile, use stacked static steps or simpler scroll reveal.
-- On reduced motion, show all steps.
+- Build as normal React/CSS/SVG, using the existing PayGate card language.
+- Use GSAP only for subtle line activation or hover/focus state transitions if it adds clarity.
+- Mobile: stack as `client -> PayGate guard -> upstream`, with blocked/forwarded states shown as compact rows.
+- Reduced motion: show both states without animated sweeps.
+- Keep interaction optional; the section must communicate statically.
 
 Acceptance:
 
-- The animation teaches the payment lifecycle.
-- It feels premium, not gimmicky.
-- It remains understandable if animation is disabled.
+- The section clearly answers upstream protection.
+- Copy is technically accurate and does not overclaim cryptographic signing.
+- It feels different from hero, transformation, and receipt proof.
+- No icon or connector overlaps on desktop/mobile.
+- Screenshot check at desktop and mobile.
+- Implementation matches `docs/evidence/ui/landing-baselines/phase-4-protected-paid-calls-baseline.png` before the phase is committed.
+- Primary CTAs, if added in this section, use the existing custom `Button` / `.pg-button` treatment.
+
+Commit message:
+
+```txt
+feat: add protected paid calls section
+```
+
+## Phase 5: Landing Receipt Proof
+
+Goal: prove that paid calls are observable and auditable after the trust model is understood.
+
+Recommended title:
+
+> Every paid call leaves a receipt.
+
+Supporting copy:
+
+> Track request identity, payment verification, upstream forwarding, and posted revenue from a single call.
+
+Content:
+
+```txt
+REQ ID: req_01HZ8XQ4F2J7Q9K3T6V1
+
+Request received       GET /api/pay/api_123
+Payment required       402 Required
+Payment verified       pay_8d7a2c0e
+Upstream returned      200 OK
+
+LIVE · Region: SGP · Latency: 142ms · Forwarded to upstream
+```
+
+Important copy correction:
+
+- Prefer `Payment verified before forwarding`.
+- Avoid leading with `verified on-chain` in marketing copy because it pulls attention toward crypto mechanics too early.
+- `Stellar MPP` can appear in supporting labels or docs links, but should not dominate the section.
+
+Visual direction:
+
+- Receipt/log panel as the main object.
+- Request identity, payment proof, upstream result as supporting evidence bullets.
+- Revenue split may appear, but as a supporting receipt outcome, not the hero of the section.
+- Keep row icons custom and friendly, but precise. Avoid generic checkmark spam.
+- Use dividers, timestamps, copy affordances, and mono values to make it feel operational.
+
+Interaction:
+
+- Rows can be hoverable/copyable.
+- Active row highlight should be subtle and semantically colored.
+- Copy state should show `copied` feedback.
+
+Acceptance:
+
+- The section communicates auditability, not setup flow.
+- It does not feel like a duplicate of the hero rail.
+- Request IDs, endpoint paths, status codes, and values remain readable on mobile.
+- Copy interactions continue to work.
+- Implementation matches `docs/evidence/ui/landing-baselines/phase-5-receipt-proof-baseline.png` before the phase is committed.
+- Receipt row hover/focus and copy states are captured as evidence when implemented.
+
+Commit message:
+
+```txt
+feat: add request receipt proof section
+```
 
 ## Phase 6: Landing Dashboard Preview
 
 Goal: show PayGate as an operational product.
+
+Recommended title:
+
+> Monitor calls, revenue, and endpoints in one workspace.
+
+Supporting copy:
+
+> Track calls, revenue, fees, escrow balance, and request activity without building billing infrastructure.
 
 Content:
 
@@ -372,70 +579,177 @@ Content:
 - Platform fee.
 - Escrow withdrawable balance.
 - Recent request/payment rows.
+- Withdrawal or escrow readiness panel.
 
 Design:
 
 - Use a realistic product screenshot-like composition, but built from components.
 - Avoid fake chart overload.
 - If a chart is needed, use a small SVG line/area chart first.
+- Prioritize table rows, ledger entries, metric hierarchy, and workspace navigation over decorative analytics.
+
+Recommended dashboard composition:
+
+```txt
+Sidebar
+  Overview
+  APIs
+  Payments
+  Withdrawals
+
+Header
+  API revenue
+  Date range
+  7D / 30D / 90D
+  Create paid endpoint
+
+Metrics
+  Total calls
+  Gross revenue
+  Developer revenue
+  Withdrawable
+
+Operations
+  API registry table
+  Activity ledger
+  Escrow / withdraw panel
+```
+
+Copy note:
+
+- Avoid headline wording like `See every paid call, payout, and endpoint in one place`; it reads slightly clumsy.
+- Prefer `Monitor calls, revenue, and endpoints in one workspace.`
 
 Acceptance:
 
 - Users can imagine operating revenue from this product.
 - Feels like a real dashboard, not marketing decoration.
+- Does not duplicate the hero's small dashboard hint; it is the fuller operational view.
+- Dense but readable at desktop and cleanly stacked on mobile.
+- Implementation matches `docs/evidence/ui/landing-baselines/phase-6-dashboard-preview-baseline.png` before the phase is committed.
+- Dashboard preview data remains credible and aligned with existing PayGate concepts.
 
-## Phase 7: Landing Developer Setup Section
+Commit message:
 
-Goal: be honest and credible about integration.
+```txt
+feat: add landing dashboard preview
+```
 
-Content:
+## Phase 7: Landing Use Cases And Final CTA
 
-- Generated proxy URL.
-- API secret.
-- Upstream guard snippet.
-- Direct upstream request without secret -> `401`.
-- Proxy unpaid request -> `402`.
-- Proxy paid request -> `200`.
+Goal: close with audience clarity and one decisive action, without creating another generic feature grid.
 
-Design:
+Recommended title:
 
-- Use compact code snippets and copy fields.
-- Keep terminal styling subtle, not hero-level.
+> Monetize the endpoints your users already call.
 
-Acceptance:
+Supporting copy:
 
-- The setup burden is clear but not intimidating.
-- Protecting the upstream API is treated as a first-class product step.
-
-## Phase 8: Landing Personas, Scope, Trust, CTA
-
-Goal: finish the page with clarity and launch confidence.
+> PayGate is for API owners and builders who want paid machine-readable access without rebuilding billing, metering, and revenue operations.
 
 Personas:
 
 - Indie API builders.
+  - Problem: useful endpoints are hard to charge for.
+  - Outcome: publish a paid endpoint in minutes.
+- Agent-facing API builders.
+  - Problem: agents need machine-readable paid access.
+  - Outcome: expose an endpoint that responds with API-native payment states.
 - Startup API owners.
-- AI agent developers.
-- Developers monetizing endpoints.
+  - Problem: billing and access control slow API monetization.
+  - Outcome: gate requests before they reach upstream.
+- Data/API sellers.
+  - Problem: successful requests need metering and revenue evidence.
+  - Outcome: track calls, revenue, and withdrawable balance.
 
-Scope/trust:
+Avoid:
 
-- Stellar MPP.
-- Soroban escrow.
-- Testnet beta if still true.
-- REST/JSON API scope if still true.
-- Pay-per-call API access.
+- Overly broad `developers who want to ship`.
+- Treating AI agents as the only primary buyer.
+- Crypto-first persona language.
+- Repeating the full hero flow inside the CTA panel.
 
-Final CTA:
+Visual direction:
 
-- `Create paid endpoint`
-- Secondary link: `View docs` or `Open dashboard`
+- Use a customer-fit matrix or compact horizontal rows, not four generic feature cards.
+- The CTA card should be the strongest object in this section.
+- CTA:
+  - Primary: `Create paid endpoint`
+  - Secondary: `View docs`
+- Trust notes:
+  - `Built on Stellar MPP`
+  - `Request receipts included`
+  - `Upstream guard supported`
 
 Acceptance:
 
-- No hackathon language.
-- No overclaiming production readiness beyond actual state.
-- CTA matches the actual product action.
+- The user can self-identify quickly.
+- The final action is clear.
+- CTA copy matches the real product route.
+- No hackathon/demo framing.
+- Implementation matches `docs/evidence/ui/landing-baselines/phase-7-use-cases-cta-baseline.png` before the phase is committed.
+- Primary and secondary CTA buttons use existing PayGate button variants rather than one-off styling.
+
+Commit message:
+
+```txt
+content: add landing audience and conversion close
+```
+
+## Phase 8: Landing Full-Page Polish And Evidence
+
+Goal: make the completed landing page feel like one coherent premium product narrative.
+
+Tasks:
+
+1. Remove obsolete generic features section.
+2. Reconcile navigation anchors:
+   - `Product` should point to the transformation or overview section.
+   - `How it works` should point to transformation.
+   - `Docs` should remain external/internal docs.
+   - Hide or defer `Pricing` until a real pricing section exists.
+3. Audit copy for repeated concepts:
+   - Do not overuse `+0.009 USDC`.
+   - Do not repeat `402 -> MPP -> 200` in every section.
+   - Use `MPP` mainly as a mechanism/trust detail, not the main value proposition.
+4. Audit motion:
+   - Every animation should teach a product state or improve affordance.
+   - No decorative motion that distracts from comprehension.
+   - Reduced-motion fallback for all animated sequences.
+5. Audit mobile:
+   - Each section must remain readable at `390x844`.
+   - No horizontal overflow.
+   - Code/URL pills truncate elegantly.
+6. Update evidence docs with screenshots and acceptance notes.
+
+Verification:
+
+- `npm --prefix frontend run build`
+- `git diff --check`
+- Playwright desktop screenshots:
+  - Hero
+  - Transformation
+  - Protected paid calls
+  - Receipt proof
+  - Dashboard preview
+  - Use cases/CTA
+- Playwright mobile screenshots at `390x844`.
+- Copy interactions still return `data-copy-state="copied"` where supported.
+
+Acceptance:
+
+- The page has clear narrative progression from product promise to trust to operations to conversion.
+- Every section has a distinct job.
+- No section feels like a duplicated version of the hero.
+- The landing page feels like a real product launch, not a hackathon/demo shell.
+- Full-page screenshots confirm all locked baselines still work together as one coherent landing page.
+- The phase is committed before moving into app shell/navigation work.
+
+Commit message:
+
+```txt
+style: polish landing narrative flow
+```
 
 ## Phase 9: App Shell And Navigation
 
