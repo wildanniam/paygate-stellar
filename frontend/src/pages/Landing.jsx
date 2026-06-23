@@ -698,10 +698,9 @@ export default function Landing() {
           </Link>
 
           <div className="paygate-nav-center" aria-label="Primary navigation">
-            <a href="#features">Product</a>
+            <a href="#workspace">Product</a>
             <a href="#how-it-works">How it works</a>
             <a href="https://github.com/wildanniam/paygate-stellar" target="_blank" rel="noopener noreferrer">Docs</a>
-            <a href="#features">Pricing</a>
           </div>
 
           <div className="paygate-nav-actions">
@@ -739,7 +738,7 @@ export default function Landing() {
           </h1>
 
           <p className="paygate-hero-copy">
-            PayGate creates a paid proxy, verifies MPP payments, and tracks API revenue.
+            PayGate creates a paid proxy, verifies payment, and tracks API revenue.
           </p>
 
           <div className="paygate-hero-actions">
