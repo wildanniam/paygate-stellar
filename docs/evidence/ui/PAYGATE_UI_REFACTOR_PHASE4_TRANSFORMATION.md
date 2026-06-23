@@ -15,6 +15,7 @@ This keeps the landing page focused on the locked product promise: PayGate shoul
 ## Locked Visual Reference
 
 - `/Users/wildanniam/.codex/generated_images/019ee93e-f259-7c52-87a1-15a66654230a/ig_0bf888e18fd73f17016a39360fd9c48194b500ca2222b74bc8.png`
+- Result-card highlight refinement: `/Users/wildanniam/.codex/generated_images/019ee93e-f259-7c52-87a1-15a66654230a/ig_0c71d14d02b84b9e016a39e317bf008191b00e0eda513a913e.png`
 
 ## Implemented Shape
 
@@ -31,6 +32,7 @@ This keeps the landing page focused on the locked product promise: PayGate shoul
 - Replaced generic transformation icons with PayGate-specific inline SVG primitives for billing, guard, revenue, agent sharing, API/code, and endpoint sparkle.
 - Tightened desktop section height, heading scale, panel spacing, and outcome rail density to match the locked visual direction more closely.
 - Added left-to-center and center-to-endpoint connector energy, dotted matrix depth, and premium dark card material.
+- Refined the right `Paid endpoint` card as the generated output by strengthening its purple result edge, paid URL pill, and revenue-state material while leaving the other cards structurally unchanged.
 - Compact mobile keeps the core sequence readable without turning the section into a long stacked wall.
 
 ## Interaction
@@ -45,9 +47,9 @@ This keeps the landing page focused on the locked product promise: PayGate shoul
 - `npm --prefix frontend run build` passed.
 - Browser console showed 0 errors and only existing development warnings.
 - Proxy URL copy interaction returned `copied`.
-- Desktop section screenshot: `output/playwright/paygate-phase4-transform-desktop-1440-v4.png`
-- Mobile section screenshot: `output/playwright/paygate-phase4-transform-mobile-390-v4.png`
-- Hover-state screenshot: `output/playwright/paygate-phase4-transform-hover-1440-v4.png`
+- Desktop section screenshot: `output/playwright/paygate-phase4-result-highlight-desktop-1440-v5.png`
+- Mobile section screenshot: `output/playwright/paygate-phase4-result-highlight-mobile-390-v5.png`
+- Hover-state screenshot: `output/playwright/paygate-phase4-result-highlight-hover-1440-v5.png`
 
 ## Acceptance
 
