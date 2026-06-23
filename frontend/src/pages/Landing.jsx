@@ -382,22 +382,46 @@ const DASHBOARD_ACTIVITY = [
   { id: 'req_01HZ8XS9', event: 'forwarded', tone: 'blue', result: '200 OK', resultTone: 'green', revenue: '+0.015 USDC' },
 ];
 
-function BrandFeatureIcon({ src, alt }) {
-  return (
-    <span className="paygate-feature-brand-icon">
-      <img src={src} alt={alt} />
-    </span>
-  );
-}
+const AUDIENCE_ROWS = [
+  {
+    title: 'Indie API builders',
+    problem: 'Useful endpoints are hard to charge for.',
+    outcome: 'Publish a paid endpoint in minutes.',
+    icon: Fingerprint,
+  },
+  {
+    title: 'Agent-facing API builders',
+    problem: 'Agents need machine-readable paid access.',
+    outcome: 'Expose API-native payment states.',
+    icon: MachineClientIcon,
+  },
+  {
+    title: 'Startup API owners',
+    problem: 'Billing and access control slow API monetization.',
+    outcome: 'Gate requests before they reach upstream.',
+    icon: LayoutDashboard,
+  },
+  {
+    title: 'Data/API sellers',
+    problem: 'Successful requests need metering and revenue evidence.',
+    outcome: 'Track calls, revenue, and withdrawable balance.',
+    icon: Database,
+  },
+];
+
+const AUDIENCE_TRUST_NOTES = [
+  { label: 'Built on Stellar MPP', icon: Zap },
+  { label: 'Request receipts included', icon: ReceiptHeaderIcon },
+  { label: 'Upstream guard supported', icon: GuardIcon },
+];
 
 export default function Landing() {
   const [h, setH] = useState({
-    navCta: false, feat: null,
+    navCta: false,
   });
   const hov = (key, val) => setH(prev => ({ ...prev, [key]: val }));
 
   const [scrollPct, setScrollPct]     = useState(0);
-  const [magnetCta, setMagnetCta]     = useState({ x: 0, y: 0 });
   const [heroActive, setHeroActive]   = useState('idle');
   const [copiedFlow, setCopiedFlow]   = useState(null);
   const [proofActive, setProofActive] = useState('mpp');
@@ -407,16 +431,11 @@ export default function Landing() {
   const [copiedTransform, setCopiedTransform] = useState(null);
   const [protectedActive, setProtectedActive] = useState('forwarded');
 
-  // Card stagger states
-  const [featVis, setFeatVis]       = useState([false, false, false, false]);
-
   const heroRailRef    = useRef(null);
   const proofRef       = useRef(null);
   const copyTimerRef   = useRef(null);
   const proofCopyTimerRef = useRef(null);
   const transformCopyTimerRef = useRef(null);
-  const ctaBottomRef   = useRef(null);
-  const featCardsRef    = useRef(null);
 
   const resetHeroActive = useCallback(() => setHeroActive('idle'), []);
 
@@ -598,22 +617,6 @@ export default function Landing() {
     };
   }, []);
 
-  // ── Features cards stagger ──
-  useEffect(() => {
-    const el = featCardsRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) {
-        [0, 1, 2, 3].forEach(i =>
-          setTimeout(() => setFeatVis(p => { const n = [...p]; n[i] = true; return n; }), i * 110)
-        );
-        obs.disconnect();
-      }
-    }, { threshold: 0.1, rootMargin: '0px 0px 80px 0px' });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
   // ── Hero transformation rail ──
   useGSAP(() => {
     const root = heroRailRef.current;
@@ -657,22 +660,6 @@ export default function Landing() {
 
     return () => timeline.kill();
   }, { scope: heroRailRef });
-
-  // ── Magnetic CTA ──
-  const applyMagnet = useCallback((e, ref, setter) => {
-    const rect = ref.current?.getBoundingClientRect();
-    if (!rect) return;
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top  + rect.height / 2;
-    const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-    setter({
-      x: clamp((e.clientX - cx) * 0.14, -3, 3),
-      y: clamp((e.clientY - cy) * 0.14, -3, 3),
-    });
-  }, []);
-
-  // Shared card transition (covers both stagger reveal + hover)
-  const cardTransition = 'opacity 0.5s ease-out, transform 0.5s ease-out, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease';
 
   return (
     <div className="paygate-landing">
@@ -1581,111 +1568,85 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
-      <section id="features" className="fs">
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '120px 24px' }}>
-          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, maxWidth: 560, lineHeight: 1.1, marginBottom: 18 }}>
-            Built for developers<br />who want to ship.
-          </h2>
-          <p style={{ color: C.text2, fontSize: 17, maxWidth: 640, lineHeight: 1.65, margin: '0 0 48px' }}>
-            The product primitives stay close to the API workflow: proxy URLs, revenue evidence, upstream protection, and machine-client payment behavior.
-          </p>
-
-          <div ref={featCardsRef} className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 16 }}>
-            {[
-              {
-                icon: <BrandFeatureIcon src="/brand/paygate-asset-api.svg" alt="" />,
-                title: 'Paid Proxy URLs',
-                body: 'Register an upstream endpoint and PayGate creates a public proxy URL that agents can call when they need paid API access.',
-              },
-              {
-                icon: <BrandFeatureIcon src="/brand/paygate-asset-chart.svg" alt="" />,
-                title: 'Revenue Dashboard',
-                body: 'Track registered APIs, paid calls, gross revenue, platform fees, request status, escrow balance, and testnet transaction hashes.',
-              },
-              {
-                icon: <BrandFeatureIcon src="/brand/paygate-asset-code.svg" alt="" />,
-                title: 'Simple Upstream Protection',
-                body: 'PayGate gives each API a secret header. Your upstream API checks that header so buyers cannot bypass the paid proxy.',
-              },
-              {
-                icon: <BrandFeatureIcon src="/brand/paygate-asset-signal.svg" alt="" />,
-                title: 'Built for Machine Clients',
-                body: 'The demo flow is made for agents and scripts: request, receive 402, pay with Stellar MPP, retry, and receive JSON.',
-              },
-            ].map((feat, i) => (
-              <div
-                key={i}
-                onMouseEnter={() => hov('feat', i)}
-                onMouseLeave={() => hov('feat', null)}
-                style={{
-                  opacity: featVis[i] ? 1 : 0,
-                  transform: featVis[i] ? 'translateY(0)' : 'translateY(24px)',
-                  background: h.feat === i ? C.surfaceHover : C.surface,
-                  border: `1px solid ${h.feat === i ? C.borderHover : C.border}`,
-                  borderTopColor: h.feat === i ? 'rgba(135,146,166,0.36)' : 'rgba(255,255,255,0.06)',
-                  borderRadius: 12, padding: 32,
-                  boxShadow: h.feat === i ? '0 18px 42px rgba(0,0,0,0.26)' : 'none',
-                  transition: cardTransition,
-                }}
-              >
-                <div className="paygate-feature-icon-shell" data-active={h.feat === i ? 'true' : 'false'}>
-                  {feat.icon}
-                </div>
-                <h3 style={{ fontSize: 17, fontWeight: 700, color: C.text1, marginBottom: 10 }}>{feat.title}</h3>
-                <p style={{ color: C.text2, fontSize: 15, lineHeight: 1.6 }}>{feat.body}</p>
-              </div>
-            ))}
+      <section
+        id="features"
+        className="paygate-audience-section fs"
+        aria-labelledby="paygate-audience-title"
+      >
+        <div className="paygate-audience-inner">
+          <div className="paygate-audience-head">
+            <p>Built for API owners</p>
+            <h2 id="paygate-audience-title">
+              Monetize the endpoints your users <span>already call.</span>
+            </h2>
+            <p>
+              PayGate is for API owners and builders who want paid machine-readable access without rebuilding billing, metering, and revenue operations.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* ── FINAL CTA ── */}
-      <section className="fs" style={{
-        width: '100%', padding: '120px 24px', textAlign: 'center',
-        position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(180deg, #050609, #080A0F)',
-        borderTop: `1px solid ${C.border}`,
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          background:
-            'linear-gradient(90deg, transparent, rgba(135,146,166,0.055), transparent), repeating-linear-gradient(90deg, transparent 0 92px, rgba(135,146,166,0.035) 93px, transparent 94px)',
-          pointerEvents: 'none', zIndex: 0,
-          opacity: 0.75,
-        }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
-          <h2 style={{
-            fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 800,
-            letterSpacing: '-0.02em', lineHeight: 1.1,
-            maxWidth: 640, margin: '0 auto',
-          }}>
-            <span style={{ color: C.text1 }}>Your API has value.</span>
-            <br />
-            <span style={{ color: '#D9D2FF' }}>
-              Make every call paid.
-            </span>
-          </h2>
-          <p style={{ color: C.text2, fontSize: 18, marginTop: 20 }}>
-            Create a PayGate proxy and start testing pay-per-call access.
-          </p>
-          <div style={{ marginTop: 40 }}>
-            <Button
-              as={Link}
-              ref={ctaBottomRef}
-              to="/apis/new"
-              size="lg"
-              className="paygate-bottom-cta"
-              onMouseLeave={() => setMagnetCta({ x: 0, y: 0 })}
-              onMouseMove={e => applyMagnet(e, ctaBottomRef, setMagnetCta)}
-              style={{
-                '--pg-magnet-x': `${magnetCta.x}px`,
-                '--pg-magnet-y': `${magnetCta.y}px`,
-              }}
-              icon={<Zap size={18} aria-hidden="true" />}
-            >
-              Create paid endpoint
-            </Button>
+          <div className="paygate-audience-grid">
+            <div className="paygate-audience-list" aria-label="PayGate use cases">
+              {AUDIENCE_ROWS.map(row => {
+                const Icon = row.icon;
+                return (
+                  <article key={row.title} className="paygate-audience-row">
+                    <span className="paygate-audience-icon"><Icon size={30} aria-hidden="true" /></span>
+                    <div className="paygate-audience-copy">
+                      <h3>{row.title}</h3>
+                      <p>{row.problem}</p>
+                    </div>
+                    <i aria-hidden="true" />
+                    <div className="paygate-audience-outcome">
+                      <CheckCircle2 size={30} aria-hidden="true" />
+                      <p>{row.outcome}</p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <aside className="paygate-audience-cta" aria-label="Create your first paid endpoint">
+              <div className="paygate-audience-cta-brand">
+                <img src="/brand/paygate-mark.svg" alt="" />
+                <strong>PayGate</strong>
+              </div>
+              <h3>Create your first paid endpoint</h3>
+              <div className="paygate-audience-actions">
+                <Button as={Link} to="/apis/new" size="lg">
+                  Create paid endpoint <ArrowRight size={20} aria-hidden="true" />
+                </Button>
+                <Button
+                  as="a"
+                  href="https://github.com/wildanniam/paygate-stellar"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="secondary"
+                  size="lg"
+                >
+                  View docs <FileText size={18} aria-hidden="true" />
+                </Button>
+              </div>
+              <div className="paygate-audience-url-flow">
+                <span>From API URL</span>
+                <div>
+                  <code><Link2 size={18} aria-hidden="true" /> <span>https://api.company.com/v1/signal</span></code>
+                  <ArrowRight size={18} aria-hidden="true" />
+                  <strong><CheckCircle2 size={18} aria-hidden="true" /> paid endpoint ready</strong>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <div className="paygate-audience-trust" aria-label="PayGate trust notes">
+            {AUDIENCE_TRUST_NOTES.map(note => {
+              const Icon = note.icon;
+              return (
+                <span key={note.label}>
+                  <Icon size={26} aria-hidden="true" />
+                  {note.label}
+                </span>
+              );
+            })}
           </div>
         </div>
       </section>
