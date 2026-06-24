@@ -5,7 +5,6 @@ import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
 import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
-import { C } from '../colors.js';
 import { readJsonResponse } from '../lib/walletAuth.js';
 import Button from '../components/ui/Button.jsx';
 import CopyField from '../components/ui/CopyField.jsx';
@@ -132,7 +131,7 @@ export default function RegisterApi() {
         </header>
 
         {sessionStatus === 'loading' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: C.text2, padding: '24px 0' }}>
+          <div className="pg-loading-row" data-size="compact">
             <Loader2 size={18} className="spin" />
             Checking wallet session...
           </div>

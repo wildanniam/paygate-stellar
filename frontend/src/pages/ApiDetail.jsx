@@ -8,7 +8,6 @@ import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
 import Button from '../components/ui/Button.jsx';
 import CopyField from '../components/ui/CopyField.jsx';
 import Notice from '../components/ui/Notice.jsx';
-import { C } from '../colors.js';
 import { readJsonResponse } from '../lib/walletAuth.js';
 
 export default function ApiDetail() {
@@ -163,7 +162,7 @@ export default function ApiDetail() {
         </header>
 
         {(sessionStatus === 'loading' || status === 'loading') && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: C.text2, padding: '28px 0' }}>
+          <div className="pg-loading-row">
             <Loader2 size={18} className="spin" />
             Loading...
           </div>
@@ -277,17 +276,17 @@ export default function ApiDetail() {
         )}
 
         {session.authenticated && status === 'not-found' && (
-          <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.amber, fontWeight: 800, marginBottom: 10 }}>
-              <AlertCircle size={18} style={{ flex: '0 0 auto', marginTop: 1 }} />
+          <section className="pg-app-card pg-not-found-card">
+            <div className="pg-not-found-title">
+              <AlertCircle size={18} aria-hidden="true" />
               API not found for this wallet
             </div>
-            <p style={{ color: C.text2, lineHeight: 1.7, margin: 0, maxWidth: 680 }}>
+            <p>
               This API either does not exist or belongs to a different developer wallet. Connect the owner wallet or register a new API.
             </p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
-              <Link to="/dashboard" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Back to dashboard</Link>
-              <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Create paid endpoint</Link>
+            <div className="pg-not-found-actions">
+              <Link to="/dashboard" className="pg-inline-link">Back to dashboard</Link>
+              <Link to="/apis/new" className="pg-inline-link">Create paid endpoint</Link>
             </div>
           </section>
         )}

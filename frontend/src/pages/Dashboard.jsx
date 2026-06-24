@@ -20,7 +20,8 @@ import CopyButton from '../components/CopyButton.jsx';
 import Button from '../components/ui/Button.jsx';
 import DataTable from '../components/ui/DataTable.jsx';
 import Metric from '../components/ui/Metric.jsx';
-import { C, MONO } from '../colors.js';
+import Notice from '../components/ui/Notice.jsx';
+import { C } from '../colors.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
 
 function short(value, head = 7, tail = 5) {
@@ -71,7 +72,7 @@ function EmptyState({ title, body, action }) {
     <div className="pg-empty-state">
       <h3>{title}</h3>
       <p>{body}</p>
-      {action && <div style={{ marginTop: 18 }}>{action}</div>}
+      {action && <div className="pg-empty-state-action">{action}</div>}
     </div>
   );
 }
@@ -101,13 +102,13 @@ function GhostDashboardPreview() {
 }
 
 function TxLink({ hash }) {
-  if (!hash) return <span style={{ color: C.text3 }}>-</span>;
+  if (!hash) return <span className="pg-muted-token">-</span>;
   return (
     <a
       href={`https://stellar.expert/explorer/testnet/tx/${hash}`}
       target="_blank"
       rel="noopener noreferrer"
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: C.cyan, textDecoration: 'none', ...MONO, fontSize: 12 }}
+      className="pg-tx-link"
     >
       {short(hash, 8, 8)}
       <ExternalLink size={13} />
@@ -395,7 +396,7 @@ export default function Dashboard() {
               {session.authenticated ? short(session.walletAddress, 12, 8) : 'Connect Freighter to load your APIs and revenue.'}
             </div>
             {lastUpdated && <div className="pg-dashboard-wallet-meta">Updated {lastUpdated.toLocaleTimeString()}</div>}
-            {authError && <div style={{ color: C.red, fontSize: 13, marginTop: 8 }}>{authError}</div>}
+            {authError && <div className="pg-inline-error">{authError}</div>}
           </div>
           {session.authenticated ? (
             <Button type="button" variant="secondary" onClick={handleLogout} disabled={authStatus === 'loading'} icon={<LogOut size={15} aria-hidden="true" />}>
@@ -423,7 +424,7 @@ export default function Dashboard() {
         )}
 
         {isLoading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: C.text2, padding: '28px 0' }}>
+          <div className="pg-loading-row">
             <Loader2 size={18} className="spin" />
             Loading dashboard...
           </div>
@@ -434,19 +435,17 @@ export default function Dashboard() {
         )}
 
         {dashboardStatus === 'error' && dashboardError && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.red, background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.18)', borderRadius: 8, padding: 14, fontSize: 14, marginBottom: 24 }}>
-            <AlertCircle size={17} style={{ flex: '0 0 auto', marginTop: 1 }} />
+          <Notice tone="danger" className="pg-dashboard-notice" icon={<AlertCircle size={17} aria-hidden="true" />}>
             {dashboardError}
-          </div>
+          </Notice>
         )}
 
         {dashboard && (
-          <div style={{ display: 'grid', gap: 22 }}>
+          <div className="pg-dashboard-content">
             {escrowError && (
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.amber, background: 'rgba(252,211,77,0.08)', border: '1px solid rgba(252,211,77,0.18)', borderRadius: 8, padding: 14, fontSize: 14 }}>
-                <AlertCircle size={17} style={{ flex: '0 0 auto', marginTop: 1 }} />
+              <Notice tone="warning" icon={<AlertCircle size={17} aria-hidden="true" />}>
                 {escrowError}
-              </div>
+              </Notice>
             )}
 
             <DashboardSection
@@ -458,7 +457,7 @@ export default function Dashboard() {
                 <EmptyState
                   title="No paid endpoints yet"
                   body="Create a paid endpoint from the demo upstream API or your own secret-protected GET endpoint."
-                  action={<Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Create your first paid endpoint</Link>}
+                  action={<Link to="/apis/new" className="pg-inline-link">Create your first paid endpoint</Link>}
                 />
               ) : (
                 <>
@@ -594,7 +593,7 @@ export default function Dashboard() {
                 >
                   {withdrawStatus === 'signing' ? 'Sign in Freighter' : withdrawStatus === 'submitting' ? 'Submitting' : 'Withdraw'}
                 </Button>
-                <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>
+                <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" className="pg-inline-link pg-external-link">
                   Open Explorer
                   <ArrowUpRight size={16} />
                 </a>

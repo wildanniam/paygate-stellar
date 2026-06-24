@@ -445,6 +445,60 @@
   color: var(--pg-danger-soft);
 }
 
+.pg-loading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pg-text-secondary);
+  padding: 28px 0;
+}
+
+.pg-loading-row[data-size='compact'] {
+  padding: 24px 0;
+}
+
+.pg-inline-error {
+  margin-top: 8px;
+  color: var(--pg-danger-soft);
+  font-size: 13px;
+}
+
+.pg-inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pg-flow-cyan);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.pg-inline-link:hover {
+  color: var(--pg-text-primary);
+}
+
+.pg-external-link svg,
+.pg-tx-link svg {
+  flex: 0 0 auto;
+}
+
+.pg-muted-token {
+  color: var(--pg-text-muted);
+}
+
+.pg-tx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pg-flow-cyan);
+  font-family: var(--pg-font-mono);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.pg-tx-link:hover {
+  color: var(--pg-text-primary);
+}
+
 .pg-code-block {
   overflow: hidden;
   border: 1px solid var(--pg-border-subtle);
@@ -1048,6 +1102,10 @@
   line-height: 1.65;
 }
 
+.pg-empty-state-action {
+  margin-top: 18px;
+}
+
 .pg-wallet-panel {
   display: grid;
   gap: 18px;
@@ -1290,6 +1348,15 @@
   border-radius: 14px;
   background:
     linear-gradient(180deg, rgba(17, 23, 34, 0.78), rgba(10, 13, 20, 0.92));
+}
+
+.pg-dashboard-content {
+  display: grid;
+  gap: 22px;
+}
+
+.pg-dashboard-notice {
+  margin-bottom: 24px;
 }
 
 .pg-dashboard-section-header {
@@ -1918,6 +1985,38 @@
   color: var(--pg-text-secondary);
   font-size: 13px;
   line-height: 1.6;
+}
+
+.pg-not-found-card {
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+}
+
+.pg-not-found-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--pg-warning-soft);
+  font-weight: 850;
+}
+
+.pg-not-found-title svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.pg-not-found-card p {
+  max-width: 680px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+}
+
+.pg-not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
 }
 
 .pg-guard-card {
