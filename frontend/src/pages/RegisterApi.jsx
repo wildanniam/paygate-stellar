@@ -1,5 +1,5 @@
 import { AlertCircle, Database, DollarSign, Link2, Loader2, Plus, ShieldCheck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
@@ -26,6 +26,7 @@ export default function RegisterApi() {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
   const [createdApi, setCreatedApi] = useState(null);
+  const createdResultRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -50,6 +51,21 @@ export default function RegisterApi() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!createdApi || !createdResultRef.current) return;
+
+    const resultPanel = createdResultRef.current;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    window.requestAnimationFrame(() => {
+      resultPanel.scrollIntoView({
+        block: 'start',
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      });
+      resultPanel.focus({ preventScroll: true });
+    });
+  }, [createdApi]);
 
   const update = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
@@ -186,7 +202,12 @@ export default function RegisterApi() {
             <aside className="pg-create-side">
               {createdApi ? (
                 <>
-                  <section className="pg-create-result">
+                  <section
+                    ref={createdResultRef}
+                    className="pg-create-result"
+                    tabIndex={-1}
+                    aria-live="polite"
+                  >
                     <div className="pg-create-result-header">
                       <div>
                         <span className="pg-status-dot" data-tone="warning">Pending setup</span>
