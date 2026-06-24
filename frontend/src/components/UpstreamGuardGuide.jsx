@@ -1,5 +1,4 @@
 import { AlertTriangle, CheckCircle2, ShieldCheck } from 'lucide-react';
-import { C, MONO } from '../colors.js';
 import CodeBlock from './CodeBlock.jsx';
 
 function guardSnippet(api) {
@@ -32,45 +31,45 @@ curl -i ${api.proxyUrl}`;
 
 function Step({ children, number }) {
   return (
-    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-      <div style={{ width: 22, height: 22, borderRadius: 999, background: C.accentDim, color: C.cyan, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flex: '0 0 auto', ...MONO }}>
+    <div className="pg-guard-step">
+      <div className="pg-guard-step-number">
         {number}
       </div>
-      <div style={{ color: C.text2, lineHeight: 1.6, fontSize: 14 }}>{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
 
 export default function UpstreamGuardGuide({ api }) {
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, marginBottom: 10 }}>
-          <ShieldCheck size={18} color={C.green} />
+    <div className="pg-guard-guide">
+      <div className="pg-guard-card is-primary">
+        <div className="pg-guard-title">
+          <ShieldCheck size={18} aria-hidden="true" />
           Protect your upstream API
         </div>
-        <p style={{ color: C.text2, lineHeight: 1.7, margin: 0 }}>
+        <p>
           Your proxy is created, but your original API must reject direct requests that do not come from PayGate.
         </p>
       </div>
 
-      <div style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.24)', borderRadius: 12, padding: 16, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <AlertTriangle size={18} color={C.amber} style={{ flex: '0 0 auto', marginTop: 2 }} />
-        <div style={{ color: C.text2, lineHeight: 1.6, fontSize: 14 }}>
-          <strong style={{ color: C.text1 }}>Important:</strong> if your upstream API stays public without this guard, buyers can bypass PayGate and call your API without paying.
+      <div className="pg-guard-card is-warning">
+        <AlertTriangle size={18} aria-hidden="true" />
+        <div>
+          <strong>Important:</strong> if your upstream API stays public without this guard, buyers can bypass PayGate and call your API without paying.
         </div>
       </div>
 
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'grid', gap: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800 }}>
-          <CheckCircle2 size={18} color={C.green} />
+      <div className="pg-guard-card is-checklist">
+        <div className="pg-guard-title">
+          <CheckCircle2 size={18} aria-hidden="true" />
           Setup checklist
         </div>
         <Step number="1">Copy the API secret and save it in your upstream API server environment.</Step>
         <Step number="2">Add the guard code to the route you registered in PayGate.</Step>
-        <Step number="3">Make sure direct upstream calls return <code style={{ ...MONO, color: C.amber }}>401 Unauthorized</code>.</Step>
+        <Step number="3">Make sure direct upstream calls return <code>401 Unauthorized</code>.</Step>
         <Step number="4">Use the PayGate proxy URL for buyers and agent clients.</Step>
-        <Step number="5">Unpaid proxy calls should return <code style={{ ...MONO, color: C.amber }}>402 Payment Required</code>; paid calls should return <code style={{ ...MONO, color: C.green }}>200 OK</code>.</Step>
+        <Step number="5">Unpaid proxy calls should return <code>402 Payment Required</code>; paid calls should return <code>200 OK</code>.</Step>
       </div>
 
       <CodeBlock code={envSnippet(api)} filename=".env" maxHeight={120} />

@@ -3,12 +3,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge, { getApiStatusMeta } from '../components/ApiStatusBadge.jsx';
-import CopyButton from '../components/CopyButton.jsx';
 import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
-import ValueRow from '../components/ValueRow.jsx';
 import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
 import Button from '../components/ui/Button.jsx';
-import { C, MONO } from '../colors.js';
+import CopyField from '../components/ui/CopyField.jsx';
+import Notice from '../components/ui/Notice.jsx';
+import { C } from '../colors.js';
 import { readJsonResponse } from '../lib/walletAuth.js';
 
 export default function ApiDetail() {
@@ -181,73 +181,98 @@ export default function ApiDetail() {
         )}
 
         {error && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.red, background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.18)', borderRadius: 8, padding: 14, fontSize: 14, marginBottom: 24 }}>
-            <AlertCircle size={17} style={{ flex: '0 0 auto', marginTop: 1 }} />
+          <Notice tone="danger" className="pg-detail-notice" icon={<AlertCircle size={17} aria-hidden="true" />}>
             {error}
-          </div>
+          </Notice>
         )}
 
         {notice && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.green, background: 'rgba(134,239,172,0.08)', border: '1px solid rgba(134,239,172,0.18)', borderRadius: 8, padding: 14, fontSize: 14, marginBottom: 24 }}>
-            <CheckCircle2 size={17} style={{ flex: '0 0 auto', marginTop: 1 }} />
+          <Notice tone="success" className="pg-detail-notice" icon={<CheckCircle2 size={17} aria-hidden="true" />}>
             {notice}
-          </div>
+          </Notice>
         )}
 
         {session.authenticated && api && (
-          <section className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 20, alignItems: 'start' }}>
-            <div style={{ display: 'grid', gap: 16 }}>
-              <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
+          <section className="pg-detail-layout">
+            <div className="pg-detail-main">
+              <section className="pg-detail-control" data-status={api.status}>
+                <div className="pg-detail-status-row">
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: statusMeta.color, fontWeight: 800, marginBottom: 7 }}>
-                      <statusMeta.Icon size={18} />
+                    <div className="pg-detail-status-label" style={{ color: statusMeta.color }}>
+                      <statusMeta.Icon size={18} aria-hidden="true" />
                       {statusMeta.label}
                     </div>
-                    <p style={{ color: C.text2, lineHeight: 1.6, margin: 0, fontSize: 14 }}>
-                      {statusMeta.description}
-                    </p>
+                    <p>{statusMeta.description}</p>
                   </div>
                   <ApiStatusBadge status={api.status} />
                 </div>
-                <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14, minWidth: 0 }}>
-                  <ValueRow label="Proxy URL" value={api.proxyUrl} />
-                  <ValueRow label="Upstream" value={`${api.upstreamBaseUrl}${api.path}`} />
-                  <div><strong style={{ color: C.text1 }}>Price:</strong> {api.priceUsdc} USDC per call</div>
-                  <ValueRow label="Secret" value={api.secret} />
-                </div>
-                {api.status === 'pending_setup' && (
-                  <div style={{ marginTop: 14, color: C.amber, background: 'rgba(252,211,77,0.08)', border: '1px solid rgba(252,211,77,0.18)', borderRadius: 8, padding: 12, fontSize: 13, lineHeight: 1.6 }}>
-                    The proxy URL is not active yet. Add the secret guard to your upstream API, then verify setup here.
+
+                <div className="pg-detail-copy-grid">
+                  <CopyField label="Paid endpoint" value={api.proxyUrl} tone="brand" copyLabel="Copy proxy" />
+                  <CopyField label="Upstream target" value={`${api.upstreamBaseUrl}${api.path}`} copyLabel="Copy upstream" />
+                  <CopyField label="Upstream secret" value={api.secret} copyLabel="Copy secret" />
+                  <div className="pg-detail-price">
+                    <span>Price per call</span>
+                    <strong>{api.priceUsdc} USDC</strong>
                   </div>
+                </div>
+
+                {api.status === 'pending_setup' && (
+                  <Notice tone="warning" icon={<AlertCircle size={17} aria-hidden="true" />}>
+                    The proxy URL is not active yet. Add the secret guard to your upstream API, then verify setup here.
+                  </Notice>
                 )}
                 {api.status === 'archived' && (
-                  <div style={{ marginTop: 14, color: C.text2, background: C.surfaceHover, border: `1px solid ${C.border}`, borderRadius: 8, padding: 12, fontSize: 13, lineHeight: 1.6 }}>
-                    This API is archived, so its proxy no longer accepts paid calls. You can register the same endpoint again for a fresh demo.
-                  </div>
+                  <Notice icon={<Archive size={17} aria-hidden="true" />}>
+                    This API is archived, so its proxy no longer accepts paid calls. You can create a fresh paid endpoint for the same upstream API.
+                  </Notice>
                 )}
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>
-                  <CopyButton value={api.proxyUrl} label="Copy proxy" />
-                  <CopyButton value={api.secret} label="Copy secret" />
+
+                <div className="pg-detail-actions">
                   {api.status === 'pending_setup' && (
-                    <button type="button" onClick={verifySetup} disabled={isBusy} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.accent, color: C.text1, border: 'none', borderRadius: 8, padding: '10px 14px', cursor: isBusy ? 'not-allowed' : 'pointer', fontWeight: 800 }}>
-                      {status === 'verifying' ? <Loader2 size={15} className="spin" /> : <ShieldCheck size={15} />}
+                    <Button
+                      type="button"
+                      onClick={verifySetup}
+                      disabled={isBusy}
+                      icon={status === 'verifying' ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <ShieldCheck size={15} aria-hidden="true" />}
+                    >
                       Verify setup
-                    </button>
+                    </Button>
                   )}
-                  <button type="button" onClick={removeApi} disabled={isBusy} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: api.status === 'archived' ? C.text3 : C.red, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: isBusy ? 'not-allowed' : 'pointer' }}>
-                    {status === 'removing' ? <Loader2 size={15} className="spin" /> : api.status === 'archived' ? <Archive size={15} /> : <Trash2 size={15} />}
-                    {api.status === 'archived' ? 'Remove archived API' : 'Delete / Archive'}
-                  </button>
-                  <button type="button" onClick={loadApi} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: C.text2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}>
-                    <RefreshCw size={15} />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={loadApi}
+                    disabled={isBusy}
+                    icon={<RefreshCw size={15} aria-hidden="true" />}
+                  >
                     Refresh
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </section>
+
+              <section className="pg-detail-danger">
+                <div>
+                  <h2>{api.status === 'archived' ? 'Remove archived endpoint' : 'Archive endpoint'}</h2>
+                  <p>
+                    APIs with request or payment history are archived to preserve audit records.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={removeApi}
+                  disabled={isBusy}
+                  icon={status === 'removing' ? <Loader2 size={15} className="spin" aria-hidden="true" /> : api.status === 'archived' ? <Archive size={15} aria-hidden="true" /> : <Trash2 size={15} aria-hidden="true" />}
+                >
+                  {api.status === 'archived' ? 'Remove archived API' : 'Delete / Archive'}
+                </Button>
+              </section>
             </div>
 
-            <UpstreamGuardGuide api={api} />
+            <aside className="pg-detail-guide">
+              <UpstreamGuardGuide api={api} />
+            </aside>
           </section>
         )}
 
