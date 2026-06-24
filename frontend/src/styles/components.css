@@ -1277,6 +1277,185 @@
   color: var(--pg-danger-soft);
 }
 
+.pg-create-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.78fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.pg-create-form,
+.pg-create-preview-card,
+.pg-create-result {
+  display: grid;
+  gap: 18px;
+  border: 1px solid rgba(82, 94, 118, 0.46);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(17, 23, 34, 0.88), rgba(10, 13, 20, 0.94));
+  padding: 22px;
+}
+
+.pg-create-form-header,
+.pg-create-result-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pg-create-form-header h2,
+.pg-create-result h2 {
+  color: var(--pg-text-primary);
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.pg-create-form-header p,
+.pg-create-result p,
+.pg-create-preview-card p {
+  margin-top: 6px;
+  color: var(--pg-text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.pg-create-step-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pg-create-step-list div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid rgba(82, 94, 118, 0.36);
+  border-radius: 12px;
+  background: rgba(5, 6, 9, 0.26);
+  color: var(--pg-text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0 12px;
+}
+
+.pg-create-step-list span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(var(--pg-brand-purple-rgb), 0.16);
+  color: var(--pg-brand-purple-soft);
+  font-family: var(--pg-font-mono);
+  font-size: 12px;
+}
+
+.pg-create-url-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 0.42fr);
+  gap: 14px;
+}
+
+.pg-mono-input {
+  font-family: var(--pg-font-mono);
+}
+
+.pg-create-side {
+  display: grid;
+  gap: 16px;
+}
+
+.pg-create-preview-card {
+  position: sticky;
+  top: 88px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(var(--pg-brand-purple-rgb), 0.16), transparent 36%),
+    linear-gradient(180deg, rgba(17, 23, 34, 0.88), rgba(10, 13, 20, 0.94));
+}
+
+.pg-create-preview-node {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(82, 94, 118, 0.42);
+  border-radius: 14px;
+  background: rgba(5, 6, 9, 0.34);
+  padding: 14px;
+}
+
+.pg-create-preview-node svg {
+  color: var(--pg-flow-blue);
+}
+
+.pg-create-preview-node.is-paid {
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.34);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.12), transparent 44%),
+    rgba(5, 6, 9, 0.34);
+}
+
+.pg-create-preview-node span,
+.pg-create-preview-price span {
+  color: var(--pg-text-muted);
+  font-family: var(--pg-font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pg-create-preview-node strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--pg-text-primary);
+  font-family: var(--pg-font-mono);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-create-preview-arrow {
+  color: var(--pg-brand-purple-soft);
+  font-family: var(--pg-font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.pg-create-preview-price {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pg-success-soft);
+}
+
+.pg-create-preview-price span {
+  color: var(--pg-success-soft);
+}
+
+.pg-create-result {
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.34);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.16), transparent 36%),
+    linear-gradient(180deg, rgba(17, 23, 34, 0.92), rgba(10, 13, 20, 0.96));
+}
+
+.pg-create-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .pg-divider {
   height: 1px;
   background: rgba(82, 94, 118, 0.42);
@@ -1386,6 +1565,24 @@
 
   .pg-dashboard-escrow-actions {
     justify-content: flex-start;
+  }
+
+  .pg-create-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .pg-create-form-header,
+  .pg-create-result-header {
+    flex-direction: column;
+  }
+
+  .pg-create-step-list,
+  .pg-create-url-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pg-create-preview-card {
+    position: static;
   }
 
   .pg-dashboard-preview-header,

@@ -1,14 +1,16 @@
-import { AlertCircle, CheckCircle2, Loader2, Plus, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Database, DollarSign, Link2, Loader2, Plus, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
-import CopyButton from '../components/CopyButton.jsx';
 import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
-import ValueRow from '../components/ValueRow.jsx';
 import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
-import { C, MONO } from '../colors.js';
+import { C } from '../colors.js';
 import { readJsonResponse } from '../lib/walletAuth.js';
+import Button from '../components/ui/Button.jsx';
+import CopyField from '../components/ui/CopyField.jsx';
+import { Field, Input } from '../components/ui/Field.jsx';
+import Notice from '../components/ui/Notice.jsx';
 
 const initialForm = {
   name: '',
@@ -16,29 +18,6 @@ const initialForm = {
   path: '',
   priceUsdc: '',
 };
-
-function inputStyle() {
-  return {
-    width: '100%',
-    background: C.surfaceHover,
-    border: `1px solid ${C.border}`,
-    color: C.text1,
-    borderRadius: 8,
-    padding: '13px 14px',
-    outline: 'none',
-    fontSize: 14,
-  };
-}
-
-function helperStyle() {
-  return {
-    display: 'block',
-    color: C.text3,
-    fontSize: 12,
-    marginTop: 8,
-    lineHeight: 1.5,
-  };
-}
 
 export default function RegisterApi() {
   const [session, setSession] = useState({ authenticated: false });
@@ -152,98 +131,110 @@ export default function RegisterApi() {
         )}
 
         {sessionStatus !== 'loading' && session.authenticated && (
-        <section className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 20, alignItems: 'start' }}>
-          <form onSubmit={handleSubmit} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'grid', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ fontWeight: 800, marginBottom: 4 }}>API details</div>
-                <p style={{ color: C.text2, lineHeight: 1.6, margin: 0, fontSize: 14 }}>
-                  Use your own upstream API, or fill the hosted demo values to try the flow.
-                </p>
+          <section className="pg-create-flow">
+            <form onSubmit={handleSubmit} className="pg-create-form">
+              <div className="pg-create-form-header">
+                <div>
+                  <h2>Source API</h2>
+                  <p>Use your own upstream API, or load demo values to try the full paid-call flow.</p>
+                </div>
+                <Button type="button" variant="secondary" size="sm" onClick={fillDemoApi} icon={<Database size={15} aria-hidden="true" />}>
+                  Fill demo API
+                </Button>
               </div>
-              <button type="button" onClick={fillDemoApi} style={{ background: 'transparent', color: C.cyan, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 12px', cursor: 'pointer', fontWeight: 800 }}>
-                Fill demo API
-              </button>
-            </div>
 
-            <label>
-              <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>API Name</span>
-              <input value={form.name} onChange={update('name')} placeholder="e.g. Market Signal API" required style={inputStyle()} />
-              <span style={helperStyle()}>A readable name for your dashboard.</span>
-            </label>
-
-            <label>
-              <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Upstream Base URL</span>
-              <input value={form.upstreamBaseUrl} onChange={update('upstreamBaseUrl')} placeholder="https://api.yourservice.com" required style={{ ...inputStyle(), ...MONO }} />
-              <span style={helperStyle()}>Base URL only. Do not include the endpoint path here.</span>
-            </label>
-
-            <label>
-              <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>GET Path</span>
-              <input value={form.path} onChange={update('path')} placeholder="/v1/data" required style={{ ...inputStyle(), ...MONO }} />
-              <span style={helperStyle()}>The GET endpoint path that PayGate should monetize.</span>
-            </label>
-
-            <label>
-              <span style={{ display: 'block', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Price Per Call, USDC</span>
-              <input value={form.priceUsdc} onChange={update('priceUsdc')} placeholder="0.01" inputMode="decimal" required style={{ ...inputStyle(), ...MONO }} />
-              <span style={helperStyle()}>Testnet USDC amount charged for each successful API call.</span>
-            </label>
-
-            {error && (
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.red, background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.18)', borderRadius: 8, padding: 14, fontSize: 14 }}>
-                <AlertCircle size={17} style={{ flex: '0 0 auto', marginTop: 1 }} />
-                {error}
+              <div className="pg-create-step-list" aria-label="Paid endpoint creation steps">
+                <div><span>1</span> Paste upstream URL</div>
+                <div><span>2</span> Set per-call price</div>
+                <div><span>3</span> Generate proxy</div>
               </div>
-            )}
 
-            <button type="submit" disabled={status === 'submitting'} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: C.accent, color: C.text1, border: 'none', borderRadius: 8, padding: '12px 16px', fontWeight: 800, cursor: 'pointer' }}>
-              {status === 'submitting' ? <Loader2 size={16} className="spin" /> : <Plus size={16} />}
-              Create paid endpoint
-            </button>
-          </form>
+              <Field label="Endpoint name" hint="A readable name for your dashboard.">
+                <Input value={form.name} onChange={update('name')} placeholder="e.g. Market Signal API" required />
+              </Field>
 
-          <div style={{ display: 'grid', gap: 16 }}>
-            {createdApi ? (
-              <>
-                <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: C.amber, fontWeight: 800 }}>
-                    <CheckCircle2 size={18} />
-                      Paid endpoint created
+              <div className="pg-create-url-grid">
+                <Field label="Upstream base URL" hint="Base URL only. Do not include the endpoint path here.">
+                  <Input className="pg-mono-input" value={form.upstreamBaseUrl} onChange={update('upstreamBaseUrl')} placeholder="https://api.yourservice.com" required />
+                </Field>
+
+                <Field label="GET path" hint="The endpoint path PayGate should monetize.">
+                  <Input className="pg-mono-input" value={form.path} onChange={update('path')} placeholder="/v1/data" required />
+                </Field>
+              </div>
+
+              <Field label="Price per call, USDC" hint="Testnet USDC amount charged for each successful API call.">
+                <Input className="pg-mono-input" value={form.priceUsdc} onChange={update('priceUsdc')} placeholder="0.01" inputMode="decimal" required />
+              </Field>
+
+              {error && (
+                <Notice tone="danger" icon={<AlertCircle size={17} aria-hidden="true" />}>
+                  {error}
+                </Notice>
+              )}
+
+              <Button
+                type="submit"
+                disabled={status === 'submitting'}
+                size="lg"
+                icon={status === 'submitting' ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
+              >
+                Create paid endpoint
+              </Button>
+            </form>
+
+            <aside className="pg-create-side">
+              {createdApi ? (
+                <>
+                  <section className="pg-create-result">
+                    <div className="pg-create-result-header">
+                      <div>
+                        <span className="pg-status-dot" data-tone="warning">Pending setup</span>
+                        <h2>Paid endpoint created</h2>
+                      </div>
+                      <ApiStatusBadge status={createdApi.status} />
                     </div>
-                    <ApiStatusBadge status={createdApi.status} />
+                    <p>
+                      Add the secret guard to your upstream API, then open the endpoint control page and verify setup.
+                    </p>
+                    <CopyField label="Paid endpoint" value={createdApi.proxyUrl} tone="brand" copyLabel="Copy endpoint" />
+                    <CopyField label="Upstream secret" value={createdApi.secret} copyLabel="Copy secret" />
+                    <div className="pg-create-result-actions">
+                      <Button as={Link} to={`/apis/${createdApi.id}`} variant="secondary" size="sm">
+                        Open endpoint control
+                      </Button>
+                    </div>
+                  </section>
+                  <UpstreamGuardGuide api={createdApi} />
+                </>
+              ) : (
+                <section className="pg-create-preview-card">
+                  <div className="pg-create-preview-node">
+                    <Link2 size={17} aria-hidden="true" />
+                    <div>
+                      <span>Your API today</span>
+                      <strong>{form.upstreamBaseUrl || 'https://api.yourservice.com'}{form.path || '/v1/data'}</strong>
+                    </div>
                   </div>
-                  <p style={{ color: C.text2, lineHeight: 1.6, margin: '0 0 14px', fontSize: 14 }}>
-                    This proxy is created but not active yet. Add the secret guard to your upstream API, then open the API detail page and verify setup.
+                  <div className="pg-create-preview-arrow">creates</div>
+                  <div className="pg-create-preview-node is-paid">
+                    <ShieldCheck size={17} aria-hidden="true" />
+                    <div>
+                      <span>PayGate endpoint</span>
+                      <strong>https://paygate.app/api/pay/api_123</strong>
+                    </div>
+                  </div>
+                  <div className="pg-create-preview-price">
+                    <DollarSign size={17} aria-hidden="true" />
+                    <span>{form.priceUsdc || '0.01'} USDC / successful call</span>
+                  </div>
+                  <p>
+                    Buyers call the PayGate URL. PayGate verifies payment, forwards with your secret header, and records revenue.
                   </p>
-                  <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14, minWidth: 0 }}>
-                    <ValueRow label="Proxy URL" value={createdApi.proxyUrl} />
-                    <ValueRow label="Secret" value={createdApi.secret} />
-                  </div>
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
-                    <CopyButton value={createdApi.proxyUrl} label="Copy proxy" />
-                    <CopyButton value={createdApi.secret} label="Copy secret" />
-                    <Link to={`/apis/${createdApi.id}`} style={{ display: 'inline-flex', alignItems: 'center', color: C.cyan, textDecoration: 'none', fontWeight: 700 }}>
-                      Open API Detail
-                    </Link>
-                  </div>
-                </div>
-                <UpstreamGuardGuide api={createdApi} />
-              </>
-            ) : (
-              <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, marginBottom: 10 }}>
-                  <ShieldCheck size={18} color={C.green} />
-                  Protected Upstream
-                </div>
-                <p style={{ color: C.text2, lineHeight: 1.7, margin: 0 }}>
-                  PayGate will generate a proxy URL and a unique secret header for this API.
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
+                </section>
+              )}
+            </aside>
+          </section>
         )}
       </main>
     </div>
