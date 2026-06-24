@@ -1200,6 +1200,97 @@
   gap: 12px;
 }
 
+.pg-activity-mobile-list {
+  gap: 12px;
+  padding: 14px;
+}
+
+.pg-activity-mobile-card {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  border: 1px solid rgba(82, 94, 118, 0.40);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(135, 102, 255, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(21, 28, 42, 0.68), rgba(13, 17, 23, 0.92));
+  padding: 14px;
+}
+
+.pg-activity-mobile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pg-activity-mobile-top > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pg-activity-mobile-top span {
+  color: var(--pg-text-muted);
+  font-family: var(--pg-font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pg-activity-mobile-top strong {
+  overflow: hidden;
+  color: var(--pg-text-primary);
+  font-size: 14px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-activity-mobile-top > .pg-dashboard-money,
+.pg-activity-mobile-top > .pg-dashboard-status-text {
+  flex: 0 0 auto;
+  padding-top: 2px;
+  font-size: 12px;
+  text-align: right;
+}
+
+.pg-activity-mobile-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.pg-activity-mobile-field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pg-activity-mobile-field > span {
+  color: var(--pg-text-muted);
+  font-family: var(--pg-font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pg-activity-mobile-field > strong {
+  min-width: 0;
+  color: var(--pg-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pg-activity-mobile-field a {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .pg-row-title a {
   overflow: hidden;
   color: var(--pg-text-primary);

@@ -140,6 +140,59 @@ function StatusText({ status }) {
   );
 }
 
+function MobileActivityField({ label, children }) {
+  return (
+    <div className="pg-activity-mobile-field">
+      <span>{label}</span>
+      <strong>{children}</strong>
+    </div>
+  );
+}
+
+function PaymentMobileCard({ payment }) {
+  return (
+    <article className="pg-activity-mobile-card">
+      <div className="pg-activity-mobile-top">
+        <div>
+          <span>{formatDate(payment.createdAt)}</span>
+          <strong>{payment.apiName}</strong>
+        </div>
+        <span className="pg-dashboard-money">{formatUsdc(payment.grossAmountUsdc)}</span>
+      </div>
+      <div className="pg-activity-mobile-grid">
+        <MobileActivityField label="Payment Tx">
+          <TxLink hash={payment.txHash} />
+        </MobileActivityField>
+        <MobileActivityField label="Credit Tx">
+          <TxLink hash={payment.creditTxHash} />
+        </MobileActivityField>
+      </div>
+    </article>
+  );
+}
+
+function RequestMobileCard({ request }) {
+  return (
+    <article className="pg-activity-mobile-card">
+      <div className="pg-activity-mobile-top">
+        <div>
+          <span>{formatDate(request.createdAt)}</span>
+          <strong>{request.apiName}</strong>
+        </div>
+        <StatusText status={request.status} />
+      </div>
+      <div className="pg-activity-mobile-grid">
+        <MobileActivityField label="Upstream">
+          {request.upstreamStatus || '-'}
+        </MobileActivityField>
+        <MobileActivityField label="Transaction">
+          <TxLink hash={request.txHash} />
+        </MobileActivityField>
+      </div>
+    </article>
+  );
+}
+
 export default function Dashboard() {
   const [session, setSession] = useState({ authenticated: false });
   const [authStatus, setAuthStatus] = useState('loading');
@@ -469,17 +522,25 @@ export default function Dashboard() {
                 {dashboard.payments.length === 0 ? (
                   <EmptyState title="No payments yet" body="Run the agent/client against a paid proxy. Verified payments will appear here with Stellar Expert links." />
                 ) : (
-                  <DataTable
-                    rows={dashboard.payments.slice(0, 8)}
-                    columns={[
-                      { key: 'time', label: 'Time', render: (payment) => formatDate(payment.createdAt) },
-                      { key: 'api', label: 'API', render: (payment) => <strong className="pg-dashboard-row-strong">{payment.apiName}</strong> },
-                      { key: 'gross', label: 'Gross', render: (payment) => <span className="pg-dashboard-money">{formatUsdc(payment.grossAmountUsdc)}</span> },
-                      { key: 'paymentTx', label: 'Payment Tx', render: (payment) => <TxLink hash={payment.txHash} /> },
-                      { key: 'creditTx', label: 'Credit Tx', render: (payment) => <TxLink hash={payment.creditTxHash} /> },
-                    ]}
-                    getRowKey={(payment) => payment.id}
-                  />
+                  <>
+                    <div className="mobile-api-list pg-activity-mobile-list">
+                      {dashboard.payments.slice(0, 8).map((payment) => (
+                        <PaymentMobileCard key={payment.id} payment={payment} />
+                      ))}
+                    </div>
+                    <DataTable
+                      className="desktop-api-table"
+                      rows={dashboard.payments.slice(0, 8)}
+                      columns={[
+                        { key: 'time', label: 'Time', render: (payment) => formatDate(payment.createdAt) },
+                        { key: 'api', label: 'API', render: (payment) => <strong className="pg-dashboard-row-strong">{payment.apiName}</strong> },
+                        { key: 'gross', label: 'Gross', render: (payment) => <span className="pg-dashboard-money">{formatUsdc(payment.grossAmountUsdc)}</span> },
+                        { key: 'paymentTx', label: 'Payment Tx', render: (payment) => <TxLink hash={payment.txHash} /> },
+                        { key: 'creditTx', label: 'Credit Tx', render: (payment) => <TxLink hash={payment.creditTxHash} /> },
+                      ]}
+                      getRowKey={(payment) => payment.id}
+                    />
+                  </>
                 )}
               </DashboardSection>
 
@@ -487,17 +548,25 @@ export default function Dashboard() {
                 {dashboard.requests.length === 0 ? (
                   <EmptyState title="No requests yet" body="Unpaid challenges and paid forwards will be logged after an agent calls a proxy URL." />
                 ) : (
-                  <DataTable
-                    rows={dashboard.requests.slice(0, 8)}
-                    columns={[
-                      { key: 'time', label: 'Time', render: (request) => formatDate(request.createdAt) },
-                      { key: 'api', label: 'API', render: (request) => <strong className="pg-dashboard-row-strong">{request.apiName}</strong> },
-                      { key: 'status', label: 'Status', render: (request) => <StatusText status={request.status} /> },
-                      { key: 'upstream', label: 'Upstream', render: (request) => request.upstreamStatus || '-' },
-                      { key: 'tx', label: 'Tx', render: (request) => <TxLink hash={request.txHash} /> },
-                    ]}
-                    getRowKey={(request) => request.id}
-                  />
+                  <>
+                    <div className="mobile-api-list pg-activity-mobile-list">
+                      {dashboard.requests.slice(0, 8).map((request) => (
+                        <RequestMobileCard key={request.id} request={request} />
+                      ))}
+                    </div>
+                    <DataTable
+                      className="desktop-api-table"
+                      rows={dashboard.requests.slice(0, 8)}
+                      columns={[
+                        { key: 'time', label: 'Time', render: (request) => formatDate(request.createdAt) },
+                        { key: 'api', label: 'API', render: (request) => <strong className="pg-dashboard-row-strong">{request.apiName}</strong> },
+                        { key: 'status', label: 'Status', render: (request) => <StatusText status={request.status} /> },
+                        { key: 'upstream', label: 'Upstream', render: (request) => request.upstreamStatus || '-' },
+                        { key: 'tx', label: 'Tx', render: (request) => <TxLink hash={request.txHash} /> },
+                      ]}
+                      getRowKey={(request) => request.id}
+                    />
+                  </>
                 )}
               </DashboardSection>
             </section>
