@@ -2,7 +2,8 @@ import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import CodeBlock from '../components/CodeBlock.jsx';
 import AppNavbar from '../components/AppNavbar.jsx';
-import { C, MONO } from '../colors.js';
+import Button from '../components/ui/Button.jsx';
+import Notice from '../components/ui/Notice.jsx';
 
 function readStoredResult() {
   try {
@@ -21,81 +22,105 @@ export default function Result() {
   const { middleware, integration, meta } = state;
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif", backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+    <div className="pg-app pg-legacy-page">
       <AppNavbar />
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '64px 24px 96px' }}>
-        <div style={{ marginBottom: 28, display: 'flex', gap: 10, alignItems: 'flex-start', color: C.text2, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.24)', borderRadius: 10, padding: 14, lineHeight: 1.6 }}>
-          <AlertCircle size={18} color={C.amber} style={{ flex: '0 0 auto', marginTop: 2 }} />
+      <main className="pg-app-main pg-legacy-main">
+        <Notice
+          tone="warning"
+          className="pg-legacy-notice"
+          icon={<AlertCircle size={18} aria-hidden="true" />}
+        >
           <div>
-            <strong style={{ color: C.text1 }}>Legacy generator output.</strong> This code is useful for V0/SOW evidence. For the current PayGate V1 product, register your API and use the generated proxy URL.
+            <strong>Legacy generator output.</strong> This code is useful for V0/SOW evidence. For the current PayGate V1 product, register your API and use the generated proxy URL.
           </div>
-        </div>
+        </Notice>
 
-        <header style={{ marginBottom: 36 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.green, background: 'rgba(134,239,172,0.08)', border: '1px solid rgba(134,239,172,0.18)', borderRadius: 999, padding: '7px 12px', fontSize: 13, ...MONO }}>
-            <CheckCircle2 size={15} />
+        <header className="pg-legacy-result-header">
+          <span className="pg-badge" data-tone="success">
+            <CheckCircle2 size={15} aria-hidden="true" />
             Code Generated
-          </div>
-          <h1 style={{ fontSize: 'clamp(34px, 5vw, 54px)', lineHeight: 1.05, fontWeight: 800, letterSpacing: '-0.02em', margin: '18px 0 16px' }}>
+          </span>
+          <h1>
             Your paywall is ready.
           </h1>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, color: C.text2, fontSize: 13, ...MONO }}>
-            <span>Path: <strong style={{ color: C.text1 }}>{meta.path}</strong></span>
-            <span>|</span>
-            <span>Price: <strong style={{ color: C.text1 }}>{meta.price} USDC</strong></span>
-            <span>|</span>
-            <span>Endpoint: <strong style={{ color: C.text1 }}>{meta.endpointUrl}</strong></span>
+          <div className="pg-legacy-meta">
+            <span>Path: <strong>{meta.path}</strong></span>
+            <span>Price: <strong>{meta.price} USDC</strong></span>
+            <span>Endpoint: <strong>{meta.endpointUrl}</strong></span>
           </div>
         </header>
 
-        <section style={{ display: 'grid', gap: 34 }}>
-          <div>
-            <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>1. Simpan sebagai mpp-middleware.js</h2>
-            <p style={{ color: C.text2, margin: '0 0 16px' }}>Buat file baru di root project kamu, paste konten ini.</p>
+        <section className="pg-legacy-code-stack">
+          <article className="pg-app-card pg-legacy-code-card">
+            <div className="pg-app-card-header">
+              <div>
+                <h2 className="pg-app-card-title">1. Simpan sebagai mpp-middleware.js</h2>
+                <p className="pg-app-card-copy">Buat file baru di root project kamu, paste konten ini.</p>
+              </div>
+            </div>
+            <div className="pg-app-card-body">
             <CodeBlock code={middleware} filename="mpp-middleware.js" />
-          </div>
+            </div>
+          </article>
 
-          <div>
-            <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>2. Tambahkan ke server.js kamu</h2>
-            <p style={{ color: C.text2, margin: '0 0 16px' }}>Copy snippet ini ke file server Express kamu yang sudah ada.</p>
+          <article className="pg-app-card pg-legacy-code-card">
+            <div className="pg-app-card-header">
+              <div>
+                <h2 className="pg-app-card-title">2. Tambahkan ke server.js kamu</h2>
+                <p className="pg-app-card-copy">Copy snippet ini ke file server Express kamu yang sudah ada.</p>
+              </div>
+            </div>
+            <div className="pg-app-card-body">
             <CodeBlock code={integration} filename="server.js (snippet)" maxHeight={240} />
-          </div>
+            </div>
+          </article>
         </section>
 
-        <section style={{ marginTop: 34, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, padding: '24px 0' }}>
-          <h2 style={{ fontSize: 18, margin: '0 0 14px' }}>Sebelum menjalankan server kamu</h2>
-          <div style={{ display: 'grid', gap: 10, color: C.text2, fontSize: 14 }}>
+        <section className="pg-app-card pg-legacy-checklist">
+          <div className="pg-app-card-header">
+            <h2 className="pg-app-card-title">Sebelum menjalankan server kamu</h2>
+          </div>
+          <div className="pg-app-card-body">
+            <div className="pg-legacy-checklist-items">
             {[
               'npm install @stellar/mpp mppx @stellar/stellar-sdk',
               'Set STELLAR_RECIPIENT=G... di environment',
               'Set MPP_SECRET_KEY=<random-string-kuat> di environment',
               'Stellar testnet account kamu butuh USDC trustline',
             ].map((item) => (
-              <label key={item} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <input type="checkbox" style={{ accentColor: C.accent }} />
+              <label key={item}>
+                <input type="checkbox" />
                 {item}
               </label>
             ))}
           </div>
-          <div style={{ marginTop: 14, display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 13 }}>
-            <a href="https://lab.stellar.org/account/fund" target="_blank" rel="noopener noreferrer" style={{ color: C.cyan }}>
+            <div className="pg-legacy-resource-links">
+            <a href="https://lab.stellar.org/account/fund" target="_blank" rel="noopener noreferrer">
               Fund testnet account
             </a>
-            <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer" style={{ color: C.cyan }}>
+            <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer">
               Circle USDC faucet
             </a>
+            </div>
           </div>
         </section>
 
-        <div style={{ marginTop: 28, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <Link to="/generate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.text2, textDecoration: 'none', border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px' }}>
-            <ArrowLeft size={16} />
+        <div className="pg-legacy-actions">
+          <Button
+            as={Link}
+            to="/generate"
+            variant="secondary"
+            icon={<ArrowLeft size={16} aria-hidden="true" />}
+          >
             Generate another legacy snippet
-          </Link>
-          <Link to="/apis/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.text1, textDecoration: 'none', background: C.accent, borderRadius: 8, padding: '10px 14px', fontWeight: 700 }}>
+          </Button>
+          <Button
+            as={Link}
+            to="/apis/new"
+            icon={<ArrowRight size={16} aria-hidden="true" />}
+          >
             Create paid endpoint in V1
-            <ArrowRight size={16} />
-          </Link>
+          </Button>
         </div>
       </main>
     </div>

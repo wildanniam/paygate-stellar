@@ -319,6 +319,16 @@
   font-family: var(--pg-font-mono);
 }
 
+.pg-field-error .pg-field-hint {
+  color: var(--pg-danger-soft);
+}
+
+.pg-field-error .pg-input,
+.pg-input[aria-invalid='true'] {
+  border-color: rgba(248, 113, 113, 0.52);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.10);
+}
+
 .pg-data-table {
   width: 100%;
   border-collapse: collapse;
@@ -385,11 +395,20 @@
   padding: 14px;
 }
 
+.pg-notice > svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
 .pg-notice[data-tone='warning'] {
   border-color: rgba(245, 158, 11, 0.28);
   background:
     linear-gradient(90deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0) 42%),
     rgba(13, 17, 23, 0.84);
+}
+
+.pg-notice[data-tone='warning'] > svg {
+  color: var(--pg-warning-soft);
 }
 
 .pg-notice[data-tone='danger'] {
@@ -399,11 +418,19 @@
     rgba(13, 17, 23, 0.84);
 }
 
+.pg-notice[data-tone='danger'] > svg {
+  color: var(--pg-danger-soft);
+}
+
 .pg-notice[data-tone='success'] {
   border-color: rgba(34, 197, 94, 0.28);
   background:
     linear-gradient(90deg, rgba(34, 197, 94, 0.07), rgba(34, 197, 94, 0) 42%),
     rgba(13, 17, 23, 0.84);
+}
+
+.pg-notice[data-tone='success'] > svg {
+  color: var(--pg-success-soft);
 }
 
 .pg-copy-button {
@@ -735,6 +762,154 @@
   color: var(--pg-text-secondary);
   font-size: 14px;
   line-height: 1.65;
+}
+
+.pg-legacy-main {
+  width: min(100% - 48px, 1100px);
+}
+
+.pg-legacy-notice {
+  max-width: 780px;
+  margin-bottom: 28px;
+}
+
+.pg-legacy-notice strong {
+  color: var(--pg-text-primary);
+}
+
+.pg-legacy-notice a,
+.pg-legacy-resource-links a {
+  color: var(--pg-flow-cyan);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.pg-legacy-notice a:hover,
+.pg-legacy-resource-links a:hover {
+  color: var(--pg-text-primary);
+}
+
+.pg-legacy-header {
+  grid-template-columns: 1fr;
+  align-items: start;
+  margin-bottom: 36px;
+}
+
+.pg-legacy-header h1,
+.pg-legacy-result-header h1 {
+  max-width: 720px;
+  color: var(--pg-text-primary);
+  font-size: clamp(36px, 5.4vw, 58px);
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 0.98;
+}
+
+.pg-legacy-header p:not(.pg-app-eyebrow) {
+  max-width: 680px;
+}
+
+.pg-legacy-form {
+  display: grid;
+  gap: 22px;
+  max-width: 700px;
+  padding: 24px;
+}
+
+.pg-legacy-input {
+  background:
+    linear-gradient(180deg, rgba(21, 28, 42, 0.80), rgba(13, 17, 23, 0.92));
+  font-family: var(--pg-font-mono);
+}
+
+.pg-legacy-submit {
+  justify-self: start;
+  min-width: 230px;
+}
+
+.pg-legacy-result-header {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.pg-legacy-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 100%;
+  color: var(--pg-text-secondary);
+  font-family: var(--pg-font-mono);
+  font-size: 13px;
+}
+
+.pg-legacy-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  border: 1px solid rgba(82, 94, 118, 0.42);
+  border-radius: 999px;
+  background: rgba(13, 17, 23, 0.62);
+  padding: 7px 10px;
+}
+
+.pg-legacy-meta strong {
+  overflow: hidden;
+  max-width: 420px;
+  color: var(--pg-text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-legacy-code-stack {
+  display: grid;
+  gap: 20px;
+}
+
+.pg-legacy-code-card .pg-code-block {
+  margin: 0;
+}
+
+.pg-legacy-checklist {
+  margin-top: 20px;
+}
+
+.pg-legacy-checklist-items {
+  display: grid;
+  gap: 12px;
+  color: var(--pg-text-secondary);
+  font-size: 14px;
+}
+
+.pg-legacy-checklist-items label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+}
+
+.pg-legacy-checklist-items input {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  accent-color: var(--pg-brand-purple);
+}
+
+.pg-legacy-resource-links,
+.pg-legacy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pg-legacy-resource-links {
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.pg-legacy-actions {
+  justify-content: space-between;
+  margin-top: 28px;
 }
 
 .pg-metric-card {
@@ -1992,6 +2167,33 @@
   .pg-copy-field-body code {
     white-space: normal;
     word-break: break-word;
+  }
+
+  .pg-legacy-main {
+    width: min(100% - 28px, 1100px);
+  }
+
+  .pg-legacy-form,
+  .pg-legacy-code-card .pg-app-card-body,
+  .pg-legacy-checklist .pg-app-card-body {
+    padding: 18px;
+  }
+
+  .pg-legacy-submit,
+  .pg-legacy-actions .pg-button {
+    width: 100%;
+  }
+
+  .pg-legacy-actions {
+    flex-direction: column-reverse;
+  }
+
+  .pg-legacy-meta {
+    display: grid;
+  }
+
+  .pg-legacy-meta strong {
+    max-width: 100%;
   }
 
   .pg-data-table {

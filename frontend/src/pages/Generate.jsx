@@ -2,38 +2,11 @@ import { AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
-import { C, MONO } from '../colors.js';
+import Notice from '../components/ui/Notice.jsx';
+import Button from '../components/ui/Button.jsx';
+import { Field, Input } from '../components/ui/Field.jsx';
 
 const initialForm = { endpointUrl: '', path: '', price: '' };
-
-function Field({ name, label, placeholder, hint, value, error, onChange }) {
-  return (
-    <label style={{ display: 'block' }}>
-      <span style={{ display: 'block', color: C.text1, fontWeight: 600, fontSize: 14, marginBottom: 8 }}>{label}</span>
-      <input
-        value={value}
-        onChange={(event) => onChange(name, event.target.value)}
-        placeholder={placeholder}
-        spellCheck={false}
-        style={{
-          width: '100%',
-          background: C.surfaceHover,
-          border: `1px solid ${error ? C.red : C.border}`,
-          color: C.text1,
-          borderRadius: 8,
-          padding: '13px 14px',
-          outline: 'none',
-          fontSize: 15,
-          ...MONO,
-          boxShadow: error ? '0 0 0 3px rgba(252,165,165,0.08)' : 'none',
-        }}
-      />
-      <span style={{ display: 'block', color: error ? C.red : C.text3, fontSize: 12, marginTop: 7 }}>
-        {error || hint}
-      </span>
-    </label>
-  );
-}
 
 export default function Generate() {
   const navigate = useNavigate();
@@ -105,101 +78,96 @@ export default function Generate() {
   const allEmpty = !form.endpointUrl && !form.path && !form.price;
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif", backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+    <div className="pg-app pg-legacy-page">
       <AppNavbar />
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '72px 24px 96px' }}>
-        <div style={{ maxWidth: 760, marginBottom: 28, display: 'flex', gap: 10, alignItems: 'flex-start', color: C.text2, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.24)', borderRadius: 10, padding: 14, lineHeight: 1.6 }}>
-          <AlertCircle size={18} color={C.amber} style={{ flex: '0 0 auto', marginTop: 2 }} />
+      <main className="pg-app-main pg-legacy-main">
+        <Notice
+          tone="warning"
+          className="pg-legacy-notice"
+          icon={<AlertCircle size={18} aria-hidden="true" />}
+        >
           <div>
-            <strong style={{ color: C.text1 }}>Legacy generator.</strong> This page is kept for V0/SOW middleware evidence. For the current PayGate V1 gateway flow, use{' '}
-            <Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Create paid endpoint</Link>.
+            <strong>Legacy generator.</strong> This page is kept for V0/SOW middleware evidence. For the current PayGate V1 gateway flow, use{' '}
+            <Link to="/apis/new">Create paid endpoint</Link>.
           </div>
-        </div>
+        </Notice>
 
-        <div style={{ maxWidth: 680 }}>
-          <p style={{ ...MONO, color: C.cyan, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 14 }}>
+        <header className="pg-app-header pg-legacy-header">
+          <div>
+            <p className="pg-app-eyebrow">
             Legacy MPP Code Generator
           </p>
-          <h1 style={{ fontSize: 'clamp(36px, 6vw, 58px)', lineHeight: 1.05, fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+            <h1>
             Generate Express middleware for V0 testing.
           </h1>
-          <p style={{ color: C.text2, fontSize: 17, lineHeight: 1.7, marginTop: 18 }}>
+            <p>
             Use this only when you need the old copy-paste middleware flow. The V1 product creates paid proxy URLs from registered APIs.
           </p>
-        </div>
+          </div>
+        </header>
 
         <form
           onSubmit={handleSubmit}
-          style={{
-            marginTop: 44,
-            maxWidth: 680,
-            background: C.surface,
-            border: `1px solid ${C.border}`,
-            borderRadius: 12,
-            padding: 24,
-            display: 'grid',
-            gap: 22,
-            boxShadow: '0 18px 70px rgba(0,0,0,0.24)',
-          }}
+          className="pg-app-card pg-legacy-form"
         >
           {generalError && (
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.red, background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.18)', borderRadius: 8, padding: 12, fontSize: 13 }}>
-              <AlertCircle size={16} style={{ flex: '0 0 auto', marginTop: 1 }} />
+            <Notice tone="danger" icon={<AlertCircle size={16} aria-hidden="true" />}>
               {generalError}
-            </div>
+            </Notice>
           )}
 
           <Field
-            name="endpointUrl"
             label="API Endpoint URL"
-            placeholder="https://api.yourservice.com"
-            hint="Base URL server kamu - tanpa path"
-            value={form.endpointUrl}
-            error={errors.endpointUrl}
-            onChange={updateField}
-          />
-          <Field
-            name="path"
-            label="Path to monetize"
-            placeholder="/v1/data"
-            hint="Gunakan :param untuk path params, contoh: /users/:id"
-            value={form.path}
-            error={errors.path}
-            onChange={updateField}
-          />
-          <Field
-            name="price"
-            label="Price per request (USDC)"
-            placeholder="0.01"
-            hint="Minimum 0.0001 USDC"
-            value={form.price}
-            error={errors.price}
-            onChange={updateField}
-          />
-
-          <button
-            type="submit"
-            disabled={loading || allEmpty}
-            style={{
-              marginTop: 4,
-              minHeight: 48,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              background: loading || allEmpty ? '#2A1F3E' : C.accent,
-              color: C.text1,
-              border: 'none',
-              borderRadius: 8,
-              cursor: loading || allEmpty ? 'not-allowed' : 'pointer',
-              fontWeight: 700,
-              fontSize: 15,
-              transition: 'all 0.15s ease',
-            }}
+            hint={errors.endpointUrl || 'Base URL server kamu - tanpa path'}
+            className={errors.endpointUrl ? 'pg-field-error' : undefined}
           >
-            {loading ? <Loader2 size={16} className="spin" /> : <ArrowRight size={16} />}
+            <Input
+              value={form.endpointUrl}
+              onChange={(event) => updateField('endpointUrl', event.target.value)}
+              placeholder="https://api.yourservice.com"
+              spellCheck={false}
+              aria-invalid={errors.endpointUrl ? 'true' : undefined}
+              className="pg-legacy-input"
+            />
+          </Field>
+          <Field
+            label="Path to monetize"
+            hint={errors.path || 'Gunakan :param untuk path params, contoh: /users/:id'}
+            className={errors.path ? 'pg-field-error' : undefined}
+          >
+            <Input
+              value={form.path}
+              onChange={(event) => updateField('path', event.target.value)}
+              placeholder="/v1/data"
+              spellCheck={false}
+              aria-invalid={errors.path ? 'true' : undefined}
+              className="pg-legacy-input"
+            />
+          </Field>
+          <Field
+            label="Price per request (USDC)"
+            hint={errors.price || 'Minimum 0.0001 USDC'}
+            className={errors.price ? 'pg-field-error' : undefined}
+          >
+            <Input
+              value={form.price}
+              onChange={(event) => updateField('price', event.target.value)}
+              placeholder="0.01"
+              spellCheck={false}
+              aria-invalid={errors.price ? 'true' : undefined}
+              className="pg-legacy-input"
+            />
+          </Field>
+
+          <Button
+            type="submit"
+            size="lg"
+            disabled={loading || allEmpty}
+            className="pg-legacy-submit"
+            icon={loading ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}
+          >
             {loading ? 'Generating...' : 'Generate legacy code'}
-          </button>
+          </Button>
         </form>
       </main>
     </div>
