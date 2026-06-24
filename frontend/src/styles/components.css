@@ -1088,6 +1088,195 @@
   white-space: nowrap;
 }
 
+.pg-dashboard-section {
+  overflow: hidden;
+  border: 1px solid rgba(82, 94, 118, 0.44);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(17, 23, 34, 0.78), rgba(10, 13, 20, 0.92));
+}
+
+.pg-dashboard-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid rgba(82, 94, 118, 0.42);
+  padding: 18px 20px;
+}
+
+.pg-dashboard-section-header h2 {
+  margin: 0;
+  color: var(--pg-text-primary);
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.pg-dashboard-section-header p {
+  margin-top: 5px;
+  color: var(--pg-text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pg-dashboard-section-body {
+  min-width: 0;
+}
+
+.pg-dashboard-table-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.pg-dashboard-copy-cell,
+.pg-endpoint-mobile-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pg-dashboard-copy-cell span,
+.pg-endpoint-mobile-url span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pg-text-secondary);
+  font-family: var(--pg-font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-dashboard-money {
+  color: var(--pg-success-soft);
+  font-family: var(--pg-font-mono);
+  font-weight: 800;
+}
+
+.pg-dashboard-row-strong {
+  color: var(--pg-text-primary);
+  font-weight: 800;
+}
+
+.pg-dashboard-status-text {
+  font-family: var(--pg-font-mono);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pg-endpoint-mobile-list {
+  gap: 12px;
+  padding: 14px;
+}
+
+.pg-endpoint-mobile-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(82, 94, 118, 0.40);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(21, 28, 42, 0.68), rgba(13, 17, 23, 0.92));
+  padding: 14px;
+}
+
+.pg-endpoint-mobile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pg-endpoint-mobile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pg-row-title a {
+  overflow: hidden;
+  color: var(--pg-text-primary);
+  font-weight: 850;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-row-title a:hover {
+  color: var(--pg-brand-purple-soft);
+}
+
+.pg-dashboard-escrow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid rgba(82, 94, 118, 0.44);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(17, 23, 34, 0.80), rgba(10, 13, 20, 0.92));
+  padding: 20px;
+}
+
+.pg-dashboard-balance {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pg-dashboard-balance span {
+  color: var(--pg-text-muted);
+  font-family: var(--pg-font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pg-dashboard-balance strong {
+  color: var(--pg-text-primary);
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.pg-dashboard-balance strong.is-success {
+  color: var(--pg-success-soft);
+}
+
+.pg-dashboard-balance strong.is-warning {
+  color: var(--pg-warning-soft);
+}
+
+.pg-dashboard-escrow-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pg-dashboard-escrow-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pg-flow-cyan);
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.pg-dashboard-withdraw-status {
+  grid-column: 1 / -1;
+  color: var(--pg-success-soft);
+  font-family: var(--pg-font-mono);
+  font-size: 12px;
+}
+
+.pg-dashboard-withdraw-status[data-tone='danger'] {
+  color: var(--pg-danger-soft);
+}
+
 .pg-divider {
   height: 1px;
   background: rgba(82, 94, 118, 0.42);
@@ -1183,6 +1372,20 @@
 
   .pg-dashboard-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .pg-dashboard-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pg-dashboard-table-split,
+  .pg-dashboard-escrow {
+    grid-template-columns: 1fr;
+  }
+
+  .pg-dashboard-escrow-actions {
+    justify-content: flex-start;
   }
 
   .pg-dashboard-preview-header,

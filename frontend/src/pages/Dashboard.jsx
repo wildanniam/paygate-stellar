@@ -18,6 +18,7 @@ import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
 import Button from '../components/ui/Button.jsx';
+import DataTable from '../components/ui/DataTable.jsx';
 import Metric from '../components/ui/Metric.jsx';
 import { C, MONO } from '../colors.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
@@ -108,9 +109,34 @@ function TxLink({ hash }) {
       rel="noopener noreferrer"
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: C.cyan, textDecoration: 'none', ...MONO, fontSize: 12 }}
     >
-      {short(hash, 8, 0)}
+      {short(hash, 8, 8)}
       <ExternalLink size={13} />
     </a>
+  );
+}
+
+function DashboardSection({ title, description, action, children, tone = 'flat' }) {
+  return (
+    <section className="pg-dashboard-section" data-tone={tone}>
+      <div className="pg-dashboard-section-header">
+        <div>
+          <h2>{title}</h2>
+          {description && <p>{description}</p>}
+        </div>
+        {action}
+      </div>
+      <div className="pg-dashboard-section-body">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function StatusText({ status }) {
+  return (
+    <span className="pg-dashboard-status-text" style={{ color: statusColor(status) }}>
+      {status || '-'}
+    </span>
   );
 }
 
@@ -370,174 +396,126 @@ export default function Dashboard() {
               </div>
             )}
 
-            <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-              <div style={{ padding: '18px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: 18 }}>Registered APIs</h2>
-                  <div style={{ color: C.text3, fontSize: 13, marginTop: 5 }}>Proxy URLs and per-API revenue.</div>
-                </div>
-                <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Create endpoint</Link>
-              </div>
-
+            <DashboardSection
+              title="Registered paid endpoints"
+              description="Proxy URLs, setup states, calls, and per-endpoint revenue."
+              action={<Button as={Link} to="/apis/new" size="sm">Create endpoint</Button>}
+            >
               {topApis.length === 0 ? (
                 <EmptyState
-                  title="No APIs registered yet"
-                  body="Register the demo upstream API or your own secret-protected GET endpoint. PayGate will create a paid proxy URL for agent calls."
+                  title="No paid endpoints yet"
+                  body="Create a paid endpoint from the demo upstream API or your own secret-protected GET endpoint."
                   action={<Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Create your first paid endpoint</Link>}
                 />
               ) : (
                 <>
-                  <div className="mobile-api-list" style={{ gap: 12, padding: 14 }}>
+                  <div className="mobile-api-list pg-endpoint-mobile-list">
                     {topApis.map((api) => (
-                      <div key={api.id} style={{ background: C.surfaceHover, border: `1px solid ${C.border}`, borderRadius: 8, padding: 14, display: 'grid', gap: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
-                          <div style={{ minWidth: 0 }}>
-                            <Link to={`/apis/${api.id}`} style={{ color: C.text1, textDecoration: 'none', fontWeight: 800 }}>{api.name}</Link>
-                            <div style={{ color: C.text3, fontSize: 12, marginTop: 5, ...MONO, overflowWrap: 'anywhere' }}>{api.method} {api.path}</div>
+                      <article key={api.id} className="pg-endpoint-mobile-card">
+                        <div className="pg-endpoint-mobile-top">
+                          <div className="pg-row-title">
+                            <Link to={`/apis/${api.id}`}>{api.name}</Link>
+                            <span>{api.method} {api.path}</span>
                           </div>
                           <ApiStatusBadge status={api.status} compact />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                          <div>
-                            <div style={{ color: C.text3, fontSize: 11, ...MONO }}>Calls</div>
-                            <div style={{ color: C.text2, fontWeight: 800, marginTop: 4 }}>{api.successfulCalls}/{api.calls}</div>
-                          </div>
-                          <div>
-                            <div style={{ color: C.text3, fontSize: 11, ...MONO }}>Revenue</div>
-                            <div style={{ color: C.green, fontWeight: 800, marginTop: 4 }}>{formatUsdc(api.grossRevenueUsdc)}</div>
-                          </div>
+                        <div className="pg-endpoint-mobile-stats">
+                          <Metric label="Calls" value={`${api.successfulCalls}/${api.calls}`} />
+                          <Metric label="Revenue" value={formatUsdc(api.grossRevenueUsdc)} tone="success" />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                          <span style={{ color: C.text2, fontSize: 12, ...MONO, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{short(api.proxyUrl, 28, 8)}</span>
+                        <div className="pg-endpoint-mobile-url">
+                          <span>{short(api.proxyUrl, 28, 8)}</span>
                           <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
                         </div>
-                      </div>
+                      </article>
                     ))}
                   </div>
-                  <div className="desktop-api-table" style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 920 }}>
-                      <thead>
-                        <tr style={{ color: C.text3, fontSize: 12, ...MONO, textAlign: 'left' }}>
-                          {['API', 'Proxy URL', 'Calls', 'Revenue', 'Status'].map((heading) => (
-                            <th key={heading} style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, fontWeight: 500 }}>
-                              {heading}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {topApis.map((api) => (
-                          <tr key={api.id} style={{ borderBottom: `1px solid ${C.border}` }}>
-                            <td style={{ padding: '15px 16px' }}>
-                              <Link to={`/apis/${api.id}`} style={{ color: C.text1, textDecoration: 'none', fontWeight: 800 }}>{api.name}</Link>
-                              <div style={{ color: C.text3, fontSize: 12, marginTop: 5, ...MONO }}>{api.method} {api.path}</div>
-                            </td>
-                            <td style={{ padding: '15px 16px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ color: C.text2, fontSize: 12, ...MONO }}>{short(api.proxyUrl, 30, 12)}</span>
-                                <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
-                              </div>
-                            </td>
-                            <td style={{ padding: '15px 16px', color: C.text2 }}>{api.successfulCalls}/{api.calls}</td>
-                            <td style={{ padding: '15px 16px', color: C.green, fontWeight: 800 }}>{formatUsdc(api.grossRevenueUsdc)}</td>
-                            <td style={{ padding: '15px 16px' }}>
-                              <ApiStatusBadge status={api.status} compact />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <DataTable
+                    className="desktop-api-table"
+                    rows={topApis}
+                    columns={[
+                      {
+                        key: 'api',
+                        label: 'Endpoint',
+                        render: (api) => (
+                          <div className="pg-row-title">
+                            <Link to={`/apis/${api.id}`}>{api.name}</Link>
+                            <span>{api.method} {api.path}</span>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'proxy',
+                        label: 'Proxy URL',
+                        render: (api) => (
+                          <div className="pg-dashboard-copy-cell">
+                            <span>{short(api.proxyUrl, 34, 12)}</span>
+                            <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+                          </div>
+                        ),
+                      },
+                      { key: 'calls', label: 'Calls', render: (api) => `${api.successfulCalls}/${api.calls}` },
+                      { key: 'revenue', label: 'Revenue', render: (api) => <span className="pg-dashboard-money">{formatUsdc(api.grossRevenueUsdc)}</span> },
+                      { key: 'status', label: 'Status', render: (api) => <ApiStatusBadge status={api.status} compact /> },
+                    ]}
+                    getRowKey={(api) => api.id}
+                  />
                 </>
               )}
-            </section>
+            </DashboardSection>
 
-            <section className="grid grid-cols-1 xl:grid-cols-2" style={{ gap: 22, alignItems: 'start' }}>
-              <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                <div style={{ padding: '18px 20px', borderBottom: `1px solid ${C.border}` }}>
-                  <h2 style={{ margin: 0, fontSize: 18 }}>Payment History</h2>
-                  <div style={{ color: C.text3, fontSize: 13, marginTop: 5 }}>Verified payment and credit transactions.</div>
-                </div>
+            <section className="pg-dashboard-table-split">
+              <DashboardSection title="Payment history" description="Verified payments and revenue credits.">
                 {dashboard.payments.length === 0 ? (
                   <EmptyState title="No payments yet" body="Run the agent/client against a paid proxy. Verified payments will appear here with Stellar Expert links." />
                 ) : (
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 760 }}>
-                      <thead>
-                        <tr style={{ color: C.text3, fontSize: 12, ...MONO, textAlign: 'left' }}>
-                          {['Time', 'API', 'Gross', 'Payment Tx', 'Credit Tx'].map((heading) => (
-                            <th key={heading} style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, fontWeight: 500 }}>
-                              {heading}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dashboard.payments.slice(0, 8).map((payment) => (
-                          <tr key={payment.id} style={{ borderBottom: `1px solid ${C.border}` }}>
-                            <td style={{ padding: '15px 16px', color: C.text2 }}>{formatDate(payment.createdAt)}</td>
-                            <td style={{ padding: '15px 16px', color: C.text1, fontWeight: 700 }}>{payment.apiName}</td>
-                            <td style={{ padding: '15px 16px', color: C.green, fontWeight: 800 }}>{formatUsdc(payment.grossAmountUsdc)}</td>
-                            <td style={{ padding: '15px 16px' }}><TxLink hash={payment.txHash} /></td>
-                            <td style={{ padding: '15px 16px' }}><TxLink hash={payment.creditTxHash} /></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <DataTable
+                    rows={dashboard.payments.slice(0, 8)}
+                    columns={[
+                      { key: 'time', label: 'Time', render: (payment) => formatDate(payment.createdAt) },
+                      { key: 'api', label: 'API', render: (payment) => <strong className="pg-dashboard-row-strong">{payment.apiName}</strong> },
+                      { key: 'gross', label: 'Gross', render: (payment) => <span className="pg-dashboard-money">{formatUsdc(payment.grossAmountUsdc)}</span> },
+                      { key: 'paymentTx', label: 'Payment Tx', render: (payment) => <TxLink hash={payment.txHash} /> },
+                      { key: 'creditTx', label: 'Credit Tx', render: (payment) => <TxLink hash={payment.creditTxHash} /> },
+                    ]}
+                    getRowKey={(payment) => payment.id}
+                  />
                 )}
-              </div>
+              </DashboardSection>
 
-              <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                <div style={{ padding: '18px 20px', borderBottom: `1px solid ${C.border}` }}>
-                  <h2 style={{ margin: 0, fontSize: 18 }}>Request Log</h2>
-                  <div style={{ color: C.text3, fontSize: 13, marginTop: 5 }}>Recent proxy request states.</div>
-                </div>
+              <DashboardSection title="Request log" description="Recent paid proxy states.">
                 {dashboard.requests.length === 0 ? (
                   <EmptyState title="No requests yet" body="Unpaid challenges and paid forwards will be logged after an agent calls a proxy URL." />
                 ) : (
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
-                      <thead>
-                        <tr style={{ color: C.text3, fontSize: 12, ...MONO, textAlign: 'left' }}>
-                          {['Time', 'API', 'Status', 'Upstream', 'Tx'].map((heading) => (
-                            <th key={heading} style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, fontWeight: 500 }}>
-                              {heading}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dashboard.requests.slice(0, 8).map((request) => (
-                          <tr key={request.id} style={{ borderBottom: `1px solid ${C.border}` }}>
-                            <td style={{ padding: '15px 16px', color: C.text2 }}>{formatDate(request.createdAt)}</td>
-                            <td style={{ padding: '15px 16px', color: C.text1, fontWeight: 700 }}>{request.apiName}</td>
-                            <td style={{ padding: '15px 16px', color: statusColor(request.status), fontWeight: 800 }}>{request.status}</td>
-                            <td style={{ padding: '15px 16px', color: C.text2 }}>{request.upstreamStatus || '-'}</td>
-                            <td style={{ padding: '15px 16px' }}><TxLink hash={request.txHash} /></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <DataTable
+                    rows={dashboard.requests.slice(0, 8)}
+                    columns={[
+                      { key: 'time', label: 'Time', render: (request) => formatDate(request.createdAt) },
+                      { key: 'api', label: 'API', render: (request) => <strong className="pg-dashboard-row-strong">{request.apiName}</strong> },
+                      { key: 'status', label: 'Status', render: (request) => <StatusText status={request.status} /> },
+                      { key: 'upstream', label: 'Upstream', render: (request) => request.upstreamStatus || '-' },
+                      { key: 'tx', label: 'Tx', render: (request) => <TxLink hash={request.txHash} /> },
+                    ]}
+                    getRowKey={(request) => request.id}
+                  />
                 )}
-              </div>
+              </DashboardSection>
             </section>
 
-            <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ color: C.text3, fontSize: 12, ...MONO }}>Escrow Contract</div>
-                <div style={{ color: C.text1, fontWeight: 800, marginTop: 8 }}>{dashboard.escrow?.configured ? 'Connected' : 'Not configured'}</div>
+            <section className="pg-dashboard-escrow">
+              <div className="pg-dashboard-balance">
+                <span>Escrow contract</span>
+                <strong>{dashboard.escrow?.configured ? 'Connected' : 'Not configured'}</strong>
               </div>
-              <div>
-                <div style={{ color: C.text3, fontSize: 12, ...MONO }}>Developer Balance</div>
-                <div style={{ color: C.green, fontWeight: 800, marginTop: 8 }}>{formatUsdc(dashboard.escrow?.developerBalance?.usdc)}</div>
+              <div className="pg-dashboard-balance">
+                <span>Developer balance</span>
+                <strong className="is-success">{formatUsdc(dashboard.escrow?.developerBalance?.usdc)}</strong>
               </div>
-              <div>
-                <div style={{ color: C.text3, fontSize: 12, ...MONO }}>PayGate Fee Balance</div>
-                <div style={{ color: C.amber, fontWeight: 800, marginTop: 8 }}>{formatUsdc(dashboard.escrow?.platformFeeBalance?.usdc)}</div>
+              <div className="pg-dashboard-balance">
+                <span>PayGate fee balance</span>
+                <strong className="is-warning">{formatUsdc(dashboard.escrow?.platformFeeBalance?.usdc)}</strong>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div className="pg-dashboard-escrow-actions">
                 <Button
                   type="button"
                   onClick={handleWithdraw}
@@ -553,45 +531,28 @@ export default function Dashboard() {
                 </a>
               </div>
               {(withdrawError || withdrawResult) && (
-                <div style={{ flexBasis: '100%', color: withdrawError ? C.red : C.green, fontSize: 13, ...MONO }}>
+                <div className="pg-dashboard-withdraw-status" data-tone={withdrawError ? 'danger' : 'success'}>
                   {withdrawError || `Withdrawal submitted: ${short(withdrawResult.txHash, 10, 8)}`}
                 </div>
               )}
             </section>
 
-            <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-              <div style={{ padding: '18px 20px', borderBottom: `1px solid ${C.border}` }}>
-                <h2 style={{ margin: 0, fontSize: 18 }}>Withdrawal History</h2>
-                <div style={{ color: C.text3, fontSize: 13, marginTop: 5 }}>Developer payout contract invocations.</div>
-              </div>
+            <DashboardSection title="Withdrawal history" description="Developer payout contract invocations.">
               {(dashboard.withdrawals || []).length === 0 ? (
                 <EmptyState title="No withdrawals yet" body="Withdrawable balance will move to the connected developer wallet after a Freighter-signed withdrawal." />
               ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
-                    <thead>
-                      <tr style={{ color: C.text3, fontSize: 12, ...MONO, textAlign: 'left' }}>
-                        {['Time', 'Amount', 'Status', 'Tx'].map((heading) => (
-                          <th key={heading} style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, fontWeight: 500 }}>
-                            {heading}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dashboard.withdrawals.slice(0, 8).map((withdrawal) => (
-                        <tr key={withdrawal.id} style={{ borderBottom: `1px solid ${C.border}` }}>
-                          <td style={{ padding: '15px 16px', color: C.text2 }}>{formatDate(withdrawal.createdAt)}</td>
-                          <td style={{ padding: '15px 16px', color: C.green, fontWeight: 800 }}>{formatUsdc(withdrawal.amountUsdc)}</td>
-                          <td style={{ padding: '15px 16px', color: statusColor(withdrawal.status), fontWeight: 800 }}>{withdrawal.status}</td>
-                          <td style={{ padding: '15px 16px' }}><TxLink hash={withdrawal.txHash} /></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  rows={dashboard.withdrawals.slice(0, 8)}
+                  columns={[
+                    { key: 'time', label: 'Time', render: (withdrawal) => formatDate(withdrawal.createdAt) },
+                    { key: 'amount', label: 'Amount', render: (withdrawal) => <span className="pg-dashboard-money">{formatUsdc(withdrawal.amountUsdc)}</span> },
+                    { key: 'status', label: 'Status', render: (withdrawal) => <StatusText status={withdrawal.status} /> },
+                    { key: 'tx', label: 'Tx', render: (withdrawal) => <TxLink hash={withdrawal.txHash} /> },
+                  ]}
+                  getRowKey={(withdrawal) => withdrawal.id}
+                />
               )}
-            </section>
+            </DashboardSection>
           </div>
         )}
       </main>
