@@ -112,7 +112,7 @@ export default function Generate() {
           <AlertCircle size={18} color={C.amber} style={{ flex: '0 0 auto', marginTop: 2 }} />
           <div>
             <strong style={{ color: C.text1 }}>Legacy generator.</strong> This page is kept for V0/SOW middleware evidence. For the current PayGate V1 gateway flow, use{' '}
-            <Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Register API</Link>.
+            <Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Create paid endpoint</Link>.
           </div>
         </div>
 

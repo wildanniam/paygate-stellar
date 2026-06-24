@@ -7,6 +7,7 @@ import CopyButton from '../components/CopyButton.jsx';
 import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
 import ValueRow from '../components/ValueRow.jsx';
 import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
+import Button from '../components/ui/Button.jsx';
 import { C, MONO } from '../colors.js';
 import { readJsonResponse } from '../lib/walletAuth.js';
 
@@ -139,19 +140,26 @@ export default function ApiDetail() {
   const isBusy = ['loading', 'saving', 'verifying', 'removing'].includes(status);
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif" }}>
+    <div className="pg-app">
       <AppNavbar />
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '64px 24px 96px' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 28 }}>
+      <main className="pg-app-main">
+        <header className="pg-app-header">
           <div>
-            <p style={{ ...MONO, color: C.cyan, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
-              API Detail
+            <p className="pg-app-eyebrow">
+              Endpoint control
             </p>
-            <h1 style={{ fontSize: 'clamp(30px, 5vw, 48px)', lineHeight: 1.05, fontWeight: 800, margin: 0 }}>
+            <h1>
               {api?.name || 'Registered API'}
             </h1>
+            <p>
+              Inspect the paid proxy URL, upstream guard, setup status, and operating controls for this endpoint.
+            </p>
           </div>
-          <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 700 }}>Register another API</Link>
+          <div className="pg-app-actions">
+            <Button as={Link} to="/apis/new" size="sm" icon={<ShieldCheck size={15} aria-hidden="true" />}>
+              Create paid endpoint
+            </Button>
+          </div>
         </header>
 
         {(sessionStatus === 'loading' || status === 'loading') && (
@@ -254,7 +262,7 @@ export default function ApiDetail() {
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
               <Link to="/dashboard" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Back to dashboard</Link>
-              <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Register API</Link>
+              <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Create paid endpoint</Link>
             </div>
           </section>
         )}

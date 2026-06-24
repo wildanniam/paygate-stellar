@@ -119,16 +119,21 @@ export default function RegisterApi() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif" }}>
+    <div className="pg-app">
       <AppNavbar />
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '64px 24px 96px' }}>
-        <header style={{ maxWidth: 760, marginBottom: 28 }}>
-          <p style={{ ...MONO, color: C.cyan, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
-            API Registry
-          </p>
-          <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', lineHeight: 1.05, fontWeight: 800, margin: 0 }}>
-            Register an API for pay-per-call access.
-          </h1>
+      <main className="pg-app-main">
+        <header className="pg-app-header">
+          <div>
+            <p className="pg-app-eyebrow">
+              Create paid endpoint
+            </p>
+            <h1>
+              Paste your API URL. Charge per call.
+            </h1>
+            <p>
+              PayGate creates a paid proxy endpoint, gives you an upstream secret, and tracks revenue from successful calls.
+            </p>
+          </div>
         </header>
 
         {sessionStatus === 'loading' && (
@@ -140,7 +145,7 @@ export default function RegisterApi() {
 
         {sessionStatus !== 'loading' && !session.authenticated && (
           <WalletLoginPanel
-            title="Connect wallet to register APIs"
+            title="Connect wallet to create paid endpoints"
             body="API ownership and payout wallet come from your Freighter session. Sign the PayGate challenge before creating a paid proxy."
             onConnected={setSession}
           />
@@ -194,7 +199,7 @@ export default function RegisterApi() {
 
             <button type="submit" disabled={status === 'submitting'} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: C.accent, color: C.text1, border: 'none', borderRadius: 8, padding: '12px 16px', fontWeight: 800, cursor: 'pointer' }}>
               {status === 'submitting' ? <Loader2 size={16} className="spin" /> : <Plus size={16} />}
-              Register API
+              Create paid endpoint
             </button>
           </form>
 
@@ -205,7 +210,7 @@ export default function RegisterApi() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: C.amber, fontWeight: 800 }}>
                     <CheckCircle2 size={18} />
-                      API registered
+                      Paid endpoint created
                     </div>
                     <ApiStatusBadge status={createdApi.status} />
                   </div>

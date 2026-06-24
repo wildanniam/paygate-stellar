@@ -93,7 +93,7 @@ export default function Result() {
             Generate another legacy snippet
           </Link>
           <Link to="/apis/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: C.text1, textDecoration: 'none', background: C.accent, borderRadius: 8, padding: '10px 14px', fontWeight: 700 }}>
-            Register API in V1
+            Create paid endpoint in V1
             <ArrowRight size={16} />
           </Link>
         </div>

@@ -252,31 +252,30 @@ export default function Dashboard() {
   }, [dashboard]);
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text1, fontFamily: "'Inter', sans-serif", backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+    <div className="pg-app">
       <AppNavbar />
-      <main style={{ maxWidth: 1180, margin: '0 auto', padding: '56px 24px 96px' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 18, flexWrap: 'wrap', marginBottom: 24 }}>
-          <div style={{ maxWidth: 760 }}>
-            <p style={{ ...MONO, color: C.cyan, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
-              PayGate V1 Console
+      <main className="pg-app-main">
+        <header className="pg-app-header">
+          <div>
+            <p className="pg-app-eyebrow">
+              PayGate workspace
             </p>
-            <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', lineHeight: 1.05, fontWeight: 800, margin: 0 }}>
-              API revenue, calls, and escrow balance.
+            <h1>
+              Operate paid API revenue.
             </h1>
-            <p style={{ color: C.text2, fontSize: 16, lineHeight: 1.7, marginTop: 16, maxWidth: 680 }}>
+            <p>
               Manage registered APIs, inspect paid proxy traffic, and track USDC testnet settlement from one developer wallet.
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div className="pg-app-actions">
             {session.authenticated && (
-              <button type="button" onClick={loadDashboard} disabled={isRefreshing} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: C.text2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}>
-                {isRefreshing ? <Loader2 size={15} className="spin" /> : <RefreshCw size={15} />}
+              <Button type="button" variant="secondary" onClick={loadDashboard} disabled={isRefreshing} icon={isRefreshing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <RefreshCw size={15} aria-hidden="true" />}>
                 Refresh
-              </button>
+              </Button>
             )}
             <Button as={Link} to="/apis/new" icon={<Database size={16} aria-hidden="true" />}>
-              Register API
+              Create paid endpoint
             </Button>
           </div>
         </header>
@@ -360,14 +359,14 @@ export default function Dashboard() {
                   <h2 style={{ margin: 0, fontSize: 18 }}>Registered APIs</h2>
                   <div style={{ color: C.text3, fontSize: 13, marginTop: 5 }}>Proxy URLs and per-API revenue.</div>
                 </div>
-                <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Add API</Link>
+                <Link to="/apis/new" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800 }}>Create endpoint</Link>
               </div>
 
               {topApis.length === 0 ? (
                 <EmptyState
                   title="No APIs registered yet"
                   body="Register the demo upstream API or your own secret-protected GET endpoint. PayGate will create a paid proxy URL for agent calls."
-                  action={<Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Register your first API</Link>}
+                  action={<Link to="/apis/new" style={{ color: C.cyan, fontWeight: 800, textDecoration: 'none' }}>Create your first paid endpoint</Link>}
                 />
               ) : (
                 <>

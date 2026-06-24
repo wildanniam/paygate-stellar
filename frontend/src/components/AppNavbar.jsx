@@ -1,101 +1,56 @@
-import { Github } from 'lucide-react';
+import { Github, LayoutDashboard, Plus } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { C, MONO } from '../colors.js';
 import Button from './ui/Button.jsx';
 
 export default function AppNavbar() {
   const { pathname } = useLocation();
+  const isCreate = pathname === '/apis/new';
 
-  const navLink = (to, label, variant = 'plain') => {
+  const navLink = (to, label, icon) => {
     const active = pathname === to;
-    if (variant === 'primary') {
-      return (
-        <Button
-          as={Link}
-          to={to}
-          size="sm"
-          className="pg-app-nav-primary"
-          aria-current={active ? 'page' : undefined}
-        >
-          {label}
-        </Button>
-      );
-    }
 
     return (
       <Link
         to={to}
-        style={{
-          color: active ? C.text1 : C.text2,
-          fontSize: 13,
-          textDecoration: 'none',
-          padding: '6px 12px',
-          borderRadius: 6,
-          background: active ? C.accent : 'transparent',
-          border: '1px solid transparent',
-          fontWeight: 500,
-          transition: 'all 0.15s ease',
-          ...MONO,
-        }}
+        className="pg-app-nav-link"
+        data-active={active ? 'true' : 'false'}
+        aria-current={active ? 'page' : undefined}
       >
+        {icon}
         {label}
       </Link>
     );
   };
 
   return (
-    <nav
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        background: 'rgba(8,8,8,0.85)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: `1px solid ${C.border}`,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1100,
-          margin: '0 auto',
-          padding: '0 24px',
-          minHeight: 56,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 10,
-        }}
-      >
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <span style={{ ...MONO, fontWeight: 700, fontSize: 15, whiteSpace: 'nowrap' }}>
-            <span style={{ color: C.accent }}>{'{ '}</span>
-            <span style={{ color: C.text1 }}>PayGate</span>
-            <span style={{ color: C.accent }}>{' }'}</span>
+    <nav className="pg-app-navbar">
+      <div className="pg-app-navbar-inner">
+        <Link to="/" className="pg-app-brand" aria-label="PayGate home">
+          <span className="pg-app-brand-mark">
+            <img src="/brand/paygate-mark.svg" alt="" />
           </span>
+          <span>PayGate</span>
         </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {navLink('/dashboard', 'Dashboard')}
-          {navLink('/apis/new', 'Register API', 'primary')}
+        <div className="pg-app-navbar-actions">
+          {navLink('/dashboard', 'Dashboard', <LayoutDashboard size={14} aria-hidden="true" />)}
+          <Button
+            as={Link}
+            to="/apis/new"
+            size="sm"
+            className="pg-app-nav-primary"
+            aria-current={isCreate ? 'page' : undefined}
+            icon={<Plus size={14} aria-hidden="true" />}
+          >
+            Create paid endpoint
+          </Button>
           <a
-            className="desktop-nav-link"
+            className="pg-app-nav-github desktop-nav-link"
             href="https://github.com/wildanniam/paygate-stellar"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              alignItems: 'center',
-              gap: 6,
-              color: C.text2,
-              fontSize: 13,
-              textDecoration: 'none',
-              padding: '6px 12px',
-              borderRadius: 6,
-              border: `1px solid ${C.border}`,
-              marginLeft: 8,
-              transition: 'all 0.15s ease',
-            }}
           >
-            <Github size={14} />
+            <Github size={14} aria-hidden="true" />
             <span className="hidden sm:inline">GitHub</span>
           </a>
         </div>
