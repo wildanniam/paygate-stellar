@@ -6,23 +6,29 @@ export default function DataTable({ columns, rows, renderCell, getRowKey, classN
   }
 
   return (
-    <table className={cx('pg-data-table', className)}>
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th key={column.key || column.label}>{column.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, rowIndex) => (
-          <tr key={getRowKey ? getRowKey(row) : row.id || rowIndex}>
+    <div className={cx('pg-data-table-wrap', className)}>
+      <table className="pg-data-table">
+        <thead>
+          <tr>
             {columns.map((column) => (
-              <td key={column.key}>{renderCell ? renderCell(row, column) : row[column.key]}</td>
+              <th key={column.key || column.label} data-align={column.align || 'left'}>
+                {column.label}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={getRowKey ? getRowKey(row) : row.id || rowIndex}>
+              {columns.map((column) => (
+                <td key={column.key} data-align={column.align || 'left'} data-label={column.label}>
+                  {column.render ? column.render(row) : renderCell ? renderCell(row, column) : row[column.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
