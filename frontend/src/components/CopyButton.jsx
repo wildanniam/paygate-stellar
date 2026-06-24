@@ -61,6 +61,7 @@ export default function CopyButton({
       iconOnly={compact}
       className="pg-copy-button"
       data-state={state}
+      data-copy-state={state}
       icon={<Icon size={compact ? 15 : 14} aria-hidden="true" />}
     >
       {text}
