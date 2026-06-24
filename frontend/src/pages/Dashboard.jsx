@@ -18,6 +18,7 @@ import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
 import Button from '../components/ui/Button.jsx';
+import Metric from '../components/ui/Metric.jsx';
 import { C, MONO } from '../colors.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
 
@@ -50,26 +51,51 @@ function statusColor(status) {
   return C.text2;
 }
 
-function SummaryCard({ icon: Icon, label, value, hint }) {
+function SummaryCard({ icon: Icon, label, value, hint, tone = 'neutral' }) {
   return (
-    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 18, minHeight: 124 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ color: C.text3, fontSize: 12, ...MONO }}>{label}</div>
-        <Icon size={17} color={C.cyan} />
-      </div>
-      <div style={{ color: C.text1, fontSize: 25, fontWeight: 800, marginTop: 14, lineHeight: 1.1 }}>{value}</div>
-      {hint && <div style={{ color: C.text3, fontSize: 12, marginTop: 10 }}>{hint}</div>}
-    </div>
+    <article className="pg-app-card pg-metric-card" data-tone={tone === 'warning' ? 'warning' : tone === 'success' ? 'success' : 'flat'}>
+      <Metric
+        label={label}
+        value={value}
+        delta={hint}
+        tone={tone}
+        icon={<Icon size={17} aria-hidden="true" />}
+      />
+    </article>
   );
 }
 
 function EmptyState({ title, body, action }) {
   return (
-    <div style={{ padding: 28, color: C.text2 }}>
-      <div style={{ color: C.text1, fontWeight: 800, marginBottom: 8 }}>{title}</div>
-      <div style={{ lineHeight: 1.6, maxWidth: 620 }}>{body}</div>
+    <div className="pg-empty-state">
+      <h3>{title}</h3>
+      <p>{body}</p>
       {action && <div style={{ marginTop: 18 }}>{action}</div>}
     </div>
+  );
+}
+
+function GhostDashboardPreview() {
+  return (
+    <section className="pg-dashboard-preview" aria-label="Dashboard preview">
+      <div className="pg-dashboard-preview-header">
+        <span className="pg-status-dot" data-tone="warning">Preview locked until wallet connect</span>
+        <span>Paid endpoint workspace</span>
+      </div>
+      <div className="pg-dashboard-metrics">
+        <SummaryCard icon={Database} label="APIs" value="2" hint="1 active · 1 setup" tone="brand" />
+        <SummaryCard icon={Activity} label="Paid Calls" value="12.4k" hint="Live proxy traffic" tone="neutral" />
+        <SummaryCard icon={DollarSign} label="Gross Revenue" value="$124.00" hint="USDC testnet" tone="success" />
+        <SummaryCard icon={Wallet} label="Withdrawable" value="$84.20" hint="Escrow balance" tone="success" />
+      </div>
+      <div className="pg-dashboard-preview-table">
+        <div>
+          <strong>Market Signal API</strong>
+          <span>https://paygate.app/api/pay/api_123</span>
+        </div>
+        <span className="pg-badge" data-tone="success">Active</span>
+      </div>
+    </section>
   );
 }
 
@@ -255,16 +281,16 @@ export default function Dashboard() {
     <div className="pg-app">
       <AppNavbar />
       <main className="pg-app-main">
-        <header className="pg-app-header">
+        <header className="pg-dashboard-header">
           <div>
             <p className="pg-app-eyebrow">
               PayGate workspace
             </p>
             <h1>
-              Operate paid API revenue.
+              API revenue command center.
             </h1>
             <p>
-              Manage registered APIs, inspect paid proxy traffic, and track USDC testnet settlement from one developer wallet.
+              Monitor paid endpoints, call traffic, escrow settlement, and withdrawable revenue from one developer wallet.
             </p>
           </div>
 
@@ -280,23 +306,22 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+        <section className="pg-dashboard-wallet">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: C.text1, fontWeight: 800 }}>
-              <ShieldCheck size={18} color={session.authenticated ? C.green : C.amber} />
+            <div className="pg-dashboard-wallet-title">
+              <ShieldCheck size={18} aria-hidden="true" />
               Developer Wallet
             </div>
-            <div style={{ color: C.text3, fontSize: 13, marginTop: 8, ...MONO }}>
+            <div className="pg-dashboard-wallet-address">
               {session.authenticated ? short(session.walletAddress, 12, 8) : 'Connect Freighter to load your APIs and revenue.'}
             </div>
-            {lastUpdated && <div style={{ color: C.text3, fontSize: 12, marginTop: 6, ...MONO }}>Updated {lastUpdated.toLocaleTimeString()}</div>}
+            {lastUpdated && <div className="pg-dashboard-wallet-meta">Updated {lastUpdated.toLocaleTimeString()}</div>}
             {authError && <div style={{ color: C.red, fontSize: 13, marginTop: 8 }}>{authError}</div>}
           </div>
           {session.authenticated ? (
-            <button type="button" onClick={handleLogout} disabled={authStatus === 'loading'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: C.text2, border: `1px solid ${C.border}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}>
-              <LogOut size={15} />
+            <Button type="button" variant="secondary" onClick={handleLogout} disabled={authStatus === 'loading'} icon={<LogOut size={15} aria-hidden="true" />}>
               Logout
-            </button>
+            </Button>
           ) : (
             <Button
               type="button"
@@ -309,6 +334,15 @@ export default function Dashboard() {
           )}
         </section>
 
+        {dashboard && (
+          <section className="pg-dashboard-metrics" aria-label="Dashboard metrics">
+            <SummaryCard icon={Database} label="APIs" value={`${summary.totalApis}`} hint={`${apiLifecycleCounts.active} active · ${apiLifecycleCounts.pending} setup · ${apiLifecycleCounts.archived} archived`} tone="brand" />
+            <SummaryCard icon={Activity} label="Paid Calls" value={`${summary.successfulCalls}/${summary.totalCalls}`} hint={`${summary.failedCalls} failed`} tone="neutral" />
+            <SummaryCard icon={DollarSign} label="Gross Revenue" value={formatUsdc(summary.grossRevenueUsdc)} hint={`Fee ${formatUsdc(summary.platformFeeUsdc)}`} tone="success" />
+            <SummaryCard icon={Wallet} label="Withdrawable" value={formatUsdc(dashboard.escrow?.developerBalance?.usdc)} hint={dashboard.escrow?.configured ? 'From escrow contract' : 'Contract not configured'} tone="success" />
+          </section>
+        )}
+
         {isLoading && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: C.text2, padding: '28px 0' }}>
             <Loader2 size={18} className="spin" />
@@ -317,17 +351,7 @@ export default function Dashboard() {
         )}
 
         {!session.authenticated && authStatus !== 'loading' && (
-          <section style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-            <EmptyState
-              title="Wallet login required"
-              body="The V1 dashboard is scoped to the developer wallet. Connect Freighter and sign the challenge so PayGate can show only APIs, payments, and escrow balance owned by that wallet."
-              action={(
-                <Button type="button" onClick={handleConnectWallet} icon={<Wallet size={16} aria-hidden="true" />}>
-                  Connect Freighter
-                </Button>
-              )}
-            />
-          </section>
+          <GhostDashboardPreview />
         )}
 
         {dashboardStatus === 'error' && dashboardError && (
@@ -339,13 +363,6 @@ export default function Dashboard() {
 
         {dashboard && (
           <div style={{ display: 'grid', gap: 22 }}>
-            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4" style={{ gap: 14 }}>
-              <SummaryCard icon={Database} label="APIs" value={`${summary.totalApis}`} hint={`${apiLifecycleCounts.active} active · ${apiLifecycleCounts.pending} setup · ${apiLifecycleCounts.archived} archived`} />
-              <SummaryCard icon={Activity} label="Paid Calls" value={`${summary.successfulCalls}/${summary.totalCalls}`} hint={`${summary.failedCalls} failed`} />
-              <SummaryCard icon={DollarSign} label="Gross Revenue" value={formatUsdc(summary.grossRevenueUsdc)} hint={`Fee ${formatUsdc(summary.platformFeeUsdc)}`} />
-              <SummaryCard icon={Wallet} label="Withdrawable" value={formatUsdc(dashboard.escrow?.developerBalance?.usdc)} hint={dashboard.escrow?.configured ? 'From escrow contract' : 'Contract not configured'} />
-            </section>
-
             {escrowError && (
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: C.amber, background: 'rgba(252,211,77,0.08)', border: '1px solid rgba(252,211,77,0.18)', borderRadius: 8, padding: 14, fontSize: 14 }}>
                 <AlertCircle size={17} style={{ flex: '0 0 auto', marginTop: 1 }} />
