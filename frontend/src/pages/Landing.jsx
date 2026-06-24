@@ -630,8 +630,7 @@ export default function Landing() {
     const arrows = root.querySelectorAll('[data-flow-arrow]');
     const statuses = root.querySelectorAll('[data-status-step]');
     const revenue = root.querySelector('[data-revenue-split]');
-    const dashboard = root.querySelector('[data-dashboard-preview]');
-    const animated = [leftPill, rightPill, node, revenue, dashboard, ...lines, ...arrows, ...statuses].filter(Boolean);
+    const animated = [leftPill, rightPill, node, revenue, ...lines, ...arrows, ...statuses].filter(Boolean);
 
     if (prefersReducedMotion) {
       gsap.set(animated, { clearProps: 'all' });
@@ -645,7 +644,6 @@ export default function Landing() {
     gsap.set(arrows, { autoAlpha: 0, scale: 0.75 });
     gsap.set(statuses, { autoAlpha: 0, y: 14 });
     gsap.set(revenue, { autoAlpha: 0, y: 16 });
-    gsap.set(dashboard, { autoAlpha: 0, y: 28 });
 
     const timeline = gsap.timeline({ defaults: { ease: 'power2.out' } });
     timeline
@@ -655,8 +653,7 @@ export default function Landing() {
       .to(lines, { scaleX: 1, duration: 0.72, stagger: 0.08 }, 0.34)
       .to(arrows, { autoAlpha: 1, scale: 1, duration: 0.26, stagger: 0.08 }, 0.7)
       .to(statuses, { autoAlpha: 1, y: 0, duration: 0.36, stagger: 0.12 }, 0.88)
-      .to(revenue, { autoAlpha: 1, y: 0, duration: 0.44 }, 1.28)
-      .to(dashboard, { autoAlpha: 1, y: 0, duration: 0.62 }, 1.42);
+      .to(revenue, { autoAlpha: 1, y: 0, duration: 0.44 }, 1.28);
 
     return () => timeline.kill();
   }, { scope: heroRailRef });
@@ -904,46 +901,6 @@ export default function Landing() {
                   PayGate fee
                 </span>
               </div>
-            </div>
-
-            <div className="paygate-dashboard-preview" data-dashboard-preview aria-hidden="true">
-              <aside>
-                <div className="paygate-preview-brand">
-                  <img src="/brand/paygate-mark.svg" alt="" />
-                  <strong>PayGate</strong>
-                </div>
-                <div className="paygate-preview-nav is-active">
-                  <LayoutDashboard size={15} />
-                  Dashboard
-                </div>
-                <div className="paygate-preview-nav">
-                  <Database size={15} />
-                  APIs
-                </div>
-              </aside>
-              <main>
-                <div className="paygate-preview-head">
-                  <strong>Overview</strong>
-                  <div>
-                    <span><CalendarDays size={14} /> May 15 - Jun 15, 2026</span>
-                    <span className="is-selected">30D</span>
-                  </div>
-                </div>
-                <div className="paygate-preview-metrics">
-                  {[
-                    ['Total Calls', '12.4k'],
-                    ['Gross Revenue', '$124.00'],
-                    ['Developer Revenue', '$111.60'],
-                    ['Withdrawable', '$84.20'],
-                  ].map(([label, value]) => (
-                    <div key={label}>
-                      <span>{label}</span>
-                      <strong>{value}</strong>
-                      <small><Activity size={12} /> live revenue</small>
-                    </div>
-                  ))}
-                </div>
-              </main>
             </div>
           </div>
         </div>
