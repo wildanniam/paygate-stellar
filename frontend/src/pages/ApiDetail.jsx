@@ -143,7 +143,7 @@ export default function ApiDetail() {
     <div className="pg-app">
       <AppNavbar />
       <main className="pg-app-main">
-        <header className="pg-app-header">
+        <header className="pg-app-header" data-density="compact">
           <div>
             <p className="pg-app-eyebrow">
               Endpoint control
@@ -152,7 +152,7 @@ export default function ApiDetail() {
               {api?.name || 'Registered API'}
             </h1>
             <p>
-              Inspect the paid proxy URL, upstream guard, setup status, and operating controls for this endpoint.
+              Manage the proxy URL, upstream guard, setup status, and controls for this paid endpoint.
             </p>
           </div>
           <div className="pg-app-actions">
@@ -172,7 +172,7 @@ export default function ApiDetail() {
         {sessionStatus !== 'loading' && !session.authenticated && (
           <WalletLoginPanel
             title="Connect wallet to view this API"
-            body="API detail is scoped to the owner wallet. Connect Freighter and sign the challenge before PayGate shows proxy URLs, secrets, and active controls."
+            body="Connect Freighter so PayGate can show endpoint controls owned by your wallet."
             onConnected={(nextSession) => {
               setSession(nextSession);
               loadApi();

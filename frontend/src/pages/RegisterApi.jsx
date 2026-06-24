@@ -117,16 +117,16 @@ export default function RegisterApi() {
     <div className="pg-app">
       <AppNavbar />
       <main className="pg-app-main">
-        <header className="pg-app-header">
+        <header className="pg-app-header" data-density="compact">
           <div>
             <p className="pg-app-eyebrow">
-              Create paid endpoint
+              New paid endpoint
             </p>
             <h1>
-              Paste your API URL. Charge per call.
+              Create a paid endpoint.
             </h1>
             <p>
-              PayGate creates a paid proxy endpoint, gives you an upstream secret, and tracks revenue from successful calls.
+              Add your upstream URL, set a USDC price, and PayGate returns a proxy URL with upstream guard setup.
             </p>
           </div>
         </header>
@@ -141,7 +141,7 @@ export default function RegisterApi() {
         {sessionStatus !== 'loading' && !session.authenticated && (
           <WalletLoginPanel
             title="Connect wallet to create paid endpoints"
-            body="API ownership and payout wallet come from your Freighter session. Sign the PayGate challenge before creating a paid proxy."
+            body="Connect Freighter to prove ownership and choose the payout wallet for new paid endpoints."
             onConnected={setSession}
           />
         )}
@@ -151,8 +151,8 @@ export default function RegisterApi() {
             <form onSubmit={handleSubmit} className="pg-create-form">
               <div className="pg-create-form-header">
                 <div>
-                  <h2>Source API</h2>
-                  <p>Use your own upstream API, or load demo values to try the full paid-call flow.</p>
+                  <h2>Upstream API</h2>
+                  <p>Use your own upstream API, or load demo values to test the paid-call flow.</p>
                 </div>
                 <Button type="button" variant="secondary" size="sm" onClick={fillDemoApi} icon={<Database size={15} aria-hidden="true" />}>
                   Fill demo API
@@ -162,7 +162,7 @@ export default function RegisterApi() {
               <div className="pg-create-step-list" aria-label="Paid endpoint creation steps">
                 <div><span>1</span> Paste upstream URL</div>
                 <div><span>2</span> Set per-call price</div>
-                <div><span>3</span> Generate proxy</div>
+                <div><span>3</span> Create proxy URL</div>
               </div>
 
               <Field label="Endpoint name" hint="A readable name for your dashboard.">
@@ -174,7 +174,7 @@ export default function RegisterApi() {
                   <Input className="pg-mono-input" value={form.upstreamBaseUrl} onChange={update('upstreamBaseUrl')} placeholder="https://api.yourservice.com" required />
                 </Field>
 
-                <Field label="GET path" hint="The endpoint path PayGate should monetize.">
+                <Field label="Endpoint path" hint="Path on your upstream API that PayGate should monetize.">
                   <Input className="pg-mono-input" value={form.path} onChange={update('path')} placeholder="/v1/data" required />
                 </Field>
               </div>
