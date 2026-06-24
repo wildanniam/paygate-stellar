@@ -655,8 +655,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(var(--pg-brand-purple-rgb), 0.06), transparent 34%),
-    linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.035), transparent);
+    linear-gradient(180deg, rgba(var(--pg-brand-purple-rgb), 0.035), transparent 32%),
+    linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.018), transparent);
 }
 
 .paygate-hero-inner {
@@ -726,9 +726,9 @@
   border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(17, 23, 34, 0.88), rgba(8, 10, 15, 0.94)),
-    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.11), transparent 46%);
+    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.065), transparent 46%);
   box-shadow:
-    0 22px 80px rgba(0, 0, 0, 0.36),
+    0 20px 66px rgba(0, 0, 0, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   padding: 28px;
   text-align: left;
@@ -828,7 +828,7 @@
   height: 9px;
   border-radius: 999px;
   background: var(--pg-flow-blue);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.44);
 }
 
 .paygate-hero-path i:nth-child(2) {
@@ -838,7 +838,7 @@
 .paygate-hero-path i:nth-child(3) {
   left: 50%;
   background: var(--pg-brand-purple-soft);
-  box-shadow: 0 0 18px rgba(var(--pg-brand-purple-soft-rgb), 0.8);
+  box-shadow: 0 0 14px rgba(var(--pg-brand-purple-soft-rgb), 0.44);
 }
 
 .paygate-hero-path i:nth-child(4) {
@@ -1627,10 +1627,10 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 52% 0%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 42%),
-    linear-gradient(90deg, transparent 0 12%, rgba(96, 165, 250, 0.045) 12.2%, transparent 12.5% 87%, rgba(96, 165, 250, 0.035) 87.2%, transparent 87.5%),
-    repeating-linear-gradient(12deg, transparent 0 58px, rgba(135, 146, 166, 0.028) 59px, transparent 61px);
-  opacity: 0.68;
+    radial-gradient(ellipse at 52% 0%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 42%),
+    linear-gradient(90deg, transparent 0 12%, rgba(96, 165, 250, 0.022) 12.2%, transparent 12.5% 87%, rgba(96, 165, 250, 0.018) 87.2%, transparent 87.5%),
+    repeating-linear-gradient(12deg, transparent 0 58px, rgba(135, 146, 166, 0.018) 59px, transparent 61px);
+  opacity: 0.58;
 }
 
 .paygate-proof-section::after {
@@ -1643,8 +1643,8 @@
   pointer-events: none;
   background: linear-gradient(90deg, transparent, rgba(135, 146, 166, 0.20), transparent);
   box-shadow:
-    -980px 84px 0 rgba(96, 165, 250, 0.055),
-    -760px -120px 0 rgba(var(--pg-brand-purple-rgb), 0.065);
+    -980px 84px 0 rgba(96, 165, 250, 0.030),
+    -760px -120px 0 rgba(var(--pg-brand-purple-rgb), 0.030);
 }
 
 .paygate-proof-inner {
@@ -1785,9 +1785,9 @@
   border: 1px solid rgba(82, 94, 118, 0.36);
   background:
     linear-gradient(180deg, rgba(8, 10, 15, 0.96), rgba(5, 7, 11, 0.98)),
-    radial-gradient(circle at 82% 12%, rgba(var(--pg-brand-purple-rgb), 0.032), transparent 38%);
+    radial-gradient(circle at 82% 12%, rgba(var(--pg-brand-purple-rgb), 0.018), transparent 38%);
   box-shadow:
-    0 24px 86px rgba(0, 0, 0, 0.42),
+    0 22px 68px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.035);
   transition:
     border-color 180ms ease,
@@ -1812,8 +1812,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent, rgba(var(--pg-brand-purple-rgb), 0.12), transparent),
-    radial-gradient(circle at 100% 70%, rgba(var(--pg-brand-purple-rgb), 0.12), transparent 24%);
+    linear-gradient(90deg, transparent, rgba(var(--pg-brand-purple-rgb), 0.07), transparent),
+    radial-gradient(circle at 100% 70%, rgba(var(--pg-brand-purple-rgb), 0.07), transparent 24%);
   opacity: 0;
   transform: translateY(0);
   transition: opacity 220ms ease;
@@ -1821,11 +1821,11 @@
 
 .paygate-proof-section[data-proof-visible='true'] .paygate-receipt-panel::before,
 .paygate-receipt-panel:hover::before {
-  opacity: 0.20;
+  opacity: 0.14;
 }
 
 .paygate-receipt-panel:hover::before {
-  opacity: 0.28;
+  opacity: 0.20;
 }
 
 .paygate-receipt-head {
@@ -2445,7 +2445,7 @@
   scroll-margin-top: 76px;
   padding: clamp(74px, 7vw, 104px) 24px clamp(84px, 7.4vw, 112px);
   background:
-    radial-gradient(ellipse at 50% 8%, rgba(var(--pg-brand-purple-rgb), 0.09), transparent 42%),
+    radial-gradient(ellipse at 50% 8%, rgba(var(--pg-brand-purple-rgb), 0.040), transparent 42%),
     linear-gradient(180deg, rgba(4, 6, 10, 0.995), rgba(5, 6, 9, 0.99));
 }
 
@@ -2457,9 +2457,9 @@
   background:
     linear-gradient(90deg, rgba(82, 94, 118, 0.024) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px),
-    radial-gradient(ellipse at 50% 58%, rgba(56, 189, 248, 0.042), transparent 52%);
+    radial-gradient(ellipse at 50% 58%, rgba(56, 189, 248, 0.022), transparent 52%);
   background-size: 74px 74px, 74px 74px, auto;
-  opacity: 0.72;
+  opacity: 0.58;
 }
 
 .paygate-ops-inner {
@@ -2513,10 +2513,10 @@
   border: 1px solid rgba(82, 94, 118, 0.42);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.07), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.032), transparent 32%),
     linear-gradient(180deg, rgba(9, 13, 20, 0.95), rgba(4, 6, 10, 0.985));
   box-shadow:
-    0 34px 110px rgba(0, 0, 0, 0.50),
+    0 30px 92px rgba(0, 0, 0, 0.46),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
@@ -2540,7 +2540,7 @@
 .paygate-ops-brand img {
   width: 38px;
   height: 38px;
-  filter: drop-shadow(0 0 20px rgba(var(--pg-brand-purple-rgb), 0.28));
+  filter: drop-shadow(0 0 14px rgba(var(--pg-brand-purple-rgb), 0.18));
 }
 
 .paygate-ops-nav {
@@ -2563,7 +2563,7 @@
 
 .paygate-ops-nav span.is-active {
   background:
-    linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0.24), rgba(var(--pg-brand-purple-rgb), 0.12));
+    linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0.18), rgba(var(--pg-brand-purple-rgb), 0.075));
   color: var(--pg-text-primary);
 }
 
@@ -2959,7 +2959,7 @@
   scroll-margin-top: 76px;
   padding: clamp(44px, 4vw, 58px) 24px clamp(58px, 5.2vw, 76px);
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.08), transparent 42%),
+    radial-gradient(ellipse at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.035), transparent 42%),
     linear-gradient(180deg, rgba(5, 6, 9, 0.99), rgba(4, 6, 10, 0.995));
 }
 
@@ -2971,9 +2971,9 @@
   background:
     linear-gradient(90deg, rgba(82, 94, 118, 0.024) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px),
-    radial-gradient(ellipse at 67% 58%, rgba(var(--pg-brand-purple-rgb), 0.12), transparent 42%);
+    radial-gradient(ellipse at 67% 58%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 42%);
   background-size: 68px 68px, 68px 68px, auto;
-  opacity: 0.78;
+  opacity: 0.62;
 }
 
 .paygate-audience-inner {
@@ -3118,12 +3118,12 @@
   border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.60);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.25), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.16), transparent 42%),
     linear-gradient(180deg, rgba(13, 17, 27, 0.94), rgba(7, 9, 15, 0.98));
   box-shadow:
-    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.12),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.09),
     0 34px 96px rgba(0, 0, 0, 0.44),
-    0 0 46px rgba(var(--pg-brand-purple-rgb), 0.16),
+    0 0 34px rgba(var(--pg-brand-purple-rgb), 0.10),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   padding: clamp(34px, 3.8vw, 48px);
 }
@@ -3140,7 +3140,7 @@
 .paygate-audience-cta-brand img {
   width: 54px;
   height: 54px;
-  filter: drop-shadow(0 0 26px rgba(var(--pg-brand-purple-rgb), 0.34));
+  filter: drop-shadow(0 0 18px rgba(var(--pg-brand-purple-rgb), 0.22));
 }
 
 .paygate-audience-cta h3 {
@@ -3262,7 +3262,7 @@
   padding: clamp(42px, 4.3vw, 58px) 24px clamp(58px, 5.5vw, 78px);
   background:
     linear-gradient(180deg, rgba(5, 6, 9, 0.99), rgba(4, 6, 10, 0.995)),
-    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 42%);
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 42%);
 }
 
 .paygate-transform-section::before {
@@ -3271,12 +3271,12 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 46%, rgba(96, 165, 250, 0.075), transparent 32%),
-    radial-gradient(ellipse at 71% 52%, rgba(var(--pg-brand-purple-rgb), 0.15), transparent 25%),
+    radial-gradient(ellipse at 50% 46%, rgba(96, 165, 250, 0.040), transparent 32%),
+    radial-gradient(ellipse at 71% 52%, rgba(var(--pg-brand-purple-rgb), 0.070), transparent 25%),
     linear-gradient(90deg, rgba(82, 94, 118, 0.028) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px);
   background-size: auto, auto, 76px 76px, 76px 76px;
-  opacity: 0.86;
+  opacity: 0.68;
 }
 
 .paygate-transform-section::after {
@@ -3351,7 +3351,7 @@
   pointer-events: none;
   background: radial-gradient(circle, rgba(96, 165, 250, 0.11) 1px, transparent 1.7px);
   background-size: 12px 12px;
-  opacity: 0.34;
+  opacity: 0.24;
   mask-image: radial-gradient(ellipse at center, #000 0 58%, transparent 78%);
 }
 
@@ -3365,11 +3365,11 @@
   height: 2px;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(56, 189, 248, 0), rgba(56, 189, 248, 0.54) 38%, rgba(var(--pg-brand-purple-soft-rgb), 0.64), rgba(var(--pg-brand-purple-rgb), 0));
+    linear-gradient(90deg, rgba(56, 189, 248, 0), rgba(56, 189, 248, 0.38) 38%, rgba(var(--pg-brand-purple-soft-rgb), 0.42), rgba(var(--pg-brand-purple-rgb), 0));
   box-shadow:
-    0 0 24px rgba(56, 189, 248, 0.24),
-    0 0 34px rgba(var(--pg-brand-purple-rgb), 0.22);
-  opacity: 0.44;
+    0 0 18px rgba(56, 189, 248, 0.16),
+    0 0 24px rgba(var(--pg-brand-purple-rgb), 0.12);
+  opacity: 0.34;
   transform: translateY(-50%) scaleX(0.86);
   transform-origin: right center;
   transition:
@@ -3392,11 +3392,11 @@
   height: 2px;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0), rgba(var(--pg-brand-purple-soft-rgb), 0.80) 22%, rgba(56, 189, 248, 0.96) 52%, rgba(var(--pg-brand-purple-soft-rgb), 0.68) 76%, rgba(56, 189, 248, 0));
+    linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0), rgba(var(--pg-brand-purple-soft-rgb), 0.52) 22%, rgba(56, 189, 248, 0.66) 52%, rgba(var(--pg-brand-purple-soft-rgb), 0.42) 76%, rgba(56, 189, 248, 0));
   box-shadow:
-    0 0 18px rgba(var(--pg-brand-purple-rgb), 0.28),
-    0 0 30px rgba(56, 189, 248, 0.18);
-  opacity: 0.42;
+    0 0 14px rgba(var(--pg-brand-purple-rgb), 0.16),
+    0 0 22px rgba(56, 189, 248, 0.12);
+  opacity: 0.34;
   transform: translateY(-50%) scaleX(0.82);
   transform-origin: left center;
   transition:
@@ -3410,9 +3410,9 @@
   content: '';
   position: absolute;
   inset: -18px -22px;
-  background: linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0), rgba(var(--pg-brand-purple-rgb), 0.16), rgba(56, 189, 248, 0.18), rgba(74, 222, 128, 0));
+  background: linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0), rgba(var(--pg-brand-purple-rgb), 0.09), rgba(56, 189, 248, 0.10), rgba(74, 222, 128, 0));
   filter: blur(12px);
-  opacity: 0.45;
+  opacity: 0.34;
   transition: opacity 220ms ease;
 }
 
@@ -3482,9 +3482,9 @@
   border-radius: 12px;
   background:
     linear-gradient(180deg, rgba(10, 14, 22, 0.94), rgba(4, 6, 10, 0.96)),
-    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.18), transparent 70%);
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 70%);
   box-shadow:
-    0 18px 44px rgba(0, 0, 0, 0.38),
+    0 16px 38px rgba(0, 0, 0, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
   opacity: 0.62;
   color: var(--pg-brand-purple-soft);
@@ -3565,9 +3565,9 @@
   border-radius: 20px;
   background:
     linear-gradient(180deg, rgba(8, 11, 17, 0.97), rgba(4, 6, 10, 0.99)),
-    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 42%);
+    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.026), transparent 42%);
   box-shadow:
-    0 28px 84px rgba(0, 0, 0, 0.46),
+    0 24px 72px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
   padding: clamp(20px, 2vw, 26px);
   transition:
@@ -3606,10 +3606,10 @@
 .paygate-transform-panel.is-action::before {
   inset: 42% 8% 20% 8%;
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(var(--pg-brand-purple-rgb), 0.16), transparent 62%),
-    radial-gradient(ellipse at 58% 55%, rgba(56, 189, 248, 0.08), transparent 48%);
+    radial-gradient(ellipse at 50% 50%, rgba(var(--pg-brand-purple-rgb), 0.09), transparent 62%),
+    radial-gradient(ellipse at 58% 55%, rgba(56, 189, 248, 0.045), transparent 48%);
   filter: blur(16px);
-  opacity: 0.76;
+  opacity: 0.60;
 }
 
 .paygate-transform-panel.is-after {
@@ -4319,7 +4319,7 @@
   scroll-margin-top: 76px;
   padding: clamp(76px, 6.5vw, 112px) 24px clamp(78px, 6vw, 104px);
   background:
-    radial-gradient(ellipse at 50% 22%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 42%),
+    radial-gradient(ellipse at 50% 22%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 42%),
     linear-gradient(180deg, rgba(4, 6, 10, 0.995), rgba(5, 6, 9, 0.99));
 }
 
@@ -4331,9 +4331,9 @@
   background:
     linear-gradient(90deg, rgba(82, 94, 118, 0.022) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.018) 1px, transparent 1px),
-    radial-gradient(ellipse at 50% 50%, rgba(56, 189, 248, 0.055), transparent 46%);
+    radial-gradient(ellipse at 50% 50%, rgba(56, 189, 248, 0.030), transparent 46%);
   background-size: 66px 66px, 66px 66px, auto;
-  opacity: 0.78;
+  opacity: 0.62;
 }
 
 .paygate-protected-section::after {
@@ -4343,6 +4343,7 @@
   height: 1px;
   pointer-events: none;
   background: linear-gradient(90deg, transparent, rgba(var(--pg-brand-purple-soft-rgb), 0.22), transparent);
+  opacity: 0.64;
 }
 
 .paygate-protected-inner {
@@ -4425,10 +4426,10 @@
   border: 1px solid rgba(82, 94, 118, 0.42);
   border-radius: 22px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.065), transparent 48%),
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.032), transparent 48%),
     linear-gradient(180deg, rgba(9, 13, 20, 0.96), rgba(4, 6, 10, 0.985));
   box-shadow:
-    0 30px 92px rgba(0, 0, 0, 0.46),
+    0 26px 78px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
   padding: clamp(20px, 2.05vw, 26px);
   transition:
@@ -4572,13 +4573,13 @@
   min-height: 386px;
   border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.70);
   background:
-    radial-gradient(circle at 50% -16%, rgba(var(--pg-brand-purple-soft-rgb), 0.22), transparent 40%),
-    radial-gradient(ellipse at 50% 74%, rgba(var(--pg-brand-purple-rgb), 0.08), transparent 60%),
+    radial-gradient(circle at 50% -16%, rgba(var(--pg-brand-purple-soft-rgb), 0.15), transparent 40%),
+    radial-gradient(ellipse at 50% 74%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 60%),
     linear-gradient(180deg, rgba(10, 13, 20, 0.985), rgba(5, 7, 12, 0.995));
   box-shadow:
-    0 34px 112px rgba(0, 0, 0, 0.58),
-    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.24),
-    0 0 54px rgba(var(--pg-brand-purple-rgb), 0.22),
+    0 32px 100px rgba(0, 0, 0, 0.54),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.16),
+    0 0 38px rgba(var(--pg-brand-purple-rgb), 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.065);
   text-align: center;
 }
@@ -4587,7 +4588,7 @@
   width: 54px;
   height: 54px;
   margin: 0 auto 15px;
-  filter: drop-shadow(0 0 24px rgba(var(--pg-brand-purple-rgb), 0.34));
+  filter: drop-shadow(0 0 18px rgba(var(--pg-brand-purple-rgb), 0.24));
 }
 
 .paygate-protected-card.is-guard h3 {
@@ -4823,7 +4824,7 @@
     linear-gradient(180deg, color-mix(in srgb, currentColor 15%, transparent), rgba(8, 11, 17, 0.92));
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.34),
-    0 0 18px color-mix(in srgb, currentColor 16%, transparent),
+    0 0 14px color-mix(in srgb, currentColor 10%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
   font-family: var(--pg-font-sans);
   font-size: 13.5px;
@@ -4889,8 +4890,8 @@
   background: linear-gradient(90deg, rgba(74, 222, 128, 0.12), #4ADE80 42%, rgba(56, 189, 248, 0.82), rgba(74, 222, 128, 0.12));
   opacity: 0.82;
   box-shadow:
-    0 0 20px rgba(74, 222, 128, 0.26),
-    0 0 30px rgba(56, 189, 248, 0.16);
+    0 0 16px rgba(74, 222, 128, 0.18),
+    0 0 24px rgba(56, 189, 248, 0.10);
 }
 
 .paygate-protected-branch.is-paid-left::after,
