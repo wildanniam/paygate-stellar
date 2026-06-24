@@ -1585,7 +1585,7 @@ export default function Landing() {
               <div className="paygate-audience-url-flow">
                 <span>From API URL</span>
                 <div>
-                  <code><Link2 size={18} aria-hidden="true" /> <span>https://api.company.com/v1/signal</span></code>
+                  <code><Link2 size={18} aria-hidden="true" /> <span>api.company.com/signal</span></code>
                   <ArrowRight size={18} aria-hidden="true" />
                   <strong><CheckCircle2 size={18} aria-hidden="true" /> paid endpoint ready</strong>
                 </div>

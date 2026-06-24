@@ -17,9 +17,9 @@ export const PALETTE = {
   },
   text: {
     primary: '#F7F8FB',
-    secondary: '#A5ADBD',
-    muted: '#8792A6',
-    faint: '#68758A',
+    secondary: '#B5BDCC',
+    muted: '#9AA5B8',
+    faint: '#7A879B',
   },
   brand: {
     purple: '#735CFA',

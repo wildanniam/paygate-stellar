@@ -1627,7 +1627,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 52% 0%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 42%),
+    radial-gradient(ellipse at 52% 0%, rgba(82, 94, 118, 0.035), transparent 42%),
     linear-gradient(90deg, transparent 0 12%, rgba(96, 165, 250, 0.022) 12.2%, transparent 12.5% 87%, rgba(96, 165, 250, 0.018) 87.2%, transparent 87.5%),
     repeating-linear-gradient(12deg, transparent 0 58px, rgba(135, 146, 166, 0.018) 59px, transparent 61px);
   opacity: 0.58;
@@ -1644,7 +1644,7 @@
   background: linear-gradient(90deg, transparent, rgba(135, 146, 166, 0.20), transparent);
   box-shadow:
     -980px 84px 0 rgba(96, 165, 250, 0.030),
-    -760px -120px 0 rgba(var(--pg-brand-purple-rgb), 0.030);
+    -760px -120px 0 rgba(82, 94, 118, 0.030);
 }
 
 .paygate-proof-inner {
@@ -1785,7 +1785,7 @@
   border: 1px solid rgba(82, 94, 118, 0.36);
   background:
     linear-gradient(180deg, rgba(8, 10, 15, 0.96), rgba(5, 7, 11, 0.98)),
-    radial-gradient(circle at 82% 12%, rgba(var(--pg-brand-purple-rgb), 0.018), transparent 38%);
+    radial-gradient(circle at 82% 12%, rgba(82, 94, 118, 0.018), transparent 38%);
   box-shadow:
     0 22px 68px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.035);
@@ -2445,7 +2445,7 @@
   scroll-margin-top: 76px;
   padding: clamp(74px, 7vw, 104px) 24px clamp(84px, 7.4vw, 112px);
   background:
-    radial-gradient(ellipse at 50% 8%, rgba(var(--pg-brand-purple-rgb), 0.040), transparent 42%),
+    radial-gradient(ellipse at 50% 8%, rgba(82, 94, 118, 0.034), transparent 42%),
     linear-gradient(180deg, rgba(4, 6, 10, 0.995), rgba(5, 6, 9, 0.99));
 }
 
@@ -2513,7 +2513,7 @@
   border: 1px solid rgba(82, 94, 118, 0.42);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.032), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(82, 94, 118, 0.030), transparent 32%),
     linear-gradient(180deg, rgba(9, 13, 20, 0.95), rgba(4, 6, 10, 0.985));
   box-shadow:
     0 30px 92px rgba(0, 0, 0, 0.46),
@@ -2959,7 +2959,7 @@
   scroll-margin-top: 76px;
   padding: clamp(44px, 4vw, 58px) 24px clamp(58px, 5.2vw, 76px);
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.035), transparent 42%),
+    radial-gradient(ellipse at 50% 0%, rgba(82, 94, 118, 0.030), transparent 42%),
     linear-gradient(180deg, rgba(5, 6, 9, 0.99), rgba(4, 6, 10, 0.995));
 }
 
@@ -2971,7 +2971,7 @@
   background:
     linear-gradient(90deg, rgba(82, 94, 118, 0.024) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px),
-    radial-gradient(ellipse at 67% 58%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 42%);
+    radial-gradient(ellipse at 67% 58%, rgba(82, 94, 118, 0.045), transparent 42%);
   background-size: 68px 68px, 68px 68px, auto;
   opacity: 0.62;
 }
@@ -3041,7 +3041,7 @@
   border: 1px solid rgba(82, 94, 118, 0.34);
   border-radius: 14px;
   background:
-    radial-gradient(circle at 0% 50%, rgba(56, 189, 248, 0.04), transparent 34%),
+    radial-gradient(circle at 0% 50%, rgba(82, 94, 118, 0.045), transparent 34%),
     linear-gradient(180deg, rgba(10, 14, 22, 0.83), rgba(5, 7, 12, 0.92));
   padding: 16px 22px;
   box-shadow:
@@ -3204,7 +3204,7 @@
 }
 
 .paygate-audience-url-flow code {
-  flex: 1 1 auto;
+  flex: 1 1 58%;
   gap: 10px;
   overflow: hidden;
   color: var(--pg-text-primary);
@@ -3213,6 +3213,7 @@
 }
 
 .paygate-audience-url-flow code span {
+  display: block;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3220,7 +3221,8 @@
 }
 
 .paygate-audience-url-flow strong {
-  flex: 0 0 auto;
+  flex: 0 1 180px;
+  min-width: 0;
   gap: 9px;
   border-color: rgba(34, 197, 94, 0.30);
   background: rgba(34, 197, 94, 0.10);
@@ -3262,7 +3264,7 @@
   padding: clamp(42px, 4.3vw, 58px) 24px clamp(58px, 5.5vw, 78px);
   background:
     linear-gradient(180deg, rgba(5, 6, 9, 0.99), rgba(4, 6, 10, 0.995)),
-    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 42%);
+    radial-gradient(circle at 50% 0%, rgba(82, 94, 118, 0.035), transparent 42%);
 }
 
 .paygate-transform-section::before {
@@ -3272,7 +3274,7 @@
   pointer-events: none;
   background:
     radial-gradient(ellipse at 50% 46%, rgba(96, 165, 250, 0.040), transparent 32%),
-    radial-gradient(ellipse at 71% 52%, rgba(var(--pg-brand-purple-rgb), 0.070), transparent 25%),
+    radial-gradient(ellipse at 71% 52%, rgba(82, 94, 118, 0.055), transparent 25%),
     linear-gradient(90deg, rgba(82, 94, 118, 0.028) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px);
   background-size: auto, auto, 76px 76px, 76px 76px;
@@ -3565,7 +3567,7 @@
   border-radius: 20px;
   background:
     linear-gradient(180deg, rgba(8, 11, 17, 0.97), rgba(4, 6, 10, 0.99)),
-    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.026), transparent 42%);
+    radial-gradient(circle at 80% 0%, rgba(82, 94, 118, 0.024), transparent 42%);
   box-shadow:
     0 24px 72px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
@@ -3606,7 +3608,7 @@
 .paygate-transform-panel.is-action::before {
   inset: 42% 8% 20% 8%;
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(var(--pg-brand-purple-rgb), 0.09), transparent 62%),
+    radial-gradient(ellipse at 50% 50%, rgba(82, 94, 118, 0.075), transparent 62%),
     radial-gradient(ellipse at 58% 55%, rgba(56, 189, 248, 0.045), transparent 48%);
   filter: blur(16px);
   opacity: 0.60;
@@ -3814,9 +3816,9 @@
   margin: 0 0 14px;
   color: var(--pg-text-muted);
   font-family: var(--pg-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -4096,7 +4098,7 @@
 
 .paygate-transform-live small {
   color: var(--pg-text-muted);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -4319,7 +4321,7 @@
   scroll-margin-top: 76px;
   padding: clamp(76px, 6.5vw, 112px) 24px clamp(78px, 6vw, 104px);
   background:
-    radial-gradient(ellipse at 50% 22%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 42%),
+    radial-gradient(ellipse at 50% 22%, rgba(82, 94, 118, 0.035), transparent 42%),
     linear-gradient(180deg, rgba(4, 6, 10, 0.995), rgba(5, 6, 9, 0.99));
 }
 
@@ -4426,7 +4428,7 @@
   border: 1px solid rgba(82, 94, 118, 0.42);
   border-radius: 22px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.032), transparent 48%),
+    radial-gradient(circle at 50% 0%, rgba(82, 94, 118, 0.030), transparent 48%),
     linear-gradient(180deg, rgba(9, 13, 20, 0.96), rgba(4, 6, 10, 0.985));
   box-shadow:
     0 26px 78px rgba(0, 0, 0, 0.42),
@@ -4540,9 +4542,9 @@
   margin: 0 0 14px;
   color: var(--pg-text-muted);
   font-family: var(--pg-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 850;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.075em;
   text-transform: uppercase;
 }
 
@@ -4573,8 +4575,8 @@
   min-height: 386px;
   border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.70);
   background:
-    radial-gradient(circle at 50% -16%, rgba(var(--pg-brand-purple-soft-rgb), 0.15), transparent 40%),
-    radial-gradient(ellipse at 50% 74%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 60%),
+    radial-gradient(circle at 50% -16%, rgba(var(--pg-brand-purple-soft-rgb), 0.10), transparent 40%),
+    radial-gradient(ellipse at 50% 74%, rgba(82, 94, 118, 0.038), transparent 60%),
     linear-gradient(180deg, rgba(10, 13, 20, 0.985), rgba(5, 7, 12, 0.995));
   box-shadow:
     0 32px 100px rgba(0, 0, 0, 0.54),
@@ -4606,7 +4608,7 @@
   background: rgba(var(--pg-brand-purple-rgb), 0.17);
   color: var(--pg-brand-purple-soft);
   font-family: var(--pg-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 850;
   letter-spacing: 0.07em;
   padding: 0 13px;
@@ -5448,7 +5450,7 @@
   }
 
   .paygate-protected-head p:first-child {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .paygate-protected-head h2 {
@@ -5507,7 +5509,7 @@
 
   .paygate-protected-card.is-client p,
   .paygate-protected-code-label {
-    font-size: 10px;
+    font-size: 11.5px;
   }
 
   .paygate-protected-client-chips {
@@ -5525,7 +5527,7 @@
   }
 
   .paygate-protected-branch > span {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .paygate-protected-branch strong {
@@ -5536,7 +5538,7 @@
 
   .paygate-protected-gate-label {
     min-height: 26px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .paygate-protected-guard-list {
@@ -5615,7 +5617,7 @@
   }
 
   .paygate-ops-head p:first-child {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .paygate-ops-head h2 {
@@ -5788,7 +5790,7 @@
   }
 
   .paygate-audience-head p:first-child {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .paygate-audience-head h2 {
@@ -6442,7 +6444,7 @@
 
   .paygate-transform-head p:first-child {
     margin-bottom: 10px;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .paygate-transform-head h2 {
