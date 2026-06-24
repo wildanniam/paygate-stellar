@@ -13,7 +13,7 @@ export const PALETTE = {
   border: {
     subtle: '#222A38',
     strong: '#344055',
-    focus: '#7C3AED',
+    focus: '#7C63FF',
   },
   text: {
     primary: '#F7F8FB',
@@ -22,10 +22,14 @@ export const PALETTE = {
     faint: '#68758A',
   },
   brand: {
-    purple: '#7C3AED',
-    purpleSoft: '#A78BFA',
-    purpleDim: 'rgba(124,58,237,0.12)',
-    purpleGlow: 'rgba(124,58,237,0.14)',
+    purple: '#735CFA',
+    purpleHover: '#7C63FF',
+    purpleSoft: '#9A90FF',
+    purpleTop: '#8F83FF',
+    purpleDeep: '#4B44AA',
+    purpleShadow: '#4942AA',
+    purpleDim: 'rgba(115,92,250,0.12)',
+    purpleGlow: 'rgba(124,114,254,0.16)',
   },
   flow: {
     blue: '#38BDF8',
@@ -54,7 +58,7 @@ export const RADIUS = {
 };
 
 export const SHADOW = {
-  focus: '0 0 0 3px rgba(124,58,237,0.24)',
+  focus: '0 0 0 3px rgba(124,99,255,0.24)',
   panel: '0 18px 60px rgba(0,0,0,0.28)',
   glow: '0 18px 48px rgba(0,0,0,0.34)',
 };

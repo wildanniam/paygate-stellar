@@ -123,11 +123,11 @@
 
 .pg-button[data-variant='primary'] {
   background:
-    linear-gradient(180deg, #8F83FF 0%, #735CFA 46%, #4B44AA 100%);
+    var(--pg-brand-gradient);
   border-color: rgba(255, 255, 255, 0.16);
   color: var(--pg-text-primary);
   box-shadow:
-    0 8px 24px rgba(73, 66, 170, 0.42),
+    0 8px 24px rgba(var(--pg-brand-purple-shadow-rgb), 0.42),
     inset 0 -2px 6px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
@@ -135,7 +135,7 @@
 .pg-button[data-variant='primary']::before {
   inset: -8px;
   background:
-    radial-gradient(120% 120% at 50% 118%, rgba(124, 114, 254, 0.28) 0%, rgba(124, 114, 254, 0) 62%);
+    radial-gradient(120% 120% at 50% 118%, rgba(var(--pg-brand-purple-glow-rgb), 0.28) 0%, rgba(var(--pg-brand-purple-glow-rgb), 0) 62%);
   filter: blur(7px);
   opacity: 1;
 }
@@ -150,9 +150,9 @@
 .pg-button[data-variant='primary']:hover:not(:disabled) {
   border-color: rgba(255, 255, 255, 0.24);
   background:
-    linear-gradient(180deg, #9A90FF 0%, #7C63FF 46%, #554BBC 100%);
+    var(--pg-brand-gradient-hover);
   box-shadow:
-    0 12px 28px rgba(73, 66, 170, 0.58),
+    0 12px 28px rgba(var(--pg-brand-purple-shadow-rgb), 0.58),
     inset 0 -2px 8px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
@@ -160,7 +160,7 @@
 .pg-button[data-variant='primary']:active:not(:disabled) {
   transform: translateY(0);
   box-shadow:
-    0 6px 18px rgba(73, 66, 170, 0.44),
+    0 6px 18px rgba(var(--pg-brand-purple-shadow-rgb), 0.44),
     inset 0 -1px 4px rgba(0, 0, 0, 0.40),
     inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
@@ -243,7 +243,7 @@
 
 .pg-badge[data-tone='brand'] {
   background: var(--pg-brand-purple-dim);
-  border-color: rgba(167, 139, 250, 0.24);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.24);
   color: var(--pg-brand-purple-soft);
 }
 
@@ -532,13 +532,13 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(167, 139, 250, 0.18);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.18);
   border-radius: 10px;
   background:
     radial-gradient(circle at 70% 72%, rgba(34, 211, 238, 0.14), transparent 38%),
-    rgba(124, 58, 237, 0.08);
+    rgba(var(--pg-brand-purple-rgb), 0.08);
   box-shadow:
-    0 0 28px rgba(124, 58, 237, 0.16),
+    0 0 28px rgba(var(--pg-brand-purple-rgb), 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
@@ -633,8 +633,8 @@
 
 .paygate-nav-icon:hover,
 .paygate-nav-icon[data-active='true'] {
-  border-color: rgba(167, 139, 250, 0.32);
-  background: rgba(124, 58, 237, 0.14);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.32);
+  background: rgba(var(--pg-brand-purple-rgb), 0.14);
   color: var(--pg-brand-purple-soft);
   transform: translateY(-1px);
 }
@@ -655,7 +655,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.06), transparent 34%),
+    linear-gradient(180deg, rgba(var(--pg-brand-purple-rgb), 0.06), transparent 34%),
     linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.035), transparent);
 }
 
@@ -773,8 +773,8 @@
 }
 
 .paygate-endpoint-card.is-paid {
-  border-color: rgba(124, 58, 237, 0.44);
-  background: rgba(124, 58, 237, 0.10);
+  border-color: rgba(var(--pg-brand-purple-rgb), 0.44);
+  background: rgba(var(--pg-brand-purple-rgb), 0.10);
 }
 
 .paygate-endpoint-card.is-paid code {
@@ -838,7 +838,7 @@
 .paygate-hero-path i:nth-child(3) {
   left: 50%;
   background: var(--pg-brand-purple-soft);
-  box-shadow: 0 0 18px rgba(167, 139, 250, 0.8);
+  box-shadow: 0 0 18px rgba(var(--pg-brand-purple-soft-rgb), 0.8);
 }
 
 .paygate-hero-path i:nth-child(4) {
@@ -1017,7 +1017,7 @@
 
 .paygate-flow-pill.is-proxy {
   grid-column: 5;
-  border-color: rgba(124, 58, 237, 0.48);
+  border-color: rgba(var(--pg-brand-purple-rgb), 0.48);
 }
 
 .paygate-flow-pill.is-source:hover,
@@ -1036,13 +1036,13 @@
 .paygate-flow-pill.is-proxy:hover,
 .paygate-flow-pill.is-proxy:focus-visible,
 .paygate-flow-stage[data-hero-active='proxy'] .paygate-flow-pill.is-proxy {
-  border-color: rgba(167, 139, 250, 0.82);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.82);
   background:
     linear-gradient(180deg, rgba(35, 29, 59, 0.96), rgba(16, 12, 28, 0.98)),
     rgba(13, 17, 23, 0.96);
   box-shadow:
     0 18px 54px rgba(0, 0, 0, 0.32),
-    0 10px 32px rgba(124, 58, 237, 0.12),
+    0 10px 32px rgba(var(--pg-brand-purple-rgb), 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.075);
 }
 
@@ -1082,8 +1082,8 @@
 
 .paygate-flow-pill.is-proxy:hover .paygate-flow-pill-icon,
 .paygate-flow-pill.is-proxy:focus-visible .paygate-flow-pill-icon {
-  border-color: rgba(167, 139, 250, 0.38);
-  background: rgba(124, 58, 237, 0.14);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.38);
+  background: rgba(var(--pg-brand-purple-rgb), 0.14);
   color: #C4B5FD;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
@@ -1273,7 +1273,7 @@
   position: absolute;
   inset: -30px;
   opacity: 0.34;
-  background-image: radial-gradient(circle, rgba(124, 58, 237, 0.44) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(var(--pg-brand-purple-rgb), 0.44) 1px, transparent 1px);
   background-size: 9px 9px;
   mask-image: radial-gradient(circle, black 0%, transparent 70%);
   transition:
@@ -1315,11 +1315,11 @@
 .paygate-node-wrap:hover .paygate-node-card,
 .paygate-node-wrap:focus-visible .paygate-node-card,
 .paygate-flow-stage[data-hero-active='node'] .paygate-node-card {
-  border-color: rgba(167, 139, 250, 0.74);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.74);
   box-shadow:
     0 20px 58px rgba(0, 0, 0, 0.40),
-    0 0 0 10px rgba(124, 58, 237, 0.08),
-    0 0 42px rgba(124, 58, 237, 0.26),
+    0 0 0 10px rgba(var(--pg-brand-purple-rgb), 0.08),
+    0 0 42px rgba(var(--pg-brand-purple-rgb), 0.26),
     inset 0 0 0 1px rgba(255, 255, 255, 0.07);
   transform: translateY(-3px);
 }
@@ -1337,7 +1337,7 @@
     box-shadow:
       0 18px 52px rgba(0, 0, 0, 0.36),
       0 0 0 10px rgba(96, 114, 145, 0.08),
-      0 0 34px rgba(124, 58, 237, 0.18),
+      0 0 34px rgba(var(--pg-brand-purple-rgb), 0.18),
       inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   }
 }
@@ -1627,7 +1627,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 52% 0%, rgba(124, 58, 237, 0.10), transparent 42%),
+    radial-gradient(ellipse at 52% 0%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 42%),
     linear-gradient(90deg, transparent 0 12%, rgba(96, 165, 250, 0.045) 12.2%, transparent 12.5% 87%, rgba(96, 165, 250, 0.035) 87.2%, transparent 87.5%),
     repeating-linear-gradient(12deg, transparent 0 58px, rgba(135, 146, 166, 0.028) 59px, transparent 61px);
   opacity: 0.68;
@@ -1644,7 +1644,7 @@
   background: linear-gradient(90deg, transparent, rgba(135, 146, 166, 0.20), transparent);
   box-shadow:
     -980px 84px 0 rgba(96, 165, 250, 0.055),
-    -760px -120px 0 rgba(124, 58, 237, 0.065);
+    -760px -120px 0 rgba(var(--pg-brand-purple-rgb), 0.065);
 }
 
 .paygate-proof-inner {
@@ -1785,7 +1785,7 @@
   border: 1px solid rgba(82, 94, 118, 0.36);
   background:
     linear-gradient(180deg, rgba(8, 10, 15, 0.96), rgba(5, 7, 11, 0.98)),
-    radial-gradient(circle at 82% 12%, rgba(124, 58, 237, 0.032), transparent 38%);
+    radial-gradient(circle at 82% 12%, rgba(var(--pg-brand-purple-rgb), 0.032), transparent 38%);
   box-shadow:
     0 24px 86px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.035);
@@ -1812,8 +1812,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.12), transparent),
-    radial-gradient(circle at 100% 70%, rgba(124, 58, 237, 0.12), transparent 24%);
+    linear-gradient(90deg, transparent, rgba(var(--pg-brand-purple-rgb), 0.12), transparent),
+    radial-gradient(circle at 100% 70%, rgba(var(--pg-brand-purple-rgb), 0.12), transparent 24%);
   opacity: 0;
   transform: translateY(0);
   transition: opacity 220ms ease;
@@ -1861,10 +1861,10 @@
   flex: 0 0 auto;
   width: 56px;
   height: 56px;
-  border: 1px solid rgba(167, 139, 250, 0.34);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.34);
   border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.12), rgba(5, 7, 11, 0.72)),
+    linear-gradient(180deg, rgba(var(--pg-brand-purple-rgb), 0.12), rgba(5, 7, 11, 0.72)),
     rgba(12, 16, 24, 0.86);
   color: var(--pg-brand-purple-soft);
   box-shadow:
@@ -1935,7 +1935,7 @@
 .paygate-receipt-id:focus-visible,
 .paygate-receipt-row:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.46);
+  box-shadow: inset 0 0 0 1px rgba(var(--pg-brand-purple-soft-rgb), 0.46);
 }
 
 .paygate-receipt-rows {
@@ -1947,7 +1947,7 @@
 }
 
 .paygate-receipt-row {
-  --receipt-tone-rgb: 167, 139, 250;
+  --receipt-tone-rgb: var(--pg-brand-purple-soft-rgb);
   position: relative;
   display: grid;
   grid-template-columns: 76px minmax(204px, 0.88fr) 1px minmax(242px, 1.12fr) 32px 104px;
@@ -2104,7 +2104,7 @@
 }
 
 .paygate-receipt-row[data-tone='purple'] {
-  --receipt-tone-rgb: 167, 139, 250;
+  --receipt-tone-rgb: var(--pg-brand-purple-soft-rgb);
 }
 
 .paygate-receipt-row[data-tone='green'] .paygate-receipt-status,
@@ -2251,7 +2251,7 @@
   border-radius: 18px;
   background:
     linear-gradient(180deg, rgba(7, 10, 15, 0.97), rgba(4, 6, 10, 0.985)),
-    radial-gradient(circle at 88% 8%, rgba(124, 58, 237, 0.030), transparent 36%);
+    radial-gradient(circle at 88% 8%, rgba(var(--pg-brand-purple-rgb), 0.030), transparent 36%);
   padding: 24px 34px;
 }
 
@@ -2271,10 +2271,10 @@
   grid-column: 1;
   width: 58px;
   height: 58px;
-  border: 1px solid rgba(167, 139, 250, 0.24);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.24);
   border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.14), rgba(88, 28, 135, 0.10)),
+    linear-gradient(180deg, rgba(var(--pg-brand-purple-rgb), 0.14), rgba(88, 28, 135, 0.10)),
     rgba(5, 7, 11, 0.72);
   color: var(--pg-brand-purple-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
@@ -2377,7 +2377,7 @@
   width: 30px;
   height: 30px;
   color: var(--pg-brand-purple-soft);
-  filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.12));
+  filter: drop-shadow(0 0 12px rgba(var(--pg-brand-purple-rgb), 0.12));
   transition:
     color 180ms ease,
     filter 180ms ease,
@@ -2410,17 +2410,17 @@
 
 .paygate-proof-metrics:hover,
 .paygate-receipt-panel:hover {
-  border-color: rgba(167, 139, 250, 0.26);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.26);
   box-shadow:
     0 26px 88px rgba(0, 0, 0, 0.46),
     inset 0 1px 0 rgba(255, 255, 255, 0.042);
 }
 
 .paygate-proof-chip:hover {
-  border-color: rgba(167, 139, 250, 0.30);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.30);
   background:
     linear-gradient(180deg, rgba(9, 12, 18, 0.98), rgba(5, 7, 11, 0.99)),
-    radial-gradient(circle at 12% 50%, rgba(124, 58, 237, 0.045), transparent 30%);
+    radial-gradient(circle at 12% 50%, rgba(var(--pg-brand-purple-rgb), 0.045), transparent 30%);
   box-shadow:
     0 18px 58px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -2429,7 +2429,7 @@
 
 .paygate-proof-chip:hover > svg:first-child {
   color: #B8A2FF;
-  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.16));
+  filter: drop-shadow(0 0 10px rgba(var(--pg-brand-purple-rgb), 0.16));
   transform: translateY(-1px);
 }
 
@@ -2445,7 +2445,7 @@
   scroll-margin-top: 76px;
   padding: clamp(74px, 7vw, 104px) 24px clamp(84px, 7.4vw, 112px);
   background:
-    radial-gradient(ellipse at 50% 8%, rgba(124, 58, 237, 0.09), transparent 42%),
+    radial-gradient(ellipse at 50% 8%, rgba(var(--pg-brand-purple-rgb), 0.09), transparent 42%),
     linear-gradient(180deg, rgba(4, 6, 10, 0.995), rgba(5, 6, 9, 0.99));
 }
 
@@ -2513,7 +2513,7 @@
   border: 1px solid rgba(82, 94, 118, 0.42);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.07), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.07), transparent 32%),
     linear-gradient(180deg, rgba(9, 13, 20, 0.95), rgba(4, 6, 10, 0.985));
   box-shadow:
     0 34px 110px rgba(0, 0, 0, 0.50),
@@ -2540,7 +2540,7 @@
 .paygate-ops-brand img {
   width: 38px;
   height: 38px;
-  filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.28));
+  filter: drop-shadow(0 0 20px rgba(var(--pg-brand-purple-rgb), 0.28));
 }
 
 .paygate-ops-nav {
@@ -2563,7 +2563,7 @@
 
 .paygate-ops-nav span.is-active {
   background:
-    linear-gradient(90deg, rgba(124, 58, 237, 0.24), rgba(124, 58, 237, 0.12));
+    linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0.24), rgba(var(--pg-brand-purple-rgb), 0.12));
   color: var(--pg-text-primary);
 }
 
@@ -2682,7 +2682,7 @@
 }
 
 .paygate-ops-range button.is-selected {
-  background: rgba(124, 58, 237, 0.24);
+  background: rgba(var(--pg-brand-purple-rgb), 0.24);
   color: var(--pg-brand-purple-soft);
 }
 
@@ -2869,7 +2869,7 @@
 }
 
 .paygate-ops-badge.is-purple {
-  background: rgba(124, 58, 237, 0.22);
+  background: rgba(var(--pg-brand-purple-rgb), 0.22);
   color: var(--pg-brand-purple-soft);
 }
 
@@ -2917,9 +2917,9 @@
   justify-content: center;
   width: 54px;
   height: 54px;
-  border: 1px solid rgba(167, 139, 250, 0.28);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.28);
   border-radius: 14px;
-  background: rgba(124, 58, 237, 0.14);
+  background: rgba(var(--pg-brand-purple-rgb), 0.14);
   color: var(--pg-brand-purple-soft);
 }
 
@@ -2959,7 +2959,7 @@
   scroll-margin-top: 76px;
   padding: clamp(44px, 4vw, 58px) 24px clamp(58px, 5.2vw, 76px);
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.08), transparent 42%),
+    radial-gradient(ellipse at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.08), transparent 42%),
     linear-gradient(180deg, rgba(5, 6, 9, 0.99), rgba(4, 6, 10, 0.995));
 }
 
@@ -2971,7 +2971,7 @@
   background:
     linear-gradient(90deg, rgba(82, 94, 118, 0.024) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px),
-    radial-gradient(ellipse at 67% 58%, rgba(124, 58, 237, 0.12), transparent 42%);
+    radial-gradient(ellipse at 67% 58%, rgba(var(--pg-brand-purple-rgb), 0.12), transparent 42%);
   background-size: 68px 68px, 68px 68px, auto;
   opacity: 0.78;
 }
@@ -3054,10 +3054,10 @@
 }
 
 .paygate-audience-row:hover {
-  border-color: rgba(167, 139, 250, 0.40);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.40);
   box-shadow:
     0 26px 76px rgba(0, 0, 0, 0.32),
-    0 0 24px rgba(124, 58, 237, 0.08),
+    0 0 24px rgba(var(--pg-brand-purple-rgb), 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
   transform: translateY(-1px);
 }
@@ -3068,11 +3068,11 @@
   justify-content: center;
   width: 62px;
   height: 62px;
-  border: 1px solid rgba(167, 139, 250, 0.28);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.28);
   border-radius: 14px;
   background:
-    radial-gradient(circle at 50% 8%, rgba(167, 139, 250, 0.22), transparent 66%),
-    rgba(124, 58, 237, 0.12);
+    radial-gradient(circle at 50% 8%, rgba(var(--pg-brand-purple-soft-rgb), 0.22), transparent 66%),
+    rgba(var(--pg-brand-purple-rgb), 0.12);
   color: var(--pg-brand-purple-soft);
 }
 
@@ -3115,15 +3115,15 @@
   display: flex;
   flex-direction: column;
   min-height: 404px;
-  border: 1px solid rgba(167, 139, 250, 0.60);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.60);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.25), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.25), transparent 42%),
     linear-gradient(180deg, rgba(13, 17, 27, 0.94), rgba(7, 9, 15, 0.98));
   box-shadow:
-    0 0 0 1px rgba(124, 58, 237, 0.12),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.12),
     0 34px 96px rgba(0, 0, 0, 0.44),
-    0 0 46px rgba(124, 58, 237, 0.16),
+    0 0 46px rgba(var(--pg-brand-purple-rgb), 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   padding: clamp(34px, 3.8vw, 48px);
 }
@@ -3140,7 +3140,7 @@
 .paygate-audience-cta-brand img {
   width: 54px;
   height: 54px;
-  filter: drop-shadow(0 0 26px rgba(124, 58, 237, 0.34));
+  filter: drop-shadow(0 0 26px rgba(var(--pg-brand-purple-rgb), 0.34));
 }
 
 .paygate-audience-cta h3 {
@@ -3248,9 +3248,9 @@
 .paygate-audience-trust svg {
   width: 42px;
   height: 42px;
-  border: 1px solid rgba(167, 139, 250, 0.24);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.24);
   border-radius: 999px;
-  background: rgba(124, 58, 237, 0.10);
+  background: rgba(var(--pg-brand-purple-rgb), 0.10);
   color: var(--pg-brand-purple-soft);
   padding: 9px;
 }
@@ -3262,7 +3262,7 @@
   padding: clamp(42px, 4.3vw, 58px) 24px clamp(58px, 5.5vw, 78px);
   background:
     linear-gradient(180deg, rgba(5, 6, 9, 0.99), rgba(4, 6, 10, 0.995)),
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.10), transparent 42%);
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 42%);
 }
 
 .paygate-transform-section::before {
@@ -3272,7 +3272,7 @@
   pointer-events: none;
   background:
     radial-gradient(ellipse at 50% 46%, rgba(96, 165, 250, 0.075), transparent 32%),
-    radial-gradient(ellipse at 71% 52%, rgba(124, 58, 237, 0.15), transparent 25%),
+    radial-gradient(ellipse at 71% 52%, rgba(var(--pg-brand-purple-rgb), 0.15), transparent 25%),
     linear-gradient(90deg, rgba(82, 94, 118, 0.028) 1px, transparent 1px),
     linear-gradient(180deg, rgba(82, 94, 118, 0.020) 1px, transparent 1px);
   background-size: auto, auto, 76px 76px, 76px 76px;
@@ -3365,10 +3365,10 @@
   height: 2px;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(56, 189, 248, 0), rgba(56, 189, 248, 0.54) 38%, rgba(167, 139, 250, 0.64), rgba(124, 58, 237, 0));
+    linear-gradient(90deg, rgba(56, 189, 248, 0), rgba(56, 189, 248, 0.54) 38%, rgba(var(--pg-brand-purple-soft-rgb), 0.64), rgba(var(--pg-brand-purple-rgb), 0));
   box-shadow:
     0 0 24px rgba(56, 189, 248, 0.24),
-    0 0 34px rgba(124, 58, 237, 0.22);
+    0 0 34px rgba(var(--pg-brand-purple-rgb), 0.22);
   opacity: 0.44;
   transform: translateY(-50%) scaleX(0.86);
   transform-origin: right center;
@@ -3392,9 +3392,9 @@
   height: 2px;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(124, 58, 237, 0), rgba(167, 139, 250, 0.80) 22%, rgba(56, 189, 248, 0.96) 52%, rgba(167, 139, 250, 0.68) 76%, rgba(56, 189, 248, 0));
+    linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0), rgba(var(--pg-brand-purple-soft-rgb), 0.80) 22%, rgba(56, 189, 248, 0.96) 52%, rgba(var(--pg-brand-purple-soft-rgb), 0.68) 76%, rgba(56, 189, 248, 0));
   box-shadow:
-    0 0 18px rgba(124, 58, 237, 0.28),
+    0 0 18px rgba(var(--pg-brand-purple-rgb), 0.28),
     0 0 30px rgba(56, 189, 248, 0.18);
   opacity: 0.42;
   transform: translateY(-50%) scaleX(0.82);
@@ -3410,7 +3410,7 @@
   content: '';
   position: absolute;
   inset: -18px -22px;
-  background: linear-gradient(90deg, rgba(124, 58, 237, 0), rgba(124, 58, 237, 0.16), rgba(56, 189, 248, 0.18), rgba(74, 222, 128, 0));
+  background: linear-gradient(90deg, rgba(var(--pg-brand-purple-rgb), 0), rgba(var(--pg-brand-purple-rgb), 0.16), rgba(56, 189, 248, 0.18), rgba(74, 222, 128, 0));
   filter: blur(12px);
   opacity: 0.45;
   transition: opacity 220ms ease;
@@ -3437,7 +3437,7 @@
   height: 3px;
   opacity: 0.68;
   box-shadow:
-    0 0 24px rgba(124, 58, 237, 0.36),
+    0 0 24px rgba(var(--pg-brand-purple-rgb), 0.36),
     0 0 38px rgba(56, 189, 248, 0.26);
   transform: translateY(-50%) scaleX(0.96);
 }
@@ -3450,7 +3450,7 @@
   height: 4px;
   opacity: 0.96;
   box-shadow:
-    0 0 30px rgba(124, 58, 237, 0.50),
+    0 0 30px rgba(var(--pg-brand-purple-rgb), 0.50),
     0 0 54px rgba(56, 189, 248, 0.38);
   transform: translateY(-50%) scaleX(1);
 }
@@ -3482,7 +3482,7 @@
   border-radius: 12px;
   background:
     linear-gradient(180deg, rgba(10, 14, 22, 0.94), rgba(4, 6, 10, 0.96)),
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 70%);
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.18), transparent 70%);
   box-shadow:
     0 18px 44px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
@@ -3500,10 +3500,10 @@
 .paygate-transform-section[data-transform-active='generate'] .paygate-transform-floaters span,
 .paygate-transform-section[data-transform-active='proxy'] .paygate-transform-floaters span {
   opacity: 0.78;
-  border-color: rgba(167, 139, 250, 0.36);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.36);
   box-shadow:
     0 18px 46px rgba(0, 0, 0, 0.40),
-    0 0 18px rgba(124, 58, 237, 0.10),
+    0 0 18px rgba(var(--pg-brand-purple-rgb), 0.10),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
@@ -3565,7 +3565,7 @@
   border-radius: 20px;
   background:
     linear-gradient(180deg, rgba(8, 11, 17, 0.97), rgba(4, 6, 10, 0.99)),
-    radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.055), transparent 42%);
+    radial-gradient(circle at 80% 0%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 42%);
   box-shadow:
     0 28px 84px rgba(0, 0, 0, 0.46),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
@@ -3578,10 +3578,10 @@
 
 .paygate-transform-panel:hover,
 .paygate-transform-panel:focus-within {
-  border-color: rgba(167, 139, 250, 0.42);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.42);
   box-shadow:
     0 32px 96px rgba(0, 0, 0, 0.50),
-    0 0 0 1px rgba(124, 58, 237, 0.09),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.09),
     inset 0 1px 0 rgba(255, 255, 255, 0.052);
   transform: translateY(-2px);
 }
@@ -3592,7 +3592,7 @@
 }
 
 .paygate-transform-panel.is-action {
-  border-color: rgba(167, 139, 250, 0.28);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.28);
 }
 
 .paygate-transform-panel.is-action::before,
@@ -3606,22 +3606,22 @@
 .paygate-transform-panel.is-action::before {
   inset: 42% 8% 20% 8%;
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.16), transparent 62%),
+    radial-gradient(ellipse at 50% 50%, rgba(var(--pg-brand-purple-rgb), 0.16), transparent 62%),
     radial-gradient(ellipse at 58% 55%, rgba(56, 189, 248, 0.08), transparent 48%);
   filter: blur(16px);
   opacity: 0.76;
 }
 
 .paygate-transform-panel.is-after {
-  border-color: rgba(167, 139, 250, 0.52);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.52);
   background:
     radial-gradient(circle at 92% 0%, rgba(139, 92, 246, 0.16), transparent 38%),
-    radial-gradient(ellipse at 74% 48%, rgba(124, 58, 237, 0.055), transparent 56%),
+    radial-gradient(ellipse at 74% 48%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 56%),
     linear-gradient(180deg, rgba(10, 13, 20, 0.985), rgba(4, 6, 10, 0.995));
   box-shadow:
     0 30px 96px rgba(0, 0, 0, 0.50),
-    0 0 0 1px rgba(124, 58, 237, 0.13),
-    0 0 38px rgba(124, 58, 237, 0.075),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.13),
+    0 0 38px rgba(var(--pg-brand-purple-rgb), 0.075),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
@@ -3630,7 +3630,7 @@
   inset: 0;
   background:
     linear-gradient(135deg, rgba(196, 181, 253, 0.08), transparent 28%),
-    radial-gradient(ellipse at 100% 8%, rgba(167, 139, 250, 0.11), transparent 44%);
+    radial-gradient(ellipse at 100% 8%, rgba(var(--pg-brand-purple-soft-rgb), 0.11), transparent 44%);
   opacity: 0.58;
   transition: opacity 220ms ease;
 }
@@ -3641,7 +3641,7 @@
   border-radius: inherit;
   box-shadow:
     inset 0 0 0 1px rgba(221, 214, 254, 0.065),
-    inset 0 -1px 0 rgba(167, 139, 250, 0.08);
+    inset 0 -1px 0 rgba(var(--pg-brand-purple-soft-rgb), 0.08);
   transition: box-shadow 220ms ease;
 }
 
@@ -3656,11 +3656,11 @@
   border-color: rgba(190, 160, 255, 0.76);
   box-shadow:
     0 34px 104px rgba(0, 0, 0, 0.54),
-    0 0 0 1px rgba(124, 58, 237, 0.24),
-    0 0 34px rgba(167, 139, 250, 0.20),
-    0 0 72px rgba(124, 58, 237, 0.14),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.24),
+    0 0 34px rgba(var(--pg-brand-purple-soft-rgb), 0.20),
+    0 0 72px rgba(var(--pg-brand-purple-rgb), 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 0 42px rgba(124, 58, 237, 0.055);
+    inset 0 0 42px rgba(var(--pg-brand-purple-rgb), 0.055);
 }
 
 .paygate-transform-panel.is-after:hover::before,
@@ -3669,7 +3669,7 @@
   opacity: 1;
   background:
     linear-gradient(135deg, rgba(196, 181, 253, 0.17), transparent 28%),
-    radial-gradient(ellipse at 100% 8%, rgba(167, 139, 250, 0.22), transparent 44%),
+    radial-gradient(ellipse at 100% 8%, rgba(var(--pg-brand-purple-soft-rgb), 0.22), transparent 44%),
     radial-gradient(ellipse at 26% 100%, rgba(74, 222, 128, 0.07), transparent 42%);
 }
 
@@ -3718,13 +3718,13 @@
 }
 
 .paygate-transform-panel.is-after .paygate-transform-url {
-  border-color: rgba(167, 139, 250, 0.34);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.34);
   background:
-    radial-gradient(circle at 86% 0%, rgba(167, 139, 250, 0.09), transparent 58%),
+    radial-gradient(circle at 86% 0%, rgba(var(--pg-brand-purple-soft-rgb), 0.09), transparent 58%),
     linear-gradient(180deg, rgba(18, 22, 34, 0.94), rgba(10, 13, 22, 0.96));
   box-shadow:
-    0 0 0 1px rgba(124, 58, 237, 0.045),
-    0 0 20px rgba(124, 58, 237, 0.06),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.045),
+    0 0 20px rgba(var(--pg-brand-purple-rgb), 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.065);
 }
 
@@ -3733,11 +3733,11 @@
 .paygate-transform-section[data-transform-active='proxy'] .paygate-transform-panel.is-after .paygate-transform-url {
   border-color: rgba(190, 160, 255, 0.50);
   background:
-    radial-gradient(circle at 86% 0%, rgba(167, 139, 250, 0.17), transparent 58%),
+    radial-gradient(circle at 86% 0%, rgba(var(--pg-brand-purple-soft-rgb), 0.17), transparent 58%),
     linear-gradient(180deg, rgba(18, 22, 34, 0.94), rgba(10, 13, 22, 0.96));
   box-shadow:
-    0 0 0 1px rgba(124, 58, 237, 0.07),
-    0 0 28px rgba(124, 58, 237, 0.12),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.07),
+    0 0 28px rgba(var(--pg-brand-purple-rgb), 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.065);
 }
 
@@ -3756,7 +3756,7 @@
 .paygate-transform-mini-url:hover,
 .paygate-transform-mini-url:focus-visible {
   outline: none;
-  border-color: rgba(167, 139, 250, 0.42);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.42);
   box-shadow:
     0 12px 30px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.042);
@@ -3838,10 +3838,10 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: 1px solid rgba(167, 139, 250, 0.22);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.22);
   border-radius: 12px;
   background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.15), rgba(13, 17, 23, 0.78));
+    linear-gradient(180deg, rgba(var(--pg-brand-purple-rgb), 0.15), rgba(13, 17, 23, 0.78));
   color: var(--pg-brand-purple-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -3890,14 +3890,14 @@
   justify-content: center;
   width: 30px;
   height: 30px;
-  border: 1px solid rgba(167, 139, 250, 0.54);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.54);
   border-radius: 999px;
-  background: rgba(124, 58, 237, 0.16);
+  background: rgba(var(--pg-brand-purple-rgb), 0.16);
   color: var(--pg-brand-purple-soft);
   font-family: var(--pg-font-mono);
   font-size: 13px;
   font-weight: 800;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.055);
+  box-shadow: 0 0 0 4px rgba(var(--pg-brand-purple-rgb), 0.055);
 }
 
 .paygate-transform-step strong {
@@ -3918,7 +3918,7 @@
 
 .paygate-transform-step[data-active='true'] .paygate-transform-step-number {
   border-color: rgba(196, 181, 253, 0.76);
-  background: rgba(124, 58, 237, 0.22);
+  background: rgba(var(--pg-brand-purple-rgb), 0.22);
   color: #D9D2FF;
 }
 
@@ -3950,8 +3950,8 @@
 
 .paygate-transform-section[data-transform-active='price'] .paygate-transform-price-control,
 .paygate-transform-step[data-active='true'] .paygate-transform-price-control {
-  border-color: rgba(167, 139, 250, 0.44);
-  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.12);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.44);
+  box-shadow: 0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.12);
 }
 
 .paygate-transform-price-control span,
@@ -4002,10 +4002,10 @@
   border-radius: 12px;
   background:
     radial-gradient(circle at 60% 20%, rgba(190, 160, 255, 0.30), transparent 62%),
-    rgba(124, 58, 237, 0.15);
+    rgba(var(--pg-brand-purple-rgb), 0.15);
   color: #C4B5FD;
   box-shadow:
-    0 0 26px rgba(124, 58, 237, 0.22),
+    0 0 26px rgba(var(--pg-brand-purple-rgb), 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.060);
 }
 
@@ -4032,7 +4032,7 @@
   min-height: 32px;
   border: 1px solid rgba(82, 94, 118, 0.32);
   border-radius: 10px;
-  background: rgba(124, 58, 237, 0.12);
+  background: rgba(var(--pg-brand-purple-rgb), 0.12);
   color: var(--pg-brand-purple-soft);
   font-size: 12.5px;
   font-weight: 800;
@@ -4064,18 +4064,18 @@
 }
 
 .paygate-transform-panel.is-after .paygate-transform-live > div {
-  border-color: rgba(167, 139, 250, 0.18);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.18);
   background:
-    radial-gradient(circle at 100% 50%, rgba(124, 58, 237, 0.055), transparent 48%),
+    radial-gradient(circle at 100% 50%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 48%),
     linear-gradient(180deg, rgba(10, 14, 21, 0.78), rgba(6, 8, 13, 0.82));
 }
 
 .paygate-transform-panel.is-after:hover .paygate-transform-live > div,
 .paygate-transform-panel.is-after:focus-within .paygate-transform-live > div,
 .paygate-transform-section[data-transform-active='proxy'] .paygate-transform-panel.is-after .paygate-transform-live > div {
-  border-color: rgba(167, 139, 250, 0.28);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.28);
   background:
-    radial-gradient(circle at 100% 50%, rgba(124, 58, 237, 0.10), transparent 48%),
+    radial-gradient(circle at 100% 50%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 48%),
     linear-gradient(180deg, rgba(10, 14, 21, 0.78), rgba(6, 8, 13, 0.82));
 }
 
@@ -4138,7 +4138,7 @@
   border-color: rgba(74, 222, 128, 0.21);
   background:
     radial-gradient(circle at 16% 0%, rgba(74, 222, 128, 0.07), transparent 58%),
-    radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.055), transparent 52%),
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 52%),
     rgba(10, 14, 21, 0.78);
   box-shadow:
     0 0 0 1px rgba(74, 222, 128, 0.025),
@@ -4151,7 +4151,7 @@
   border-color: rgba(74, 222, 128, 0.32);
   background:
     radial-gradient(circle at 16% 0%, rgba(74, 222, 128, 0.13), transparent 58%),
-    radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.08), transparent 52%),
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.08), transparent 52%),
     rgba(10, 14, 21, 0.78);
   box-shadow:
     0 0 0 1px rgba(74, 222, 128, 0.045),
@@ -4160,18 +4160,18 @@
 }
 
 .paygate-transform-panel.is-after .paygate-transform-result-grid div:nth-child(2) {
-  border-color: rgba(167, 139, 250, 0.18);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.18);
   background:
-    radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.055), transparent 56%),
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 56%),
     rgba(10, 14, 21, 0.74);
 }
 
 .paygate-transform-panel.is-after:hover .paygate-transform-result-grid div:nth-child(2),
 .paygate-transform-panel.is-after:focus-within .paygate-transform-result-grid div:nth-child(2),
 .paygate-transform-section[data-transform-active='proxy'] .paygate-transform-panel.is-after .paygate-transform-result-grid div:nth-child(2) {
-  border-color: rgba(167, 139, 250, 0.24);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.24);
   background:
-    radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.10), transparent 56%),
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 56%),
     rgba(10, 14, 21, 0.74);
 }
 
@@ -4234,7 +4234,7 @@
   border: 1px solid rgba(82, 94, 118, 0.30);
   border-radius: 20px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.055), transparent 46%),
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.055), transparent 46%),
     linear-gradient(180deg, rgba(8, 10, 15, 0.86), rgba(4, 6, 10, 0.94));
   box-shadow:
     0 22px 64px rgba(0, 0, 0, 0.34),
@@ -4319,7 +4319,7 @@
   scroll-margin-top: 76px;
   padding: clamp(76px, 6.5vw, 112px) 24px clamp(78px, 6vw, 104px);
   background:
-    radial-gradient(ellipse at 50% 22%, rgba(124, 58, 237, 0.10), transparent 42%),
+    radial-gradient(ellipse at 50% 22%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 42%),
     linear-gradient(180deg, rgba(4, 6, 10, 0.995), rgba(5, 6, 9, 0.99));
 }
 
@@ -4342,7 +4342,7 @@
   inset: auto 8% 0;
   height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.22), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--pg-brand-purple-soft-rgb), 0.22), transparent);
 }
 
 .paygate-protected-inner {
@@ -4425,7 +4425,7 @@
   border: 1px solid rgba(82, 94, 118, 0.42);
   border-radius: 22px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.065), transparent 48%),
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.065), transparent 48%),
     linear-gradient(180deg, rgba(9, 13, 20, 0.96), rgba(4, 6, 10, 0.985));
   box-shadow:
     0 30px 92px rgba(0, 0, 0, 0.46),
@@ -4440,10 +4440,10 @@
 .paygate-protected-card:hover,
 .paygate-protected-card:focus-visible {
   outline: none;
-  border-color: rgba(167, 139, 250, 0.44);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.44);
   box-shadow:
     0 34px 104px rgba(0, 0, 0, 0.52),
-    0 0 0 1px rgba(124, 58, 237, 0.10),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.10),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
   transform: translateY(-2px);
 }
@@ -4461,14 +4461,14 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(167, 139, 250, 0.30);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.30);
   border-radius: 14px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.20), transparent 64%),
-    rgba(124, 58, 237, 0.10);
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-soft-rgb), 0.20), transparent 64%),
+    rgba(var(--pg-brand-purple-rgb), 0.10);
   color: var(--pg-brand-purple-soft);
   box-shadow:
-    0 0 24px rgba(124, 58, 237, 0.14),
+    0 0 24px rgba(var(--pg-brand-purple-rgb), 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
@@ -4570,15 +4570,15 @@
 
 .paygate-protected-card.is-guard {
   min-height: 386px;
-  border-color: rgba(167, 139, 250, 0.70);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.70);
   background:
-    radial-gradient(circle at 50% -16%, rgba(167, 139, 250, 0.22), transparent 40%),
-    radial-gradient(ellipse at 50% 74%, rgba(124, 58, 237, 0.08), transparent 60%),
+    radial-gradient(circle at 50% -16%, rgba(var(--pg-brand-purple-soft-rgb), 0.22), transparent 40%),
+    radial-gradient(ellipse at 50% 74%, rgba(var(--pg-brand-purple-rgb), 0.08), transparent 60%),
     linear-gradient(180deg, rgba(10, 13, 20, 0.985), rgba(5, 7, 12, 0.995));
   box-shadow:
     0 34px 112px rgba(0, 0, 0, 0.58),
-    0 0 0 1px rgba(124, 58, 237, 0.24),
-    0 0 54px rgba(124, 58, 237, 0.22),
+    0 0 0 1px rgba(var(--pg-brand-purple-rgb), 0.24),
+    0 0 54px rgba(var(--pg-brand-purple-rgb), 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.065);
   text-align: center;
 }
@@ -4587,7 +4587,7 @@
   width: 54px;
   height: 54px;
   margin: 0 auto 15px;
-  filter: drop-shadow(0 0 24px rgba(124, 58, 237, 0.34));
+  filter: drop-shadow(0 0 24px rgba(var(--pg-brand-purple-rgb), 0.34));
 }
 
 .paygate-protected-card.is-guard h3 {
@@ -4600,9 +4600,9 @@
   justify-content: center;
   min-height: 28px;
   margin-top: 11px;
-  border: 1px solid rgba(167, 139, 250, 0.28);
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.28);
   border-radius: 999px;
-  background: rgba(124, 58, 237, 0.17);
+  background: rgba(var(--pg-brand-purple-rgb), 0.17);
   color: var(--pg-brand-purple-soft);
   font-family: var(--pg-font-mono);
   font-size: 11px;
@@ -4943,10 +4943,10 @@
 }
 
 .paygate-protected-fact:hover {
-  border-color: rgba(167, 139, 250, 0.38);
+  border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.38);
   box-shadow:
     0 24px 66px rgba(0, 0, 0, 0.34),
-    0 0 20px rgba(124, 58, 237, 0.08),
+    0 0 20px rgba(var(--pg-brand-purple-rgb), 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
   transform: translateY(-1px);
 }

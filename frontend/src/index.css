@@ -19,7 +19,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.10), transparent 34rem),
+    radial-gradient(circle at 50% 0%, rgba(var(--pg-brand-purple-rgb), 0.10), transparent 34rem),
     var(--pg-bg-canvas);
   color: var(--pg-text-primary);
   font-family: var(--pg-font-sans);
@@ -39,7 +39,7 @@ a {
 }
 
 ::selection {
-  background: rgba(124, 58, 237, 0.36);
+  background: rgba(var(--pg-brand-purple-rgb), 0.36);
   color: var(--pg-text-primary);
 }
 
@@ -93,7 +93,7 @@ a {
 .shimmer-border {
   border-radius: 13px;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.75), rgba(124, 58, 237, 0.65));
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.75), rgba(var(--pg-brand-purple-rgb), 0.65));
   background-size: 300% 100%;
   animation: none;
 }
