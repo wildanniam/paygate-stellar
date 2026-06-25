@@ -19,7 +19,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
@@ -223,6 +223,20 @@ function WorkspaceBadge({ children, tone = 'muted' }) {
   );
 }
 
+const WORKSPACE_NAV_ITEMS = [
+  { id: 'overview', label: 'Overview', to: '/dashboard', icon: LayoutDashboard },
+  { id: 'endpoints', label: 'Endpoints', to: '/dashboard/endpoints', icon: Code2 },
+  { id: 'activity', label: 'Activity', to: '/dashboard/activity', icon: Activity },
+  { id: 'payouts', label: 'Payouts', to: '/dashboard/payouts', icon: Upload },
+];
+
+function getWorkspaceView(pathname) {
+  if (pathname.includes('/dashboard/endpoints')) return 'endpoints';
+  if (pathname.includes('/dashboard/activity')) return 'activity';
+  if (pathname.includes('/dashboard/payouts')) return 'payouts';
+  return 'overview';
+}
+
 function WorkspaceMetric({ icon: Icon, label, value, delta, tone = 'neutral' }) {
   return (
     <article className="pg-workspace-metric" data-tone={tone}>
@@ -247,10 +261,17 @@ function WorkspaceSidebar({ session, lastUpdated, authStatus, onConnectWallet, o
       </div>
 
       <nav className="pg-workspace-nav" aria-label="Dashboard sections">
-        <a href="#dashboard-overview" className="is-active"><LayoutDashboard size={21} aria-hidden="true" /> Overview</a>
-        <a href="#api-registry"><Code2 size={21} aria-hidden="true" /> APIs</a>
-        <a href="#activity-ledger"><Database size={21} aria-hidden="true" /> Payments</a>
-        <a href="#withdrawals"><Upload size={21} aria-hidden="true" /> Withdrawals</a>
+        {WORKSPACE_NAV_ITEMS.map(({ id, label, to, icon: Icon }) => (
+          <NavLink
+            key={id}
+            to={to}
+            end={id === 'overview'}
+            className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+          >
+            <Icon size={21} aria-hidden="true" />
+            {label}
+          </NavLink>
+        ))}
       </nav>
 
       <div className="pg-workspace-live-card">
@@ -428,6 +449,8 @@ function LoggedOutWorkspace({ authStatus, authError, onConnectWallet }) {
 }
 
 export default function Dashboard() {
+  const location = useLocation();
+  const currentView = getWorkspaceView(location.pathname);
   const [session, setSession] = useState({ authenticated: false });
   const [authStatus, setAuthStatus] = useState('loading');
   const [authError, setAuthError] = useState('');
@@ -607,7 +630,7 @@ export default function Dashboard() {
             onLogout={handleLogout}
           />
 
-          <div className="pg-workspace-main" id="dashboard-overview">
+          <div className="pg-workspace-main" id="dashboard-overview" data-view={currentView}>
             <header className="pg-workspace-topbar">
               <div>
                 <p>PayGate workspace</p>

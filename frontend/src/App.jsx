@@ -14,6 +14,9 @@ export default function App() {
         <Route path="/generate" element={<Generate />} />
         <Route path="/result" element={<Result />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/endpoints" element={<Dashboard />} />
+        <Route path="/dashboard/activity" element={<Dashboard />} />
+        <Route path="/dashboard/payouts" element={<Dashboard />} />
         <Route path="/apis/new" element={<RegisterApi />} />
         <Route path="/apis/:apiId" element={<ApiDetail />} />
       </Routes>
