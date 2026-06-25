@@ -7,6 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
+    "dev:api": "npm --prefix backend run dev",
+    "dev:web": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend ci && npm --prefix frontend run build",
     "test:auth": "node scripts/phase2-auth-smoke.mjs",
     "test:registry": "node scripts/phase3-registry-smoke.mjs",

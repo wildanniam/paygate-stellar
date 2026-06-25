@@ -12,6 +12,19 @@ export async function readJsonResponse(res) {
   }
 }
 
+function isLocalhost() {
+  if (typeof window === 'undefined') return false;
+  return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+}
+
+function apiErrorMessage(res, body, fallback) {
+  if (body?.error) return body.error;
+  const localHint = isLocalhost() && res.status >= 500
+    ? ' Make sure the local API server is running on localhost:3001.'
+    : '';
+  return `${fallback}${localHint}`;
+}
+
 function normalizeSignedMessage(signedMessage) {
   if (typeof signedMessage === 'string') return signedMessage;
   if (signedMessage?.type === 'Buffer' && Array.isArray(signedMessage.data)) {
@@ -41,7 +54,9 @@ export async function connectFreighterWallet() {
     body: JSON.stringify({ walletAddress: developerWallet }),
   });
   const challenge = await readJsonResponse(challengeRes);
-  if (!challengeRes.ok) throw new Error(challenge.error || 'PayGate could not create a wallet login challenge.');
+  if (!challengeRes.ok) {
+    throw new Error(apiErrorMessage(challengeRes, challenge, 'PayGate could not create a wallet login challenge.'));
+  }
 
   const signed = await signMessage(challenge.message, {
     address: developerWallet,
@@ -64,7 +79,9 @@ export async function connectFreighterWallet() {
     }),
   });
   const verified = await readJsonResponse(verifyRes);
-  if (!verifyRes.ok) throw new Error(verified.error || 'Wallet signature could not be verified.');
+  if (!verifyRes.ok) {
+    throw new Error(apiErrorMessage(verifyRes, verified, 'Wallet signature could not be verified.'));
+  }
 
   return { authenticated: true, walletAddress: verified.walletAddress };
 }
