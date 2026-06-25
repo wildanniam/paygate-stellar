@@ -9530,6 +9530,217 @@
   white-space: nowrap;
 }
 
+.pg-payout-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  gap: 16px;
+  padding: 20px 28px 18px;
+}
+
+.pg-payout-balance-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 220px;
+  background:
+    radial-gradient(circle at 100% 12%, rgba(var(--pg-brand-purple-rgb), 0.16), transparent 34%),
+    radial-gradient(circle at 0% 100%, rgba(34, 197, 94, 0.08), transparent 32%),
+    rgba(8, 11, 17, 0.78);
+  padding: 26px;
+}
+
+.pg-payout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.34);
+  border-radius: 15px;
+  background: rgba(var(--pg-brand-purple-rgb), 0.16);
+  color: var(--pg-brand-purple-soft);
+  box-shadow: 0 0 28px rgba(var(--pg-brand-purple-rgb), 0.12);
+}
+
+.pg-payout-balance-card small,
+.pg-payout-split-grid small {
+  display: block;
+  margin-top: 18px;
+  color: var(--pg-text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pg-payout-balance-card strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--pg-success-soft);
+  font-family: var(--pg-font-mono);
+  font-size: clamp(36px, 5vw, 58px);
+  font-weight: 850;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.pg-payout-balance-card p {
+  max-width: 520px;
+  margin: 14px 0 0;
+  color: var(--pg-text-secondary);
+  line-height: 1.55;
+}
+
+.pg-payout-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 210px;
+}
+
+.pg-payout-actions .pg-button,
+.pg-payout-actions .pg-inline-link {
+  justify-content: center;
+}
+
+.pg-payout-balance-card .pg-dashboard-withdraw-status {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
+.pg-payout-split-card {
+  min-width: 0;
+}
+
+.pg-payout-split-grid {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.pg-payout-split-grid > div {
+  border: 1px solid rgba(82, 94, 118, 0.26);
+  border-radius: 10px;
+  background: rgba(8, 11, 17, 0.58);
+  padding: 15px;
+}
+
+.pg-payout-split-grid small {
+  margin-top: 0;
+  font-size: 11px;
+}
+
+.pg-payout-split-grid strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--pg-text-primary);
+  font-family: var(--pg-font-mono);
+  font-size: 22px;
+  font-weight: 850;
+}
+
+.pg-payout-split-grid > div:first-child strong,
+.pg-payout-split-grid > div:nth-child(3) strong {
+  color: var(--pg-success-soft);
+}
+
+.pg-payout-split-grid span {
+  display: block;
+  margin-top: 6px;
+  color: var(--pg-text-muted);
+  font-size: 12px;
+}
+
+.pg-payout-panels {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.pg-payout-info-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 18px 22px 20px;
+}
+
+.pg-payout-info-list div {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.pg-payout-info-list dt {
+  color: var(--pg-text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pg-payout-info-list dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--pg-text-primary);
+  font-family: var(--pg-font-mono);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-payout-credit-list {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.pg-payout-credit-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(82, 94, 118, 0.24);
+  border-radius: 10px;
+  background: rgba(8, 11, 17, 0.58);
+  padding: 13px;
+}
+
+.pg-payout-credit-list span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pg-payout-credit-list strong {
+  overflow: hidden;
+  color: var(--pg-text-primary);
+  font-size: 13px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-payout-credit-list small {
+  overflow: hidden;
+  color: var(--pg-text-muted);
+  font-family: var(--pg-font-mono);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-payout-credit-list em {
+  color: var(--pg-success-soft);
+  font-family: var(--pg-font-mono);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.pg-payout-history {
+  margin-top: 0;
+}
+
 .pg-workspace-panel,
 .pg-workspace-secondary-panel {
   overflow: hidden;
@@ -10030,6 +10241,11 @@
   .pg-activity-layout {
     grid-template-columns: 1fr;
   }
+
+  .pg-payout-hero,
+  .pg-payout-panels {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
@@ -10187,6 +10403,26 @@
     padding: 0 14px 14px;
   }
 
+  .pg-payout-hero {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .pg-payout-balance-card {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .pg-payout-actions {
+    min-width: 0;
+  }
+
+  .pg-payout-panels {
+    grid-template-columns: 1fr;
+  }
+
   .pg-workspace-panel-head {
     align-items: flex-start;
     flex-direction: column;
@@ -10242,6 +10478,15 @@
   }
 
   .pg-activity-detail-list div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .pg-payout-info-list {
+    padding: 16px;
+  }
+
+  .pg-payout-info-list div {
     grid-template-columns: 1fr;
     gap: 4px;
   }

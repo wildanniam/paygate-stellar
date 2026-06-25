@@ -1261,6 +1261,158 @@ function ActivityView({ model }) {
   );
 }
 
+function PayoutsView({
+  dashboard,
+  model,
+  session,
+  canWithdraw,
+  handleWithdraw,
+  isWithdrawing,
+  withdrawStatus,
+  withdrawError,
+  withdrawResult,
+}) {
+  const developerBalance = dashboard.escrow?.developerBalance?.usdc;
+  const platformBalance = dashboard.escrow?.platformFeeBalance?.usdc;
+  const withdrawals = dashboard.withdrawals || [];
+  const latestWithdrawal = withdrawals[0];
+
+  return (
+    <>
+      <section className="pg-payout-hero">
+        <article className="pg-workspace-panel pg-payout-balance-card">
+          <div>
+            <span className="pg-payout-icon"><Wallet size={24} aria-hidden="true" /></span>
+            <small>Ready to withdraw</small>
+            <strong>{formatDashboardUsdc(developerBalance)}</strong>
+            <p>{dashboard.escrow?.configured ? 'Funds available from the PayGate escrow contract.' : 'Escrow contract is not configured yet.'}</p>
+          </div>
+          <div className="pg-payout-actions">
+            <Button
+              type="button"
+              onClick={handleWithdraw}
+              disabled={!canWithdraw}
+              variant={canWithdraw ? 'primary' : 'secondary'}
+              icon={isWithdrawing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <Wallet size={15} aria-hidden="true" />}
+            >
+              {withdrawStatus === 'signing' ? 'Sign in Freighter' : withdrawStatus === 'submitting' ? 'Submitting' : 'Withdraw'}
+            </Button>
+            <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" className="pg-inline-link pg-external-link">
+              Open Explorer
+              <ArrowUpRight size={16} />
+            </a>
+          </div>
+          {(withdrawError || withdrawResult) && (
+            <div className="pg-dashboard-withdraw-status" data-tone={withdrawError ? 'danger' : 'success'}>
+              {withdrawError || `Withdrawal submitted: ${short(withdrawResult.txHash, 10, 8)}`}
+            </div>
+          )}
+        </article>
+
+        <article className="pg-workspace-panel pg-payout-split-card">
+          <div className="pg-workspace-panel-head">
+            <div>
+              <h2>Revenue split</h2>
+              <p>Developer revenue and PayGate fee posted after successful calls.</p>
+            </div>
+          </div>
+          <div className="pg-payout-split-grid">
+            <div>
+              <small>Developer balance</small>
+              <strong>{formatDashboardUsdc(developerBalance)}</strong>
+              <span>Withdrawable</span>
+            </div>
+            <div>
+              <small>PayGate fee balance</small>
+              <strong>{formatDashboardUsdc(platformBalance)}</strong>
+              <span>Platform share</span>
+            </div>
+            <div>
+              <small>Range revenue</small>
+              <strong>{formatDashboardUsdc(model.summary.developerRevenueUsdc)}</strong>
+              <span>Developer share in selected window</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section className="pg-workspace-panels pg-payout-panels">
+        <article className="pg-workspace-panel">
+          <div className="pg-workspace-panel-head">
+            <div>
+              <h2>Escrow contract</h2>
+              <p>Current contract health and latest payout state.</p>
+            </div>
+            <WorkspaceBadge tone={dashboard.escrow?.configured ? 'success' : 'warning'}>
+              {dashboard.escrow?.configured ? 'Connected' : 'Not configured'}
+            </WorkspaceBadge>
+          </div>
+          <dl className="pg-payout-info-list">
+            <div>
+              <dt>Contract</dt>
+              <dd>{dashboard.escrow?.configured ? 'PayGate escrow active' : 'Missing escrow env'}</dd>
+            </div>
+            <div>
+              <dt>Developer wallet</dt>
+              <dd>{short(session.walletAddress, 10, 6)}</dd>
+            </div>
+            <div>
+              <dt>Latest withdrawal</dt>
+              <dd>{latestWithdrawal ? `${formatDashboardUsdc(latestWithdrawal.amountUsdc)} · ${formatDate(latestWithdrawal.createdAt)}` : 'No withdrawals yet'}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <article className="pg-workspace-panel">
+          <div className="pg-workspace-panel-head">
+            <div>
+              <h2>Credit sources</h2>
+              <p>Recent paid requests that increased withdrawable balance.</p>
+            </div>
+          </div>
+          <div className="pg-payout-credit-list">
+            {model.activityRows.filter((row) => row.revenueTone === 'positive').slice(0, 4).map((row) => (
+              <div key={row.id}>
+                <span>
+                  <strong>{row.apiName}</strong>
+                  <small>{short(row.requestId, 10, 4)}</small>
+                </span>
+                <em>{row.revenue}</em>
+              </div>
+            ))}
+            {model.activityRows.filter((row) => row.revenueTone === 'positive').length === 0 && (
+              <EmptyState title="No revenue credits yet" body="Successful paid requests will appear here before withdrawal." />
+            )}
+          </div>
+        </article>
+      </section>
+
+      <section className="pg-workspace-secondary-panel pg-payout-history">
+        <div className="pg-workspace-panel-head">
+          <div>
+            <h2>Withdrawal history</h2>
+            <p>Developer payout contract invocations.</p>
+          </div>
+        </div>
+        {withdrawals.length === 0 ? (
+          <EmptyState title="No withdrawals yet" body="Withdrawable balance will move to the connected developer wallet after a Freighter-signed withdrawal." />
+        ) : (
+          <DataTable
+            rows={withdrawals.slice(0, 10)}
+            columns={[
+              { key: 'time', label: 'Time', render: (withdrawal) => formatDate(withdrawal.createdAt) },
+              { key: 'amount', label: 'Amount', render: (withdrawal) => <span className="pg-dashboard-money">{formatDashboardUsdc(withdrawal.amountUsdc)}</span> },
+              { key: 'status', label: 'Status', render: (withdrawal) => <StatusText status={withdrawal.status} /> },
+              { key: 'tx', label: 'Tx', render: (withdrawal) => <TxLink hash={withdrawal.txHash} /> },
+            ]}
+            getRowKey={(withdrawal) => withdrawal.id}
+          />
+        )}
+      </section>
+    </>
+  );
+}
+
 export default function Dashboard() {
   const location = useLocation();
   const currentView = getWorkspaceView(location.pathname);
@@ -1516,6 +1668,18 @@ export default function Dashboard() {
                 <EndpointsView model={dashboardModel} />
               ) : currentView === 'activity' ? (
                 <ActivityView model={dashboardModel} />
+              ) : currentView === 'payouts' ? (
+                <PayoutsView
+                  dashboard={dashboard}
+                  model={dashboardModel}
+                  session={session}
+                  canWithdraw={canWithdraw}
+                  handleWithdraw={handleWithdraw}
+                  isWithdrawing={isWithdrawing}
+                  withdrawStatus={withdrawStatus}
+                  withdrawError={withdrawError}
+                  withdrawResult={withdrawResult}
+                />
               ) : (
                 <>
                 <section className="pg-workspace-metrics" aria-label="Dashboard metrics">
