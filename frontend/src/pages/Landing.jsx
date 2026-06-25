@@ -1,9 +1,11 @@
-import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Github, Info, Layers3, LayoutDashboard, Link2, Plus, ShieldCheck, TrendingUp, Upload, Zap } from 'lucide-react';
+import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Info, Layers3, LayoutDashboard, Link2, Plus, ShieldCheck, TrendingUp, Upload, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { C, MONO as M } from '../colors.js';
+import { C } from '../colors.js';
+import MarketingNavbar from '../components/MarketingNavbar.jsx';
+import SiteFooter from '../components/SiteFooter.jsx';
 import Button from '../components/ui/Button.jsx';
 
 const HERO_FLOW_URLS = {
@@ -684,47 +686,7 @@ export default function Landing() {
         transition: 'transform 0.08s linear',
       }} />
 
-      {/* ── NAVBAR ── */}
-      <nav className="paygate-nav">
-        <div className="paygate-nav-inner">
-          <Link className="paygate-brand-link" to="/" aria-label="PayGate home">
-            <span className="paygate-brand-mark" aria-hidden="true">
-              <img src="/brand/paygate-mark.svg" alt="" />
-            </span>
-            <span>PayGate</span>
-          </Link>
-
-          <div className="paygate-nav-center" aria-label="Primary navigation">
-            <a href="#workspace">Product</a>
-            <a href="#how-it-works">How it works</a>
-            <a href="https://github.com/wildanniam/paygate-stellar" target="_blank" rel="noopener noreferrer">Docs</a>
-          </div>
-
-          <div className="paygate-nav-actions">
-            <Link className="paygate-nav-secondary" to="/dashboard">
-              Dashboard
-            </Link>
-            <Button
-              as={Link}
-              className="paygate-nav-cta"
-              to="/apis/new"
-            >
-              Create paid endpoint
-            </Button>
-            <a
-              className="paygate-nav-icon desktop-nav-link"
-              href="https://github.com/wildanniam/paygate-stellar"
-              target="_blank" rel="noopener noreferrer"
-              aria-label="View PayGate on GitHub"
-              onMouseEnter={() => hov('navCta', true)}
-              onMouseLeave={() => hov('navCta', false)}
-              data-active={h.navCta ? 'true' : 'false'}
-            >
-              <Github size={14} />
-            </a>
-          </div>
-        </div>
-      </nav>
+      <MarketingNavbar />
 
       {/* ── HERO ── */}
       <section className="paygate-hero">
@@ -1607,23 +1569,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer style={{ borderTop: `1px solid ${C.border}`, padding: '32px 24px', textAlign: 'center' }}>
-        <div className="flex items-center justify-center" style={{ gap: 16, maxWidth: 1100, margin: '0 auto' }}>
-          <span style={{ ...M, fontSize: 13, color: C.text3 }}>
-            © 2026 PayGate · Built on Stellar · MPP
-          </span>
-          <a
-            href="https://github.com/wildanniam/paygate-stellar"
-            target="_blank" rel="noopener noreferrer"
-            style={{ color: C.text3, transition: 'color 0.15s ease', display: 'flex' }}
-            onMouseEnter={e => e.currentTarget.style.color = C.text1}
-            onMouseLeave={e => e.currentTarget.style.color = C.text3}
-          >
-            <Github size={14} />
-          </a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

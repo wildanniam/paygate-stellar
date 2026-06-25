@@ -2491,6 +2491,38 @@
   transform: translateY(-1px);
 }
 
+.paygate-footer {
+  border-top: 1px solid var(--pg-border-subtle);
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.paygate-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.paygate-footer-meta {
+  color: var(--pg-text-muted);
+  font-family: var(--pg-font-mono);
+  font-size: 13px;
+}
+
+.paygate-footer a {
+  display: inline-flex;
+  color: var(--pg-text-muted);
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.paygate-footer a:hover {
+  color: var(--pg-text-primary);
+  transform: translateY(-1px);
+}
+
 .paygate-hero {
   position: relative;
   overflow: hidden;

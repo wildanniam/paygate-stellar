@@ -1,6 +1,7 @@
 import { Github, LayoutDashboard, Plus } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import Button from './ui/Button.jsx';
+import SiteBrand from './SiteBrand.jsx';
 
 export default function AppNavbar() {
   const { pathname } = useLocation();
@@ -27,12 +28,7 @@ export default function AppNavbar() {
   return (
     <nav className="pg-app-navbar">
       <div className="pg-app-navbar-inner">
-        <Link to="/" className="pg-app-brand" aria-label="PayGate home">
-          <span className="pg-app-brand-mark">
-            <img src="/brand/paygate-mark.svg" alt="" />
-          </span>
-          <span>PayGate</span>
-        </Link>
+        <SiteBrand className="pg-app-brand" markClassName="pg-app-brand-mark" />
 
         <div className="pg-app-navbar-actions">
           {navLink('/dashboard', 'Dashboard', <LayoutDashboard size={14} aria-hidden="true" />)}
