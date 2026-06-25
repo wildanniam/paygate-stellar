@@ -7,7 +7,9 @@ export default function AppNavbar() {
   const isCreate = pathname === '/apis/new';
 
   const navLink = (to, label, icon) => {
-    const active = pathname === to;
+    const active = to === '/dashboard'
+      ? pathname === to || pathname.startsWith(`${to}/`)
+      : pathname === to;
 
     return (
       <Link
