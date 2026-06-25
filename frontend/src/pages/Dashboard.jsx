@@ -14,6 +14,7 @@ import {
   LogOut,
   Plus,
   RefreshCw,
+  Search,
   ShieldCheck,
   Upload,
   Wallet,
@@ -766,6 +767,275 @@ function OverviewView({ model, dashboard }) {
   );
 }
 
+const ENDPOINT_STATUS_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'active', label: 'Active' },
+  { value: 'pending_setup', label: 'Setup required' },
+  { value: 'archived', label: 'Archived' },
+];
+
+function EndpointDetailPanel({ api }) {
+  const [detail, setDetail] = useState(null);
+  const [status, setStatus] = useState('idle');
+
+  useEffect(() => {
+    let active = true;
+    if (!api?.id) {
+      setDetail(null);
+      return undefined;
+    }
+
+    async function loadDetail() {
+      setStatus('loading');
+      try {
+        const res = await fetch(`/api/apis/${api.id}`, { credentials: 'include' });
+        const data = await readJsonResponse(res);
+        if (!active) return;
+        if (!res.ok) throw new Error(data.error || 'Failed to load endpoint details.');
+        setDetail(data.api);
+        setStatus('loaded');
+      } catch {
+        if (!active) return;
+        setDetail(null);
+        setStatus('error');
+      }
+    }
+
+    loadDetail();
+    return () => {
+      active = false;
+    };
+  }, [api?.id]);
+
+  if (!api) {
+    return (
+      <article className="pg-workspace-panel pg-endpoint-detail">
+        <EmptyState title="Select an endpoint" body="Choose an endpoint row to inspect proxy URL, setup status, and revenue." />
+      </article>
+    );
+  }
+
+  const successRate = api.rangeCalls > 0
+    ? `${Math.round(((api.rangeSuccessfulCalls || 0) / api.rangeCalls) * 100)}%`
+    : '-';
+  const endpointDetail = detail || api;
+
+  return (
+    <article className="pg-workspace-panel pg-endpoint-detail">
+      <div className="pg-endpoint-detail-head">
+        <div>
+          <span className="pg-endpoint-icon"><Database size={19} aria-hidden="true" /></span>
+          <div>
+            <h2>{api.name}</h2>
+            <p>{api.method} {api.path}</p>
+          </div>
+        </div>
+        <ApiStatusBadge status={api.status} />
+      </div>
+
+      <div className="pg-endpoint-copy-stack">
+        <label>
+          <span>Proxy URL</span>
+          <code>{endpointDetail.proxyUrl || api.proxyUrl}</code>
+          <CopyButton value={endpointDetail.proxyUrl || api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+        </label>
+        <label>
+          <span>Required header</span>
+          <code>
+            {status === 'loading'
+              ? 'Loading secret...'
+              : endpointDetail.secret
+                ? `X-PayGate-Secret: ${endpointDetail.secret}`
+                : 'Open endpoint detail to reveal secret'}
+          </code>
+          {endpointDetail.secret && <CopyButton value={`X-PayGate-Secret: ${endpointDetail.secret}`} compact ariaLabel="Copy upstream secret header" />}
+        </label>
+      </div>
+
+      <div className="pg-endpoint-detail-grid">
+        <div>
+          <small>Price / call</small>
+          <strong>{formatPricePerCall(api.priceUsdc)}</strong>
+        </div>
+        <div>
+          <small>Paid calls</small>
+          <strong>{formatDashboardCompactNumber(api.rangeSuccessfulCalls ?? api.successfulCalls)}</strong>
+        </div>
+        <div>
+          <small>Success rate</small>
+          <strong>{successRate}</strong>
+        </div>
+        <div>
+          <small>Revenue</small>
+          <strong className="is-positive">{formatDashboardUsdc(api.rangeDeveloperRevenueUsdc ?? api.developerRevenueUsdc)}</strong>
+        </div>
+      </div>
+
+      <div className="pg-endpoint-checklist">
+        <h3>Setup checklist</h3>
+        <span data-state={api.status === 'active' ? 'done' : 'pending'}>Upstream guard configured</span>
+        <span data-state={api.status === 'active' ? 'done' : 'pending'}>PayGate secret verified</span>
+        <span data-state={api.status === 'active' ? 'done' : 'pending'}>{api.status === 'active' ? 'Live and earning' : 'Verify setup to go live'}</span>
+      </div>
+
+      <div className="pg-endpoint-actions">
+        <Button as={Link} to={`/apis/${api.id}`} variant="secondary" icon={<ExternalLink size={15} aria-hidden="true" />}>
+          Open detail
+        </Button>
+        {api.status === 'pending_setup' && (
+          <Button as={Link} to={`/apis/${api.id}`} variant="primary" icon={<ShieldCheck size={15} aria-hidden="true" />}>
+            Verify setup
+          </Button>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function EndpointsView({ model }) {
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('revenue');
+  const [selectedEndpointId, setSelectedEndpointId] = useState(null);
+
+  const endpoints = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return [...(model?.apiStats || [])]
+      .filter((api) => statusFilter === 'all' || api.status === statusFilter)
+      .filter((api) => {
+        if (!normalizedQuery) return true;
+        return [api.name, api.path, api.proxyUrl, api.upstreamBaseUrl]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(normalizedQuery));
+      })
+      .sort((a, b) => {
+        if (sortBy === 'calls') return (b.rangeSuccessfulCalls || 0) - (a.rangeSuccessfulCalls || 0);
+        if (sortBy === 'last_activity') return new Date(b.rangeLastActivityAt || 0) - new Date(a.rangeLastActivityAt || 0);
+        return (b.rangeDeveloperRevenueUsdc || 0) - (a.rangeDeveloperRevenueUsdc || 0);
+      });
+  }, [model, query, sortBy, statusFilter]);
+
+  const selectedEndpoint = endpoints.find((api) => api.id === selectedEndpointId) || endpoints[0] || null;
+
+  return (
+    <>
+      <section className="pg-workspace-toolbar" aria-label="Endpoint filters">
+        <label className="pg-workspace-search">
+          <Search size={17} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search endpoints..."
+          />
+        </label>
+
+        <div className="pg-workspace-segment" aria-label="Endpoint status filter">
+          {ENDPOINT_STATUS_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={statusFilter === option.value ? 'is-selected' : undefined}
+              onClick={() => setStatusFilter(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        <label className="pg-workspace-select">
+          <span>Sort</span>
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+            <option value="revenue">Revenue</option>
+            <option value="calls">Paid calls</option>
+            <option value="last_activity">Last activity</option>
+          </select>
+        </label>
+      </section>
+
+      <section className="pg-workspace-metrics" aria-label="Endpoint metrics">
+        <WorkspaceMetric icon={Database} label="Total endpoints" value={`${model.summary.totalApis}`} delta="All registered endpoints" tone="brand" />
+        <WorkspaceMetric icon={ShieldCheck} label="Active" value={`${model.summary.activeApis}`} delta="Live and serving traffic" tone="success" />
+        <WorkspaceMetric icon={AlertCircle} label="Setup required" value={`${model.summary.setupRequiredApis}`} delta="Pending upstream verification" />
+        <WorkspaceMetric icon={Upload} label="Archived" value={`${model.summary.archivedApis}`} delta="Inactive but preserved" />
+      </section>
+
+      <section className="pg-endpoints-layout">
+        <article className="pg-workspace-panel pg-endpoints-table-panel">
+          <div className="pg-workspace-panel-head">
+            <div>
+              <h2>Paid endpoints</h2>
+              <p>Proxy URLs, setup states, calls, and per-endpoint revenue.</p>
+            </div>
+            <Button as={Link} to="/apis/new" size="sm" icon={<Plus size={15} aria-hidden="true" />}>
+              Add endpoint
+            </Button>
+          </div>
+
+          {endpoints.length === 0 ? (
+            <EmptyState
+              title="No endpoints match this filter"
+              body="Try clearing search or create a new paid endpoint."
+              action={<Link to="/apis/new" className="pg-inline-link">Create endpoint</Link>}
+            />
+          ) : (
+            <>
+              <div className="pg-workspace-mobile-list">
+                {endpoints.map((api) => <ApiMobileCard key={api.id} api={api} />)}
+              </div>
+              <div className="pg-workspace-table is-endpoints">
+                <div className="pg-workspace-table-head" aria-hidden="true">
+                  <span>Endpoint</span>
+                  <span>Status</span>
+                  <span>Proxy URL</span>
+                  <span>Price</span>
+                  <span>Calls</span>
+                  <span>Success</span>
+                  <span>Revenue</span>
+                  <span>Action</span>
+                </div>
+                {endpoints.map((api) => {
+                  const isSelected = selectedEndpoint?.id === api.id;
+                  const successRate = api.rangeCalls > 0
+                    ? `${Math.round(((api.rangeSuccessfulCalls || 0) / api.rangeCalls) * 100)}%`
+                    : '-';
+
+                  return (
+                    <button
+                      key={api.id}
+                      type="button"
+                      className={`pg-workspace-table-row ${isSelected ? 'is-selected' : ''}`}
+                      onClick={() => setSelectedEndpointId(api.id)}
+                    >
+                      <span className="pg-workspace-api-cell">
+                        <strong>{api.name}</strong>
+                        <small>{api.method} {api.path}</small>
+                      </span>
+                      <ApiStatusBadge status={api.status} compact />
+                      <span className="pg-workspace-copy-inline">
+                        {short(api.proxyUrl, 24, 8)}
+                        <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+                      </span>
+                      <span>{formatPricePerCall(api.priceUsdc)}</span>
+                      <span>{formatDashboardCompactNumber(api.rangeSuccessfulCalls ?? api.successfulCalls)}</span>
+                      <span>{successRate}</span>
+                      <strong>{formatDashboardUsdc(api.rangeDeveloperRevenueUsdc ?? api.developerRevenueUsdc)}</strong>
+                      <span>{api.status === 'pending_setup' ? 'Verify setup' : 'Open detail'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </article>
+
+        <EndpointDetailPanel api={selectedEndpoint} />
+      </section>
+    </>
+  );
+}
+
 export default function Dashboard() {
   const location = useLocation();
   const currentView = getWorkspaceView(location.pathname);
@@ -1017,6 +1287,8 @@ export default function Dashboard() {
             {dashboard && (
               currentView === 'overview' ? (
                 <OverviewView model={dashboardModel} dashboard={dashboard} />
+              ) : currentView === 'endpoints' ? (
+                <EndpointsView model={dashboardModel} />
               ) : (
                 <>
                 <section className="pg-workspace-metrics" aria-label="Dashboard metrics">
