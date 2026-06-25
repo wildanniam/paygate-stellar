@@ -67,7 +67,7 @@ export default function MarketingNavbar() {
                 rel={item.external ? 'noopener noreferrer' : undefined}
                 aria-label={item.external ? 'Open PayGate docs on GitHub' : undefined}
                 data-active={isActive ? 'true' : 'false'}
-                aria-current={isActive ? 'true' : undefined}
+                aria-current={isActive ? 'location' : undefined}
               >
                 {item.label}
               </a>

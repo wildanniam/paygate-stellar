@@ -418,11 +418,6 @@ const AUDIENCE_TRUST_NOTES = [
 ];
 
 export default function Landing() {
-  const [h, setH] = useState({
-    navCta: false,
-  });
-  const hov = (key, val) => setH(prev => ({ ...prev, [key]: val }));
-
   const [scrollPct, setScrollPct]     = useState(0);
   const [heroActive, setHeroActive]   = useState('idle');
   const [copiedFlow, setCopiedFlow]   = useState(null);

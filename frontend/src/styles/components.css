@@ -2787,6 +2787,12 @@
   transform: translateY(-1px);
 }
 
+.paygate-footer a:focus-visible {
+  outline: none;
+  border-radius: var(--pg-radius-sm);
+  box-shadow: var(--pg-shadow-focus);
+}
+
 @media (max-width: 1120px) {
   .paygate-footer-main {
     grid-template-columns: 1fr;
