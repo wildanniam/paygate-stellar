@@ -26,6 +26,10 @@ import CopyButton from '../components/CopyButton.jsx';
 import Button from '../components/ui/Button.jsx';
 import DataTable from '../components/ui/DataTable.jsx';
 import Notice from '../components/ui/Notice.jsx';
+import {
+  buildActivityRows as buildDashboardActivityRows,
+  formatRangeLabel as formatDashboardRangeLabel,
+} from '../lib/dashboardViewModel.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
 
 function short(value, head = 7, tail = 5) {
@@ -600,7 +604,7 @@ export default function Dashboard() {
   const isWithdrawing = ['preparing', 'signing', 'submitting'].includes(withdrawStatus);
   const withdrawableUsdc = Number(dashboard?.escrow?.developerBalance?.usdc || 0);
   const canWithdraw = session.authenticated && dashboard?.escrow?.configured && withdrawableUsdc > 0 && !escrowError && !isWithdrawing;
-  const rangeLabel = useMemo(() => formatRangeLabel(lastUpdated || new Date()), [lastUpdated]);
+  const rangeLabel = useMemo(() => formatDashboardRangeLabel(30, lastUpdated || new Date()), [lastUpdated]);
 
   const topApis = useMemo(() => {
     return [...(dashboard?.apis || [])].sort((a, b) => b.calls - a.calls).slice(0, 6);
@@ -615,7 +619,10 @@ export default function Dashboard() {
     };
   }, [dashboard]);
 
-  const activityRows = useMemo(() => buildActivityRows(dashboard?.requests, dashboard?.payments), [dashboard]);
+  const activityRows = useMemo(
+    () => buildDashboardActivityRows(dashboard?.requests, dashboard?.payments).slice(0, 8),
+    [dashboard],
+  );
 
   return (
     <div className="pg-app">
