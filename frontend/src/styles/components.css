@@ -8733,11 +8733,6 @@
   padding: 20px 28px 18px;
 }
 
-.pg-workspace-metrics.is-preview {
-  opacity: 0.62;
-  padding-inline: 0;
-}
-
 .pg-workspace-metric {
   display: grid;
   gap: 13px;
@@ -10019,35 +10014,9 @@
 
 .pg-workspace-logged-out {
   display: grid;
-  gap: 20px;
+  min-height: 420px;
+  align-items: start;
   padding: 24px 28px 28px;
-}
-
-.pg-workspace-preview-panels {
-  padding: 0;
-  opacity: 0.74;
-}
-
-.pg-workspace-preview-withdraw {
-  margin: 0;
-  opacity: 0.74;
-}
-
-.pg-workspace-preview-api {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  overflow: hidden;
-  color: var(--pg-text-primary);
-  font-weight: 850;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pg-workspace-preview-api svg {
-  flex: 0 0 auto;
-  color: var(--pg-brand-purple-soft);
 }
 
 .pg-workspace-connect-card {
@@ -10063,8 +10032,37 @@
   padding: 20px;
 }
 
-.pg-workspace-connect-card > svg {
+.pg-workspace-locked-card {
+  min-height: 180px;
+  border-color: rgba(var(--pg-brand-purple-rgb), 0.34);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(var(--pg-brand-purple-rgb), 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(12, 17, 27, 0.94), rgba(7, 10, 16, 0.88));
+  box-shadow:
+    0 22px 46px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.pg-workspace-lock-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(81, 235, 139, 0.34);
+  border-radius: 12px;
+  background: rgba(81, 235, 139, 0.08);
   color: var(--pg-success-soft);
+}
+
+.pg-workspace-lock-eyebrow {
+  margin: 0 0 6px;
+  color: var(--pg-brand-purple-soft);
+  font-family: var(--pg-font-mono);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .pg-workspace-connect-card h2 {
@@ -10285,6 +10283,19 @@
   .pg-workspace-topbar,
   .pg-workspace-logged-out {
     padding: 16px;
+  }
+
+  .pg-workspace-logged-out {
+    min-height: 320px;
+  }
+
+  .pg-workspace-connect-card {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .pg-workspace-connect-card .pg-button {
+    width: 100%;
   }
 
   .pg-workspace-brand {

@@ -263,12 +263,15 @@ function LoggedOutWorkspace({ authStatus, authError, onConnectWallet }) {
   const isConnecting = authStatus === 'connecting' || authStatus === 'loading';
 
   return (
-    <div className="pg-workspace-logged-out">
-      <section className="pg-workspace-connect-card">
-        <ShieldCheck size={22} aria-hidden="true" />
+    <div className="pg-workspace-logged-out" aria-live="polite">
+      <section className="pg-workspace-connect-card pg-workspace-locked-card">
+        <span className="pg-workspace-lock-icon" aria-hidden="true">
+          <ShieldCheck size={24} />
+        </span>
         <div>
-          <h2>Connect Freighter to open your revenue workspace.</h2>
-          <p>PayGate scopes APIs, payments, request logs, escrow balance, and withdrawals to your developer wallet.</p>
+          <p className="pg-workspace-lock-eyebrow">Wallet required</p>
+          <h2>Wallet not connected.</h2>
+          <p>Connect Freighter first to load your registered endpoints, activity, revenue, and payout workspace.</p>
           {authError && <div className="pg-inline-error">{authError}</div>}
         </div>
         <Button
@@ -279,89 +282,6 @@ function LoggedOutWorkspace({ authStatus, authError, onConnectWallet }) {
         >
           Connect Freighter
         </Button>
-      </section>
-
-      <section className="pg-workspace-metrics is-preview" aria-label="Dashboard preview metrics">
-        <WorkspaceMetric icon={Database} label="APIs" value="2" delta="1 active · 1 setup" tone="brand" />
-        <WorkspaceMetric icon={Activity} label="Paid calls" value="12.4k" delta="Live proxy traffic" />
-        <WorkspaceMetric icon={DollarSign} label="Gross revenue" value="$124.00" delta="USDC testnet" tone="success" />
-        <WorkspaceMetric icon={Wallet} label="Withdrawable" value="$84.20" delta="Escrow balance" tone="success" />
-      </section>
-
-      <section className="pg-workspace-panels pg-workspace-preview-panels" aria-label="Dashboard preview panels">
-        <article className="pg-workspace-panel">
-          <div className="pg-workspace-panel-head">
-            <div>
-              <h2>API registry</h2>
-              <p>Preview of paid endpoints after wallet connect.</p>
-            </div>
-          </div>
-          <div className="pg-workspace-table is-registry">
-            <div className="pg-workspace-table-head" aria-hidden="true">
-              <span>API</span>
-              <span>Status</span>
-              <span>Price per call</span>
-              <span>Calls</span>
-              <span>Revenue</span>
-            </div>
-            <div className="pg-workspace-table-row">
-              <div className="pg-workspace-api-cell">
-                <span className="pg-workspace-preview-api"><Database size={17} aria-hidden="true" /> Weather signal</span>
-                <span>https://paygate.app/api/pay/api_123</span>
-              </div>
-              <WorkspaceBadge tone="success">active</WorkspaceBadge>
-              <span>$0.009/call</span>
-              <span>8.2k</span>
-              <strong>$73.80</strong>
-            </div>
-          </div>
-        </article>
-
-        <article className="pg-workspace-panel">
-          <div className="pg-workspace-panel-head">
-            <div>
-              <h2>Activity ledger</h2>
-              <p>Requests, payment checks, and revenue in one stream.</p>
-            </div>
-          </div>
-          <div className="pg-workspace-table is-ledger">
-            <div className="pg-workspace-table-head" aria-hidden="true">
-              <span>Request ID</span>
-              <span>Event</span>
-              <span>Result</span>
-              <span>Revenue</span>
-            </div>
-            <div className="pg-workspace-table-row">
-              <span className="pg-workspace-request-cell">
-                <span className="pg-workspace-mono">req_01HZ8XQ4</span>
-                <small>Weather signal</small>
-              </span>
-              <WorkspaceBadge tone="purple">MPP verified</WorkspaceBadge>
-              <WorkspaceBadge tone="success">200 OK</WorkspaceBadge>
-              <strong className="is-positive">+0.009 USDC</strong>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section className="pg-workspace-withdraw pg-workspace-preview-withdraw" aria-label="Dashboard preview withdrawal">
-        <span className="pg-workspace-withdraw-icon"><ShieldCheck size={27} aria-hidden="true" /></span>
-        <div>
-          <small>Escrow balance</small>
-          <strong>$84.20 USDC</strong>
-          <span>Preview balance</span>
-        </div>
-        <i aria-hidden="true" />
-        <div>
-          <small>Ready to withdraw</small>
-          <strong>$84.20 USDC</strong>
-          <span>Connect wallet to manage payouts</span>
-        </div>
-        <div className="pg-workspace-withdraw-actions">
-          <Button type="button" variant="secondary" disabled icon={<Wallet size={15} aria-hidden="true" />}>
-            Withdraw
-          </Button>
-        </div>
       </section>
     </div>
   );
@@ -1453,14 +1373,14 @@ export default function Dashboard() {
                 <span className="pg-workspace-subtitle">{viewMeta.subtitle}</span>
               </div>
 
-              <div className="pg-workspace-controls">
-                {currentView !== 'endpoints' && (
-                  <>
-                    <span className="pg-workspace-date"><CalendarDays size={17} aria-hidden="true" /> {rangeLabel}</span>
-                    <RangeToggle value={selectedRange} onChange={setSelectedRange} />
-                  </>
-                )}
-                {session.authenticated && (
+              {session.authenticated && (
+                <div className="pg-workspace-controls">
+                  {currentView !== 'endpoints' && (
+                    <>
+                      <span className="pg-workspace-date"><CalendarDays size={17} aria-hidden="true" /> {rangeLabel}</span>
+                      <RangeToggle value={selectedRange} onChange={setSelectedRange} />
+                    </>
+                  )}
                   <Button
                     type="button"
                     variant="secondary"
@@ -1472,11 +1392,11 @@ export default function Dashboard() {
                   >
                     Refresh
                   </Button>
-                )}
-                <Button as={Link} to="/apis/new" size="sm" icon={<Plus size={16} aria-hidden="true" />} className="pg-workspace-create">
-                  Create paid endpoint
-                </Button>
-              </div>
+                  <Button as={Link} to="/apis/new" size="sm" icon={<Plus size={16} aria-hidden="true" />} className="pg-workspace-create">
+                    Create paid endpoint
+                  </Button>
+                </div>
+              )}
             </header>
 
             {dashboardStatus === 'error' && dashboardError && (
