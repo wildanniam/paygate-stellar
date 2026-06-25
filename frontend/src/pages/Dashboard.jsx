@@ -28,7 +28,6 @@ import Button from '../components/ui/Button.jsx';
 import DataTable from '../components/ui/DataTable.jsx';
 import Notice from '../components/ui/Notice.jsx';
 import {
-  buildActivityRows as buildDashboardActivityRows,
   buildDashboardModel,
   DASHBOARD_RANGES,
   formatCompactNumber as formatDashboardCompactNumber,
@@ -54,142 +53,12 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
-function formatRangeLabel(referenceDate = new Date()) {
-  const end = referenceDate;
-  const start = new Date(end);
-  start.setDate(start.getDate() - 30);
-
-  const dateFormatter = new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
-  const yearFormatter = new Intl.DateTimeFormat(undefined, {
-    year: 'numeric',
-  });
-
-  return `${dateFormatter.format(start)} - ${dateFormatter.format(end)}, ${yearFormatter.format(end)}`;
-}
-
-function formatUsdc(value) {
-  const number = Number(value || 0);
-  return `${number.toFixed(4).replace(/\.?0+$/, '') || '0'} USDC`;
-}
-
-function formatCompactUsdc(value) {
-  const number = Number(value || 0);
-  return `${number.toFixed(3).replace(/\.?0+$/, '') || '0'} USDC`;
-}
-
-function formatMoney(value) {
-  return `$${Number(value || 0).toFixed(2)}`;
-}
-
-function formatCompactNumber(value) {
-  const number = Number(value || 0);
-  if (number >= 1_000_000) return `${(number / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-  if (number >= 1000) return `${(number / 1000).toFixed(1).replace(/\.0$/, '')}k`;
-  return `${number}`;
-}
-
 function requestTone(status) {
   if (status === 'forwarded' || status === 'succeeded') return 'success';
   if (status === 'credited' || status === 'payment_verified') return 'blue';
   if (status === 'challenge_sent' || status === 'pending') return 'warning';
   if (status?.includes('failed') || status === 'duplicate_payment') return 'danger';
   return 'muted';
-}
-
-function resultTone(status, upstreamStatus) {
-  if (status === 'challenge_sent') return 'danger';
-  if (status?.includes('failed') || status === 'duplicate_payment') return 'danger';
-  if (Number(upstreamStatus) >= 200 && Number(upstreamStatus) < 300) return 'success';
-  if (status === 'forwarded') return 'success';
-  return 'muted';
-}
-
-function activityMeta(request, payment) {
-  if (request.status === 'challenge_sent') {
-    return {
-      event: '402 required',
-      eventTone: 'warning',
-      result: 'blocked',
-      resultTone: 'danger',
-      revenue: '$0.000',
-      revenueTone: 'muted',
-    };
-  }
-
-  if (request.status === 'forwarded') {
-    const upstream = request.upstreamStatus ? `${request.upstreamStatus} OK` : '200 OK';
-    return {
-      event: payment ? 'MPP verified' : 'forwarded',
-      eventTone: payment ? 'purple' : 'blue',
-      result: upstream,
-      resultTone: resultTone(request.status, request.upstreamStatus),
-      revenue: payment ? `+${formatCompactUsdc(payment.developerAmountUsdc ?? payment.grossAmountUsdc)}` : '$0.000',
-      revenueTone: payment ? 'positive' : 'muted',
-    };
-  }
-
-  if (request.status === 'payment_failed' || request.status === 'duplicate_payment') {
-    return {
-      event: request.status.replace(/_/g, ' '),
-      eventTone: 'danger',
-      result: 'failed',
-      resultTone: 'danger',
-      revenue: '$0.000',
-      revenueTone: 'muted',
-    };
-  }
-
-  return {
-    event: request.status?.replace(/_/g, ' ') || 'request',
-    eventTone: requestTone(request.status),
-    result: request.upstreamStatus || '-',
-    resultTone: resultTone(request.status, request.upstreamStatus),
-    revenue: payment ? `+${formatCompactUsdc(payment.developerAmountUsdc ?? payment.grossAmountUsdc)}` : '$0.000',
-    revenueTone: payment ? 'positive' : 'muted',
-  };
-}
-
-function buildActivityRows(requests = [], payments = []) {
-  const paymentByRequestId = new Map(payments.filter((payment) => payment.requestId).map((payment) => [payment.requestId, payment]));
-  const paymentByPaymentId = new Map(payments.filter((payment) => payment.paymentId).map((payment) => [payment.paymentId, payment]));
-  const requestIds = new Set(requests.map((request) => request.id));
-
-  const requestRows = requests.map((request) => {
-    const payment = paymentByRequestId.get(request.id) || paymentByPaymentId.get(request.paymentId);
-    const meta = activityMeta(request, payment);
-
-    return {
-      id: request.id,
-      requestId: request.id,
-      apiName: request.apiName,
-      createdAt: request.forwardedAt || request.paidAt || request.createdAt,
-      txHash: request.txHash || payment?.txHash,
-      ...meta,
-    };
-  });
-
-  const orphanPaymentRows = payments
-    .filter((payment) => payment.requestId && !requestIds.has(payment.requestId))
-    .map((payment) => ({
-      id: `payment-${payment.id}`,
-      requestId: payment.requestId,
-      apiName: payment.apiName,
-      createdAt: payment.creditedAt || payment.verifiedAt || payment.createdAt,
-      txHash: payment.creditTxHash || payment.txHash,
-      event: 'MPP verified',
-      eventTone: 'purple',
-      result: 'credited',
-      resultTone: 'success',
-      revenue: `+${formatCompactUsdc(payment.developerAmountUsdc ?? payment.grossAmountUsdc)}`,
-      revenueTone: 'positive',
-    }));
-
-  return [...requestRows, ...orphanPaymentRows]
-    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-    .slice(0, 8);
 }
 
 function EmptyState({ title, body, action }) {
@@ -355,9 +224,9 @@ function ApiMobileCard({ api }) {
         <ApiStatusBadge status={api.status} compact />
       </div>
       <div className="pg-workspace-mobile-card-grid">
-        <span>Price <strong>${api.priceUsdc}/call</strong></span>
-        <span>Calls <strong>{formatCompactNumber(api.successfulCalls)}</strong></span>
-        <span>Revenue <strong>{formatMoney(api.grossRevenueUsdc)}</strong></span>
+        <span>Price <strong>{formatPricePerCall(api.priceUsdc)}</strong></span>
+        <span>Calls <strong>{formatDashboardCompactNumber(api.rangeSuccessfulCalls ?? api.successfulCalls)}</strong></span>
+        <span>Revenue <strong>{formatDashboardUsdc(api.rangeDeveloperRevenueUsdc ?? api.developerRevenueUsdc)}</strong></span>
       </div>
       <div className="pg-workspace-url-row">
         <span>{short(api.proxyUrl, 30, 8)}</span>
@@ -988,12 +857,10 @@ function EndpointsView({ model }) {
                 <div className="pg-workspace-table-head" aria-hidden="true">
                   <span>Endpoint</span>
                   <span>Status</span>
-                  <span>Proxy URL</span>
                   <span>Price</span>
                   <span>Calls</span>
                   <span>Success</span>
                   <span>Revenue</span>
-                  <span>Action</span>
                 </div>
                 {endpoints.map((api) => {
                   const isSelected = selectedEndpoint?.id === api.id;
@@ -1013,15 +880,10 @@ function EndpointsView({ model }) {
                         <small>{api.method} {api.path}</small>
                       </span>
                       <ApiStatusBadge status={api.status} compact />
-                      <span className="pg-workspace-copy-inline">
-                        {short(api.proxyUrl, 24, 8)}
-                        <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
-                      </span>
                       <span>{formatPricePerCall(api.priceUsdc)}</span>
                       <span>{formatDashboardCompactNumber(api.rangeSuccessfulCalls ?? api.successfulCalls)}</span>
                       <span>{successRate}</span>
                       <strong>{formatDashboardUsdc(api.rangeDeveloperRevenueUsdc ?? api.developerRevenueUsdc)}</strong>
-                      <span>{api.status === 'pending_setup' ? 'Verify setup' : 'Open detail'}</span>
                     </button>
                   );
                 })}
@@ -1227,7 +1089,6 @@ function ActivityView({ model }) {
                 <div className="pg-workspace-table-head" aria-hidden="true">
                   <span>Time</span>
                   <span>Endpoint</span>
-                  <span>Request</span>
                   <span>Event</span>
                   <span>Result</span>
                   <span>Revenue</span>
@@ -1238,16 +1099,15 @@ function ActivityView({ model }) {
                     type="button"
                     className={`pg-workspace-table-row ${selectedRow?.id === row.id ? 'is-selected' : ''}`}
                     onClick={() => setSelectedActivityId(row.id)}
-                  >
-                    <span>{formatDate(row.createdAt)}</span>
-                    <span className="pg-workspace-request-cell">
-                      <strong>{row.apiName || 'Unknown'}</strong>
-                      <small>{row.paymentId || 'No payment ID'}</small>
-                    </span>
-                    <span className="pg-workspace-mono">{short(row.requestId, 10, 5)}</span>
-                    <WorkspaceBadge tone={row.eventTone}>{row.event}</WorkspaceBadge>
-                    <WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge>
-                    <strong className={row.revenueTone === 'positive' ? 'is-positive' : undefined}>{row.revenue}</strong>
+                    >
+                      <span>{formatDate(row.createdAt)}</span>
+                      <span className="pg-workspace-request-cell">
+                        <strong>{row.apiName || 'Unknown'}</strong>
+                        <small>{short(row.requestId, 11, 4)}</small>
+                      </span>
+                      <WorkspaceBadge tone={row.eventTone}>{row.event}</WorkspaceBadge>
+                      <WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge>
+                      <strong className={row.revenueTone === 'positive' ? 'is-positive' : undefined}>{row.revenue}</strong>
                   </button>
                 ))}
               </div>
@@ -1570,26 +1430,7 @@ export default function Dashboard() {
     () => buildDashboardModel(dashboard, selectedRange, lastUpdated || new Date()),
     [dashboard, selectedRange, lastUpdated],
   );
-  const summary = dashboardModel?.summary || dashboard?.summary;
   const viewMeta = WORKSPACE_VIEW_META[currentView] || WORKSPACE_VIEW_META.overview;
-
-  const topApis = useMemo(() => {
-    return [...(dashboard?.apis || [])].sort((a, b) => b.calls - a.calls).slice(0, 6);
-  }, [dashboard]);
-
-  const apiLifecycleCounts = useMemo(() => {
-    const apis = dashboard?.apis || [];
-    return {
-      active: apis.filter((api) => api.status === 'active').length,
-      pending: apis.filter((api) => api.status === 'pending_setup').length,
-      archived: apis.filter((api) => api.status === 'archived').length,
-    };
-  }, [dashboard]);
-
-  const activityRows = useMemo(
-    () => buildDashboardActivityRows(dashboard?.requests, dashboard?.payments).slice(0, 8),
-    [dashboard],
-  );
 
   return (
     <div className="pg-app">
@@ -1680,163 +1521,7 @@ export default function Dashboard() {
                   withdrawError={withdrawError}
                   withdrawResult={withdrawResult}
                 />
-              ) : (
-                <>
-                <section className="pg-workspace-metrics" aria-label="Dashboard metrics">
-                  <WorkspaceMetric icon={Database} label="APIs" value={`${summary.totalApis}`} delta={`${apiLifecycleCounts.active} active · ${apiLifecycleCounts.pending} setup · ${apiLifecycleCounts.archived} archived`} tone="brand" />
-                  <WorkspaceMetric icon={Activity} label="Paid calls" value={formatCompactNumber(summary.successfulCalls)} delta={`${formatCompactNumber(summary.totalCalls)} total · ${summary.failedCalls} failed`} />
-                  <WorkspaceMetric icon={DollarSign} label="Gross revenue" value={formatUsdc(summary.grossRevenueUsdc)} delta={`Fee ${formatUsdc(summary.platformFeeUsdc)}`} tone="success" />
-                  <WorkspaceMetric icon={Wallet} label="Withdrawable" value={formatUsdc(dashboard.escrow?.developerBalance?.usdc)} delta={dashboard.escrow?.configured ? 'From escrow contract' : 'Contract not configured'} tone="success" />
-                </section>
-
-                <section className="pg-workspace-panels">
-                  <article className="pg-workspace-panel" id="api-registry">
-                    <div className="pg-workspace-panel-head">
-                      <div>
-                        <h2>API registry</h2>
-                        <p>Paid endpoints, setup states, calls, and revenue.</p>
-                      </div>
-                      <Link to="/apis/new" className="pg-workspace-panel-link">Add API <ArrowRight size={15} aria-hidden="true" /></Link>
-                    </div>
-
-                    {topApis.length === 0 ? (
-                      <EmptyState
-                        title="No paid endpoints yet"
-                        body="Create a paid endpoint from the demo upstream API or your own secret-protected GET endpoint."
-                        action={<Link to="/apis/new" className="pg-inline-link">Create your first paid endpoint</Link>}
-                      />
-                    ) : (
-                      <>
-                        <div className="pg-workspace-mobile-list">
-                          {topApis.map((api) => <ApiMobileCard key={api.id} api={api} />)}
-                        </div>
-                        <div className="pg-workspace-table is-registry">
-                          <div className="pg-workspace-table-head" aria-hidden="true">
-                            <span>API</span>
-                            <span>Status</span>
-                            <span>Price per call</span>
-                            <span>Calls</span>
-                            <span>Revenue</span>
-                          </div>
-                          {topApis.map((api) => (
-                            <div key={api.id} className="pg-workspace-table-row">
-                              <div className="pg-workspace-api-cell">
-                                <Link to={`/apis/${api.id}`}><Database size={17} aria-hidden="true" /> {api.name}</Link>
-                                <span>
-                                  {short(api.proxyUrl, 24, 8)}
-                                  <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
-                                </span>
-                              </div>
-                              <ApiStatusBadge status={api.status} compact />
-                              <span>${api.priceUsdc}</span>
-                              <span>{formatCompactNumber(api.successfulCalls)}</span>
-                              <strong>{formatMoney(api.grossRevenueUsdc)}</strong>
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </article>
-
-                  <article className="pg-workspace-panel" id="activity-ledger">
-                    <div className="pg-workspace-panel-head">
-                      <div>
-                        <h2>Activity ledger</h2>
-                        <p>Request, payment, upstream result, and revenue in one timeline.</p>
-                      </div>
-                      <button type="button">View all</button>
-                    </div>
-
-                    {activityRows.length === 0 ? (
-                      <EmptyState title="No activity yet" body="Unpaid challenges, verified payments, and forwarded requests will appear here after a proxy call." />
-                    ) : (
-                      <>
-                        <div className="pg-workspace-mobile-list">
-                          {activityRows.map((row) => <ActivityMobileCard key={row.id} row={row} />)}
-                        </div>
-                        <div className="pg-workspace-table is-ledger">
-                          <div className="pg-workspace-table-head" aria-hidden="true">
-                            <span>Request ID</span>
-                            <span>Event</span>
-                            <span>Result</span>
-                            <span>Revenue</span>
-                          </div>
-                          {activityRows.map((row) => (
-                            <div key={row.id} className="pg-workspace-table-row">
-                              <span className="pg-workspace-request-cell">
-                                <span className="pg-workspace-mono">{short(row.requestId, 10, 4)}</span>
-                                <small>{row.apiName}</small>
-                              </span>
-                              <WorkspaceBadge tone={row.eventTone}>{row.event}</WorkspaceBadge>
-                              <WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge>
-                              <strong className={row.revenueTone === 'positive' ? 'is-positive' : undefined}>{row.revenue}</strong>
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </article>
-                </section>
-
-                <section className="pg-workspace-withdraw" id="withdrawals">
-                  <span className="pg-workspace-withdraw-icon"><ShieldCheck size={27} aria-hidden="true" /></span>
-                  <div>
-                    <small>Escrow balance</small>
-                    <strong>{formatUsdc(dashboard.escrow?.developerBalance?.usdc)}</strong>
-                    <span>{dashboard.escrow?.configured ? 'Connected contract' : 'Contract not configured'}</span>
-                  </div>
-                  <i aria-hidden="true" />
-                  <div>
-                    <small>Ready to withdraw</small>
-                    <strong>{formatUsdc(dashboard.escrow?.developerBalance?.usdc)}</strong>
-                    <span>PayGate fee balance {formatUsdc(dashboard.escrow?.platformFeeBalance?.usdc)}</span>
-                  </div>
-                  <div className="pg-workspace-withdraw-actions">
-                    <Button
-                      type="button"
-                      onClick={handleWithdraw}
-                      disabled={!canWithdraw}
-                      variant={canWithdraw ? 'primary' : 'secondary'}
-                      icon={isWithdrawing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <Wallet size={15} aria-hidden="true" />}
-                    >
-                      {withdrawStatus === 'signing' ? 'Sign in Freighter' : withdrawStatus === 'submitting' ? 'Submitting' : 'Withdraw'}
-                    </Button>
-                    <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" className="pg-inline-link pg-external-link">
-                      Open Explorer
-                      <ArrowUpRight size={16} />
-                    </a>
-                  </div>
-                  {(withdrawError || withdrawResult) && (
-                    <div className="pg-dashboard-withdraw-status" data-tone={withdrawError ? 'danger' : 'success'}>
-                      {withdrawError || `Withdrawal submitted: ${short(withdrawResult.txHash, 10, 8)}`}
-                    </div>
-                  )}
-                </section>
-
-                <section className="pg-workspace-secondary-panel">
-                  <div className="pg-workspace-panel-head">
-                    <div>
-                      <h2>Withdrawal history</h2>
-                      <p>Developer payout contract invocations.</p>
-                    </div>
-                  </div>
-                  {(dashboard.withdrawals || []).length === 0 ? (
-                    <EmptyState title="No withdrawals yet" body="Withdrawable balance will move to the connected developer wallet after a Freighter-signed withdrawal." />
-                  ) : (
-                    <DataTable
-                      rows={dashboard.withdrawals.slice(0, 8)}
-                      columns={[
-                        { key: 'time', label: 'Time', render: (withdrawal) => formatDate(withdrawal.createdAt) },
-                        { key: 'amount', label: 'Amount', render: (withdrawal) => <span className="pg-dashboard-money">{formatUsdc(withdrawal.amountUsdc)}</span> },
-                        { key: 'status', label: 'Status', render: (withdrawal) => <StatusText status={withdrawal.status} /> },
-                        { key: 'tx', label: 'Tx', render: (withdrawal) => <TxLink hash={withdrawal.txHash} /> },
-                      ]}
-                      getRowKey={(withdrawal) => withdrawal.id}
-                    />
-                  )}
-                </section>
-                </>
-              )
+              ) : null
             )}
           </div>
         </section>
