@@ -299,6 +299,7 @@ export function buildDashboardModel(dashboard, days = 30, referenceDate = new Da
       archivedApis: lifecycleCounts.archived,
       totalCalls: rangeRequests.length,
       paidCalls,
+      successfulCalls: paidCalls,
       failedCalls,
       paymentRequiredCalls,
       grossRevenueUsdc: sumRows(rangePayments, 'grossAmountUsdc'),

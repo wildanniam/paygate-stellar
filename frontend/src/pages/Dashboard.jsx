@@ -28,7 +28,12 @@ import DataTable from '../components/ui/DataTable.jsx';
 import Notice from '../components/ui/Notice.jsx';
 import {
   buildActivityRows as buildDashboardActivityRows,
+  buildDashboardModel,
+  DASHBOARD_RANGES,
+  formatCompactNumber as formatDashboardCompactNumber,
+  formatPricePerCall,
   formatRangeLabel as formatDashboardRangeLabel,
+  formatUsdc as formatDashboardUsdc,
 } from '../lib/dashboardViewModel.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
 
@@ -234,11 +239,51 @@ const WORKSPACE_NAV_ITEMS = [
   { id: 'payouts', label: 'Payouts', to: '/dashboard/payouts', icon: Upload },
 ];
 
+const WORKSPACE_VIEW_META = {
+  overview: {
+    eyebrow: 'PayGate workspace',
+    title: 'Overview',
+    subtitle: 'Your API revenue, endpoint health, and payout readiness.',
+  },
+  endpoints: {
+    eyebrow: 'PayGate workspace',
+    title: 'Endpoints',
+    subtitle: 'Manage paid proxy URLs, setup state, price, and per-endpoint revenue.',
+  },
+  activity: {
+    eyebrow: 'PayGate workspace',
+    title: 'Activity',
+    subtitle: 'Trace requests from payment challenge to upstream response and revenue credit.',
+  },
+  payouts: {
+    eyebrow: 'PayGate workspace',
+    title: 'Payouts',
+    subtitle: 'Withdraw developer revenue and verify escrow settlement.',
+  },
+};
+
 function getWorkspaceView(pathname) {
   if (pathname.includes('/dashboard/endpoints')) return 'endpoints';
   if (pathname.includes('/dashboard/activity')) return 'activity';
   if (pathname.includes('/dashboard/payouts')) return 'payouts';
   return 'overview';
+}
+
+function RangeToggle({ value, onChange }) {
+  return (
+    <span className="pg-workspace-range" aria-label="Dashboard range">
+      {DASHBOARD_RANGES.map((range) => (
+        <button
+          key={range}
+          type="button"
+          className={value === range ? 'is-selected' : undefined}
+          onClick={() => onChange(range)}
+        >
+          {range}D
+        </button>
+      ))}
+    </span>
+  );
 }
 
 function WorkspaceMetric({ icon: Icon, label, value, delta, tone = 'neutral' }) {
@@ -452,6 +497,275 @@ function LoggedOutWorkspace({ authStatus, authError, onConnectWallet }) {
   );
 }
 
+function RevenueTrendCard({ model }) {
+  const payments = model.rangePayments || [];
+  const buckets = Array.from({ length: 8 }, (_, index) => {
+    const bucketPayments = payments.filter((_, paymentIndex) => paymentIndex % 8 === index);
+    return bucketPayments.reduce((sum, payment) => sum + Number(payment.developerAmountUsdc || 0), 0);
+  });
+  const max = Math.max(...buckets, 0.0001);
+
+  return (
+    <article className="pg-workspace-panel pg-overview-trend">
+      <div className="pg-workspace-panel-head">
+        <div>
+          <h2>Revenue trend</h2>
+          <p>Developer revenue credited during the selected range.</p>
+        </div>
+        <Link to="/dashboard/activity" className="pg-workspace-panel-link">View activity <ArrowRight size={15} aria-hidden="true" /></Link>
+      </div>
+      <div className="pg-overview-chart" aria-label="Developer revenue trend">
+        <div className="pg-overview-chart-total">
+          <small>Developer revenue</small>
+          <strong>{formatDashboardUsdc(model.summary.developerRevenueUsdc)}</strong>
+        </div>
+        <div className="pg-overview-bars" aria-hidden="true">
+          {buckets.map((value, index) => (
+            <span
+              key={`${index}-${value}`}
+              style={{ '--bar-height': `${Math.max(8, Math.round((value / max) * 100))}%` }}
+            />
+          ))}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function NeedsAttentionCard({ model }) {
+  const items = [];
+
+  if (model.needsAttention.setupRequiredApis > 0) {
+    items.push({
+      id: 'setup',
+      tone: 'warning',
+      title: `${model.needsAttention.setupRequiredApis} endpoint${model.needsAttention.setupRequiredApis > 1 ? 's' : ''} need setup`,
+      body: 'Verify the upstream guard before earning from paid calls.',
+      to: '/dashboard/endpoints',
+      action: 'Continue setup',
+    });
+  }
+
+  if (model.needsAttention.paymentRequiredCalls > 0) {
+    items.push({
+      id: 'payment-required',
+      tone: 'warning',
+      title: `${model.needsAttention.paymentRequiredCalls} payment-required call${model.needsAttention.paymentRequiredCalls > 1 ? 's' : ''}`,
+      body: 'These requests received 402 and were not forwarded upstream.',
+      to: '/dashboard/activity',
+      action: 'Review calls',
+    });
+  }
+
+  if (model.needsAttention.failedCalls > 0) {
+    items.push({
+      id: 'failed',
+      tone: 'danger',
+      title: `${model.needsAttention.failedCalls} failed request${model.needsAttention.failedCalls > 1 ? 's' : ''}`,
+      body: 'Check payment or upstream errors before they affect conversion.',
+      to: '/dashboard/activity',
+      action: 'Inspect errors',
+    });
+  }
+
+  if (model.needsAttention.withdrawableUsdc > 0) {
+    items.push({
+      id: 'withdrawable',
+      tone: 'success',
+      title: `${formatDashboardUsdc(model.needsAttention.withdrawableUsdc)} ready`,
+      body: 'Developer revenue is available in escrow.',
+      to: '/dashboard/payouts',
+      action: 'Open payouts',
+    });
+  }
+
+  return (
+    <article className="pg-workspace-panel pg-overview-attention">
+      <div className="pg-workspace-panel-head">
+        <div>
+          <h2>Needs attention</h2>
+          <p>The short list of things worth acting on now.</p>
+        </div>
+      </div>
+      <div className="pg-overview-attention-list">
+        {items.length === 0 ? (
+          <div className="pg-overview-attention-empty">
+            <ShieldCheck size={20} aria-hidden="true" />
+            <div>
+              <strong>Everything looks healthy</strong>
+              <span>No setup, payment, or payout action needs your attention.</span>
+            </div>
+          </div>
+        ) : (
+          items.slice(0, 3).map((item) => (
+            <Link key={item.id} to={item.to} className="pg-overview-attention-item" data-tone={item.tone}>
+              <span aria-hidden="true" />
+              <div>
+                <strong>{item.title}</strong>
+                <small>{item.body}</small>
+              </div>
+              <em>{item.action}</em>
+            </Link>
+          ))
+        )}
+      </div>
+    </article>
+  );
+}
+
+function TopEndpointsCard({ endpoints }) {
+  return (
+    <article className="pg-workspace-panel">
+      <div className="pg-workspace-panel-head">
+        <div>
+          <h2>Top endpoints</h2>
+          <p>Best performers in the selected range.</p>
+        </div>
+        <Link to="/dashboard/endpoints" className="pg-workspace-panel-link">View all <ArrowRight size={15} aria-hidden="true" /></Link>
+      </div>
+      {endpoints.length === 0 ? (
+        <EmptyState
+          title="No paid endpoints yet"
+          body="Create a paid endpoint to start tracking calls and revenue."
+          action={<Link to="/apis/new" className="pg-inline-link">Create your first endpoint</Link>}
+        />
+      ) : (
+        <div className="pg-workspace-table is-overview-endpoints">
+          <div className="pg-workspace-table-head" aria-hidden="true">
+            <span>Endpoint</span>
+            <span>Status</span>
+            <span>Price</span>
+            <span>Calls</span>
+            <span>Revenue</span>
+          </div>
+          {endpoints.slice(0, 3).map((api) => (
+            <div key={api.id} className="pg-workspace-table-row">
+              <div className="pg-workspace-api-cell">
+                <Link to={`/apis/${api.id}`}><Database size={17} aria-hidden="true" /> {api.name}</Link>
+                <span>{api.path}</span>
+              </div>
+              <ApiStatusBadge status={api.status} compact />
+              <span>{formatPricePerCall(api.priceUsdc)}</span>
+              <span>{formatDashboardCompactNumber(api.rangeSuccessfulCalls ?? api.successfulCalls)}</span>
+              <strong>{formatDashboardUsdc(api.rangeDeveloperRevenueUsdc ?? api.developerRevenueUsdc)}</strong>
+            </div>
+          ))}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function RecentActivityCard({ rows }) {
+  return (
+    <article className="pg-workspace-panel">
+      <div className="pg-workspace-panel-head">
+        <div>
+          <h2>Recent activity</h2>
+          <p>Latest request states and credited revenue.</p>
+        </div>
+        <Link to="/dashboard/activity" className="pg-workspace-panel-link">View all <ArrowRight size={15} aria-hidden="true" /></Link>
+      </div>
+      {rows.length === 0 ? (
+        <EmptyState title="No activity yet" body="402 challenges, verified payments, and forwarded requests will appear here." />
+      ) : (
+        <div className="pg-workspace-table is-overview-activity">
+          <div className="pg-workspace-table-head" aria-hidden="true">
+            <span>Time</span>
+            <span>Event</span>
+            <span>Endpoint</span>
+            <span>Result</span>
+            <span>Revenue</span>
+          </div>
+          {rows.slice(0, 4).map((row) => (
+            <div key={row.id} className="pg-workspace-table-row">
+              <span>{formatDate(row.createdAt)}</span>
+              <WorkspaceBadge tone={row.eventTone}>{row.event}</WorkspaceBadge>
+              <span>{row.apiName}</span>
+              <WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge>
+              <strong className={row.revenueTone === 'positive' ? 'is-positive' : undefined}>{row.revenue}</strong>
+            </div>
+          ))}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function OverviewPayoutStrip({ model, escrowConfigured }) {
+  return (
+    <section className="pg-workspace-withdraw pg-overview-payout" aria-label="Payout summary">
+      <span className="pg-workspace-withdraw-icon"><Wallet size={27} aria-hidden="true" /></span>
+      <div>
+        <small>Ready to withdraw</small>
+        <strong>{formatDashboardUsdc(model.summary.withdrawableUsdc)}</strong>
+        <span>{escrowConfigured ? 'Available from escrow' : 'Escrow contract unavailable'}</span>
+      </div>
+      <i aria-hidden="true" />
+      <div>
+        <small>PayGate fee balance</small>
+        <strong>{formatDashboardUsdc(model.summary.platformFeeBalanceUsdc)}</strong>
+        <span>Platform share from paid calls</span>
+      </div>
+      <div className="pg-workspace-withdraw-actions">
+        <Button as={Link} to="/dashboard/payouts" variant="secondary" icon={<ArrowRight size={15} aria-hidden="true" />}>
+          Manage payouts
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+function OverviewView({ model, dashboard }) {
+  if (!model) return null;
+
+  return (
+    <>
+      <section className="pg-workspace-metrics" aria-label="Overview metrics">
+        <WorkspaceMetric
+          icon={Database}
+          label="Active endpoints"
+          value={`${model.summary.activeApis}`}
+          delta={`${model.summary.setupRequiredApis} setup · ${model.summary.archivedApis} archived`}
+          tone="brand"
+        />
+        <WorkspaceMetric
+          icon={Activity}
+          label="Paid calls"
+          value={formatDashboardCompactNumber(model.summary.paidCalls)}
+          delta={`${formatDashboardCompactNumber(model.summary.totalCalls)} total · ${model.summary.paymentRequiredCalls} payment-required`}
+        />
+        <WorkspaceMetric
+          icon={DollarSign}
+          label="Developer revenue"
+          value={formatDashboardUsdc(model.summary.developerRevenueUsdc)}
+          delta={`PayGate fee ${formatDashboardUsdc(model.summary.platformFeeUsdc)}`}
+          tone="success"
+        />
+        <WorkspaceMetric
+          icon={Wallet}
+          label="Withdrawable"
+          value={formatDashboardUsdc(model.summary.withdrawableUsdc)}
+          delta={dashboard.escrow?.configured ? 'Ready from escrow' : 'Contract not configured'}
+          tone="success"
+        />
+      </section>
+
+      <section className="pg-overview-grid">
+        <RevenueTrendCard model={model} />
+        <NeedsAttentionCard model={model} />
+      </section>
+
+      <section className="pg-workspace-panels pg-overview-panels">
+        <TopEndpointsCard endpoints={model.topEndpoints} />
+        <RecentActivityCard rows={model.activityRows} />
+      </section>
+
+      <OverviewPayoutStrip model={model} escrowConfigured={dashboard.escrow?.configured} />
+    </>
+  );
+}
+
 export default function Dashboard() {
   const location = useLocation();
   const currentView = getWorkspaceView(location.pathname);
@@ -465,6 +779,7 @@ export default function Dashboard() {
   const [withdrawStatus, setWithdrawStatus] = useState('idle');
   const [withdrawError, setWithdrawError] = useState('');
   const [withdrawResult, setWithdrawResult] = useState(null);
+  const [selectedRange, setSelectedRange] = useState(30);
 
   const loadDashboard = useCallback(async () => {
     setDashboardStatus((prev) => (prev === 'loaded' ? 'refreshing' : 'loading'));
@@ -597,14 +912,19 @@ export default function Dashboard() {
     }
   };
 
-  const summary = dashboard?.summary;
   const escrowError = dashboard?.escrow?.error;
   const isLoading = dashboardStatus === 'loading' || authStatus === 'loading';
   const isRefreshing = dashboardStatus === 'refreshing';
   const isWithdrawing = ['preparing', 'signing', 'submitting'].includes(withdrawStatus);
   const withdrawableUsdc = Number(dashboard?.escrow?.developerBalance?.usdc || 0);
   const canWithdraw = session.authenticated && dashboard?.escrow?.configured && withdrawableUsdc > 0 && !escrowError && !isWithdrawing;
-  const rangeLabel = useMemo(() => formatDashboardRangeLabel(30, lastUpdated || new Date()), [lastUpdated]);
+  const rangeLabel = useMemo(() => formatDashboardRangeLabel(selectedRange, lastUpdated || new Date()), [lastUpdated, selectedRange]);
+  const dashboardModel = useMemo(
+    () => buildDashboardModel(dashboard, selectedRange, lastUpdated || new Date()),
+    [dashboard, selectedRange, lastUpdated],
+  );
+  const summary = dashboardModel?.summary || dashboard?.summary;
+  const viewMeta = WORKSPACE_VIEW_META[currentView] || WORKSPACE_VIEW_META.overview;
 
   const topApis = useMemo(() => {
     return [...(dashboard?.apis || [])].sort((a, b) => b.calls - a.calls).slice(0, 6);
@@ -640,17 +960,18 @@ export default function Dashboard() {
           <div className="pg-workspace-main" id="dashboard-overview" data-view={currentView}>
             <header className="pg-workspace-topbar">
               <div>
-                <p>PayGate workspace</p>
-                <h1>API revenue</h1>
+                <p>{viewMeta.eyebrow}</p>
+                <h1>{viewMeta.title}</h1>
+                <span className="pg-workspace-subtitle">{viewMeta.subtitle}</span>
               </div>
 
               <div className="pg-workspace-controls">
-                <span className="pg-workspace-date"><CalendarDays size={17} aria-hidden="true" /> {rangeLabel}</span>
-                <span className="pg-workspace-range" aria-label="Dashboard range">
-                  <button type="button">7D</button>
-                  <button type="button" className="is-selected">30D</button>
-                  <button type="button">90D</button>
-                </span>
+                {currentView !== 'endpoints' && (
+                  <>
+                    <span className="pg-workspace-date"><CalendarDays size={17} aria-hidden="true" /> {rangeLabel}</span>
+                    <RangeToggle value={selectedRange} onChange={setSelectedRange} />
+                  </>
+                )}
                 {session.authenticated && (
                   <Button
                     type="button"
@@ -694,7 +1015,10 @@ export default function Dashboard() {
             )}
 
             {dashboard && (
-              <>
+              currentView === 'overview' ? (
+                <OverviewView model={dashboardModel} dashboard={dashboard} />
+              ) : (
+                <>
                 <section className="pg-workspace-metrics" aria-label="Dashboard metrics">
                   <WorkspaceMetric icon={Database} label="APIs" value={`${summary.totalApis}`} delta={`${apiLifecycleCounts.active} active · ${apiLifecycleCounts.pending} setup · ${apiLifecycleCounts.archived} archived`} tone="brand" />
                   <WorkspaceMetric icon={Activity} label="Paid calls" value={formatCompactNumber(summary.successfulCalls)} delta={`${formatCompactNumber(summary.totalCalls)} total · ${summary.failedCalls} failed`} />
@@ -848,7 +1172,8 @@ export default function Dashboard() {
                     />
                   )}
                 </section>
-              </>
+                </>
+              )
             )}
           </div>
         </section>
