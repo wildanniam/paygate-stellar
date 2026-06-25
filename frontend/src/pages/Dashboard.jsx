@@ -2,14 +2,20 @@ import { signTransaction } from '@stellar/freighter-api';
 import {
   Activity,
   AlertCircle,
+  ArrowRight,
   ArrowUpRight,
+  CalendarDays,
+  Code2,
   Database,
   DollarSign,
   ExternalLink,
+  LayoutDashboard,
   Loader2,
   LogOut,
+  Plus,
   RefreshCw,
   ShieldCheck,
+  Upload,
   Wallet,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,9 +25,7 @@ import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import CopyButton from '../components/CopyButton.jsx';
 import Button from '../components/ui/Button.jsx';
 import DataTable from '../components/ui/DataTable.jsx';
-import Metric from '../components/ui/Metric.jsx';
 import Notice from '../components/ui/Notice.jsx';
-import { C } from '../colors.js';
 import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
 
 function short(value, head = 7, tail = 5) {
@@ -40,31 +44,142 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function formatRangeLabel(referenceDate = new Date()) {
+  const end = referenceDate;
+  const start = new Date(end);
+  start.setDate(start.getDate() - 30);
+
+  const dateFormatter = new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+  const yearFormatter = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+  });
+
+  return `${dateFormatter.format(start)} - ${dateFormatter.format(end)}, ${yearFormatter.format(end)}`;
+}
+
 function formatUsdc(value) {
   const number = Number(value || 0);
   return `${number.toFixed(4).replace(/\.?0+$/, '') || '0'} USDC`;
 }
 
-function statusColor(status) {
-  if (status === 'forwarded' || status === 'succeeded') return C.green;
-  if (status === 'credited' || status === 'payment_verified') return C.blue;
-  if (status === 'challenge_sent' || status === 'pending') return C.amber;
-  if (status?.includes('failed') || status === 'duplicate_payment') return C.red;
-  return C.text2;
+function formatCompactUsdc(value) {
+  const number = Number(value || 0);
+  return `${number.toFixed(3).replace(/\.?0+$/, '') || '0'} USDC`;
 }
 
-function SummaryCard({ icon: Icon, label, value, hint, tone = 'neutral' }) {
-  return (
-    <article className="pg-app-card pg-metric-card" data-tone={tone === 'warning' ? 'warning' : tone === 'success' ? 'success' : 'flat'}>
-      <Metric
-        label={label}
-        value={value}
-        delta={hint}
-        tone={tone}
-        icon={<Icon size={17} aria-hidden="true" />}
-      />
-    </article>
-  );
+function formatMoney(value) {
+  return `$${Number(value || 0).toFixed(2)}`;
+}
+
+function formatCompactNumber(value) {
+  const number = Number(value || 0);
+  if (number >= 1_000_000) return `${(number / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (number >= 1000) return `${(number / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+  return `${number}`;
+}
+
+function requestTone(status) {
+  if (status === 'forwarded' || status === 'succeeded') return 'success';
+  if (status === 'credited' || status === 'payment_verified') return 'blue';
+  if (status === 'challenge_sent' || status === 'pending') return 'warning';
+  if (status?.includes('failed') || status === 'duplicate_payment') return 'danger';
+  return 'muted';
+}
+
+function resultTone(status, upstreamStatus) {
+  if (status === 'challenge_sent') return 'danger';
+  if (status?.includes('failed') || status === 'duplicate_payment') return 'danger';
+  if (Number(upstreamStatus) >= 200 && Number(upstreamStatus) < 300) return 'success';
+  if (status === 'forwarded') return 'success';
+  return 'muted';
+}
+
+function activityMeta(request, payment) {
+  if (request.status === 'challenge_sent') {
+    return {
+      event: '402 required',
+      eventTone: 'warning',
+      result: 'blocked',
+      resultTone: 'danger',
+      revenue: '$0.000',
+      revenueTone: 'muted',
+    };
+  }
+
+  if (request.status === 'forwarded') {
+    const upstream = request.upstreamStatus ? `${request.upstreamStatus} OK` : '200 OK';
+    return {
+      event: payment ? 'MPP verified' : 'forwarded',
+      eventTone: payment ? 'purple' : 'blue',
+      result: upstream,
+      resultTone: resultTone(request.status, request.upstreamStatus),
+      revenue: payment ? `+${formatCompactUsdc(payment.developerAmountUsdc ?? payment.grossAmountUsdc)}` : '$0.000',
+      revenueTone: payment ? 'positive' : 'muted',
+    };
+  }
+
+  if (request.status === 'payment_failed' || request.status === 'duplicate_payment') {
+    return {
+      event: request.status.replace(/_/g, ' '),
+      eventTone: 'danger',
+      result: 'failed',
+      resultTone: 'danger',
+      revenue: '$0.000',
+      revenueTone: 'muted',
+    };
+  }
+
+  return {
+    event: request.status?.replace(/_/g, ' ') || 'request',
+    eventTone: requestTone(request.status),
+    result: request.upstreamStatus || '-',
+    resultTone: resultTone(request.status, request.upstreamStatus),
+    revenue: payment ? `+${formatCompactUsdc(payment.developerAmountUsdc ?? payment.grossAmountUsdc)}` : '$0.000',
+    revenueTone: payment ? 'positive' : 'muted',
+  };
+}
+
+function buildActivityRows(requests = [], payments = []) {
+  const paymentByRequestId = new Map(payments.filter((payment) => payment.requestId).map((payment) => [payment.requestId, payment]));
+  const paymentByPaymentId = new Map(payments.filter((payment) => payment.paymentId).map((payment) => [payment.paymentId, payment]));
+  const requestIds = new Set(requests.map((request) => request.id));
+
+  const requestRows = requests.map((request) => {
+    const payment = paymentByRequestId.get(request.id) || paymentByPaymentId.get(request.paymentId);
+    const meta = activityMeta(request, payment);
+
+    return {
+      id: request.id,
+      requestId: request.id,
+      apiName: request.apiName,
+      createdAt: request.forwardedAt || request.paidAt || request.createdAt,
+      txHash: request.txHash || payment?.txHash,
+      ...meta,
+    };
+  });
+
+  const orphanPaymentRows = payments
+    .filter((payment) => payment.requestId && !requestIds.has(payment.requestId))
+    .map((payment) => ({
+      id: `payment-${payment.id}`,
+      requestId: payment.requestId,
+      apiName: payment.apiName,
+      createdAt: payment.creditedAt || payment.verifiedAt || payment.createdAt,
+      txHash: payment.creditTxHash || payment.txHash,
+      event: 'MPP verified',
+      eventTone: 'purple',
+      result: 'credited',
+      resultTone: 'success',
+      revenue: `+${formatCompactUsdc(payment.developerAmountUsdc ?? payment.grossAmountUsdc)}`,
+      revenueTone: 'positive',
+    }));
+
+  return [...requestRows, ...orphanPaymentRows]
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .slice(0, 8);
 }
 
 function EmptyState({ title, body, action }) {
@@ -74,30 +189,6 @@ function EmptyState({ title, body, action }) {
       <p>{body}</p>
       {action && <div className="pg-empty-state-action">{action}</div>}
     </div>
-  );
-}
-
-function GhostDashboardPreview() {
-  return (
-    <section className="pg-dashboard-preview" aria-label="Dashboard preview">
-      <div className="pg-dashboard-preview-header">
-        <span className="pg-status-dot" data-tone="warning">Preview locked until wallet connect</span>
-        <span>Paid endpoint workspace</span>
-      </div>
-      <div className="pg-dashboard-metrics">
-        <SummaryCard icon={Database} label="APIs" value="2" hint="1 active · 1 setup" tone="brand" />
-        <SummaryCard icon={Activity} label="Paid Calls" value="12.4k" hint="Live proxy traffic" tone="neutral" />
-        <SummaryCard icon={DollarSign} label="Gross Revenue" value="$124.00" hint="USDC testnet" tone="success" />
-        <SummaryCard icon={Wallet} label="Withdrawable" value="$84.20" hint="Escrow balance" tone="success" />
-      </div>
-      <div className="pg-dashboard-preview-table">
-        <div>
-          <strong>Market Signal API</strong>
-          <span>https://paygate.app/api/pay/api_123</span>
-        </div>
-        <span className="pg-badge" data-tone="success">Active</span>
-      </div>
-    </section>
   );
 }
 
@@ -116,81 +207,223 @@ function TxLink({ hash }) {
   );
 }
 
-function DashboardSection({ title, description, action, children, tone = 'flat' }) {
-  return (
-    <section className="pg-dashboard-section" data-tone={tone}>
-      <div className="pg-dashboard-section-header">
-        <div>
-          <h2>{title}</h2>
-          {description && <p>{description}</p>}
-        </div>
-        {action}
-      </div>
-      <div className="pg-dashboard-section-body">
-        {children}
-      </div>
-    </section>
-  );
-}
-
 function StatusText({ status }) {
   return (
-    <span className="pg-dashboard-status-text" style={{ color: statusColor(status) }}>
+    <span className="pg-dashboard-status-text" data-tone={requestTone(status)}>
       {status || '-'}
     </span>
   );
 }
 
-function MobileActivityField({ label, children }) {
+function WorkspaceBadge({ children, tone = 'muted' }) {
   return (
-    <div className="pg-activity-mobile-field">
-      <span>{label}</span>
-      <strong>{children}</strong>
+    <span className={`pg-workspace-badge is-${tone}`}>
+      {children}
+    </span>
+  );
+}
+
+function WorkspaceMetric({ icon: Icon, label, value, delta, tone = 'neutral' }) {
+  return (
+    <article className="pg-workspace-metric" data-tone={tone}>
+      <div className="pg-workspace-metric-top">
+        <span>{label}</span>
+        <i aria-hidden="true"><Icon size={18} /></i>
+      </div>
+      <strong>{value}</strong>
+      {delta && <small>{delta}</small>}
+    </article>
+  );
+}
+
+function WorkspaceSidebar({ session, lastUpdated, authStatus, onConnectWallet, onLogout }) {
+  const isConnecting = authStatus === 'connecting' || authStatus === 'loading';
+
+  return (
+    <aside className="pg-workspace-sidebar" aria-label="Dashboard navigation">
+      <div className="pg-workspace-brand">
+        <img src="/brand/paygate-mark.svg" alt="" />
+        <strong>PayGate</strong>
+      </div>
+
+      <nav className="pg-workspace-nav" aria-label="Dashboard sections">
+        <a href="#dashboard-overview" className="is-active"><LayoutDashboard size={21} aria-hidden="true" /> Overview</a>
+        <a href="#api-registry"><Code2 size={21} aria-hidden="true" /> APIs</a>
+        <a href="#activity-ledger"><Database size={21} aria-hidden="true" /> Payments</a>
+        <a href="#withdrawals"><Upload size={21} aria-hidden="true" /> Withdrawals</a>
+      </nav>
+
+      <div className="pg-workspace-live-card">
+        <div>
+          <span><i aria-hidden="true" /> {session.authenticated ? 'Live' : 'Wallet required'}</span>
+          <small>{session.authenticated ? short(session.walletAddress, 9, 6) : 'Connect Freighter'}</small>
+          {lastUpdated && <small>Updated {lastUpdated.toLocaleTimeString()}</small>}
+        </div>
+        {session.authenticated ? (
+          <button type="button" onClick={onLogout} aria-label="Log out wallet">
+            <LogOut size={16} aria-hidden="true" />
+          </button>
+        ) : (
+          <button type="button" onClick={onConnectWallet} disabled={isConnecting} aria-label="Connect wallet">
+            {isConnecting ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}
+          </button>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function ApiMobileCard({ api }) {
+  return (
+    <article className="pg-workspace-mobile-card">
+      <div className="pg-workspace-mobile-card-top">
+        <div>
+          <Link to={`/apis/${api.id}`}>{api.name}</Link>
+          <span>{api.method} {api.path}</span>
+        </div>
+        <ApiStatusBadge status={api.status} compact />
+      </div>
+      <div className="pg-workspace-mobile-card-grid">
+        <span>Price <strong>${api.priceUsdc}/call</strong></span>
+        <span>Calls <strong>{formatCompactNumber(api.successfulCalls)}</strong></span>
+        <span>Revenue <strong>{formatMoney(api.grossRevenueUsdc)}</strong></span>
+      </div>
+      <div className="pg-workspace-url-row">
+        <span>{short(api.proxyUrl, 30, 8)}</span>
+        <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+      </div>
+    </article>
+  );
+}
+
+function ActivityMobileCard({ row }) {
+  return (
+    <article className="pg-workspace-mobile-card">
+      <div className="pg-workspace-mobile-card-top">
+        <div>
+          <span>{formatDate(row.createdAt)}</span>
+          <strong>{row.apiName}</strong>
+        </div>
+        <WorkspaceBadge tone={row.eventTone}>{row.event}</WorkspaceBadge>
+      </div>
+      <div className="pg-workspace-mobile-card-grid">
+        <span>Request <strong>{short(row.requestId, 10, 4)}</strong></span>
+        <span>Result <strong><WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge></strong></span>
+        <span>Revenue <strong className={row.revenueTone === 'positive' ? 'is-positive' : undefined}>{row.revenue}</strong></span>
+      </div>
+      <div className="pg-workspace-url-row">
+        <span>Transaction</span>
+        <TxLink hash={row.txHash} />
+      </div>
+    </article>
+  );
+}
+
+function LoggedOutWorkspace({ authStatus, authError, onConnectWallet }) {
+  const isConnecting = authStatus === 'connecting' || authStatus === 'loading';
+
+  return (
+    <div className="pg-workspace-logged-out">
+      <section className="pg-workspace-connect-card">
+        <ShieldCheck size={22} aria-hidden="true" />
+        <div>
+          <h2>Connect Freighter to open your revenue workspace.</h2>
+          <p>PayGate scopes APIs, payments, request logs, escrow balance, and withdrawals to your developer wallet.</p>
+          {authError && <div className="pg-inline-error">{authError}</div>}
+        </div>
+        <Button
+          type="button"
+          onClick={onConnectWallet}
+          disabled={isConnecting}
+          icon={isConnecting ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Wallet size={16} aria-hidden="true" />}
+        >
+          Connect Freighter
+        </Button>
+      </section>
+
+      <section className="pg-workspace-metrics is-preview" aria-label="Dashboard preview metrics">
+        <WorkspaceMetric icon={Database} label="APIs" value="2" delta="1 active · 1 setup" tone="brand" />
+        <WorkspaceMetric icon={Activity} label="Paid calls" value="12.4k" delta="Live proxy traffic" />
+        <WorkspaceMetric icon={DollarSign} label="Gross revenue" value="$124.00" delta="USDC testnet" tone="success" />
+        <WorkspaceMetric icon={Wallet} label="Withdrawable" value="$84.20" delta="Escrow balance" tone="success" />
+      </section>
+
+      <section className="pg-workspace-panels pg-workspace-preview-panels" aria-label="Dashboard preview panels">
+        <article className="pg-workspace-panel">
+          <div className="pg-workspace-panel-head">
+            <div>
+              <h2>API registry</h2>
+              <p>Preview of paid endpoints after wallet connect.</p>
+            </div>
+          </div>
+          <div className="pg-workspace-table is-registry">
+            <div className="pg-workspace-table-head" aria-hidden="true">
+              <span>API</span>
+              <span>Status</span>
+              <span>Price per call</span>
+              <span>Calls</span>
+              <span>Revenue</span>
+            </div>
+            <div className="pg-workspace-table-row">
+              <div className="pg-workspace-api-cell">
+                <span className="pg-workspace-preview-api"><Database size={17} aria-hidden="true" /> Weather signal</span>
+                <span>https://paygate.app/api/pay/api_123</span>
+              </div>
+              <WorkspaceBadge tone="success">active</WorkspaceBadge>
+              <span>$0.009/call</span>
+              <span>8.2k</span>
+              <strong>$73.80</strong>
+            </div>
+          </div>
+        </article>
+
+        <article className="pg-workspace-panel">
+          <div className="pg-workspace-panel-head">
+            <div>
+              <h2>Activity ledger</h2>
+              <p>Requests, payment checks, and revenue in one stream.</p>
+            </div>
+          </div>
+          <div className="pg-workspace-table is-ledger">
+            <div className="pg-workspace-table-head" aria-hidden="true">
+              <span>Request ID</span>
+              <span>Event</span>
+              <span>Result</span>
+              <span>Revenue</span>
+            </div>
+            <div className="pg-workspace-table-row">
+              <span className="pg-workspace-request-cell">
+                <span className="pg-workspace-mono">req_01HZ8XQ4</span>
+                <small>Weather signal</small>
+              </span>
+              <WorkspaceBadge tone="purple">MPP verified</WorkspaceBadge>
+              <WorkspaceBadge tone="success">200 OK</WorkspaceBadge>
+              <strong className="is-positive">+0.009 USDC</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section className="pg-workspace-withdraw pg-workspace-preview-withdraw" aria-label="Dashboard preview withdrawal">
+        <span className="pg-workspace-withdraw-icon"><ShieldCheck size={27} aria-hidden="true" /></span>
+        <div>
+          <small>Escrow balance</small>
+          <strong>$84.20 USDC</strong>
+          <span>Preview balance</span>
+        </div>
+        <i aria-hidden="true" />
+        <div>
+          <small>Ready to withdraw</small>
+          <strong>$84.20 USDC</strong>
+          <span>Connect wallet to manage payouts</span>
+        </div>
+        <div className="pg-workspace-withdraw-actions">
+          <Button type="button" variant="secondary" disabled icon={<Wallet size={15} aria-hidden="true" />}>
+            Withdraw
+          </Button>
+        </div>
+      </section>
     </div>
-  );
-}
-
-function PaymentMobileCard({ payment }) {
-  return (
-    <article className="pg-activity-mobile-card">
-      <div className="pg-activity-mobile-top">
-        <div>
-          <span>{formatDate(payment.createdAt)}</span>
-          <strong>{payment.apiName}</strong>
-        </div>
-        <span className="pg-dashboard-money">{formatUsdc(payment.grossAmountUsdc)}</span>
-      </div>
-      <div className="pg-activity-mobile-grid">
-        <MobileActivityField label="Payment Tx">
-          <TxLink hash={payment.txHash} />
-        </MobileActivityField>
-        <MobileActivityField label="Credit Tx">
-          <TxLink hash={payment.creditTxHash} />
-        </MobileActivityField>
-      </div>
-    </article>
-  );
-}
-
-function RequestMobileCard({ request }) {
-  return (
-    <article className="pg-activity-mobile-card">
-      <div className="pg-activity-mobile-top">
-        <div>
-          <span>{formatDate(request.createdAt)}</span>
-          <strong>{request.apiName}</strong>
-        </div>
-        <StatusText status={request.status} />
-      </div>
-      <div className="pg-activity-mobile-grid">
-        <MobileActivityField label="Upstream">
-          {request.upstreamStatus || '-'}
-        </MobileActivityField>
-        <MobileActivityField label="Transaction">
-          <TxLink hash={request.txHash} />
-        </MobileActivityField>
-      </div>
-    </article>
   );
 }
 
@@ -344,10 +577,12 @@ export default function Dashboard() {
   const isWithdrawing = ['preparing', 'signing', 'submitting'].includes(withdrawStatus);
   const withdrawableUsdc = Number(dashboard?.escrow?.developerBalance?.usdc || 0);
   const canWithdraw = session.authenticated && dashboard?.escrow?.configured && withdrawableUsdc > 0 && !escrowError && !isWithdrawing;
+  const rangeLabel = useMemo(() => formatRangeLabel(lastUpdated || new Date()), [lastUpdated]);
 
   const topApis = useMemo(() => {
     return [...(dashboard?.apis || [])].sort((a, b) => b.calls - a.calls).slice(0, 6);
   }, [dashboard]);
+
   const apiLifecycleCounts = useMemo(() => {
     const apis = dashboard?.apis || [];
     return {
@@ -357,272 +592,236 @@ export default function Dashboard() {
     };
   }, [dashboard]);
 
+  const activityRows = useMemo(() => buildActivityRows(dashboard?.requests, dashboard?.payments), [dashboard]);
+
   return (
     <div className="pg-app">
       <AppNavbar />
-      <main className="pg-app-main">
-        <header className="pg-dashboard-header">
-          <div>
-            <p className="pg-app-eyebrow">
-              PayGate workspace
-            </p>
-            <h1>
-              API revenue command center.
-            </h1>
-            <p>
-              Monitor paid endpoints, call traffic, escrow settlement, and withdrawable revenue from one developer wallet.
-            </p>
-          </div>
+      <main className="pg-app-main pg-workspace-page">
+        <section className="pg-workspace-shell" aria-label="PayGate API revenue workspace">
+          <WorkspaceSidebar
+            session={session}
+            lastUpdated={lastUpdated}
+            authStatus={authStatus}
+            onConnectWallet={handleConnectWallet}
+            onLogout={handleLogout}
+          />
 
-          <div className="pg-app-actions">
-            {session.authenticated && (
-              <Button type="button" variant="secondary" onClick={loadDashboard} disabled={isRefreshing} icon={isRefreshing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <RefreshCw size={15} aria-hidden="true" />}>
-                Refresh
-              </Button>
+          <div className="pg-workspace-main" id="dashboard-overview">
+            <header className="pg-workspace-topbar">
+              <div>
+                <p>PayGate workspace</p>
+                <h1>API revenue</h1>
+              </div>
+
+              <div className="pg-workspace-controls">
+                <span className="pg-workspace-date"><CalendarDays size={17} aria-hidden="true" /> {rangeLabel}</span>
+                <span className="pg-workspace-range" aria-label="Dashboard range">
+                  <button type="button">7D</button>
+                  <button type="button" className="is-selected">30D</button>
+                  <button type="button">90D</button>
+                </span>
+                {session.authenticated && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={loadDashboard}
+                    disabled={isRefreshing}
+                    icon={isRefreshing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <RefreshCw size={15} aria-hidden="true" />}
+                    className="pg-workspace-refresh"
+                  >
+                    Refresh
+                  </Button>
+                )}
+                <Button as={Link} to="/apis/new" size="sm" icon={<Plus size={16} aria-hidden="true" />} className="pg-workspace-create">
+                  Create paid endpoint
+                </Button>
+              </div>
+            </header>
+
+            {dashboardStatus === 'error' && dashboardError && (
+              <Notice tone="danger" className="pg-dashboard-notice" icon={<AlertCircle size={17} aria-hidden="true" />}>
+                {dashboardError}
+              </Notice>
             )}
-            <Button as={Link} to="/apis/new" icon={<Database size={16} aria-hidden="true" />}>
-              Create paid endpoint
-            </Button>
-          </div>
-        </header>
 
-        <section className="pg-dashboard-wallet">
-          <div>
-            <div className="pg-dashboard-wallet-title">
-              <ShieldCheck size={18} aria-hidden="true" />
-              Developer Wallet
-            </div>
-            <div className="pg-dashboard-wallet-address">
-              {session.authenticated ? short(session.walletAddress, 12, 8) : 'Connect Freighter to load your APIs and revenue.'}
-            </div>
-            {lastUpdated && <div className="pg-dashboard-wallet-meta">Updated {lastUpdated.toLocaleTimeString()}</div>}
-            {authError && <div className="pg-inline-error">{authError}</div>}
-          </div>
-          {session.authenticated ? (
-            <Button type="button" variant="secondary" onClick={handleLogout} disabled={authStatus === 'loading'} icon={<LogOut size={15} aria-hidden="true" />}>
-              Logout
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              onClick={handleConnectWallet}
-              disabled={authStatus === 'connecting' || authStatus === 'loading'}
-              icon={authStatus === 'connecting' ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Wallet size={16} aria-hidden="true" />}
-            >
-              Connect Freighter
-            </Button>
-          )}
-        </section>
-
-        {dashboard && (
-          <section className="pg-dashboard-metrics" aria-label="Dashboard metrics">
-            <SummaryCard icon={Database} label="APIs" value={`${summary.totalApis}`} hint={`${apiLifecycleCounts.active} active · ${apiLifecycleCounts.pending} setup · ${apiLifecycleCounts.archived} archived`} tone="brand" />
-            <SummaryCard icon={Activity} label="Paid Calls" value={`${summary.successfulCalls}/${summary.totalCalls}`} hint={`${summary.failedCalls} failed`} tone="neutral" />
-            <SummaryCard icon={DollarSign} label="Gross Revenue" value={formatUsdc(summary.grossRevenueUsdc)} hint={`Fee ${formatUsdc(summary.platformFeeUsdc)}`} tone="success" />
-            <SummaryCard icon={Wallet} label="Withdrawable" value={formatUsdc(dashboard.escrow?.developerBalance?.usdc)} hint={dashboard.escrow?.configured ? 'From escrow contract' : 'Contract not configured'} tone="success" />
-          </section>
-        )}
-
-        {isLoading && (
-          <div className="pg-loading-row">
-            <Loader2 size={18} className="spin" />
-            Loading dashboard...
-          </div>
-        )}
-
-        {!session.authenticated && authStatus !== 'loading' && (
-          <GhostDashboardPreview />
-        )}
-
-        {dashboardStatus === 'error' && dashboardError && (
-          <Notice tone="danger" className="pg-dashboard-notice" icon={<AlertCircle size={17} aria-hidden="true" />}>
-            {dashboardError}
-          </Notice>
-        )}
-
-        {dashboard && (
-          <div className="pg-dashboard-content">
             {escrowError && (
-              <Notice tone="warning" icon={<AlertCircle size={17} aria-hidden="true" />}>
+              <Notice tone="warning" className="pg-dashboard-notice" icon={<AlertCircle size={17} aria-hidden="true" />}>
                 {escrowError}
               </Notice>
             )}
 
-            <DashboardSection
-              title="Registered paid endpoints"
-              description="Proxy URLs, setup states, calls, and per-endpoint revenue."
-              action={<Button as={Link} to="/apis/new" size="sm">Create endpoint</Button>}
-            >
-              {topApis.length === 0 ? (
-                <EmptyState
-                  title="No paid endpoints yet"
-                  body="Create a paid endpoint from the demo upstream API or your own secret-protected GET endpoint."
-                  action={<Link to="/apis/new" className="pg-inline-link">Create your first paid endpoint</Link>}
-                />
-              ) : (
-                <>
-                  <div className="mobile-api-list pg-endpoint-mobile-list">
-                    {topApis.map((api) => (
-                      <article key={api.id} className="pg-endpoint-mobile-card">
-                        <div className="pg-endpoint-mobile-top">
-                          <div className="pg-row-title">
-                            <Link to={`/apis/${api.id}`}>{api.name}</Link>
-                            <span>{api.method} {api.path}</span>
+            {!session.authenticated && authStatus !== 'loading' && (
+              <LoggedOutWorkspace authStatus={authStatus} authError={authError} onConnectWallet={handleConnectWallet} />
+            )}
+
+            {isLoading && !dashboard && (
+              <div className="pg-loading-row pg-workspace-loading">
+                <Loader2 size={18} className="spin" />
+                Loading dashboard workspace...
+              </div>
+            )}
+
+            {dashboard && (
+              <>
+                <section className="pg-workspace-metrics" aria-label="Dashboard metrics">
+                  <WorkspaceMetric icon={Database} label="APIs" value={`${summary.totalApis}`} delta={`${apiLifecycleCounts.active} active · ${apiLifecycleCounts.pending} setup · ${apiLifecycleCounts.archived} archived`} tone="brand" />
+                  <WorkspaceMetric icon={Activity} label="Paid calls" value={formatCompactNumber(summary.successfulCalls)} delta={`${formatCompactNumber(summary.totalCalls)} total · ${summary.failedCalls} failed`} />
+                  <WorkspaceMetric icon={DollarSign} label="Gross revenue" value={formatUsdc(summary.grossRevenueUsdc)} delta={`Fee ${formatUsdc(summary.platformFeeUsdc)}`} tone="success" />
+                  <WorkspaceMetric icon={Wallet} label="Withdrawable" value={formatUsdc(dashboard.escrow?.developerBalance?.usdc)} delta={dashboard.escrow?.configured ? 'From escrow contract' : 'Contract not configured'} tone="success" />
+                </section>
+
+                <section className="pg-workspace-panels">
+                  <article className="pg-workspace-panel" id="api-registry">
+                    <div className="pg-workspace-panel-head">
+                      <div>
+                        <h2>API registry</h2>
+                        <p>Paid endpoints, setup states, calls, and revenue.</p>
+                      </div>
+                      <Link to="/apis/new" className="pg-workspace-panel-link">Add API <ArrowRight size={15} aria-hidden="true" /></Link>
+                    </div>
+
+                    {topApis.length === 0 ? (
+                      <EmptyState
+                        title="No paid endpoints yet"
+                        body="Create a paid endpoint from the demo upstream API or your own secret-protected GET endpoint."
+                        action={<Link to="/apis/new" className="pg-inline-link">Create your first paid endpoint</Link>}
+                      />
+                    ) : (
+                      <>
+                        <div className="pg-workspace-mobile-list">
+                          {topApis.map((api) => <ApiMobileCard key={api.id} api={api} />)}
+                        </div>
+                        <div className="pg-workspace-table is-registry">
+                          <div className="pg-workspace-table-head" aria-hidden="true">
+                            <span>API</span>
+                            <span>Status</span>
+                            <span>Price per call</span>
+                            <span>Calls</span>
+                            <span>Revenue</span>
                           </div>
-                          <ApiStatusBadge status={api.status} compact />
+                          {topApis.map((api) => (
+                            <div key={api.id} className="pg-workspace-table-row">
+                              <div className="pg-workspace-api-cell">
+                                <Link to={`/apis/${api.id}`}><Database size={17} aria-hidden="true" /> {api.name}</Link>
+                                <span>
+                                  {short(api.proxyUrl, 24, 8)}
+                                  <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+                                </span>
+                              </div>
+                              <ApiStatusBadge status={api.status} compact />
+                              <span>${api.priceUsdc}</span>
+                              <span>{formatCompactNumber(api.successfulCalls)}</span>
+                              <strong>{formatMoney(api.grossRevenueUsdc)}</strong>
+                            </div>
+                          ))}
                         </div>
-                        <div className="pg-endpoint-mobile-stats">
-                          <Metric label="Calls" value={`${api.successfulCalls}/${api.calls}`} />
-                          <Metric label="Revenue" value={formatUsdc(api.grossRevenueUsdc)} tone="success" />
+                      </>
+                    )}
+                  </article>
+
+                  <article className="pg-workspace-panel" id="activity-ledger">
+                    <div className="pg-workspace-panel-head">
+                      <div>
+                        <h2>Activity ledger</h2>
+                        <p>Request, payment, upstream result, and revenue in one timeline.</p>
+                      </div>
+                      <button type="button">View all</button>
+                    </div>
+
+                    {activityRows.length === 0 ? (
+                      <EmptyState title="No activity yet" body="Unpaid challenges, verified payments, and forwarded requests will appear here after a proxy call." />
+                    ) : (
+                      <>
+                        <div className="pg-workspace-mobile-list">
+                          {activityRows.map((row) => <ActivityMobileCard key={row.id} row={row} />)}
                         </div>
-                        <div className="pg-endpoint-mobile-url">
-                          <span>{short(api.proxyUrl, 28, 8)}</span>
-                          <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
+                        <div className="pg-workspace-table is-ledger">
+                          <div className="pg-workspace-table-head" aria-hidden="true">
+                            <span>Request ID</span>
+                            <span>Event</span>
+                            <span>Result</span>
+                            <span>Revenue</span>
+                          </div>
+                          {activityRows.map((row) => (
+                            <div key={row.id} className="pg-workspace-table-row">
+                              <span className="pg-workspace-request-cell">
+                                <span className="pg-workspace-mono">{short(row.requestId, 10, 4)}</span>
+                                <small>{row.apiName}</small>
+                              </span>
+                              <WorkspaceBadge tone={row.eventTone}>{row.event}</WorkspaceBadge>
+                              <WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge>
+                              <strong className={row.revenueTone === 'positive' ? 'is-positive' : undefined}>{row.revenue}</strong>
+                            </div>
+                          ))}
                         </div>
-                      </article>
-                    ))}
+                      </>
+                    )}
+                  </article>
+                </section>
+
+                <section className="pg-workspace-withdraw" id="withdrawals">
+                  <span className="pg-workspace-withdraw-icon"><ShieldCheck size={27} aria-hidden="true" /></span>
+                  <div>
+                    <small>Escrow balance</small>
+                    <strong>{formatUsdc(dashboard.escrow?.developerBalance?.usdc)}</strong>
+                    <span>{dashboard.escrow?.configured ? 'Connected contract' : 'Contract not configured'}</span>
                   </div>
-                  <DataTable
-                    className="desktop-api-table"
-                    rows={topApis}
-                    columns={[
-                      {
-                        key: 'api',
-                        label: 'Endpoint',
-                        render: (api) => (
-                          <div className="pg-row-title">
-                            <Link to={`/apis/${api.id}`}>{api.name}</Link>
-                            <span>{api.method} {api.path}</span>
-                          </div>
-                        ),
-                      },
-                      {
-                        key: 'proxy',
-                        label: 'Proxy URL',
-                        render: (api) => (
-                          <div className="pg-dashboard-copy-cell">
-                            <span>{short(api.proxyUrl, 34, 12)}</span>
-                            <CopyButton value={api.proxyUrl} compact ariaLabel="Copy proxy URL" />
-                          </div>
-                        ),
-                      },
-                      { key: 'calls', label: 'Calls', render: (api) => `${api.successfulCalls}/${api.calls}` },
-                      { key: 'revenue', label: 'Revenue', render: (api) => <span className="pg-dashboard-money">{formatUsdc(api.grossRevenueUsdc)}</span> },
-                      { key: 'status', label: 'Status', render: (api) => <ApiStatusBadge status={api.status} compact /> },
-                    ]}
-                    getRowKey={(api) => api.id}
-                  />
-                </>
-              )}
-            </DashboardSection>
-
-            <section className="pg-dashboard-table-split">
-              <DashboardSection title="Payment history" description="Verified payments and revenue credits.">
-                {dashboard.payments.length === 0 ? (
-                  <EmptyState title="No payments yet" body="Run the agent/client against a paid proxy. Verified payments will appear here with Stellar Expert links." />
-                ) : (
-                  <>
-                    <div className="mobile-api-list pg-activity-mobile-list">
-                      {dashboard.payments.slice(0, 8).map((payment) => (
-                        <PaymentMobileCard key={payment.id} payment={payment} />
-                      ))}
+                  <i aria-hidden="true" />
+                  <div>
+                    <small>Ready to withdraw</small>
+                    <strong>{formatUsdc(dashboard.escrow?.developerBalance?.usdc)}</strong>
+                    <span>PayGate fee balance {formatUsdc(dashboard.escrow?.platformFeeBalance?.usdc)}</span>
+                  </div>
+                  <div className="pg-workspace-withdraw-actions">
+                    <Button
+                      type="button"
+                      onClick={handleWithdraw}
+                      disabled={!canWithdraw}
+                      variant={canWithdraw ? 'primary' : 'secondary'}
+                      icon={isWithdrawing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <Wallet size={15} aria-hidden="true" />}
+                    >
+                      {withdrawStatus === 'signing' ? 'Sign in Freighter' : withdrawStatus === 'submitting' ? 'Submitting' : 'Withdraw'}
+                    </Button>
+                    <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" className="pg-inline-link pg-external-link">
+                      Open Explorer
+                      <ArrowUpRight size={16} />
+                    </a>
+                  </div>
+                  {(withdrawError || withdrawResult) && (
+                    <div className="pg-dashboard-withdraw-status" data-tone={withdrawError ? 'danger' : 'success'}>
+                      {withdrawError || `Withdrawal submitted: ${short(withdrawResult.txHash, 10, 8)}`}
                     </div>
-                    <DataTable
-                      className="desktop-api-table"
-                      rows={dashboard.payments.slice(0, 8)}
-                      columns={[
-                        { key: 'time', label: 'Time', render: (payment) => formatDate(payment.createdAt) },
-                        { key: 'api', label: 'API', render: (payment) => <strong className="pg-dashboard-row-strong">{payment.apiName}</strong> },
-                        { key: 'gross', label: 'Gross', render: (payment) => <span className="pg-dashboard-money">{formatUsdc(payment.grossAmountUsdc)}</span> },
-                        { key: 'paymentTx', label: 'Payment Tx', render: (payment) => <TxLink hash={payment.txHash} /> },
-                        { key: 'creditTx', label: 'Credit Tx', render: (payment) => <TxLink hash={payment.creditTxHash} /> },
-                      ]}
-                      getRowKey={(payment) => payment.id}
-                    />
-                  </>
-                )}
-              </DashboardSection>
+                  )}
+                </section>
 
-              <DashboardSection title="Request log" description="Recent paid proxy states.">
-                {dashboard.requests.length === 0 ? (
-                  <EmptyState title="No requests yet" body="Unpaid challenges and paid forwards will be logged after an agent calls a proxy URL." />
-                ) : (
-                  <>
-                    <div className="mobile-api-list pg-activity-mobile-list">
-                      {dashboard.requests.slice(0, 8).map((request) => (
-                        <RequestMobileCard key={request.id} request={request} />
-                      ))}
+                <section className="pg-workspace-secondary-panel">
+                  <div className="pg-workspace-panel-head">
+                    <div>
+                      <h2>Withdrawal history</h2>
+                      <p>Developer payout contract invocations.</p>
                     </div>
+                  </div>
+                  {(dashboard.withdrawals || []).length === 0 ? (
+                    <EmptyState title="No withdrawals yet" body="Withdrawable balance will move to the connected developer wallet after a Freighter-signed withdrawal." />
+                  ) : (
                     <DataTable
-                      className="desktop-api-table"
-                      rows={dashboard.requests.slice(0, 8)}
+                      rows={dashboard.withdrawals.slice(0, 8)}
                       columns={[
-                        { key: 'time', label: 'Time', render: (request) => formatDate(request.createdAt) },
-                        { key: 'api', label: 'API', render: (request) => <strong className="pg-dashboard-row-strong">{request.apiName}</strong> },
-                        { key: 'status', label: 'Status', render: (request) => <StatusText status={request.status} /> },
-                        { key: 'upstream', label: 'Upstream', render: (request) => request.upstreamStatus || '-' },
-                        { key: 'tx', label: 'Tx', render: (request) => <TxLink hash={request.txHash} /> },
+                        { key: 'time', label: 'Time', render: (withdrawal) => formatDate(withdrawal.createdAt) },
+                        { key: 'amount', label: 'Amount', render: (withdrawal) => <span className="pg-dashboard-money">{formatUsdc(withdrawal.amountUsdc)}</span> },
+                        { key: 'status', label: 'Status', render: (withdrawal) => <StatusText status={withdrawal.status} /> },
+                        { key: 'tx', label: 'Tx', render: (withdrawal) => <TxLink hash={withdrawal.txHash} /> },
                       ]}
-                      getRowKey={(request) => request.id}
+                      getRowKey={(withdrawal) => withdrawal.id}
                     />
-                  </>
-                )}
-              </DashboardSection>
-            </section>
-
-            <section className="pg-dashboard-escrow">
-              <div className="pg-dashboard-balance">
-                <span>Escrow contract</span>
-                <strong>{dashboard.escrow?.configured ? 'Connected' : 'Not configured'}</strong>
-              </div>
-              <div className="pg-dashboard-balance">
-                <span>Developer balance</span>
-                <strong className="is-success">{formatUsdc(dashboard.escrow?.developerBalance?.usdc)}</strong>
-              </div>
-              <div className="pg-dashboard-balance">
-                <span>PayGate fee balance</span>
-                <strong className="is-warning">{formatUsdc(dashboard.escrow?.platformFeeBalance?.usdc)}</strong>
-              </div>
-              <div className="pg-dashboard-escrow-actions">
-                <Button
-                  type="button"
-                  onClick={handleWithdraw}
-                  disabled={!canWithdraw}
-                  variant={canWithdraw ? 'primary' : 'secondary'}
-                  icon={isWithdrawing ? <Loader2 size={15} className="spin" aria-hidden="true" /> : <Wallet size={15} aria-hidden="true" />}
-                >
-                  {withdrawStatus === 'signing' ? 'Sign in Freighter' : withdrawStatus === 'submitting' ? 'Submitting' : 'Withdraw'}
-                </Button>
-                <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" className="pg-inline-link pg-external-link">
-                  Open Explorer
-                  <ArrowUpRight size={16} />
-                </a>
-              </div>
-              {(withdrawError || withdrawResult) && (
-                <div className="pg-dashboard-withdraw-status" data-tone={withdrawError ? 'danger' : 'success'}>
-                  {withdrawError || `Withdrawal submitted: ${short(withdrawResult.txHash, 10, 8)}`}
-                </div>
-              )}
-            </section>
-
-            <DashboardSection title="Withdrawal history" description="Developer payout contract invocations.">
-              {(dashboard.withdrawals || []).length === 0 ? (
-                <EmptyState title="No withdrawals yet" body="Withdrawable balance will move to the connected developer wallet after a Freighter-signed withdrawal." />
-              ) : (
-                <DataTable
-                  rows={dashboard.withdrawals.slice(0, 8)}
-                  columns={[
-                    { key: 'time', label: 'Time', render: (withdrawal) => formatDate(withdrawal.createdAt) },
-                    { key: 'amount', label: 'Amount', render: (withdrawal) => <span className="pg-dashboard-money">{formatUsdc(withdrawal.amountUsdc)}</span> },
-                    { key: 'status', label: 'Status', render: (withdrawal) => <StatusText status={withdrawal.status} /> },
-                    { key: 'tx', label: 'Tx', render: (withdrawal) => <TxLink hash={withdrawal.txHash} /> },
-                  ]}
-                  getRowKey={(withdrawal) => withdrawal.id}
-                />
-              )}
-            </DashboardSection>
+                  )}
+                </section>
+              </>
+            )}
           </div>
-        )}
+        </section>
       </main>
     </div>
   );
