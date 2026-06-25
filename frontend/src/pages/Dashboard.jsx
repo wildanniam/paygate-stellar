@@ -1036,6 +1036,231 @@ function EndpointsView({ model }) {
   );
 }
 
+const ACTIVITY_STATUS_OPTIONS = [
+  { value: 'all', label: 'All events' },
+  { value: 'mpp_verified', label: 'Paid' },
+  { value: '402', label: '402' },
+  { value: 'forwarded', label: 'Forwarded' },
+  { value: 'failed', label: 'Failed' },
+];
+
+function ActivityDetailPanel({ row }) {
+  if (!row) {
+    return (
+      <article className="pg-workspace-panel pg-activity-detail">
+        <EmptyState title="Select a request" body="Choose a ledger row to inspect payment, upstream, and revenue details." />
+      </article>
+    );
+  }
+
+  const timeline = [
+    {
+      label: 'Request received',
+      value: row.requestId,
+      tone: 'blue',
+    },
+    {
+      label: row.group === '402' ? 'Payment required' : 'Payment checked',
+      value: row.group === '402' ? '402 challenge returned' : row.paymentId || 'No payment ID',
+      tone: row.group === '402' ? 'warning' : 'purple',
+    },
+    {
+      label: 'Upstream result',
+      value: row.result,
+      tone: row.resultTone,
+    },
+    {
+      label: 'Revenue',
+      value: row.revenue,
+      tone: row.revenueTone === 'positive' ? 'success' : 'muted',
+    },
+  ];
+
+  return (
+    <article className="pg-workspace-panel pg-activity-detail">
+      <div className="pg-activity-detail-head">
+        <div>
+          <small>{formatDate(row.createdAt)}</small>
+          <h2>{row.event}</h2>
+          <p>{row.apiName || 'Unknown endpoint'}</p>
+        </div>
+        <WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge>
+      </div>
+
+      <div className="pg-activity-request-box">
+        <span>Request ID</span>
+        <code>{row.requestId}</code>
+        <CopyButton value={row.requestId} compact ariaLabel="Copy request ID" />
+      </div>
+
+      <div className="pg-activity-timeline">
+        {timeline.map((item) => (
+          <div key={item.label} data-tone={item.tone}>
+            <i aria-hidden="true" />
+            <span>{item.label}</span>
+            <strong>{item.value || '-'}</strong>
+          </div>
+        ))}
+      </div>
+
+      <dl className="pg-activity-detail-list">
+        <div>
+          <dt>Payment ID</dt>
+          <dd>{row.paymentId || '-'}</dd>
+        </div>
+        <div>
+          <dt>Payer wallet</dt>
+          <dd>{row.payerWallet ? short(row.payerWallet, 10, 6) : '-'}</dd>
+        </div>
+        <div>
+          <dt>Payment tx</dt>
+          <dd><TxLink hash={row.txHash} /></dd>
+        </div>
+        <div>
+          <dt>Credit tx</dt>
+          <dd><TxLink hash={row.creditTxHash} /></dd>
+        </div>
+      </dl>
+
+      {row.errorMessage && (
+        <Notice tone="danger" icon={<AlertCircle size={16} aria-hidden="true" />}>
+          {row.errorMessage}
+        </Notice>
+      )}
+    </article>
+  );
+}
+
+function ActivityView({ model }) {
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [apiFilter, setApiFilter] = useState('all');
+  const [revenueOnly, setRevenueOnly] = useState(false);
+  const [selectedActivityId, setSelectedActivityId] = useState(null);
+
+  const rows = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return (model?.activityRows || [])
+      .filter((row) => statusFilter === 'all' || row.group === statusFilter)
+      .filter((row) => apiFilter === 'all' || row.apiId === apiFilter)
+      .filter((row) => !revenueOnly || row.revenueTone === 'positive')
+      .filter((row) => {
+        if (!normalizedQuery) return true;
+        return [row.requestId, row.apiName, row.paymentId, row.payerWallet, row.txHash, row.creditTxHash]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(normalizedQuery));
+      });
+  }, [apiFilter, model, query, revenueOnly, statusFilter]);
+
+  const selectedRow = rows.find((row) => row.id === selectedActivityId) || rows[0] || null;
+  const apiOptions = model?.apiStats || [];
+
+  return (
+    <>
+      <section className="pg-workspace-toolbar pg-activity-toolbar" aria-label="Activity filters">
+        <label className="pg-workspace-search">
+          <Search size={17} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search requests, payments, wallets..."
+          />
+        </label>
+
+        <div className="pg-workspace-segment" aria-label="Activity status filter">
+          {ACTIVITY_STATUS_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={statusFilter === option.value ? 'is-selected' : undefined}
+              onClick={() => setStatusFilter(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        <label className="pg-workspace-select">
+          <span>API</span>
+          <select value={apiFilter} onChange={(event) => setApiFilter(event.target.value)}>
+            <option value="all">All endpoints</option>
+            {apiOptions.map((api) => (
+              <option key={api.id} value={api.id}>{api.name}</option>
+            ))}
+          </select>
+        </label>
+      </section>
+
+      <section className="pg-workspace-metrics" aria-label="Activity metrics">
+        <WorkspaceMetric icon={Activity} label="Requests" value={formatDashboardCompactNumber(model.summary.totalCalls)} delta={`${formatDashboardCompactNumber(rows.length)} shown by filter`} />
+        <WorkspaceMetric icon={ShieldCheck} label="Paid calls" value={formatDashboardCompactNumber(model.summary.successfulCalls)} delta="MPP verified and forwarded" tone="brand" />
+        <WorkspaceMetric icon={AlertCircle} label="402 challenges" value={formatDashboardCompactNumber(model.summary.paymentRequiredCalls)} delta="Blocked until paid" />
+        <WorkspaceMetric icon={DollarSign} label="Revenue events" value={formatDashboardUsdc(model.summary.developerRevenueUsdc)} delta="Developer share in range" tone="success" />
+      </section>
+
+      <section className="pg-activity-layout">
+        <article className="pg-workspace-panel pg-activity-ledger-panel">
+          <div className="pg-workspace-panel-head">
+            <div>
+              <h2>Activity ledger</h2>
+              <p>Request, payment check, upstream result, and revenue in one stream.</p>
+            </div>
+            <button
+              type="button"
+              className={revenueOnly ? 'is-selected' : undefined}
+              onClick={() => setRevenueOnly((value) => !value)}
+            >
+              Revenue only
+            </button>
+          </div>
+
+          {rows.length === 0 ? (
+            <EmptyState title="No activity matches this filter" body="Clear a filter or run a paid endpoint request to populate the ledger." />
+          ) : (
+            <>
+              <div className="pg-workspace-mobile-list">
+                {rows.map((row) => <ActivityMobileCard key={row.id} row={row} />)}
+              </div>
+              <div className="pg-workspace-table is-activity">
+                <div className="pg-workspace-table-head" aria-hidden="true">
+                  <span>Time</span>
+                  <span>Endpoint</span>
+                  <span>Request</span>
+                  <span>Event</span>
+                  <span>Result</span>
+                  <span>Revenue</span>
+                </div>
+                {rows.map((row) => (
+                  <button
+                    key={row.id}
+                    type="button"
+                    className={`pg-workspace-table-row ${selectedRow?.id === row.id ? 'is-selected' : ''}`}
+                    onClick={() => setSelectedActivityId(row.id)}
+                  >
+                    <span>{formatDate(row.createdAt)}</span>
+                    <span className="pg-workspace-request-cell">
+                      <strong>{row.apiName || 'Unknown'}</strong>
+                      <small>{row.paymentId || 'No payment ID'}</small>
+                    </span>
+                    <span className="pg-workspace-mono">{short(row.requestId, 10, 5)}</span>
+                    <WorkspaceBadge tone={row.eventTone}>{row.event}</WorkspaceBadge>
+                    <WorkspaceBadge tone={row.resultTone}>{row.result}</WorkspaceBadge>
+                    <strong className={row.revenueTone === 'positive' ? 'is-positive' : undefined}>{row.revenue}</strong>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </article>
+
+        <ActivityDetailPanel row={selectedRow} />
+      </section>
+    </>
+  );
+}
+
 export default function Dashboard() {
   const location = useLocation();
   const currentView = getWorkspaceView(location.pathname);
@@ -1289,6 +1514,8 @@ export default function Dashboard() {
                 <OverviewView model={dashboardModel} dashboard={dashboard} />
               ) : currentView === 'endpoints' ? (
                 <EndpointsView model={dashboardModel} />
+              ) : currentView === 'activity' ? (
+                <ActivityView model={dashboardModel} />
               ) : (
                 <>
                 <section className="pg-workspace-metrics" aria-label="Dashboard metrics">
