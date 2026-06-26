@@ -669,7 +669,7 @@ export default function Landing() {
     }
 
     if (protectedSection) {
-      gsap.from(protectedSection.querySelectorAll('.paygate-protected-head > *, .paygate-protected-card, .paygate-protected-branch, .paygate-protected-fact'), {
+      gsap.from(protectedSection.querySelectorAll('.paygate-protected-head > *, .paygate-protected-card, .paygate-protected-fact'), {
         autoAlpha: 0,
         y: 18,
         scale: 0.99,
@@ -1308,7 +1308,7 @@ export default function Landing() {
               aria-label="Unpaid request receives 402 blocked before reaching PayGate forwarding."
             >
               <span>Unpaid</span>
-              <strong><BlockedTrafficIcon size={16} /> 402 blocked</strong>
+              <strong><BlockedTrafficIcon size={15} /> 402</strong>
               <i aria-hidden="true" />
             </button>
 
@@ -1320,7 +1320,7 @@ export default function Landing() {
               aria-label="Paid request is forwarded from the machine client to PayGate guard."
             >
               <span>Paid</span>
-              <strong><CheckCircle2 size={16} /> forwarded</strong>
+              <strong><CheckCircle2 size={15} /> verified</strong>
             </button>
 
             <article
@@ -1352,8 +1352,8 @@ export default function Landing() {
               onFocus={() => setProtectedActive('forwarded')}
               aria-label="Paid request is forwarded from PayGate guard to the protected upstream API."
             >
-              <span>Paid</span>
-              <strong><CheckCircle2 size={16} /> forwarded</strong>
+              <span>Forward</span>
+              <strong><CheckCircle2 size={15} /> sent</strong>
             </button>
 
             <article

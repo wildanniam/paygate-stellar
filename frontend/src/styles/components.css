@@ -6559,8 +6559,8 @@
   --protected-left-col: 292px;
   --protected-center-col: 264px;
   --protected-right-col: 326px;
-  --protected-gap: clamp(86px, 8vw, 118px);
-  --protected-branch-width: 132px;
+  --protected-gap: clamp(132px, 9vw, 154px);
+  --protected-branch-width: 108px;
   position: relative;
   display: grid;
   grid-template-columns: var(--protected-left-col) var(--protected-center-col) var(--protected-right-col);
@@ -6945,7 +6945,7 @@
   align-items: center;
   justify-content: center;
   width: var(--protected-branch-width);
-  height: 54px;
+  height: 48px;
   border: 0;
   background: transparent;
   color: var(--pg-text-secondary);
@@ -6971,18 +6971,23 @@
 
 .paygate-protected-branch > span {
   position: absolute;
-  top: 0;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
   color: currentColor;
   font-family: var(--pg-font-mono);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.82;
 }
 
 .paygate-protected-branch strong {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 32px;
+  gap: 6px;
+  min-height: 28px;
   border: 1px solid currentColor;
   border-radius: 999px;
   background:
@@ -6992,15 +6997,19 @@
     0 0 10px color-mix(in srgb, currentColor 7%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
   font-family: var(--pg-font-sans);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 0 12px;
+  padding: 0 10px;
   white-space: nowrap;
 }
 
+.paygate-protected-branch strong svg {
+  flex: 0 0 auto;
+}
+
 .paygate-protected-branch.is-blocked {
-  top: 28.5%;
-  left: calc(var(--protected-left-col) + (var(--protected-gap) - var(--protected-branch-width)) / 2);
+  top: 35%;
+  left: calc(var(--protected-left-col) + (var(--protected-gap) / 2) - (var(--protected-branch-width) / 2));
   color: var(--pg-warning);
 }
 
@@ -7012,10 +7021,10 @@
 
 .paygate-protected-branch.is-blocked i {
   position: absolute;
-  right: -22px;
+  right: -18px;
   top: 50%;
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
   transform: translateY(-50%) rotate(45deg);
 }
 
@@ -7025,8 +7034,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 20px;
-  height: 3px;
+  width: 17px;
+  height: 2.5px;
   border-radius: 999px;
   background: var(--pg-warning);
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.30);
@@ -7038,14 +7047,14 @@
 }
 
 .paygate-protected-branch.is-paid-left {
-  top: 56%;
-  left: calc(var(--protected-left-col) + (var(--protected-gap) - var(--protected-branch-width)) / 2);
+  top: 61%;
+  left: calc(var(--protected-left-col) + (var(--protected-gap) / 2) - (var(--protected-branch-width) / 2));
   color: #4ADE80;
 }
 
 .paygate-protected-branch.is-paid-right {
-  top: 56%;
-  right: calc(var(--protected-right-col) + (var(--protected-gap) - var(--protected-branch-width)) / 2);
+  top: 61%;
+  right: calc(var(--protected-right-col) + (var(--protected-gap) / 2) - (var(--protected-branch-width) / 2));
   color: #4ADE80;
 }
 
@@ -7063,12 +7072,12 @@
 .paygate-protected-branch.is-paid-right::after {
   content: '';
   position: absolute;
-  right: calc((var(--protected-gap) - var(--protected-branch-width)) / -2 - 5px);
+  right: calc((var(--protected-gap) - var(--protected-branch-width)) / -2 - 4px);
   top: 50%;
-  width: 12px;
-  height: 12px;
-  border-top: 3px solid currentColor;
-  border-right: 3px solid currentColor;
+  width: 10px;
+  height: 10px;
+  border-top: 2.5px solid currentColor;
+  border-right: 2.5px solid currentColor;
   transform: translateY(-50%) rotate(45deg);
   filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.32));
 }
@@ -7156,7 +7165,7 @@
     right: auto;
     left: auto;
     width: 100%;
-    height: 54px;
+    height: 48px;
   }
 
   .paygate-protected-branch.is-blocked,
@@ -7686,17 +7695,17 @@
   }
 
   .paygate-protected-branch {
-    height: 50px;
+    height: 48px;
   }
 
   .paygate-protected-branch > span {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .paygate-protected-branch strong {
-    min-height: 34px;
-    font-size: 12px;
-    padding: 0 12px;
+    min-height: 28px;
+    font-size: 11px;
+    padding: 0 10px;
   }
 
   .paygate-protected-gate-label {
