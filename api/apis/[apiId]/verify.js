@@ -1,6 +1,7 @@
 import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, resolveApiStatus } from '../../../server/lib/apiRegistry.js';
 import { decryptApiSecret } from '../../../server/lib/apiSecret.js';
 import { methodNotAllowed } from '../../../server/lib/auth.js';
+import { publicErrorMessage } from '../../../server/lib/errors.js';
 
 function nowIso() {
   return new Date().toISOString();
@@ -66,7 +67,7 @@ export default async function handler(req, res) {
       return res.status(502).json({
         error: 'PayGate could not reach the upstream API for verification.',
         code: 'upstream_unreachable',
-        details: error instanceof Error ? error.message : 'Upstream request failed',
+        details: publicErrorMessage(error, 'Upstream request failed'),
       });
     }
 
@@ -95,6 +96,8 @@ export default async function handler(req, res) {
       },
     });
   } catch (err) {
-    return res.status(500).json({ error: err.message || 'API setup verification error' });
+    return res.status(500).json({
+      error: publicErrorMessage(err, 'PayGate could not verify setup. Please try again in a moment.'),
+    });
   }
 }

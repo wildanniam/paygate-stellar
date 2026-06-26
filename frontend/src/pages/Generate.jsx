@@ -5,6 +5,7 @@ import AppNavbar from '../components/AppNavbar.jsx';
 import Notice from '../components/ui/Notice.jsx';
 import Button from '../components/ui/Button.jsx';
 import { Field, Input } from '../components/ui/Field.jsx';
+import { toSafeErrorMessage } from '../lib/walletAuth.js';
 
 const initialForm = { endpointUrl: '', path: '', price: '' };
 
@@ -61,7 +62,7 @@ export default function Generate() {
           setErrors(data.details);
           return;
         }
-        setGeneralError(data.error || 'Failed to generate code. Please try again.');
+        setGeneralError(toSafeErrorMessage(data.error, 'Failed to generate code. Please try again.'));
         return;
       }
 

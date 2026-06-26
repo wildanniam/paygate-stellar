@@ -8,7 +8,7 @@ import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
 import Button from '../components/ui/Button.jsx';
 import CopyField from '../components/ui/CopyField.jsx';
 import Notice from '../components/ui/Notice.jsx';
-import { readJsonResponse } from '../lib/walletAuth.js';
+import { readJsonResponse, toSafeErrorMessage } from '../lib/walletAuth.js';
 
 export default function ApiDetail() {
   const { apiId } = useParams();
@@ -37,11 +37,13 @@ export default function ApiDetail() {
         setStatus('not-found');
         return;
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to load API.');
+      if (!res.ok) {
+        throw new Error(toSafeErrorMessage(data.error, 'PayGate could not load this endpoint. Please try again in a moment.'));
+      }
       setApi(data.api);
       setStatus('loaded');
     } catch (err) {
-      setError(err.message || 'Failed to load API.');
+      setError(toSafeErrorMessage(err.message, 'PayGate could not load this endpoint. Please try again in a moment.'));
       setStatus('error');
     }
   }, [apiId]);
@@ -88,12 +90,14 @@ export default function ApiDetail() {
         setStatus('idle');
         return;
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to update API.');
+      if (!res.ok) {
+        throw new Error(toSafeErrorMessage(data.error, 'PayGate could not verify setup. Please try again in a moment.'));
+      }
       setApi((current) => ({ ...current, ...data.api }));
       setNotice('Setup verified. This API is now active for paid proxy calls.');
       setStatus('loaded');
     } catch (err) {
-      setError(err.message || 'Failed to verify setup.');
+      setError(toSafeErrorMessage(err.message, 'PayGate could not verify setup. Please try again in a moment.'));
       setStatus('error');
     }
   };
@@ -121,7 +125,9 @@ export default function ApiDetail() {
         setStatus('idle');
         return;
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to remove API.');
+      if (!res.ok) {
+        throw new Error(toSafeErrorMessage(data.error, 'PayGate could not update this endpoint. Please try again in a moment.'));
+      }
       if (data.deleted) {
         navigate('/dashboard');
         return;
@@ -130,7 +136,7 @@ export default function ApiDetail() {
       setNotice('API archived. Its history is preserved, and the endpoint can be registered again for a fresh demo.');
       setStatus('loaded');
     } catch (err) {
-      setError(err.message || 'Failed to remove API.');
+      setError(toSafeErrorMessage(err.message, 'PayGate could not update this endpoint. Please try again in a moment.'));
       setStatus('error');
     }
   };

@@ -20,7 +20,7 @@ export function toSafeErrorMessage(message, fallback = 'PayGate could not comple
   const looksLikeGatewayError = /cloudflare|connection timed out|error code 52\d|supabase\.co/i.test(raw);
 
   if (looksLikeHtml || looksLikeGatewayError || raw.length > 320) {
-    return 'PayGate could not reach the wallet challenge service. Please try again in a moment.';
+    return fallback;
   }
 
   return raw;

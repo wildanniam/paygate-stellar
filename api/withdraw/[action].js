@@ -6,6 +6,7 @@ import {
   readEscrowBalances,
   submitEscrowWithdrawal,
 } from '../../server/lib/escrowContract.js';
+import { publicErrorMessage } from '../../server/lib/errors.js';
 
 const submitSchema = z.object({
   signedTransactionXdr: z.string().min(20),
@@ -52,7 +53,9 @@ export async function handlePrepare(req, res) {
         requiredEnv: ['ESCROW_CONTRACT_ID'],
       });
     }
-    return res.status(500).json({ error: err.message || 'Withdrawal preparation failed' });
+    return res.status(500).json({
+      error: publicErrorMessage(err, 'PayGate could not prepare the withdrawal. Please try again in a moment.'),
+    });
   }
 }
 
@@ -125,7 +128,9 @@ export async function handleSubmit(req, res) {
         requiredEnv: ['ESCROW_CONTRACT_ID'],
       });
     }
-    return res.status(500).json({ error: err.message || 'Withdrawal submission failed' });
+    return res.status(500).json({
+      error: publicErrorMessage(err, 'PayGate could not submit the withdrawal. Please try again in a moment.'),
+    });
   }
 }
 

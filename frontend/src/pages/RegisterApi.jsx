@@ -5,7 +5,7 @@ import AppNavbar from '../components/AppNavbar.jsx';
 import ApiStatusBadge from '../components/ApiStatusBadge.jsx';
 import UpstreamGuardGuide from '../components/UpstreamGuardGuide.jsx';
 import WalletLoginPanel from '../components/WalletLoginPanel.jsx';
-import { readJsonResponse } from '../lib/walletAuth.js';
+import { readJsonResponse, toSafeErrorMessage } from '../lib/walletAuth.js';
 import Button from '../components/ui/Button.jsx';
 import CopyField from '../components/ui/CopyField.jsx';
 import { Field, Input } from '../components/ui/Field.jsx';
@@ -103,11 +103,13 @@ export default function RegisterApi() {
         setSession({ authenticated: false });
         throw new Error('Wallet session expired. Connect Freighter again.');
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to register API.');
+      if (!res.ok) {
+        throw new Error(toSafeErrorMessage(data.error, 'PayGate could not create the paid endpoint. Please try again in a moment.'));
+      }
       setCreatedApi(data.api);
       setStatus('created');
     } catch (err) {
-      setError(err.message || 'Failed to register API.');
+      setError(toSafeErrorMessage(err.message, 'PayGate could not create the paid endpoint. Please try again in a moment.'));
       setStatus('error');
     }
   };

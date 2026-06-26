@@ -1,6 +1,7 @@
 import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, toApiResponse, updateApiSchema } from '../../server/lib/apiRegistry.js';
 import { methodNotAllowed } from '../../server/lib/auth.js';
 import { readJsonBody } from '../../server/lib/body.js';
+import { publicErrorMessage } from '../../server/lib/errors.js';
 
 function nowIso() {
   return new Date().toISOString();
@@ -83,6 +84,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ api: toApiResponse(req, api) });
   } catch (err) {
-    return res.status(500).json({ error: err.message || 'API registry error' });
+    return res.status(500).json({
+      error: publicErrorMessage(err, 'PayGate could not load this endpoint. Please try again in a moment.'),
+    });
   }
 }

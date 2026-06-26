@@ -35,7 +35,7 @@ import {
   formatRangeLabel as formatDashboardRangeLabel,
   formatUsdc as formatDashboardUsdc,
 } from '../lib/dashboardViewModel.js';
-import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE } from '../lib/walletAuth.js';
+import { connectFreighterWallet, readJsonResponse, TESTNET_PASSPHRASE, toSafeErrorMessage } from '../lib/walletAuth.js';
 
 function short(value, head = 7, tail = 5) {
   if (!value) return '-';
@@ -580,7 +580,9 @@ function EndpointDetailPanel({ api }) {
         const res = await fetch(`/api/apis/${api.id}`, { credentials: 'include' });
         const data = await readJsonResponse(res);
         if (!active) return;
-        if (!res.ok) throw new Error(data.error || 'Failed to load endpoint details.');
+        if (!res.ok) {
+          throw new Error(toSafeErrorMessage(data.error, 'PayGate could not load endpoint details. Please try again in a moment.'));
+        }
         setDetail(data.api);
         setStatus('loaded');
       } catch {
@@ -1220,12 +1222,14 @@ export default function Dashboard() {
         setDashboardStatus('idle');
         return;
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to load dashboard.');
+      if (!res.ok) {
+        throw new Error(toSafeErrorMessage(data.error, 'PayGate could not load the dashboard workspace. Please try again in a moment.'));
+      }
       setDashboard(data);
       setLastUpdated(new Date());
       setDashboardStatus('loaded');
     } catch (err) {
-      setDashboardError(err.message || 'Failed to load dashboard.');
+      setDashboardError(toSafeErrorMessage(err.message, 'PayGate could not load the dashboard workspace. Please try again in a moment.'));
       setDashboardStatus('error');
     }
   }, []);
@@ -1264,7 +1268,7 @@ export default function Dashboard() {
       setAuthStatus('idle');
       await loadDashboard();
     } catch (err) {
-      setAuthError(err.message || 'Gagal connect wallet.');
+      setAuthError(toSafeErrorMessage(err.message, 'PayGate could not connect your wallet.'));
       setAuthStatus('error');
     }
   };
@@ -1302,7 +1306,9 @@ export default function Dashboard() {
         setDashboardStatus('idle');
         throw new Error('Wallet session expired. Connect Freighter again.');
       }
-      if (!prepareRes.ok) throw new Error(prepared.error || 'Failed to prepare withdrawal.');
+      if (!prepareRes.ok) {
+        throw new Error(toSafeErrorMessage(prepared.error, 'PayGate could not prepare the withdrawal. Please try again in a moment.'));
+      }
 
       setWithdrawStatus('signing');
       const signed = await signTransaction(prepared.transactionXdr, {
@@ -1328,13 +1334,15 @@ export default function Dashboard() {
         setDashboardStatus('idle');
         throw new Error('Wallet session expired. Connect Freighter again.');
       }
-      if (!submitRes.ok) throw new Error(submitted.error || 'Failed to submit withdrawal.');
+      if (!submitRes.ok) {
+        throw new Error(toSafeErrorMessage(submitted.error, 'PayGate could not submit the withdrawal. Please try again in a moment.'));
+      }
 
       setWithdrawResult(submitted);
       setWithdrawStatus('done');
       await loadDashboard();
     } catch (err) {
-      setWithdrawError(err.message || 'Withdrawal failed.');
+      setWithdrawError(toSafeErrorMessage(err.message, 'Withdrawal failed. Please try again in a moment.'));
       setWithdrawStatus('error');
     }
   };

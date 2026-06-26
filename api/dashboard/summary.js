@@ -1,5 +1,6 @@
 import { toApiResponse, requireRegistryConfig, requireRegistrySession } from '../../server/lib/apiRegistry.js';
 import { readEscrowBalances } from '../../server/lib/escrowContract.js';
+import { publicErrorMessage } from '../../server/lib/errors.js';
 
 function sumUsdc(rows, field) {
   return rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
@@ -105,7 +106,7 @@ async function readBalances(walletAddress) {
       configured: true,
       developerBalance: { baseUnits: '0', usdc: '0.0000000' },
       platformFeeBalance: { baseUnits: '0', usdc: '0.0000000' },
-      error: error instanceof Error ? error.message : 'Failed to read escrow balance',
+      error: publicErrorMessage(error, 'Escrow balance is temporarily unavailable.'),
     };
   }
 }
@@ -155,6 +156,8 @@ export default async function handler(req, res) {
       withdrawals: withdrawals.map(serializeWithdrawal),
     });
   } catch (err) {
-    return res.status(500).json({ error: err.message || 'Dashboard summary error' });
+    return res.status(500).json({
+      error: publicErrorMessage(err, 'PayGate could not load the dashboard workspace. Please try again in a moment.'),
+    });
   }
 }

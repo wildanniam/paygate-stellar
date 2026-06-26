@@ -14,6 +14,7 @@ import payHandler from '../../api/pay/[apiId].js';
 import withdrawHandler from '../../api/withdraw/[action].js';
 import demoMarketSignalHandler from '../../api/demo/market-signal.js';
 import upstreamMarketSignalHandler from '../../api/upstream/market-signal.js';
+import { publicErrorMessage } from '../../server/lib/errors.js';
 
 function loadLocalEnv() {
   const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -84,7 +85,9 @@ app.all('/api/upstream/market-signal', vercelHandler(upstreamMarketSignalHandler
 app.use('/api', (error, _req, res, next) => {
   if (res.headersSent) return next(error);
   console.error('PayGate local API error:', error);
-  return res.status(500).json({ error: error.message || 'Local API error' });
+  return res.status(500).json({
+    error: publicErrorMessage(error, 'PayGate local API could not complete the request. Please try again in a moment.'),
+  });
 });
 
 app.get('/health', (_req, res) => {
