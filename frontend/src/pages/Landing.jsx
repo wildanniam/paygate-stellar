@@ -597,6 +597,12 @@ export default function Landing() {
       },
     });
 
+    const heroIntro = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    heroIntro
+      .from('.paygate-hero-title', { autoAlpha: 0, y: 24, duration: 0.72 }, 0.05)
+      .from('.paygate-hero-copy', { autoAlpha: 0, y: 16, duration: 0.56 }, 0.18)
+      .from('.paygate-hero-actions .pg-button', { autoAlpha: 0, y: 14, duration: 0.48, stagger: 0.08 }, 0.32);
+
     const setStage = () => {
       const current = {
         transform: transformActive,
@@ -627,8 +633,24 @@ export default function Landing() {
     const transformSection = root.querySelector('.paygate-transform-section');
     const protectedSection = root.querySelector('.paygate-protected-section');
     const proofSection = root.querySelector('.paygate-proof-section');
+    const opsSection = root.querySelector('.paygate-ops-section');
+    const audienceSection = root.querySelector('.paygate-audience-section');
 
     if (transformSection) {
+      gsap.from(transformSection.querySelectorAll('.paygate-transform-head > *, .paygate-transform-panel, .paygate-transform-outcome'), {
+        autoAlpha: 0,
+        y: 20,
+        scale: 0.99,
+        duration: 0.64,
+        ease: 'power3.out',
+        stagger: 0.07,
+        scrollTrigger: {
+          trigger: transformSection,
+          start: 'top 76%',
+          once: true,
+        },
+      });
+
       ScrollTrigger.create({
         trigger: transformSection,
         start: 'top 68%',
@@ -647,6 +669,20 @@ export default function Landing() {
     }
 
     if (protectedSection) {
+      gsap.from(protectedSection.querySelectorAll('.paygate-protected-head > *, .paygate-protected-card, .paygate-protected-branch, .paygate-protected-fact'), {
+        autoAlpha: 0,
+        y: 18,
+        scale: 0.99,
+        duration: 0.62,
+        ease: 'power3.out',
+        stagger: 0.055,
+        scrollTrigger: {
+          trigger: protectedSection,
+          start: 'top 76%',
+          once: true,
+        },
+      });
+
       ScrollTrigger.create({
         trigger: protectedSection,
         start: 'top 68%',
@@ -661,6 +697,32 @@ export default function Landing() {
     }
 
     if (proofSection) {
+      gsap.from(proofSection.querySelectorAll('.paygate-proof-copy > *, .paygate-receipt-panel, .paygate-proof-metrics'), {
+        autoAlpha: 0,
+        y: 20,
+        duration: 0.66,
+        ease: 'power3.out',
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: proofSection,
+          start: 'top 76%',
+          once: true,
+        },
+      });
+
+      gsap.from(proofSection.querySelectorAll('.paygate-receipt-row'), {
+        autoAlpha: 0,
+        x: 18,
+        duration: 0.48,
+        ease: 'power2.out',
+        stagger: 0.075,
+        scrollTrigger: {
+          trigger: proofSection.querySelector('.paygate-receipt-panel') || proofSection,
+          start: 'top 78%',
+          once: true,
+        },
+      });
+
       ScrollTrigger.create({
         trigger: proofSection,
         start: 'top 68%',
@@ -674,7 +736,51 @@ export default function Landing() {
       });
     }
 
-    gsap.utils.toArray('.paygate-transform-panel, .paygate-protected-card, .paygate-proof-reason, .paygate-ops-metric, .paygate-ops-panel, .paygate-audience-row', root)
+    if (opsSection) {
+      gsap.from(opsSection.querySelectorAll('.paygate-ops-head > *, .paygate-ops-shell'), {
+        autoAlpha: 0,
+        y: 22,
+        duration: 0.7,
+        ease: 'power3.out',
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: opsSection,
+          start: 'top 76%',
+          once: true,
+        },
+      });
+
+      gsap.from(opsSection.querySelectorAll('.paygate-ops-metric, .paygate-ops-table-row, .paygate-ops-withdraw'), {
+        autoAlpha: 0,
+        y: 16,
+        duration: 0.5,
+        ease: 'power2.out',
+        stagger: 0.055,
+        scrollTrigger: {
+          trigger: opsSection.querySelector('.paygate-ops-shell') || opsSection,
+          start: 'top 72%',
+          once: true,
+        },
+      });
+    }
+
+    if (audienceSection) {
+      gsap.from(audienceSection.querySelectorAll('.paygate-audience-head > *, .paygate-audience-row, .paygate-audience-cta, .paygate-audience-trust span'), {
+        autoAlpha: 0,
+        y: 18,
+        scale: 0.99,
+        duration: 0.58,
+        ease: 'power3.out',
+        stagger: 0.055,
+        scrollTrigger: {
+          trigger: audienceSection,
+          start: 'top 78%',
+          once: true,
+        },
+      });
+    }
+
+    gsap.utils.toArray('.paygate-proof-reason', root)
       .forEach((element, index) => {
         gsap.from(element, {
           autoAlpha: 0,
@@ -728,7 +834,12 @@ export default function Landing() {
       .to(lines, { scaleX: 1, duration: 0.72, stagger: 0.08 }, 0.34)
       .to(arrows, { autoAlpha: 1, scale: 1, duration: 0.26, stagger: 0.08 }, 0.7)
       .to(statuses, { autoAlpha: 1, y: 0, duration: 0.36, stagger: 0.12 }, 0.88)
-      .to(revenue, { autoAlpha: 1, y: 0, duration: 0.44 }, 1.28);
+      .to(revenue, { autoAlpha: 1, y: 0, duration: 0.44 }, 1.28)
+      .call(() => setHeroActive('challenge'), null, 1.05)
+      .call(() => setHeroActive('paid'), null, 1.35)
+      .call(() => setHeroActive('success'), null, 1.68)
+      .call(() => setHeroActive('proxy'), null, 2.02)
+      .call(() => setHeroActive('idle'), null, 2.9);
 
     return () => timeline.kill();
   }, { scope: heroRailRef });
