@@ -6559,12 +6559,19 @@
   --protected-left-col: 292px;
   --protected-center-col: 264px;
   --protected-right-col: 326px;
-  --protected-gap: clamp(132px, 9vw, 154px);
-  --protected-branch-width: 108px;
+  --protected-lane: clamp(128px, 8.2vw, 154px);
+  --protected-branch-width: 122px;
+  --protected-blocked-y: -64px;
+  --protected-paid-y: 56px;
   position: relative;
   display: grid;
-  grid-template-columns: var(--protected-left-col) var(--protected-center-col) var(--protected-right-col);
-  gap: var(--protected-gap);
+  grid-template-columns:
+    var(--protected-left-col)
+    var(--protected-lane)
+    var(--protected-center-col)
+    var(--protected-lane)
+    var(--protected-right-col);
+  column-gap: 0;
   align-items: center;
   justify-content: center;
   isolation: isolate;
@@ -6649,6 +6656,18 @@
 .paygate-protected-card.is-client,
 .paygate-protected-card.is-upstream {
   min-height: 270px;
+}
+
+.paygate-protected-card.is-client {
+  grid-column: 1;
+}
+
+.paygate-protected-card.is-guard {
+  grid-column: 3;
+}
+
+.paygate-protected-card.is-upstream {
+  grid-column: 5;
 }
 
 .paygate-protected-request {
@@ -6939,12 +6958,12 @@
 }
 
 .paygate-protected-branch {
-  position: absolute;
+  position: relative;
   z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--protected-branch-width);
+  width: 100%;
   height: 48px;
   border: 0;
   background: transparent;
@@ -6958,8 +6977,8 @@
   content: '';
   position: absolute;
   top: 50%;
-  left: calc((var(--protected-gap) - var(--protected-branch-width)) / -2);
-  right: calc((var(--protected-gap) - var(--protected-branch-width)) / -2);
+  left: -1px;
+  right: -1px;
   z-index: -1;
   height: 2px;
   transform: translateY(-50%);
@@ -6971,16 +6990,11 @@
 
 .paygate-protected-branch > span {
   position: absolute;
-  top: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: currentColor;
-  font-family: var(--pg-font-mono);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.82;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .paygate-protected-branch strong {
@@ -6988,6 +7002,8 @@
   align-items: center;
   gap: 6px;
   min-height: 28px;
+  max-width: var(--protected-branch-width);
+  min-width: min(var(--protected-branch-width), 100%);
   border: 1px solid currentColor;
   border-radius: 999px;
   background:
@@ -7008,8 +7024,9 @@
 }
 
 .paygate-protected-branch.is-blocked {
-  top: 35%;
-  left: calc(var(--protected-left-col) + (var(--protected-gap) / 2) - (var(--protected-branch-width) / 2));
+  grid-column: 2;
+  grid-row: 1;
+  transform: translateY(var(--protected-blocked-y));
   color: var(--pg-warning);
 }
 
@@ -7021,7 +7038,7 @@
 
 .paygate-protected-branch.is-blocked i {
   position: absolute;
-  right: -18px;
+  right: -10px;
   top: 50%;
   width: 17px;
   height: 17px;
@@ -7047,14 +7064,16 @@
 }
 
 .paygate-protected-branch.is-paid-left {
-  top: 61%;
-  left: calc(var(--protected-left-col) + (var(--protected-gap) / 2) - (var(--protected-branch-width) / 2));
+  grid-column: 2;
+  grid-row: 1;
+  transform: translateY(var(--protected-paid-y));
   color: #4ADE80;
 }
 
 .paygate-protected-branch.is-paid-right {
-  top: 61%;
-  right: calc(var(--protected-right-col) + (var(--protected-gap) / 2) - (var(--protected-branch-width) / 2));
+  grid-column: 4;
+  grid-row: 1;
+  transform: translateY(var(--protected-paid-y));
   color: #4ADE80;
 }
 
@@ -7072,7 +7091,7 @@
 .paygate-protected-branch.is-paid-right::after {
   content: '';
   position: absolute;
-  right: calc((var(--protected-gap) - var(--protected-branch-width)) / -2 - 4px);
+  right: -8px;
   top: 50%;
   width: 10px;
   height: 10px;
@@ -7156,6 +7175,7 @@
   .paygate-protected-card.is-client,
   .paygate-protected-card.is-upstream,
   .paygate-protected-card.is-guard {
+    grid-column: 1;
     min-height: auto;
   }
 
@@ -7170,11 +7190,17 @@
 
   .paygate-protected-branch.is-blocked,
   .paygate-protected-branch.is-paid-left {
+    grid-column: 1;
+    grid-row: auto;
+    transform: none;
     top: auto;
     left: auto;
   }
 
   .paygate-protected-branch.is-paid-right {
+    grid-column: 1;
+    grid-row: auto;
+    transform: none;
     top: auto;
     right: auto;
   }

@@ -1308,7 +1308,7 @@ export default function Landing() {
               aria-label="Unpaid request receives 402 blocked before reaching PayGate forwarding."
             >
               <span>Unpaid</span>
-              <strong><BlockedTrafficIcon size={15} /> 402</strong>
+              <strong><BlockedTrafficIcon size={15} /> 402 blocked</strong>
               <i aria-hidden="true" />
             </button>
 
@@ -1320,7 +1320,7 @@ export default function Landing() {
               aria-label="Paid request is forwarded from the machine client to PayGate guard."
             >
               <span>Paid</span>
-              <strong><CheckCircle2 size={15} /> verified</strong>
+              <strong><CheckCircle2 size={15} /> paid</strong>
             </button>
 
             <article
@@ -1353,7 +1353,7 @@ export default function Landing() {
               aria-label="Paid request is forwarded from PayGate guard to the protected upstream API."
             >
               <span>Forward</span>
-              <strong><CheckCircle2 size={15} /> sent</strong>
+              <strong><CheckCircle2 size={15} /> forwarded</strong>
             </button>
 
             <article
