@@ -1,12 +1,14 @@
 import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Info, Layers3, LayoutDashboard, Link2, Plus, ShieldCheck, TrendingUp, Upload, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { C } from '../colors.js';
 import MarketingNavbar from '../components/MarketingNavbar.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 import Button from '../components/ui/Button.jsx';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HERO_FLOW_URLS = {
   source: 'https://api.company.com/v1/signal',
@@ -418,7 +420,6 @@ const AUDIENCE_TRUST_NOTES = [
 ];
 
 export default function Landing() {
-  const [scrollPct, setScrollPct]     = useState(0);
   const [heroActive, setHeroActive]   = useState('idle');
   const [copiedFlow, setCopiedFlow]   = useState(null);
   const [proofActive, setProofActive] = useState('mpp');
@@ -428,6 +429,8 @@ export default function Landing() {
   const [copiedTransform, setCopiedTransform] = useState(null);
   const [protectedActive, setProtectedActive] = useState('forwarded');
 
+  const landingRef     = useRef(null);
+  const scrollProgressRef = useRef(null);
   const heroRailRef    = useRef(null);
   const proofRef       = useRef(null);
   const copyTimerRef   = useRef(null);
@@ -542,77 +545,152 @@ export default function Landing() {
     return 'idle';
   };
 
-  // ── Fade-in: JS-driven so SSR/no-JS sees content; IO with rootMargin + 800ms fallback ──
-  useEffect(() => {
-    const els = [...document.querySelectorAll('.fs')];
-    els.forEach(el => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(20px)';
-      el.style.transition = 'opacity 0.65s ease-out, transform 0.65s ease-out';
-    });
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.style.opacity = '1';
-          e.target.style.transform = 'translateY(0)';
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.05, rootMargin: '0px 0px 120px 0px' });
-    els.forEach(el => obs.observe(el));
-    const fallback = setTimeout(() => {
-      els.forEach(el => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
-    }, 800);
-    return () => { obs.disconnect(); clearTimeout(fallback); };
-  }, []);
-
   useEffect(() => () => {
     window.clearTimeout(copyTimerRef.current);
     window.clearTimeout(proofCopyTimerRef.current);
     window.clearTimeout(transformCopyTimerRef.current);
   }, []);
 
-  // ── Scroll progress ──
-  useEffect(() => {
-    const onScroll = () => {
-      const d = document.documentElement;
-      setScrollPct(d.scrollTop / (d.scrollHeight - d.clientHeight) * 100);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // ── Landing scroll motion foundation ──
+  useGSAP(() => {
+    const root = landingRef.current;
+    if (!root) return;
 
-  // ── Request-time proof activation ──
-  useEffect(() => {
-    const el = proofRef.current;
-    if (!el) return;
-
-    let intervalId = null;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
+    const progressBar = scrollProgressRef.current;
+    const sections = gsap.utils.toArray('.fs', root);
 
+    if (progressBar) {
+      gsap.set(progressBar, { scaleX: 0, transformOrigin: 'left center' });
+      ScrollTrigger.create({
+        trigger: root,
+        start: 'top top',
+        end: 'bottom bottom',
+        invalidateOnRefresh: true,
+        onUpdate: self => gsap.set(progressBar, { scaleX: self.progress }),
+      });
+    }
+
+    if (prefersReducedMotion) {
+      gsap.set(sections, { autoAlpha: 1, y: 0, clearProps: 'transform,opacity,visibility' });
       setProofVisible(true);
-      setProofActive('mpp');
+      setProofActive('ok');
+      setTransformActive('proxy');
+      setProtectedActive('forwarded');
+      return;
+    }
 
-      if (!prefersReducedMotion) {
-        let index = PROOF_SEQUENCE.indexOf('mpp');
-        intervalId = window.setInterval(() => {
-          index = (index + 1) % PROOF_SEQUENCE.length;
-          setProofActive(PROOF_SEQUENCE[index]);
-        }, 1450);
-      }
+    gsap.set(sections, { autoAlpha: 0, y: 28 });
+    ScrollTrigger.batch(sections, {
+      start: 'top 82%',
+      once: true,
+      onEnter: batch => {
+        gsap.to(batch, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.78,
+          ease: 'power3.out',
+          stagger: 0.12,
+          overwrite: true,
+          clearProps: 'transform,opacity,visibility',
+        });
+      },
+    });
 
-      obs.disconnect();
-    }, { threshold: 0.24, rootMargin: '0px 0px -8% 0px' });
+    const setStage = () => {
+      const current = {
+        transform: transformActive,
+        protected: protectedActive,
+        proof: proofActive,
+      };
 
-    obs.observe(el);
-
-    return () => {
-      obs.disconnect();
-      window.clearInterval(intervalId);
+      return {
+        transform(stage) {
+          if (current.transform === stage) return;
+          current.transform = stage;
+          setTransformActive(stage);
+        },
+        protected(stage) {
+          if (current.protected === stage) return;
+          current.protected = stage;
+          setProtectedActive(stage);
+        },
+        proof(stage) {
+          if (current.proof === stage) return;
+          current.proof = stage;
+          setProofActive(stage);
+        },
+      };
     };
-  }, []);
+
+    const stage = setStage();
+    const transformSection = root.querySelector('.paygate-transform-section');
+    const protectedSection = root.querySelector('.paygate-protected-section');
+    const proofSection = root.querySelector('.paygate-proof-section');
+
+    if (transformSection) {
+      ScrollTrigger.create({
+        trigger: transformSection,
+        start: 'top 68%',
+        end: 'bottom 34%',
+        onUpdate: self => {
+          const progress = self.progress;
+          if (progress < 0.24) stage.transform('paste');
+          else if (progress < 0.48) stage.transform('price');
+          else if (progress < 0.74) stage.transform('generate');
+          else stage.transform('proxy');
+        },
+        onEnter: () => stage.transform('paste'),
+        onLeave: () => stage.transform('proxy'),
+        onEnterBack: () => stage.transform('generate'),
+      });
+    }
+
+    if (protectedSection) {
+      ScrollTrigger.create({
+        trigger: protectedSection,
+        start: 'top 68%',
+        end: 'bottom 38%',
+        onUpdate: self => {
+          stage.protected(self.progress < 0.42 ? 'blocked' : 'forwarded');
+        },
+        onEnter: () => stage.protected('blocked'),
+        onLeave: () => stage.protected('forwarded'),
+        onEnterBack: () => stage.protected('forwarded'),
+      });
+    }
+
+    if (proofSection) {
+      ScrollTrigger.create({
+        trigger: proofSection,
+        start: 'top 68%',
+        end: 'bottom 40%',
+        onEnter: () => setProofVisible(true),
+        onEnterBack: () => setProofVisible(true),
+        onUpdate: self => {
+          const index = Math.min(PROOF_SEQUENCE.length - 1, Math.floor(self.progress * PROOF_SEQUENCE.length));
+          stage.proof(PROOF_SEQUENCE[index]);
+        },
+      });
+    }
+
+    gsap.utils.toArray('.paygate-transform-panel, .paygate-protected-card, .paygate-proof-reason, .paygate-ops-metric, .paygate-ops-panel, .paygate-audience-row', root)
+      .forEach((element, index) => {
+        gsap.from(element, {
+          autoAlpha: 0,
+          y: 18,
+          scale: 0.985,
+          duration: 0.58,
+          delay: Math.min(index % 4, 3) * 0.045,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: element,
+            start: 'top 86%',
+            once: true,
+          },
+        });
+      });
+  }, { scope: landingRef });
 
   // ── Hero transformation rail ──
   useGSAP(() => {
@@ -656,7 +734,7 @@ export default function Landing() {
   }, { scope: heroRailRef });
 
   return (
-    <div className="paygate-landing">
+    <div ref={landingRef} className="paygate-landing">
 
       {/* SVG noise filter */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
@@ -670,16 +748,7 @@ export default function Landing() {
       <div className="noise-grain" />
 
       {/* Scroll progress */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, zIndex: 100,
-        height: 2, pointerEvents: 'none',
-        width: '100%',
-        transform: `scaleX(${scrollPct / 100})`,
-        transformOrigin: 'left center',
-        background: `linear-gradient(90deg, ${C.accent}, ${C.flowBlue})`,
-        opacity: 0.92,
-        transition: 'transform 0.08s linear',
-      }} />
+      <div ref={scrollProgressRef} className="paygate-scroll-progress" aria-hidden="true" />
 
       <MarketingNavbar />
 
