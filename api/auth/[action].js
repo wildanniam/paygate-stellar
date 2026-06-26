@@ -20,6 +20,18 @@ function getAction(req) {
   return parts[parts.length - 1] || '';
 }
 
+function authStoreErrorMessage(error) {
+  const raw = error instanceof Error ? error.message : String(error || '');
+  const looksLikeHtml = /<(!doctype|html|head|body|div|span|meta|script)\b/i.test(raw);
+  const looksLikeGatewayError = /cloudflare|connection timed out|error code 52\d|supabase\.co/i.test(raw);
+
+  if (looksLikeHtml || looksLikeGatewayError || raw.length > 320) {
+    return 'PayGate could not reach the wallet challenge database. Please try again in a moment.';
+  }
+
+  return raw || 'PayGate auth challenge store is not configured';
+}
+
 export async function handleChallenge(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, 'POST');
 
@@ -42,8 +54,9 @@ export async function handleChallenge(req, res) {
       origin: getOrigin(req),
     });
   } catch (error) {
+    console.error('Auth challenge store error:', error);
     return res.status(503).json({
-      error: error.message || 'PayGate auth challenge store is not configured',
+      error: authStoreErrorMessage(error),
       requiredEnv: ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'],
       testMode: 'Set PAYGATE_AUTH_CHALLENGE_STORE=memory for local smoke tests only.',
     });
@@ -84,8 +97,9 @@ export async function handleVerify(req, res) {
   try {
     challenge = await getChallenge(challengeId);
   } catch (error) {
+    console.error('Auth challenge read error:', error);
     return res.status(503).json({
-      error: error.message || 'PayGate auth challenge store is not configured',
+      error: authStoreErrorMessage(error),
       requiredEnv: ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'],
       testMode: 'Set PAYGATE_AUTH_CHALLENGE_STORE=memory for local smoke tests only.',
     });
@@ -115,8 +129,9 @@ export async function handleVerify(req, res) {
   try {
     consumed = await consumeChallenge(challengeId);
   } catch (error) {
+    console.error('Auth challenge consume error:', error);
     return res.status(503).json({
-      error: error.message || 'PayGate auth challenge store is not configured',
+      error: authStoreErrorMessage(error),
       requiredEnv: ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'],
       testMode: 'Set PAYGATE_AUTH_CHALLENGE_STORE=memory for local smoke tests only.',
     });

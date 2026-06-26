@@ -387,11 +387,13 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  min-width: 0;
   border: 1px solid var(--pg-border-subtle);
   border-radius: var(--pg-radius-lg);
   background: rgba(165, 173, 189, 0.06);
   color: var(--pg-text-secondary);
   line-height: 1.65;
+  overflow-wrap: anywhere;
   padding: 14px;
 }
 
@@ -1152,6 +1154,16 @@
   color: var(--pg-text-secondary);
   font-size: 14px;
   line-height: 1.65;
+}
+
+.pg-wallet-panel-action {
+  display: flex;
+  justify-self: start;
+  max-width: 100%;
+}
+
+.pg-wallet-panel-action .pg-button {
+  min-width: 224px;
 }
 
 .pg-data-table-wrap {

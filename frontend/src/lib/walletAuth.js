@@ -12,13 +12,27 @@ export async function readJsonResponse(res) {
   }
 }
 
+export function toSafeErrorMessage(message, fallback = 'PayGate could not complete the request.') {
+  const raw = typeof message === 'string' ? message.trim() : '';
+  if (!raw) return fallback;
+
+  const looksLikeHtml = /<(!doctype|html|head|body|div|span|meta|script)\b/i.test(raw);
+  const looksLikeGatewayError = /cloudflare|connection timed out|error code 52\d|supabase\.co/i.test(raw);
+
+  if (looksLikeHtml || looksLikeGatewayError || raw.length > 320) {
+    return 'PayGate could not reach the wallet challenge service. Please try again in a moment.';
+  }
+
+  return raw;
+}
+
 function isLocalhost() {
   if (typeof window === 'undefined') return false;
   return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 }
 
 function apiErrorMessage(res, body, fallback) {
-  if (body?.error) return body.error;
+  if (body?.error) return toSafeErrorMessage(body.error, fallback);
   const localHint = isLocalhost() && res.status >= 500
     ? ' Make sure the local API server is running on localhost:3001.'
     : '';

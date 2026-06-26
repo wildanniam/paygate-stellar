@@ -1,6 +1,6 @@
 import { AlertCircle, Loader2, ShieldCheck, Wallet } from 'lucide-react';
 import { useState } from 'react';
-import { connectFreighterWallet } from '../lib/walletAuth.js';
+import { connectFreighterWallet, toSafeErrorMessage } from '../lib/walletAuth.js';
 import Button from './ui/Button.jsx';
 import Notice from './ui/Notice.jsx';
 
@@ -21,7 +21,7 @@ export default function WalletLoginPanel({
       setStatus('idle');
       onConnected?.(session);
     } catch (err) {
-      setError(err.message || 'Gagal connect wallet.');
+      setError(toSafeErrorMessage(err.message, 'PayGate could not connect your wallet.'));
       setStatus('error');
     }
   };
@@ -42,14 +42,17 @@ export default function WalletLoginPanel({
           {error}
         </Notice>
       )}
-      <Button
-        type="button"
-        onClick={connect}
-        disabled={status === 'connecting'}
-        icon={status === 'connecting' ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Wallet size={16} aria-hidden="true" />}
-      >
-        Connect Freighter
-      </Button>
+      <div className="pg-wallet-panel-action">
+        <Button
+          type="button"
+          size="lg"
+          onClick={connect}
+          disabled={status === 'connecting'}
+          icon={status === 'connecting' ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <Wallet size={16} aria-hidden="true" />}
+        >
+          Connect Freighter
+        </Button>
+      </div>
     </section>
   );
 }
