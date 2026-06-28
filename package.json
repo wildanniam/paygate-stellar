@@ -22,7 +22,8 @@
     "test:withdrawal": "node scripts/phase8-withdrawal-smoke.mjs",
     "test:auth:supabase": "node scripts/supabase-auth-challenge-smoke.mjs",
     "test:browser": "node scripts/browser-smoke.mjs",
-    "test:beta": "npm run test:auth && npm run test:registry && npm run test:verify-setup && npm run test:api-reset && npm run test:upstream && npm run test:proxy-unpaid && npm run test:proxy-paid && npm run test:demo-flow && npm run test:dashboard && npm run test:withdrawal && npm run build && cd contracts && cargo test && cd .. && git diff --check",
+    "test:security": "node scripts/security-upstream-url-smoke.mjs",
+    "test:beta": "npm run test:auth && npm run test:registry && npm run test:verify-setup && npm run test:api-reset && npm run test:upstream && npm run test:proxy-unpaid && npm run test:proxy-paid && npm run test:demo-flow && npm run test:dashboard && npm run test:withdrawal && npm run test:security && npm run build && cd contracts && cargo test && cd .. && git diff --check",
     "beta:preflight": "node scripts/beta-preflight.mjs",
     "evidence:init": "node scripts/prepare-beta-evidence.mjs",
     "audit:prod": "npm audit --omit=dev && npm --prefix frontend audit --omit=dev && npm --prefix backend audit --omit=dev && npm --prefix examples/express-paid-api audit --omit=dev",
@@ -38,6 +39,8 @@
     "zod": "^3.22.0"
   },
   "overrides": {
-    "axios": "^1.17.0"
+    "axios": "^1.17.0",
+    "form-data": "^4.0.6",
+    "ws": "^8.21.0"
   }
 }

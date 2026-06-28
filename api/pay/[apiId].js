@@ -7,6 +7,7 @@ import { creditEscrowPayment, getEscrowContractId, hasEscrowCreditConfig } from 
 import { createMppReplayStore } from '../../server/lib/mppReplayStore.js';
 import { createPaymentId } from '../../server/lib/paymentId.js';
 import { getRegistryStore } from '../../server/lib/registryStore.js';
+import { assertSafeUpstreamUrl, upstreamFetchOptions } from '../../server/lib/upstreamSecurity.js';
 
 const mppxByConfig = new Map();
 
@@ -214,14 +215,15 @@ function buildUpstreamUrl(req, api) {
 
 async function forwardToUpstream(req, api) {
   const upstreamUrl = buildUpstreamUrl(req, api);
+  await assertSafeUpstreamUrl(upstreamUrl);
   const secret = decryptApiSecret(api);
-  return fetch(upstreamUrl, {
+  return fetch(upstreamUrl, upstreamFetchOptions({
     method: 'GET',
     headers: {
       Accept: req.headers.accept || 'application/json',
       'X-PayGate-Secret': secret,
     },
-  });
+  }));
 }
 
 function isDuplicateError(error) {

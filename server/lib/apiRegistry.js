@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { decryptApiSecret, encryptApiSecret, generateApiSecret, hasApiSecretEncryptionKey } from './apiSecret.js';
 import { getOrigin, getSession } from './auth.js';
 import { getRegistryStore } from './registryStore.js';
+import { UnsafeUpstreamUrlError, assertSafeUpstreamUrl, validateUpstreamBaseUrlSyntax } from './upstreamSecurity.js';
 
 export const API_STATUSES = {
   PENDING_SETUP: 'pending_setup',
@@ -9,9 +10,19 @@ export const API_STATUSES = {
   ARCHIVED: 'archived',
 };
 
+const upstreamBaseUrlSchema = z.string().trim().url().superRefine((value, ctx) => {
+  const validation = validateUpstreamBaseUrlSyntax(value);
+  if (!validation.ok) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: validation.message,
+    });
+  }
+});
+
 export const createApiSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  upstreamBaseUrl: z.string().trim().url(),
+  upstreamBaseUrl: upstreamBaseUrlSchema,
   path: z.string().trim().regex(/^\/[A-Za-z0-9/_\-.:]*$/, 'Path must start with / and contain URL-safe characters'),
   priceUsdc: z.coerce.number().positive().max(1000),
 });
@@ -110,6 +121,15 @@ export async function createRegisteredApi({ req, store, walletAddress, input }) 
     path: input.path,
     method: 'GET',
   });
+  try {
+    await assertSafeUpstreamUrl(fingerprint.upstreamBaseUrl);
+  } catch (error) {
+    if (error instanceof UnsafeUpstreamUrlError) {
+      throw new RegistryApiError(400, error.message, { code: error.code });
+    }
+    throw error;
+  }
+
   const existing = await store.findLiveApiByEndpoint(fingerprint);
   if (existing) {
     const sameOwner = existing.owner_wallet === walletAddress;

@@ -55,6 +55,12 @@ async function call(handler, req) {
 async function startUpstream() {
   let expectedSecret = 'not-yet-configured';
   const server = createServer((req, res) => {
+    if (req.url?.startsWith('/v1/open-market-signal')) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ signal: 'unguarded', confidence: 0.1 }));
+      return;
+    }
+
     if (req.url?.startsWith('/v1/market-signal')) {
       if (req.headers['x-paygate-secret'] !== expectedSecret) {
         res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -143,6 +149,24 @@ try {
     makeReq({ cookie, url: `/api/apis/${archived.id}/verify` }),
   );
   assert(archivedVerify.statusCode === 409, 'archived API verification should return 409');
+
+  const openApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Open API',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/open-market-signal',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    ...encryptApiSecret('open-secret'),
+  });
+  const openVerify = await call(
+    verifyHandler,
+    makeReq({ cookie, url: `/api/apis/${openApi.id}/verify` }),
+  );
+  assert(openVerify.statusCode === 400, 'unguarded API verification should return 400');
+  assert(openVerify.body.code === 'setup_guard_missing', 'unguarded API should expose setup_guard_missing code');
 } finally {
   await upstream.close();
 }

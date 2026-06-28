@@ -2,6 +2,7 @@ import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, resol
 import { decryptApiSecret } from '../../../server/lib/apiSecret.js';
 import { methodNotAllowed } from '../../../server/lib/auth.js';
 import { publicErrorMessage } from '../../../server/lib/errors.js';
+import { assertSafeUpstreamUrl, upstreamFetchOptions } from '../../../server/lib/upstreamSecurity.js';
 
 function nowIso() {
   return new Date().toISOString();
@@ -19,21 +20,45 @@ function buildUpstreamUrl(api) {
   return new URL(api.path, `${api.upstream_base_url.replace(/\/+$/, '')}/`);
 }
 
-async function verifyUpstreamGuard(api) {
-  const secret = decryptApiSecret(api);
-  const response = await fetch(buildUpstreamUrl(api), {
+async function fetchUpstreamGuardProbe(upstreamUrl, secret) {
+  const headers = {
+    Accept: 'application/json',
+  };
+  if (secret) headers['X-PayGate-Secret'] = secret;
+
+  const response = await fetch(upstreamUrl, upstreamFetchOptions({
     method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'X-PayGate-Secret': secret,
-    },
-  });
+    headers,
+  }));
 
   return {
     ok: response.ok,
     status: response.status,
     contentType: response.headers.get('Content-Type'),
     bodyPreview: (await response.text()).slice(0, 300),
+  };
+}
+
+async function verifyUpstreamGuard(api) {
+  const secret = decryptApiSecret(api);
+  const upstreamUrl = buildUpstreamUrl(api);
+  await assertSafeUpstreamUrl(upstreamUrl);
+
+  const negativeProbe = await fetchUpstreamGuardProbe(upstreamUrl, 'pgsec_invalid_setup_probe');
+  if (negativeProbe.ok) {
+    return {
+      ok: false,
+      guardRejectedInvalidSecret: false,
+      status: negativeProbe.status,
+      contentType: negativeProbe.contentType,
+      bodyPreview: negativeProbe.bodyPreview,
+    };
+  }
+
+  const positiveProbe = await fetchUpstreamGuardProbe(upstreamUrl, secret);
+  return {
+    ...positiveProbe,
+    guardRejectedInvalidSecret: true,
   };
 }
 
@@ -72,6 +97,15 @@ export default async function handler(req, res) {
     }
 
     if (!verification.ok) {
+      if (verification.guardRejectedInvalidSecret === false) {
+        return res.status(400).json({
+          error: 'Upstream guard verification failed. The endpoint accepted an invalid X-PayGate-Secret.',
+          code: 'setup_guard_missing',
+          upstreamStatus: verification.status,
+          upstreamBodyPreview: verification.bodyPreview,
+        });
+      }
+
       return res.status(400).json({
         error: 'Upstream guard verification failed. Add the X-PayGate-Secret check to your API, then try again.',
         code: 'setup_verification_failed',
