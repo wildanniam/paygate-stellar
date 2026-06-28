@@ -205,6 +205,7 @@ File terdampak:
 
 - `package.json`
 - `package-lock.json`
+- `.github/workflows/paygate-security.yml`
 - `examples/express-paid-api/package.json`
 - `examples/express-paid-api/package-lock.json`
 - `frontend/package.json`
@@ -233,6 +234,7 @@ Patch yang diterapkan:
   - `vite` 7.3.6
   - `@vitejs/plugin-react` 5.2.0
 - Refresh lockfile.
+- Tambahkan GitHub Actions `dependency-audit` untuk menjalankan `npm run audit:prod` di PR dan push ke `main`.
 
 Cara tes:
 
@@ -657,13 +659,16 @@ Cara tes:
 
 Severity: Informational
 
-Status: confirmed, tidak dipatch.
+Status: guardrail CI sudah ditambahkan pada Phase 6. File lokal tetap harus dijaga manual.
 
 File:
 
 - `.env.local`
 - `.vercel/.env.production.local`
 - `examples/express-paid-api/.env`
+- `.github/workflows/paygate-security.yml`
+- `scripts/secret-scan.mjs`
+- `package.json`
 
 Catatan:
 
@@ -681,12 +686,20 @@ Rekomendasi:
 - Pastikan tetap di `.gitignore`.
 - Jangan kirim ke chat/ticket/log.
 - Rotate secret jika pernah terekspos.
-- Tambahkan secret scanning di CI.
+- Jalankan secret scanning di CI untuk setiap PR dan push ke `main`.
+
+Patch yang diterapkan:
+
+- Tambahkan `npm run scan:secrets`.
+- Tambahkan scanner lokal untuk tracked files yang mendeteksi Stellar secret key, private key PEM, JWT/service token, dan assignment env secret literal.
+- Tambahkan GitHub Actions `secret-scan`.
+- Tambahkan GitHub Actions `beta-smoke` untuk smoke/build/contract test path.
 
 Cara cek:
 
 ```sh
 git ls-files .env.local .vercel/.env.production.local examples/express-paid-api/.env
+npm run scan:secrets
 ```
 
 Output harus kosong.

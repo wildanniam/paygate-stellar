@@ -24,6 +24,7 @@
     "test:browser": "node scripts/browser-smoke.mjs",
     "test:security": "node scripts/security-upstream-url-smoke.mjs",
     "test:beta": "npm run test:auth && npm run test:registry && npm run test:verify-setup && npm run test:api-reset && npm run test:upstream && npm run test:proxy-unpaid && npm run test:proxy-paid && npm run test:demo-flow && npm run test:dashboard && npm run test:withdrawal && npm run test:security && npm run build && cd contracts && cargo test && cd .. && git diff --check",
+    "scan:secrets": "node scripts/secret-scan.mjs",
     "beta:preflight": "node scripts/beta-preflight.mjs",
     "evidence:init": "node scripts/prepare-beta-evidence.mjs",
     "audit:prod": "npm audit --omit=dev && npm --prefix frontend audit --omit=dev && npm --prefix backend audit --omit=dev && npm --prefix examples/express-paid-api audit --omit=dev",
