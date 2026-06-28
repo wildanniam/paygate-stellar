@@ -13,7 +13,7 @@ Temuan paling penting:
 1. High - SSRF lewat upstream URL yang didaftarkan developer. Sudah diperbaiki.
 2. High - Setup verification bisa meloloskan upstream yang sebenarnya tidak punya secret guard. Sudah diperbaiki.
 3. High - Dependency vulnerable di payment/frontend tooling. Sudah diperbaiki.
-4. High - Payment bisa tercatat/escrow credited sebelum upstream sukses. Belum diperbaiki karena perlu keputusan produk.
+4. High - Payment bisa tercatat/escrow credited sebelum upstream sukses. Sudah dimitigasi dengan retry entitlement dan reconciliation report; refund policy masih backlog.
 5. Medium - Rate limiting produksi belum ada di Vercel route. Sudah diperbaiki dengan Upstash-backed limiter.
 6. Medium - Body/request/response size belum dibatasi. Sudah diperbaiki.
 7. Medium - Withdrawal submit hanya cek source wallet, belum cek full intent transaksi. Sudah diperbaiki.
@@ -257,14 +257,19 @@ Mapping OWASP:
 
 Severity: Medium
 
-Status: belum diperbaiki.
+Status: sudah diperbaiki di aplikasi dengan Upstash pada Phase 4. Panduan Vercel WAF edge rate limit ditambahkan pada Phase 8; publish WAF masih manual di Vercel Dashboard.
 
 File terdampak:
 
 - `backend/src/index.js`
 - `vercel.json`
+- `server/lib/rateLimit.js`
 - `api/auth/[action].js`
 - `api/pay/[apiId].js`
+- `api/apis/[apiId]/verify.js`
+- `api/withdraw/[action].js`
+- `.env.example`
+- `docs/security/VERCEL_WAF_SETUP.md`
 
 Masalah:
 
@@ -291,22 +296,18 @@ Dampak:
 - Upstream developer bisa kena traffic tidak perlu.
 - Dashboard dipenuhi noise.
 
-Rekomendasi:
+Patch yang diterapkan:
 
-Tambahkan rate limit berbasis:
+- Upstash Redis rate limiter untuk route berisiko.
+- Memory limiter untuk smoke test lokal.
+- Key berbasis IP, wallet, API ID, dan payment ID sesuai endpoint.
+- `429` dengan rate-limit headers.
+- Beta preflight mewajibkan Upstash env.
+- Panduan Vercel WAF untuk edge rate limit.
 
-- IP address
-- wallet address
-- API ID
-- payment ID
-- route risk level
+Catatan:
 
-Implementasi bisa lewat:
-
-- Vercel Firewall/WAF
-- Upstash Redis
-- Vercel KV
-- Supabase RPC untuk counter
+- Vercel WAF belum dipublish otomatis dari repo. Ikuti `docs/security/VERCEL_WAF_SETUP.md`.
 
 Cara tes:
 
@@ -318,7 +319,7 @@ Cara tes:
 
 Severity: Medium
 
-Status: belum diperbaiki.
+Status: sudah diperbaiki pada Phase 2 dan Phase 3.
 
 File terdampak:
 
@@ -497,7 +498,7 @@ Cara tes:
 
 Severity: Medium
 
-Status: belum diperbaiki.
+Status: sudah diperbaiki pada Phase 2 dengan same-origin check untuk unsafe methods.
 
 File terdampak:
 
@@ -550,7 +551,7 @@ Cara tes:
 
 Severity: Medium
 
-Status: belum diperbaiki.
+Status: sudah diperbaiki pada Phase 1 dengan `PAYGATE_PUBLIC_ORIGIN`.
 
 File terdampak:
 
@@ -599,11 +600,12 @@ Cara tes:
 
 Severity: Low
 
-Status: belum diperbaiki.
+Status: sebagian besar sudah diperbaiki pada Phase 1. CSP ketat masih perlu tuning manual setelah Freighter/frontend behavior divalidasi.
 
 File terdampak:
 
 - `vercel.json`
+- `docs/security/VERCEL_WAF_SETUP.md`
 
 Masalah:
 
@@ -770,16 +772,13 @@ Saat lockfile direfresh, npm sempat memberi warning engine karena shell lokal me
 
 Urutan rekomendasi berikutnya:
 
-1. Tambahkan rate limiting produksi.
-2. Putuskan semantics payment saat upstream gagal.
-3. Tambahkan reconciliation job/admin tool untuk state stuck.
-4. Tambahkan limit body dan upstream response.
-5. Tambahkan `PAYGATE_PUBLIC_ORIGIN` dan host allowlist.
-6. Tambahkan CSRF/origin check.
-7. Validasi full transaction intent untuk withdrawal.
-8. Tambahkan security headers dan CSP di Vercel.
-9. Tambahkan secret scanning dan audit security di CI.
-10. Tambahkan structured audit log untuk payment ID, API ID, wallet, state transition, dan tx hash.
+1. Publish dan tune Vercel WAF rules sesuai `docs/security/VERCEL_WAF_SETUP.md`.
+2. Putuskan refund/settlement policy untuk paid request yang terus gagal delivery.
+3. Tambahkan worker otomatis untuk retry/reconcile state `credit_pending`, `credited`, dan `upstream_failed`.
+4. Tambahkan CSP ketat setelah validasi Freighter/frontend behavior.
+5. Tambahkan structured audit log untuk payment ID, API ID, wallet, state transition, tx hash, dan WAF/rate-limit outcome.
+6. Tambahkan alerting untuk spike `402`, `429`, `upstream_failed`, `credit_pending`, dan withdrawal failure.
+7. Jalankan rotasi secret jika ada indikasi secret lokal pernah terekspos.
 
 ## Threat Model untuk AI Agent
 

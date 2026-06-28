@@ -15,7 +15,7 @@ const SKIP_EXTENSIONS = new Set([
   '.wasm',
 ]);
 
-const SECRET_NAME = /(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|SERVICE_ROLE_KEY|API_KEY|ENCRYPTION_KEY)/i;
+const SENSITIVE_NAME = /(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|SERVICE_ROLE_KEY|API_KEY|ENCRYPTION_KEY)/i;
 const ASSIGNMENT = /\b([A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|SERVICE_ROLE_KEY|API_KEY|ENCRYPTION_KEY)[A-Z0-9_]*)\b\s*[:=]\s*([^#\n\r,]+)/g;
 
 const RULES = [
@@ -95,7 +95,7 @@ function isAllowedPlaceholder(value) {
   if (lower.includes('phase') && lower.includes('secret')) return true;
   if (lower.includes('wrong') && lower.includes('secret')) return true;
   if (lower.includes('not-configured')) return true;
-  if (/^[A-Z0-9_./:-]+$/.test(normalized) && SECRET_NAME.test(normalized)) return true;
+  if (/^[A-Z0-9_./:-]+$/.test(normalized) && SENSITIVE_NAME.test(normalized)) return true;
 
   return false;
 }
@@ -126,7 +126,7 @@ async function scanFile(file, findings) {
 
   const lines = content.split(/\r?\n/);
   lines.forEach((line, index) => {
-    if (!SECRET_NAME.test(line)) return;
+    if (!SENSITIVE_NAME.test(line)) return;
 
     ASSIGNMENT.lastIndex = 0;
     const matches = line.matchAll(ASSIGNMENT);
