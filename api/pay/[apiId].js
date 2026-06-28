@@ -7,7 +7,12 @@ import { creditEscrowPayment, getEscrowContractId, hasEscrowCreditConfig } from 
 import { createMppReplayStore } from '../../server/lib/mppReplayStore.js';
 import { createPaymentId } from '../../server/lib/paymentId.js';
 import { getRegistryStore } from '../../server/lib/registryStore.js';
-import { assertSafeUpstreamUrl, upstreamFetchOptions } from '../../server/lib/upstreamSecurity.js';
+import {
+  assertSafeUpstreamUrl,
+  isUpstreamResponseTooLarge,
+  readLimitedResponseText,
+  upstreamFetchOptions,
+} from '../../server/lib/upstreamSecurity.js';
 
 const mppxByConfig = new Map();
 
@@ -425,7 +430,24 @@ export default async function handler(req, res) {
     );
   }
 
-  const responseText = await upstreamResponse.text();
+  let responseText;
+  try {
+    responseText = await readLimitedResponseText(upstreamResponse);
+  } catch (error) {
+    if (!isUpstreamResponseTooLarge(error)) throw error;
+    await store.updateProxyRequest(proxyRequest.id, {
+      status: 'upstream_failed',
+      upstream_status: upstreamResponse.status,
+      error_message: error.message,
+    });
+    return sendJson(
+      res,
+      502,
+      { error: 'Upstream response too large' },
+      { 'Payment-Receipt': verified.receiptHeader },
+    );
+  }
+
   if (!upstreamResponse.ok) {
     await store.updateProxyRequest(proxyRequest.id, {
       status: 'upstream_failed',

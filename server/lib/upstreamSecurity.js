@@ -2,6 +2,8 @@ import dns from 'node:dns/promises';
 import net from 'node:net';
 
 const DEFAULT_UPSTREAM_TIMEOUT_MS = 10_000;
+export const MAX_UPSTREAM_RESPONSE_BYTES = 1024 * 1024;
+export const MAX_UPSTREAM_VERIFY_PREVIEW_BYTES = 4 * 1024;
 const BLOCKED_HOSTNAMES = new Set([
   'localhost',
   'metadata.google.internal',
@@ -14,6 +16,19 @@ export class UnsafeUpstreamUrlError extends Error {
     this.name = 'UnsafeUpstreamUrlError';
     this.code = 'unsafe_upstream_url';
   }
+}
+
+export class UpstreamResponseTooLargeError extends Error {
+  constructor(limitBytes = MAX_UPSTREAM_RESPONSE_BYTES) {
+    super(`Upstream response exceeds ${limitBytes} bytes`);
+    this.name = 'UpstreamResponseTooLargeError';
+    this.code = 'upstream_response_too_large';
+    this.statusCode = 502;
+  }
+}
+
+export function isUpstreamResponseTooLarge(error) {
+  return error instanceof UpstreamResponseTooLargeError || error?.code === 'upstream_response_too_large';
 }
 
 function allowPrivateUpstreams() {
@@ -172,4 +187,41 @@ export function upstreamFetchOptions(options = {}) {
     redirect: 'manual',
     signal: options.signal || AbortSignal.timeout(DEFAULT_UPSTREAM_TIMEOUT_MS),
   };
+}
+
+export async function readLimitedResponseText(
+  response,
+  { maxBytes = MAX_UPSTREAM_RESPONSE_BYTES, errorOnLimit = true } = {},
+) {
+  if (!response.body) {
+    const body = Buffer.from(await response.arrayBuffer());
+    if (body.byteLength > maxBytes) {
+      if (errorOnLimit) throw new UpstreamResponseTooLargeError(maxBytes);
+      return body.subarray(0, maxBytes).toString('utf8');
+    }
+    return body.toString('utf8');
+  }
+
+  const reader = response.body.getReader();
+  const chunks = [];
+  let bytes = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = Buffer.from(value);
+    if (bytes + chunk.byteLength > maxBytes) {
+      const remaining = maxBytes - bytes;
+      if (remaining > 0) chunks.push(chunk.subarray(0, remaining));
+      await reader.cancel();
+      if (errorOnLimit) throw new UpstreamResponseTooLargeError(maxBytes);
+      break;
+    }
+
+    bytes += chunk.byteLength;
+    chunks.push(chunk);
+  }
+
+  return Buffer.concat(chunks).toString('utf8');
 }

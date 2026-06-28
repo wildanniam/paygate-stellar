@@ -2,7 +2,12 @@ import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, resol
 import { decryptApiSecret } from '../../../server/lib/apiSecret.js';
 import { methodNotAllowed, requireSameOrigin } from '../../../server/lib/auth.js';
 import { publicErrorMessage } from '../../../server/lib/errors.js';
-import { assertSafeUpstreamUrl, upstreamFetchOptions } from '../../../server/lib/upstreamSecurity.js';
+import {
+  MAX_UPSTREAM_VERIFY_PREVIEW_BYTES,
+  assertSafeUpstreamUrl,
+  readLimitedResponseText,
+  upstreamFetchOptions,
+} from '../../../server/lib/upstreamSecurity.js';
 
 function nowIso() {
   return new Date().toISOString();
@@ -35,7 +40,12 @@ async function fetchUpstreamGuardProbe(upstreamUrl, secret) {
     ok: response.ok,
     status: response.status,
     contentType: response.headers.get('Content-Type'),
-    bodyPreview: (await response.text()).slice(0, 300),
+    bodyPreview: (
+      await readLimitedResponseText(response, {
+        maxBytes: MAX_UPSTREAM_VERIFY_PREVIEW_BYTES,
+        errorOnLimit: false,
+      })
+    ).slice(0, 300),
   };
 }
 

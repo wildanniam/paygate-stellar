@@ -1,4 +1,8 @@
-import { assertSafeUpstreamUrl } from '../server/lib/upstreamSecurity.js';
+import {
+  assertSafeUpstreamUrl,
+  isUpstreamResponseTooLarge,
+  readLimitedResponseText,
+} from '../server/lib/upstreamSecurity.js';
 import { getOrigin, requireSameOrigin } from '../server/lib/auth.js';
 import { isRequestBodyTooLarge, readJsonBody } from '../server/lib/body.js';
 
@@ -102,6 +106,13 @@ try {
   throw new Error('oversized JSON body should be rejected');
 } catch (error) {
   assert(isRequestBodyTooLarge(error), 'oversized JSON body should throw RequestBodyTooLargeError');
+}
+
+try {
+  await readLimitedResponseText(new Response('x'.repeat(12)), { maxBytes: 8 });
+  throw new Error('oversized upstream response should be rejected');
+} catch (error) {
+  assert(isUpstreamResponseTooLarge(error), 'oversized upstream response should throw UpstreamResponseTooLargeError');
 }
 
 if (originalNodeEnv === undefined) {
