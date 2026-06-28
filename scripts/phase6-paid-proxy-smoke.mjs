@@ -22,6 +22,7 @@ const UPSTREAM_SECRET = 'phase6-upstream-secret';
 const PAYER_WALLET = 'GBGXIGC36FD6COHDTBOA6KU4BW3U7UBVABMHKNRB4CRUHCIKH42IILLW';
 const PAYMENT_TX_HASH = 'a'.repeat(64);
 const RETRY_PAYMENT_TX_HASH = 'b'.repeat(64);
+const REDIRECT_PAYMENT_TX_HASH = 'c'.repeat(64);
 let flakyFailuresRemaining = 1;
 
 function assert(condition, message) {
@@ -40,11 +41,23 @@ async function startServer() {
       return res;
     };
 
-    if (req.url?.startsWith('/upstream/market-signal') || req.url?.startsWith('/upstream/flaky-signal')) {
+    if (
+      req.url?.startsWith('/upstream/market-signal')
+      || req.url?.startsWith('/upstream/flaky-signal')
+      || req.url?.startsWith('/upstream/redirect-signal')
+    ) {
       if (req.headers['x-paygate-secret'] !== UPSTREAM_SECRET) {
         res.statusCode = 401;
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+      }
+
+      if (req.url?.startsWith('/upstream/redirect-signal')) {
+        res.statusCode = 307;
+        res.setHeader('Location', '/upstream/market-signal');
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end('Redirecting...');
         return;
       }
 
@@ -240,6 +253,47 @@ try {
     },
   });
   assert(flakyDuplicate.status === 409, `flaky duplicate after success expected 409, got ${flakyDuplicate.status}`);
+
+  const redirectApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Redirecting Paid Proxy API',
+    upstream_base_url: server.baseUrl,
+    path: '/upstream/redirect-signal',
+    method: 'GET',
+    price_usdc: 0.02,
+    active: true,
+    ...encrypted,
+  });
+
+  const redirectUnpaid = await fetch(`${server.baseUrl}/api/pay/${redirectApi.id}`);
+  assert(redirectUnpaid.status === 402, `redirect unpaid API expected 402, got ${redirectUnpaid.status}`);
+  const redirectPaymentId = redirectUnpaid.headers.get('x-paygate-payment-id');
+  const redirectChallenge = Challenge.fromResponse(redirectUnpaid);
+  const redirectCredential = Credential.serialize({
+    challenge: redirectChallenge,
+    payload: { type: 'hash', hash: REDIRECT_PAYMENT_TX_HASH },
+    source: `did:pkh:stellar:testnet:${PAYER_WALLET}`,
+  });
+
+  const redirectPaid = await fetch(`${server.baseUrl}/api/pay/${redirectApi.id}`, {
+    headers: {
+      Authorization: redirectCredential,
+    },
+  });
+  assert(redirectPaid.status === 502, `redirecting paid API expected 502, got ${redirectPaid.status}`);
+  assert(redirectPaid.headers.get('x-paygate-retryable') === 'true', 'redirected upstream response should be retryable');
+  assert(redirectPaid.headers.get('x-paygate-payment-id') === redirectPaymentId, 'redirected response payment id mismatch');
+  const redirectBody = await redirectPaid.json();
+  assert(redirectBody.error === 'Upstream redirected', 'redirected response should explain upstream redirect');
+  assert(redirectBody.retryable === true, 'redirected response body should be retryable');
+
+  const redirectRequest = getRawProxyRequestsForTest().find((row) => row.payment_id === redirectPaymentId);
+  assert(redirectRequest.status === 'upstream_failed', `expected upstream_failed for redirect, got ${redirectRequest.status}`);
+  assert(redirectRequest.upstream_status === 307, 'redirected request upstream status should be saved');
+
+  const redirectPayment = getRawPaymentsForTest().find((row) => row.payment_id === redirectPaymentId);
+  assert(redirectPayment, 'redirected upstream should still record payment');
+  assert(redirectPayment.credit_tx_hash === `mock-credit-${redirectPaymentId}`, 'redirected upstream should still credit escrow once');
 } finally {
   await server.close();
 }

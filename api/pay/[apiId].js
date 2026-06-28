@@ -252,6 +252,10 @@ function paymentHeaders({ receiptHeader, paymentId, retryable = false }) {
   };
 }
 
+function isRedirectStatus(status) {
+  return status >= 300 && status < 400;
+}
+
 async function sendResponse(res, response, headers = {}) {
   res.statusCode = response.status;
   for (const [key, value] of response.headers) res.setHeader(key, value);
@@ -566,6 +570,26 @@ export default async function handler(req, res) {
   }
 
   if (!upstreamResponse.ok) {
+    if (isRedirectStatus(upstreamResponse.status)) {
+      const message = 'Upstream redirected; update the endpoint upstream URL to its canonical HTTPS URL';
+      await store.updateProxyRequest(proxyRequest.id, {
+        status: 'upstream_failed',
+        upstream_status: upstreamResponse.status,
+        error_message: message,
+      });
+      return sendJson(
+        res,
+        502,
+        {
+          error: 'Upstream redirected',
+          detail: message,
+          retryable: true,
+          paymentId,
+        },
+        paymentHeaders({ receiptHeader: verified.receiptHeader, paymentId, retryable: true }),
+      );
+    }
+
     await store.updateProxyRequest(proxyRequest.id, {
       status: 'upstream_failed',
       upstream_status: upstreamResponse.status,
