@@ -5,9 +5,38 @@ export const SESSION_COOKIE = 'paygate_session';
 export const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
 const SIGN_MESSAGE_PREFIX = 'Stellar Signed Message:\n';
 
+function firstHeaderValue(value) {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
+export function getConfiguredPublicOrigin() {
+  const raw = process.env.PAYGATE_PUBLIC_ORIGIN || '';
+  if (!raw.trim()) return '';
+
+  try {
+    const url = new URL(raw);
+    if (!['https:', 'http:'].includes(url.protocol)) throw new Error('invalid protocol');
+    url.username = '';
+    url.password = '';
+    url.hash = '';
+    url.search = '';
+    url.pathname = '';
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('PAYGATE_PUBLIC_ORIGIN must be a valid http(s) origin');
+    }
+    return '';
+  }
+}
+
 export function getOrigin(req) {
-  const proto = req.headers['x-forwarded-proto'] || 'http';
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
+  const configuredOrigin = getConfiguredPublicOrigin();
+  if (configuredOrigin) return configuredOrigin;
+
+  const proto = firstHeaderValue(req.headers['x-forwarded-proto']) || 'http';
+  const host = firstHeaderValue(req.headers['x-forwarded-host']) || firstHeaderValue(req.headers.host) || 'localhost';
   return `${proto}://${host}`;
 }
 

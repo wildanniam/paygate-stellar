@@ -14,6 +14,7 @@ const REQUIRED_ENV = [
   'ESCROW_CONTRACT_ID',
   'PAYGATE_OPERATOR_SECRET',
   'PAYGATE_DEMO_UPSTREAM_SECRET',
+  'PAYGATE_PUBLIC_ORIGIN',
   'STELLAR_NETWORK',
   'STELLAR_RPC_URL',
 ];
@@ -59,6 +60,20 @@ function isUrl(value) {
   }
 }
 
+function publicOriginError(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') return 'PAYGATE_PUBLIC_ORIGIN must use https.';
+    if (url.username || url.password) return 'PAYGATE_PUBLIC_ORIGIN must not include credentials.';
+    if (url.pathname !== '/' || url.search || url.hash) {
+      return 'PAYGATE_PUBLIC_ORIGIN must be an origin only, for example https://trypaygate.com.';
+    }
+    return '';
+  } catch {
+    return 'PAYGATE_PUBLIC_ORIGIN must be a valid URL.';
+  }
+}
+
 function checkRequiredEnv() {
   for (const name of REQUIRED_ENV) {
     if (isMissing(process.env[name])) {
@@ -90,6 +105,15 @@ function checkEnvSemantics() {
 
   if (process.env.SUPABASE_URL && !isUrl(process.env.SUPABASE_URL)) {
     fail('SUPABASE_URL is a valid URL');
+  }
+
+  if (!isMissing(process.env.PAYGATE_PUBLIC_ORIGIN)) {
+    const originError = publicOriginError(process.env.PAYGATE_PUBLIC_ORIGIN);
+    if (originError) {
+      fail('PAYGATE_PUBLIC_ORIGIN is a valid production origin', originError);
+    } else {
+      pass('PAYGATE_PUBLIC_ORIGIN is a valid production origin');
+    }
   }
 
   if (!isMissing(process.env.SESSION_SECRET) && process.env.SESSION_SECRET.length < 32) {

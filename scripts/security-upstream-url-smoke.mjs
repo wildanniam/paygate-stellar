@@ -1,4 +1,5 @@
 import { assertSafeUpstreamUrl } from '../server/lib/upstreamSecurity.js';
+import { getOrigin } from '../server/lib/auth.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -25,6 +26,7 @@ async function accepts(url) {
 const originalNodeEnv = process.env.NODE_ENV;
 const originalRegistryStore = process.env.PAYGATE_REGISTRY_STORE;
 const originalAllowPrivate = process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
+const originalPublicOrigin = process.env.PAYGATE_PUBLIC_ORIGIN;
 
 delete process.env.PAYGATE_REGISTRY_STORE;
 delete process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
@@ -42,6 +44,16 @@ process.env.NODE_ENV = originalNodeEnv || '';
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
 assert(await accepts('http://127.0.0.1:4000'), 'memory-mode smoke tests should allow local upstreams');
 
+process.env.PAYGATE_PUBLIC_ORIGIN = 'https://trypaygate.com/';
+const pinnedOrigin = getOrigin({
+  headers: {
+    host: 'localhost:3000',
+    'x-forwarded-proto': 'https',
+    'x-forwarded-host': 'evil.example',
+  },
+});
+assert(pinnedOrigin === 'https://trypaygate.com', 'configured public origin should ignore forwarded host');
+
 if (originalNodeEnv === undefined) {
   delete process.env.NODE_ENV;
 } else {
@@ -56,6 +68,11 @@ if (originalAllowPrivate === undefined) {
   delete process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
 } else {
   process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS = originalAllowPrivate;
+}
+if (originalPublicOrigin === undefined) {
+  delete process.env.PAYGATE_PUBLIC_ORIGIN;
+} else {
+  process.env.PAYGATE_PUBLIC_ORIGIN = originalPublicOrigin;
 }
 
 console.log('Security upstream URL smoke test passed');
