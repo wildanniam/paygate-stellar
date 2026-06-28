@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { decryptApiSecret, encryptApiSecret, generateApiSecret, hasApiSecretEncryptionKey } from './apiSecret.js';
 import { getOrigin, getSession } from './auth.js';
 import { getRegistryStore } from './registryStore.js';
-import { UnsafeUpstreamUrlError, assertSafeUpstreamUrl, validateUpstreamBaseUrlSyntax } from './upstreamSecurity.js';
+import { UnsafeUpstreamUrlError, assertSafeUpstreamUrl, upstreamFetchOptions, validateUpstreamBaseUrlSyntax } from './upstreamSecurity.js';
 
 export const API_STATUSES = {
   PENDING_SETUP: 'pending_setup',
@@ -92,6 +92,39 @@ export function normalizeApiFingerprint({ upstreamBaseUrl, path, method = 'GET' 
   };
 }
 
+function buildRegisteredUpstreamUrl(fingerprint) {
+  return new URL(fingerprint.path, `${fingerprint.upstreamBaseUrl.replace(/\/+$/, '')}/`);
+}
+
+function isRedirectStatus(status) {
+  return status >= 300 && status < 400;
+}
+
+async function assertUpstreamDoesNotRedirect(fingerprint) {
+  const upstreamUrl = buildRegisteredUpstreamUrl(fingerprint);
+
+  let response;
+  try {
+    response = await fetch(upstreamUrl, upstreamFetchOptions({
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'X-PayGate-Secret': 'pgsec_setup_redirect_probe',
+      },
+    }));
+  } catch {
+    return;
+  }
+
+  if (isRedirectStatus(response.status)) {
+    throw new RegistryApiError(
+      400,
+      'Upstream URL redirects. Use the final canonical HTTPS URL instead.',
+      { code: 'upstream_redirect', upstreamStatus: response.status },
+    );
+  }
+}
+
 export function toApiResponse(req, api, extra = {}) {
   const status = resolveApiStatus(api);
   return {
@@ -122,13 +155,14 @@ export async function createRegisteredApi({ req, store, walletAddress, input }) 
     method: 'GET',
   });
   try {
-    await assertSafeUpstreamUrl(fingerprint.upstreamBaseUrl);
+    await assertSafeUpstreamUrl(buildRegisteredUpstreamUrl(fingerprint));
   } catch (error) {
     if (error instanceof UnsafeUpstreamUrlError) {
       throw new RegistryApiError(400, error.message, { code: error.code });
     }
     throw error;
   }
+  await assertUpstreamDoesNotRedirect(fingerprint);
 
   const existing = await store.findLiveApiByEndpoint(fingerprint);
   if (existing) {

@@ -103,6 +103,14 @@ async function startDemoServer() {
       return;
     }
 
+    if (req.url?.startsWith('/upstream/redirect-signal')) {
+      res.statusCode = 307;
+      res.setHeader('Location', '/upstream/market-signal');
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.end('Redirecting...');
+      return;
+    }
+
     proxyHandler(req, res);
   });
 
@@ -222,6 +230,22 @@ try {
   assert(freshDemo.statusCode === 201, `fresh demo re-register expected 201, got ${freshDemo.statusCode}`);
   assert(freshDemo.body.api.id !== api.id, 'fresh demo should create a new API id');
   assert(freshDemo.body.api.status === 'pending_setup', 'fresh demo should restart at pending_setup');
+
+  const redirectingApi = await call(
+    apisHandler,
+    makeReq({
+      method: 'POST',
+      cookie: ownerCookie,
+      body: {
+        name: 'Redirecting API',
+        upstreamBaseUrl: server.baseUrl,
+        path: '/upstream/redirect-signal',
+        priceUsdc: '0.02',
+      },
+    }),
+  );
+  assert(redirectingApi.statusCode === 400, `redirecting upstream create expected 400, got ${redirectingApi.statusCode}`);
+  assert(redirectingApi.body.code === 'upstream_redirect', 'redirecting upstream create should expose upstream_redirect code');
 } finally {
   await server.close();
 }
