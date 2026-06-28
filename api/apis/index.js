@@ -1,6 +1,6 @@
 import { RegistryApiError, createRegisteredApi, createApiSchema, requireRegistryConfig, requireRegistrySession, toApiResponse } from '../../server/lib/apiRegistry.js';
-import { methodNotAllowed } from '../../server/lib/auth.js';
-import { readJsonBody } from '../../server/lib/body.js';
+import { methodNotAllowed, requireSameOrigin } from '../../server/lib/auth.js';
+import { jsonBodyErrorResponse, readJsonBody } from '../../server/lib/body.js';
 import { publicErrorMessage } from '../../server/lib/errors.js';
 
 export default async function handler(req, res) {
@@ -8,6 +8,8 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  if (req.method === 'POST' && !requireSameOrigin(req, res)) return undefined;
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;
@@ -24,8 +26,9 @@ export default async function handler(req, res) {
     let body;
     try {
       body = await readJsonBody(req);
-    } catch {
-      return res.status(400).json({ error: 'Invalid JSON body' });
+    } catch (error) {
+      const response = jsonBodyErrorResponse(error);
+      return res.status(response.statusCode).json(response.payload);
     }
 
     const parsed = createApiSchema.safeParse(body);

@@ -1,17 +1,7 @@
 import { generateSchema } from '../backend/src/validators/generate.js';
 import { generateMiddleware } from '../backend/src/templates/middleware.js';
 import { generateIntegration } from '../backend/src/templates/integration.js';
-
-async function readJsonBody(req) {
-  if (req.body && typeof req.body === 'object') return req.body;
-  if (typeof req.body === 'string') return JSON.parse(req.body);
-
-  let raw = '';
-  for await (const chunk of req) {
-    raw += chunk;
-  }
-  return raw ? JSON.parse(raw) : {};
-}
+import { jsonBodyErrorResponse, readJsonBody } from '../server/lib/body.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -22,8 +12,9 @@ export default async function handler(req, res) {
   let body;
   try {
     body = await readJsonBody(req);
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON body' });
+  } catch (error) {
+    const response = jsonBodyErrorResponse(error);
+    return res.status(response.statusCode).json(response.payload);
   }
 
   const parsed = generateSchema.safeParse(body);

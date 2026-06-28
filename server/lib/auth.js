@@ -31,6 +31,21 @@ export function getConfiguredPublicOrigin() {
   }
 }
 
+function normalizeOrigin(value) {
+  try {
+    const url = new URL(value);
+    if (!['https:', 'http:'].includes(url.protocol)) return '';
+    url.username = '';
+    url.password = '';
+    url.hash = '';
+    url.search = '';
+    url.pathname = '';
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    return '';
+  }
+}
+
 export function getOrigin(req) {
   const configuredOrigin = getConfiguredPublicOrigin();
   if (configuredOrigin) return configuredOrigin;
@@ -38,6 +53,24 @@ export function getOrigin(req) {
   const proto = firstHeaderValue(req.headers['x-forwarded-proto']) || 'http';
   const host = firstHeaderValue(req.headers['x-forwarded-host']) || firstHeaderValue(req.headers.host) || 'localhost';
   return `${proto}://${host}`;
+}
+
+export function requireSameOrigin(req, res) {
+  if (!['POST', 'PATCH', 'DELETE'].includes(req.method)) return true;
+
+  const origin = firstHeaderValue(req.headers.origin);
+  const configuredOrigin = getConfiguredPublicOrigin();
+  const strict = process.env.NODE_ENV === 'production';
+
+  if (!strict && !origin) return true;
+
+  const expectedOrigin = configuredOrigin || getOrigin(req);
+  if (!origin || normalizeOrigin(origin) !== expectedOrigin) {
+    res.status(403).json({ error: 'Invalid request origin' });
+    return false;
+  }
+
+  return true;
 }
 
 export function isValidWalletAddress(walletAddress) {

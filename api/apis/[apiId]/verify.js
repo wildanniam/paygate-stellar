@@ -1,6 +1,6 @@
 import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, resolveApiStatus } from '../../../server/lib/apiRegistry.js';
 import { decryptApiSecret } from '../../../server/lib/apiSecret.js';
-import { methodNotAllowed } from '../../../server/lib/auth.js';
+import { methodNotAllowed, requireSameOrigin } from '../../../server/lib/auth.js';
 import { publicErrorMessage } from '../../../server/lib/errors.js';
 import { assertSafeUpstreamUrl, upstreamFetchOptions } from '../../../server/lib/upstreamSecurity.js';
 
@@ -64,6 +64,7 @@ async function verifyUpstreamGuard(api) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, 'POST');
+  if (!requireSameOrigin(req, res)) return undefined;
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;

@@ -6,10 +6,11 @@ import {
   hasSessionSecret,
   isValidWalletAddress,
   methodNotAllowed,
+  requireSameOrigin,
   setSessionCookie,
   verifySignedMessage,
 } from '../../server/lib/auth.js';
-import { readJsonBody } from '../../server/lib/body.js';
+import { jsonBodyErrorResponse, readJsonBody } from '../../server/lib/body.js';
 
 function getAction(req) {
   const queryAction = req.query?.action;
@@ -38,8 +39,9 @@ export async function handleChallenge(req, res) {
   let body;
   try {
     body = await readJsonBody(req);
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON body' });
+  } catch (error) {
+    const response = jsonBodyErrorResponse(error);
+    return res.status(response.statusCode).json(response.payload);
   }
 
   const walletAddress = String(body.walletAddress || '').trim();
@@ -80,8 +82,9 @@ export async function handleVerify(req, res) {
   let body;
   try {
     body = await readJsonBody(req);
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON body' });
+  } catch (error) {
+    const response = jsonBodyErrorResponse(error);
+    return res.status(response.statusCode).json(response.payload);
   }
 
   const challengeId = String(body.challengeId || '').trim();
@@ -163,6 +166,7 @@ export function handleMe(req, res) {
 
 export function handleLogout(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, 'POST');
+  if (!requireSameOrigin(req, res)) return undefined;
 
   clearSessionCookie(res);
   return res.status(200).json({ ok: true });

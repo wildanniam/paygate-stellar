@@ -1,6 +1,6 @@
 import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, toApiResponse, updateApiSchema } from '../../server/lib/apiRegistry.js';
-import { methodNotAllowed } from '../../server/lib/auth.js';
-import { readJsonBody } from '../../server/lib/body.js';
+import { methodNotAllowed, requireSameOrigin } from '../../server/lib/auth.js';
+import { jsonBodyErrorResponse, readJsonBody } from '../../server/lib/body.js';
 import { publicErrorMessage } from '../../server/lib/errors.js';
 
 function nowIso() {
@@ -15,6 +15,8 @@ function getApiId(req) {
 
 export default async function handler(req, res) {
   if (!['GET', 'PATCH', 'DELETE'].includes(req.method)) return methodNotAllowed(res, 'GET, PATCH, DELETE');
+
+  if (req.method !== 'GET' && !requireSameOrigin(req, res)) return undefined;
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;
@@ -64,8 +66,9 @@ export default async function handler(req, res) {
     let body;
     try {
       body = await readJsonBody(req);
-    } catch {
-      return res.status(400).json({ error: 'Invalid JSON body' });
+    } catch (error) {
+      const response = jsonBodyErrorResponse(error);
+      return res.status(response.statusCode).json(response.payload);
     }
 
     const parsed = updateApiSchema.safeParse(body);

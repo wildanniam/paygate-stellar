@@ -1,5 +1,6 @@
 import { assertSafeUpstreamUrl } from '../server/lib/upstreamSecurity.js';
-import { getOrigin } from '../server/lib/auth.js';
+import { getOrigin, requireSameOrigin } from '../server/lib/auth.js';
+import { isRequestBodyTooLarge, readJsonBody } from '../server/lib/body.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -21,6 +22,21 @@ async function accepts(url) {
   } catch {
     return false;
   }
+}
+
+function makeRes() {
+  return {
+    statusCode: 200,
+    body: undefined,
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(payload) {
+      this.body = payload;
+      return this;
+    },
+  };
 }
 
 const originalNodeEnv = process.env.NODE_ENV;
@@ -53,6 +69,40 @@ const pinnedOrigin = getOrigin({
   },
 });
 assert(pinnedOrigin === 'https://trypaygate.com', 'configured public origin should ignore forwarded host');
+
+const blockedOriginRes = makeRes();
+const blockedOrigin = requireSameOrigin(
+  {
+    method: 'POST',
+    headers: {
+      origin: 'https://evil.example',
+      host: 'trypaygate.com',
+    },
+  },
+  blockedOriginRes,
+);
+assert(blockedOrigin === false, 'cross-origin unsafe requests should be blocked');
+assert(blockedOriginRes.statusCode === 403, 'cross-origin unsafe requests should return 403');
+
+const allowedOriginRes = makeRes();
+const allowedOrigin = requireSameOrigin(
+  {
+    method: 'POST',
+    headers: {
+      origin: 'https://trypaygate.com',
+      host: 'trypaygate.com',
+    },
+  },
+  allowedOriginRes,
+);
+assert(allowedOrigin === true, 'same-origin unsafe requests should be allowed');
+
+try {
+  await readJsonBody({ body: JSON.stringify({ value: 'x'.repeat(12) }) }, { maxBytes: 8 });
+  throw new Error('oversized JSON body should be rejected');
+} catch (error) {
+  assert(isRequestBodyTooLarge(error), 'oversized JSON body should throw RequestBodyTooLargeError');
+}
 
 if (originalNodeEnv === undefined) {
   delete process.env.NODE_ENV;

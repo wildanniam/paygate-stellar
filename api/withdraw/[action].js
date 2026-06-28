@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { requireRegistryConfig, requireRegistrySession } from '../../server/lib/apiRegistry.js';
-import { readJsonBody } from '../../server/lib/body.js';
+import { requireSameOrigin } from '../../server/lib/auth.js';
+import { jsonBodyErrorResponse, readJsonBody } from '../../server/lib/body.js';
 import {
   prepareEscrowWithdrawal,
   readEscrowBalances,
@@ -30,6 +31,7 @@ export async function handlePrepare(req, res) {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if (!requireSameOrigin(req, res)) return undefined;
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;
@@ -64,6 +66,7 @@ export async function handleSubmit(req, res) {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if (!requireSameOrigin(req, res)) return undefined;
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;
@@ -74,8 +77,9 @@ export async function handleSubmit(req, res) {
   let body;
   try {
     body = await readJsonBody(req);
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON body' });
+  } catch (error) {
+    const response = jsonBodyErrorResponse(error);
+    return res.status(response.statusCode).json(response.payload);
   }
 
   const parsed = submitSchema.safeParse(body);
