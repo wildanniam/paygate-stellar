@@ -153,6 +153,50 @@ function createMockPaymentResult({ credential, expectedAmountBaseUnits, expected
   };
 }
 
+function validateStoredPaymentCredential({ api, credential, paymentId, expectedTxHash }) {
+  const expectedAmountBaseUnits = baseUnitsFromUsdc(api.price_usdc);
+
+  if (!Challenge.verify(credential.challenge, { secretKey: process.env.MPP_SECRET_KEY })) {
+    throw new Error('Payment credential challenge was not issued by PayGate');
+  }
+  if (credential.challenge.request.externalId !== paymentId) {
+    throw new Error('Payment credential externalId mismatch');
+  }
+  if (credential.challenge.request.amount !== expectedAmountBaseUnits) {
+    throw new Error('Payment credential amount mismatch');
+  }
+  if (credential.challenge.request.currency !== USDC_SAC_TESTNET) {
+    throw new Error('Payment credential currency mismatch');
+  }
+  if (credential.challenge.request.recipient !== getEscrowContractId()) {
+    throw new Error('Payment credential recipient mismatch');
+  }
+
+  const credentialTxHash = credential.payload?.hash;
+  if (
+    !credentialTxHash
+    || String(credentialTxHash).toLowerCase() !== String(expectedTxHash).toLowerCase()
+  ) {
+    throw new Error('Payment credential does not match recorded transaction');
+  }
+}
+
+function createRecordedPaymentResult(payment, paymentId) {
+  const receipt = Receipt.from({
+    method: 'stellar',
+    reference: payment.tx_hash,
+    status: 'success',
+    timestamp: payment.verified_at || payment.created_at || nowIso(),
+    externalId: paymentId,
+  });
+
+  return {
+    receipt,
+    receiptHeader: Receipt.serialize(receipt),
+    recordedPayment: payment,
+  };
+}
+
 async function verifyPayment({ api, credential, mppx, paymentId, req }) {
   const expectedAmountBaseUnits = baseUnitsFromUsdc(api.price_usdc);
 
@@ -198,6 +242,14 @@ function sendJson(res, statusCode, payload, headers = {}) {
     if (value !== undefined && value !== null) res.setHeader(key, value);
   }
   return res.status(statusCode).json(payload);
+}
+
+function paymentHeaders({ receiptHeader, paymentId, retryable = false }) {
+  return {
+    'Payment-Receipt': receiptHeader,
+    'X-PayGate-Payment-Id': paymentId,
+    'X-PayGate-Retryable': retryable ? 'true' : 'false',
+  };
 }
 
 async function sendResponse(res, response, headers = {}) {
@@ -291,6 +343,7 @@ export default async function handler(req, res) {
 
   let paymentId = credential ? getCredentialPaymentId(credential) : null;
   let proxyRequest = null;
+  let recordedPayment = null;
 
   if (credential) {
     if (!hasEscrowCreditConfig()) {
@@ -322,11 +375,32 @@ export default async function handler(req, res) {
       return sendJson(res, 402, { error: 'Payment credential does not match this API' });
     }
 
-    if (proxyRequest.status === 'forwarded' || proxyRequest.tx_hash) {
+    if (proxyRequest.status === 'forwarded') {
       return sendJson(res, 409, { error: 'Payment credential was already used' });
     }
 
-    await store.updateProxyRequest(proxyRequest.id, { status: 'payment_submitted' });
+    recordedPayment = await store.getPaymentByPaymentId(paymentId);
+    if (recordedPayment) {
+      if (recordedPayment.api_id !== api.id || recordedPayment.request_id !== proxyRequest.id) {
+        return sendJson(res, 402, { error: 'Payment credential does not match this API request' });
+      }
+
+      try {
+        validateStoredPaymentCredential({
+          api,
+          credential,
+          paymentId,
+          expectedTxHash: recordedPayment.tx_hash,
+        });
+      } catch {
+        return sendJson(res, 402, { error: 'Payment credential does not match the recorded payment' });
+      }
+    }
+
+    await store.updateProxyRequest(proxyRequest.id, {
+      status: recordedPayment ? 'payment_verified' : 'payment_submitted',
+      error_message: null,
+    });
   } else {
     paymentId = createPaymentId();
     proxyRequest = await store.createProxyRequest({
@@ -356,82 +430,105 @@ export default async function handler(req, res) {
   }
 
   const grossBaseUnits = baseUnitsFromUsdc(api.price_usdc);
-  let verified;
-  try {
-    verified = await verifyPayment({ api, credential, mppx, paymentId, req });
-  } catch (error) {
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'payment_failed',
-      error_message: error instanceof Error ? error.message : 'Payment verification failed',
-    });
-    return sendJson(res, 402, { error: 'Payment verification failed' });
-  }
+  let verified = null;
 
-  if (verified.challengeResponse) {
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'payment_failed',
-      error_message: 'Payment verification returned a new challenge',
-    });
-    return sendResponse(res, verified.challengeResponse);
-  }
-
-  const receipt = verified.receipt;
   const payerWallet = getPayerWallet(credential);
 
-  await store.updateProxyRequest(proxyRequest.id, {
-    status: 'payment_verified',
-    payer_wallet: payerWallet,
-    tx_hash: receipt.reference,
-    paid_at: nowIso(),
-  });
+  if (recordedPayment) {
+    verified = createRecordedPaymentResult(recordedPayment, paymentId);
+    await store.updateProxyRequest(proxyRequest.id, {
+      status: recordedPayment.credit_tx_hash ? 'credited' : 'payment_verified',
+      payer_wallet: proxyRequest.payer_wallet || payerWallet,
+      tx_hash: recordedPayment.tx_hash,
+      paid_at: proxyRequest.paid_at || recordedPayment.verified_at || nowIso(),
+      error_message: null,
+    });
+  } else {
+    try {
+      verified = await verifyPayment({ api, credential, mppx, paymentId, req });
+    } catch (error) {
+      await store.updateProxyRequest(proxyRequest.id, {
+        status: 'payment_failed',
+        error_message: error instanceof Error ? error.message : 'Payment verification failed',
+      });
+      return sendJson(res, 402, { error: 'Payment verification failed' });
+    }
+
+    if (verified.challengeResponse) {
+      await store.updateProxyRequest(proxyRequest.id, {
+        status: 'payment_failed',
+        error_message: 'Payment verification returned a new challenge',
+      });
+      return sendResponse(res, verified.challengeResponse);
+    }
+
+    const receipt = verified.receipt;
+    await store.updateProxyRequest(proxyRequest.id, {
+      status: 'payment_verified',
+      payer_wallet: payerWallet,
+      tx_hash: receipt.reference,
+      paid_at: nowIso(),
+      error_message: null,
+    });
+  }
 
   const amounts = paymentAmounts(grossBaseUnits);
-  try {
-    await store.createPayment({
-      request_id: proxyRequest.id,
-      api_id: api.id,
-      payment_id: paymentId,
-      tx_hash: receipt.reference,
-      gross_amount_usdc: amounts.grossAmountUsdc,
-      developer_amount_usdc: amounts.developerAmountUsdc,
-      platform_fee_usdc: amounts.platformFeeUsdc,
-      recipient_mode: 'contract',
-      verified_at: nowIso(),
-    });
-  } catch (error) {
-    if (!isDuplicateError(error)) throw error;
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'duplicate_payment',
-      error_message: 'Payment was already recorded',
-    });
-    return sendJson(res, 409, { error: 'Payment was already recorded' });
+  if (!recordedPayment) {
+    try {
+      recordedPayment = await store.createPayment({
+        request_id: proxyRequest.id,
+        api_id: api.id,
+        payment_id: paymentId,
+        tx_hash: verified.receipt.reference,
+        gross_amount_usdc: amounts.grossAmountUsdc,
+        developer_amount_usdc: amounts.developerAmountUsdc,
+        platform_fee_usdc: amounts.platformFeeUsdc,
+        recipient_mode: 'contract',
+        verified_at: nowIso(),
+      });
+    } catch (error) {
+      if (!isDuplicateError(error)) throw error;
+
+      const existingPayment = await store.getPaymentByPaymentId(paymentId);
+      if (existingPayment && existingPayment.tx_hash === verified.receipt.reference) {
+        recordedPayment = existingPayment;
+      } else {
+        await store.updateProxyRequest(proxyRequest.id, {
+          status: 'duplicate_payment',
+          error_message: 'Payment was already recorded',
+        });
+        return sendJson(res, 409, { error: 'Payment was already recorded' });
+      }
+    }
   }
 
-  await store.updateProxyRequest(proxyRequest.id, { status: 'credit_pending' });
-  let credit;
-  try {
-    credit = await creditEscrowPayment({
-      paymentId,
-      developerWallet: api.owner_wallet,
-      grossAmountBaseUnits: grossBaseUnits,
-    });
-  } catch (error) {
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'credit_pending',
-      error_message: error instanceof Error ? error.message : 'Escrow credit failed',
-    });
-    return sendJson(
-      res,
-      502,
-      { error: 'Escrow credit failed' },
-      { 'Payment-Receipt': verified.receiptHeader },
-    );
-  }
+  if (!recordedPayment.credit_tx_hash) {
+    await store.updateProxyRequest(proxyRequest.id, { status: 'credit_pending' });
+    let credit;
+    try {
+      credit = await creditEscrowPayment({
+        paymentId,
+        developerWallet: api.owner_wallet,
+        grossAmountBaseUnits: grossBaseUnits,
+      });
+    } catch (error) {
+      await store.updateProxyRequest(proxyRequest.id, {
+        status: 'credit_pending',
+        error_message: error instanceof Error ? error.message : 'Escrow credit failed',
+      });
+      return sendJson(
+        res,
+        502,
+        { error: 'Escrow credit failed', retryable: true, paymentId },
+        paymentHeaders({ receiptHeader: verified.receiptHeader, paymentId, retryable: true }),
+      );
+    }
 
-  await store.updatePayment(paymentId, {
-    credit_tx_hash: credit.txHash,
-    credited_at: nowIso(),
-  });
+    recordedPayment = await store.updatePayment(paymentId, {
+      credit_tx_hash: credit.txHash,
+      credited_at: nowIso(),
+    });
+  }
   await store.updateProxyRequest(proxyRequest.id, { status: 'credited' });
 
   let upstreamResponse;
@@ -445,8 +542,8 @@ export default async function handler(req, res) {
     return sendJson(
       res,
       502,
-      { error: 'Upstream request failed' },
-      { 'Payment-Receipt': verified.receiptHeader },
+      { error: 'Upstream request failed', retryable: true, paymentId },
+      paymentHeaders({ receiptHeader: verified.receiptHeader, paymentId, retryable: true }),
     );
   }
 
@@ -463,8 +560,8 @@ export default async function handler(req, res) {
     return sendJson(
       res,
       502,
-      { error: 'Upstream response too large' },
-      { 'Payment-Receipt': verified.receiptHeader },
+      { error: 'Upstream response too large', retryable: true, paymentId },
+      paymentHeaders({ receiptHeader: verified.receiptHeader, paymentId, retryable: true }),
     );
   }
 
@@ -475,6 +572,8 @@ export default async function handler(req, res) {
       error_message: responseText.slice(0, 500),
     });
     res.setHeader('Payment-Receipt', verified.receiptHeader);
+    res.setHeader('X-PayGate-Payment-Id', paymentId);
+    res.setHeader('X-PayGate-Retryable', 'true');
     res.statusCode = upstreamResponse.status;
     res.setHeader('Content-Type', upstreamResponse.headers.get('Content-Type') || 'application/json');
     return res.end(responseText);
@@ -488,6 +587,8 @@ export default async function handler(req, res) {
 
   res.statusCode = upstreamResponse.status;
   res.setHeader('Payment-Receipt', verified.receiptHeader);
+  res.setHeader('X-PayGate-Payment-Id', paymentId);
+  res.setHeader('X-PayGate-Retryable', 'false');
   res.setHeader('Content-Type', upstreamResponse.headers.get('Content-Type') || 'application/json');
   return res.end(responseText);
 }

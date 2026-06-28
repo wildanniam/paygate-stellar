@@ -21,6 +21,8 @@ process.env.ESCROW_CONTRACT_ID =
 const UPSTREAM_SECRET = 'phase6-upstream-secret';
 const PAYER_WALLET = 'GBGXIGC36FD6COHDTBOA6KU4BW3U7UBVABMHKNRB4CRUHCIKH42IILLW';
 const PAYMENT_TX_HASH = 'a'.repeat(64);
+const RETRY_PAYMENT_TX_HASH = 'b'.repeat(64);
+let flakyFailuresRemaining = 1;
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -38,11 +40,19 @@ async function startServer() {
       return res;
     };
 
-    if (req.url?.startsWith('/upstream/market-signal')) {
+    if (req.url?.startsWith('/upstream/market-signal') || req.url?.startsWith('/upstream/flaky-signal')) {
       if (req.headers['x-paygate-secret'] !== UPSTREAM_SECRET) {
         res.statusCode = 401;
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+      }
+
+      if (req.url?.startsWith('/upstream/flaky-signal') && flakyFailuresRemaining > 0) {
+        flakyFailuresRemaining -= 1;
+        res.statusCode = 503;
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify({ error: 'Temporary upstream outage' }));
         return;
       }
 
@@ -166,6 +176,70 @@ try {
   assert(wrongMapping.status === 402, `wrong mapping expected 402, got ${wrongMapping.status}`);
   const requestAfterWrongMapping = getRawProxyRequestsForTest().find((row) => row.id === requestId);
   assert(requestAfterWrongMapping.status === 'forwarded', 'wrong mapping should not mutate original forwarded request');
+
+  const flakyApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Flaky Paid Proxy API',
+    upstream_base_url: server.baseUrl,
+    path: '/upstream/flaky-signal',
+    method: 'GET',
+    price_usdc: 0.02,
+    active: true,
+    ...encrypted,
+  });
+
+  const flakyUnpaid = await fetch(`${server.baseUrl}/api/pay/${flakyApi.id}`);
+  assert(flakyUnpaid.status === 402, `flaky unpaid API expected 402, got ${flakyUnpaid.status}`);
+  const flakyPaymentId = flakyUnpaid.headers.get('x-paygate-payment-id');
+  const flakyChallenge = Challenge.fromResponse(flakyUnpaid);
+  const flakyCredential = Credential.serialize({
+    challenge: flakyChallenge,
+    payload: { type: 'hash', hash: RETRY_PAYMENT_TX_HASH },
+    source: `did:pkh:stellar:testnet:${PAYER_WALLET}`,
+  });
+
+  const flakyFirst = await fetch(`${server.baseUrl}/api/pay/${flakyApi.id}`, {
+    headers: {
+      Authorization: flakyCredential,
+    },
+  });
+  assert(flakyFirst.status === 503, `flaky first paid API expected 503, got ${flakyFirst.status}`);
+  assert(flakyFirst.headers.get('x-paygate-retryable') === 'true', 'failed upstream response should be retryable');
+  assert(flakyFirst.headers.get('x-paygate-payment-id') === flakyPaymentId, 'retryable response payment id mismatch');
+
+  const failedRequest = getRawProxyRequestsForTest().find((row) => row.payment_id === flakyPaymentId);
+  assert(failedRequest.status === 'upstream_failed', `expected upstream_failed, got ${failedRequest.status}`);
+  assert(failedRequest.tx_hash === RETRY_PAYMENT_TX_HASH, 'failed request tx hash not saved');
+  assert(failedRequest.upstream_status === 503, 'failed request upstream status not saved');
+
+  const failedPayment = getRawPaymentsForTest().find((row) => row.payment_id === flakyPaymentId);
+  assert(failedPayment, 'failed upstream should still record payment');
+  assert(failedPayment.credit_tx_hash === `mock-credit-${flakyPaymentId}`, 'failed upstream should still credit escrow once');
+
+  const flakyRetry = await fetch(`${server.baseUrl}/api/pay/${flakyApi.id}`, {
+    headers: {
+      Authorization: flakyCredential,
+    },
+  });
+  assert(flakyRetry.status === 200, `flaky retry paid API expected 200, got ${flakyRetry.status}`);
+  assert(flakyRetry.headers.get('x-paygate-retryable') === 'false', 'successful retry should not be retryable');
+  const retryBody = await flakyRetry.json();
+  assert(retryBody.signal === 'bullish', 'retry response missing upstream signal');
+
+  const retriedRequest = getRawProxyRequestsForTest().find((row) => row.payment_id === flakyPaymentId);
+  assert(retriedRequest.status === 'forwarded', `expected forwarded after retry, got ${retriedRequest.status}`);
+  assert(retriedRequest.upstream_status === 200, 'retried request upstream status not saved');
+
+  const retryPayments = getRawPaymentsForTest().filter((row) => row.payment_id === flakyPaymentId);
+  assert(retryPayments.length === 1, 'retry should not create another payment row');
+  assert(retryPayments[0].credit_tx_hash === `mock-credit-${flakyPaymentId}`, 'retry should not credit escrow again');
+
+  const flakyDuplicate = await fetch(`${server.baseUrl}/api/pay/${flakyApi.id}`, {
+    headers: {
+      Authorization: flakyCredential,
+    },
+  });
+  assert(flakyDuplicate.status === 409, `flaky duplicate after success expected 409, got ${flakyDuplicate.status}`);
 } finally {
   await server.close();
 }

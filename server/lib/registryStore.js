@@ -135,6 +135,13 @@ function publicWithdrawalPreparationFields(record) {
   };
 }
 
+const PAYMENT_RECONCILIATION_STATUSES = [
+  'payment_verified',
+  'credit_pending',
+  'credited',
+  'upstream_failed',
+];
+
 function shouldUseMemoryStore() {
   return process.env.PAYGATE_REGISTRY_STORE === 'memory';
 }
@@ -217,6 +224,13 @@ function createMemoryRegistry() {
     async listProxyRequests(ownerWallet, limit = 100) {
       return [...state.proxyRequests.values()]
         .filter((record) => record.owner_wallet === ownerWallet)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, limit)
+        .map(publicProxyRequestFields);
+    },
+    async listPaymentReconciliationCandidates(limit = 100) {
+      return [...state.proxyRequests.values()]
+        .filter((record) => PAYMENT_RECONCILIATION_STATUSES.includes(record.status))
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
         .slice(0, limit)
         .map(publicProxyRequestFields);
@@ -519,6 +533,16 @@ function createSupabaseRegistry() {
         .from('proxy_requests')
         .select('*')
         .eq('owner_wallet', ownerWallet)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data ?? [];
+    },
+    async listPaymentReconciliationCandidates(limit = 100) {
+      const { data, error } = await client
+        .from('proxy_requests')
+        .select('*')
+        .in('status', PAYMENT_RECONCILIATION_STATUSES)
         .order('created_at', { ascending: false })
         .limit(limit);
       if (error) throw error;

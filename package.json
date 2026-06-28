@@ -28,6 +28,7 @@
     "beta:preflight": "node scripts/beta-preflight.mjs",
     "evidence:init": "node scripts/prepare-beta-evidence.mjs",
     "audit:prod": "npm audit --omit=dev && npm --prefix frontend audit --omit=dev && npm --prefix backend audit --omit=dev && npm --prefix examples/express-paid-api audit --omit=dev",
+    "reconcile:payments": "node scripts/reconcile-payments.mjs",
     "admin:withdraw-fees": "node scripts/admin-withdraw-fees.mjs",
     "vercel-build": "npm run build"
   },

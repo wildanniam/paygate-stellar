@@ -378,11 +378,15 @@ Cara tes:
 
 Severity: High
 
-Status: belum diperbaiki karena perlu keputusan produk.
+Status: sudah dimitigasi pada Phase 7 dengan retry entitlement dan reconciliation report. Refund/settlement policy tetap backlog produk.
 
 File terdampak:
 
 - `api/pay/[apiId].js`
+- `server/lib/registryStore.js`
+- `scripts/reconcile-payments.mjs`
+- `scripts/phase6-paid-proxy-smoke.mjs`
+- `package.json`
 
 Masalah:
 
@@ -393,7 +397,7 @@ Flow sekarang:
 3. Escrow di-credit.
 4. Baru request diteruskan ke upstream.
 
-Kalau upstream gagal setelah escrow credited, buyer sudah bayar tapi tidak mendapat service yang berguna.
+Kalau upstream gagal setelah escrow credited, buyer sudah bayar tapi tidak mendapat service yang berguna. Sebelum Phase 7, retry dengan credential yang sama juga ditolak karena `tx_hash` sudah tersimpan.
 
 Skenario serangan / failure:
 
@@ -406,41 +410,30 @@ Dampak:
 
 - Buyer/agent bisa ter-charge tanpa hasil.
 - Developer balance bisa bertambah walaupun service gagal.
-- Retry dengan credential sama bisa dianggap duplicate.
-- Butuh manual reconciliation.
+- Retry dengan credential sama sebelumnya bisa dianggap duplicate.
+- Butuh manual reconciliation untuk state stuck.
 
-Rekomendasi:
+Patch yang diterapkan:
 
-Harus pilih model produk:
+- Payment credential yang sudah tercatat dapat dipakai ulang hanya jika request belum `forwarded`.
+- Retry tidak membuat payment row baru.
+- Retry tidak menjalankan escrow credit ulang jika `credit_tx_hash` sudah ada.
+- Response upstream gagal membawa `Payment-Receipt`, `X-PayGate-Payment-Id`, dan `X-PayGate-Retryable: true`.
+- Setelah retry sukses, status berubah ke `forwarded` dan credential berikutnya ditolak `409`.
+- Tambahkan `npm run reconcile:payments` untuk laporan read-only state `credit_pending`, `credited`, dan `upstream_failed`.
 
-1. Pay-for-success:
-   - Credit escrow hanya setelah upstream sukses.
-   - Kalau upstream gagal, refund atau pending settlement.
+Keputusan produk yang masih tersisa:
 
-2. Pay-for-attempt:
-   - Upstream gagal tetap billable.
-   - Harus jelas di docs dan receipt.
-
-3. Retry/reconciliation:
-   - Simpan state paid-but-not-forwarded.
-   - Ada worker/admin tool untuk retry.
-
-Minimal state yang disarankan:
-
-- `payment_verified`
-- `service_pending`
-- `service_failed`
-- `credit_pending`
-- `credited`
-- `forwarded`
-- `refund_pending`
-- `refunded`
+- Refund otomatis belum dibuat.
+- Retry window/TTL belum diputuskan.
+- Worker otomatis untuk retry delivery belum dibuat.
 
 Cara tes:
 
 - Payment sukses, upstream return 500.
 - Payment sukses, escrow RPC gagal.
 - Retry credential yang sama.
+- Pastikan retry sukses tidak menambah payment row dan tidak menambah escrow credit.
 - Pastikan dashboard dan receipt menjelaskan status sebenarnya.
 
 ## PG-007 - Withdrawal submit belum validasi full transaction intent
