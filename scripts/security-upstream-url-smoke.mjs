@@ -5,6 +5,7 @@ import {
 } from '../server/lib/upstreamSecurity.js';
 import { getOrigin, requireSameOrigin } from '../server/lib/auth.js';
 import { isRequestBodyTooLarge, readJsonBody } from '../server/lib/body.js';
+import { clearRateLimitsForTest, enforceRateLimit } from '../server/lib/rateLimit.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -31,7 +32,11 @@ async function accepts(url) {
 function makeRes() {
   return {
     statusCode: 200,
+    headers: {},
     body: undefined,
+    setHeader(name, value) {
+      this.headers[name.toLowerCase()] = value;
+    },
     status(code) {
       this.statusCode = code;
       return this;
@@ -47,6 +52,7 @@ const originalNodeEnv = process.env.NODE_ENV;
 const originalRegistryStore = process.env.PAYGATE_REGISTRY_STORE;
 const originalAllowPrivate = process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
 const originalPublicOrigin = process.env.PAYGATE_PUBLIC_ORIGIN;
+const originalRateLimitStore = process.env.PAYGATE_RATE_LIMIT_STORE;
 
 delete process.env.PAYGATE_REGISTRY_STORE;
 delete process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
@@ -115,6 +121,36 @@ try {
   assert(isUpstreamResponseTooLarge(error), 'oversized upstream response should throw UpstreamResponseTooLargeError');
 }
 
+process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
+clearRateLimitsForTest();
+const rateReq = {
+  headers: {
+    'x-forwarded-for': '203.0.113.9',
+  },
+};
+assert(await enforceRateLimit(rateReq, makeRes(), {
+  label: 'security_smoke',
+  keyParts: ['203.0.113.9'],
+  limit: 2,
+  windowSeconds: 60,
+}), 'first rate-limited request should pass');
+assert(await enforceRateLimit(rateReq, makeRes(), {
+  label: 'security_smoke',
+  keyParts: ['203.0.113.9'],
+  limit: 2,
+  windowSeconds: 60,
+}), 'second rate-limited request should pass');
+const limitedRes = makeRes();
+const thirdRateAllowed = await enforceRateLimit(rateReq, limitedRes, {
+  label: 'security_smoke',
+  keyParts: ['203.0.113.9'],
+  limit: 2,
+  windowSeconds: 60,
+});
+assert(!thirdRateAllowed, 'third rate-limited request should be blocked');
+assert(limitedRes.statusCode === 429, 'rate-limited request should return 429');
+clearRateLimitsForTest();
+
 if (originalNodeEnv === undefined) {
   delete process.env.NODE_ENV;
 } else {
@@ -134,6 +170,11 @@ if (originalPublicOrigin === undefined) {
   delete process.env.PAYGATE_PUBLIC_ORIGIN;
 } else {
   process.env.PAYGATE_PUBLIC_ORIGIN = originalPublicOrigin;
+}
+if (originalRateLimitStore === undefined) {
+  delete process.env.PAYGATE_RATE_LIMIT_STORE;
+} else {
+  process.env.PAYGATE_RATE_LIMIT_STORE = originalRateLimitStore;
 }
 
 console.log('Security upstream URL smoke test passed');

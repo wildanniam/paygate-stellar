@@ -7,6 +7,7 @@ import { creditEscrowPayment, getEscrowContractId, hasEscrowCreditConfig } from 
 import { createMppReplayStore } from '../../server/lib/mppReplayStore.js';
 import { createPaymentId } from '../../server/lib/paymentId.js';
 import { getRegistryStore } from '../../server/lib/registryStore.js';
+import { enforceRateLimit, getClientIp } from '../../server/lib/rateLimit.js';
 import {
   assertSafeUpstreamUrl,
   isUpstreamResponseTooLarge,
@@ -271,6 +272,16 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: 'API not found' });
   }
 
+  const clientIp = getClientIp(req);
+  const paidProxyRateAllowed = await enforceRateLimit(req, res, {
+    label: 'paid_proxy_ip_api',
+    keyParts: [clientIp, api.id],
+    limit: 60,
+    windowSeconds: 60,
+    failOpen: true,
+  });
+  if (!paidProxyRateAllowed) return undefined;
+
   let credential = null;
   try {
     credential = getPaymentCredential(req);
@@ -292,6 +303,15 @@ export default async function handler(req, res) {
     if (!paymentId) {
       return sendJson(res, 402, { error: 'Payment credential is missing PayGate payment id' });
     }
+
+    const credentialRateAllowed = await enforceRateLimit(req, res, {
+      label: 'paid_credential_ip_payment',
+      keyParts: [clientIp, paymentId],
+      limit: 10,
+      windowSeconds: 10 * 60,
+      failOpen: true,
+    });
+    if (!credentialRateAllowed) return undefined;
 
     proxyRequest = await store.getProxyRequestByPaymentId(paymentId);
     if (!proxyRequest) {

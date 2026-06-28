@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { requireRegistryConfig, requireRegistrySession } from '../../server/lib/apiRegistry.js';
 import { requireSameOrigin } from '../../server/lib/auth.js';
 import { jsonBodyErrorResponse, readJsonBody } from '../../server/lib/body.js';
+import { enforceRateLimit } from '../../server/lib/rateLimit.js';
 import {
   prepareEscrowWithdrawal,
   readEscrowBalances,
@@ -35,6 +36,14 @@ export async function handlePrepare(req, res) {
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;
+
+  const prepareRateAllowed = await enforceRateLimit(req, res, {
+    label: 'withdraw_prepare_wallet',
+    keyParts: [session.walletAddress],
+    limit: 5,
+    windowSeconds: 60,
+  });
+  if (!prepareRateAllowed) return undefined;
 
   const store = requireRegistryConfig(res);
   if (!store) return undefined;
@@ -70,6 +79,14 @@ export async function handleSubmit(req, res) {
 
   const session = requireRegistrySession(req, res);
   if (!session) return undefined;
+
+  const submitRateAllowed = await enforceRateLimit(req, res, {
+    label: 'withdraw_submit_wallet',
+    keyParts: [session.walletAddress],
+    limit: 5,
+    windowSeconds: 60,
+  });
+  if (!submitRateAllowed) return undefined;
 
   const store = requireRegistryConfig(res);
   if (!store) return undefined;

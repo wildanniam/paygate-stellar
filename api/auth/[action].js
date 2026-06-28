@@ -11,6 +11,7 @@ import {
   verifySignedMessage,
 } from '../../server/lib/auth.js';
 import { jsonBodyErrorResponse, readJsonBody } from '../../server/lib/body.js';
+import { enforceRateLimit, getClientIp } from '../../server/lib/rateLimit.js';
 
 function getAction(req) {
   const queryAction = req.query?.action;
@@ -35,6 +36,15 @@ function authStoreErrorMessage(error) {
 
 export async function handleChallenge(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, 'POST');
+
+  const clientIp = getClientIp(req);
+  const challengeRateAllowed = await enforceRateLimit(req, res, {
+    label: 'auth_challenge_ip',
+    keyParts: [clientIp],
+    limit: 10,
+    windowSeconds: 60,
+  });
+  if (!challengeRateAllowed) return undefined;
 
   let body;
   try {
@@ -91,6 +101,25 @@ export async function handleVerify(req, res) {
   const walletAddress = String(body.walletAddress || '').trim();
   const signerAddress = String(body.signerAddress || '').trim();
   const signedMessage = typeof body.signedMessage === 'string' ? body.signedMessage : '';
+  const clientIp = getClientIp(req);
+
+  const verifyIpRateAllowed = await enforceRateLimit(req, res, {
+    label: 'auth_verify_ip',
+    keyParts: [clientIp],
+    limit: 10,
+    windowSeconds: 60,
+  });
+  if (!verifyIpRateAllowed) return undefined;
+
+  if (isValidWalletAddress(walletAddress)) {
+    const verifyWalletRateAllowed = await enforceRateLimit(req, res, {
+      label: 'auth_verify_wallet',
+      keyParts: [walletAddress],
+      limit: 20,
+      windowSeconds: 60 * 60,
+    });
+    if (!verifyWalletRateAllowed) return undefined;
+  }
 
   if (!challengeId || !isValidWalletAddress(walletAddress)) {
     return res.status(400).json({ error: 'Invalid verification payload' });

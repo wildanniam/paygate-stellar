@@ -34,6 +34,7 @@
     "@stellar/mpp": "^0.6.0",
     "@stellar/stellar-sdk": "^15.0.0",
     "@supabase/supabase-js": "^2.107.0",
+    "@upstash/redis": "^1.38.0",
     "express": "^5.2.1",
     "mppx": "^0.6.28",
     "zod": "^3.22.0"

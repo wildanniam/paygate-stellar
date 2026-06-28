@@ -8,6 +8,7 @@ import {
   readLimitedResponseText,
   upstreamFetchOptions,
 } from '../../../server/lib/upstreamSecurity.js';
+import { enforceRateLimit } from '../../../server/lib/rateLimit.js';
 
 function nowIso() {
   return new Date().toISOString();
@@ -83,6 +84,13 @@ export default async function handler(req, res) {
   if (!store) return undefined;
 
   const apiId = getApiId(req);
+  const verifyRateAllowed = await enforceRateLimit(req, res, {
+    label: 'api_setup_verify_wallet_api',
+    keyParts: [session.walletAddress, apiId],
+    limit: 5,
+    windowSeconds: 60,
+  });
+  if (!verifyRateAllowed) return undefined;
 
   try {
     const api = await store.getApi(apiId, session.walletAddress);
