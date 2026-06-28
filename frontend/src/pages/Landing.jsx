@@ -8,7 +8,7 @@ import MarketingNavbar from '../components/MarketingNavbar.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 import Button from '../components/ui/Button.jsx';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const HERO_FLOW_URLS = {
   source: 'https://api.company.com/v1/signal',
@@ -598,10 +598,27 @@ export default function Landing() {
     });
 
     const heroIntro = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    const heroButtons = root.querySelectorAll('.paygate-hero-actions .pg-button');
+
     heroIntro
-      .from('.paygate-hero-title', { autoAlpha: 0, y: 24, duration: 0.72 }, 0.05)
-      .from('.paygate-hero-copy', { autoAlpha: 0, y: 16, duration: 0.56 }, 0.18)
-      .from('.paygate-hero-actions .pg-button', { autoAlpha: 0, y: 14, duration: 0.48, stagger: 0.08 }, 0.32);
+      .fromTo(
+        '.paygate-hero-title',
+        { autoAlpha: 0, y: 24 },
+        { autoAlpha: 1, y: 0, duration: 0.72, clearProps: 'opacity,visibility,transform' },
+        0.05,
+      )
+      .fromTo(
+        '.paygate-hero-copy',
+        { autoAlpha: 0, y: 16 },
+        { autoAlpha: 1, y: 0, duration: 0.56, clearProps: 'opacity,visibility,transform' },
+        0.18,
+      )
+      .fromTo(
+        heroButtons,
+        { autoAlpha: 0, y: 14 },
+        { autoAlpha: 1, y: 0, duration: 0.48, stagger: 0.08, clearProps: 'opacity,visibility,transform' },
+        0.32,
+      );
 
     const setStage = () => {
       const current = {
@@ -937,7 +954,6 @@ export default function Landing() {
                 onMouseEnter={() => setHeroActive('node')}
                 onFocus={() => setHeroActive('node')}
                 onBlur={resetHeroActive}
-                tabIndex={0}
                 aria-label="PayGate paid proxy verifies payment and forwards authorized API calls."
               >
                 <div className="paygate-node-matrix" aria-hidden="true" />
@@ -1117,7 +1133,6 @@ export default function Landing() {
                 data-active={transformActive === 'paste' ? 'true' : 'false'}
                 onMouseEnter={() => setTransformActive('paste')}
                 onFocus={() => setTransformActive('paste')}
-                tabIndex={0}
               >
                 <span className="paygate-transform-step-number">1</span>
                 <div>
@@ -1141,7 +1156,6 @@ export default function Landing() {
                 data-active={transformActive === 'price' ? 'true' : 'false'}
                 onMouseEnter={() => setTransformActive('price')}
                 onFocus={() => setTransformActive('price')}
-                tabIndex={0}
               >
                 <span className="paygate-transform-step-number">2</span>
                 <div>
@@ -1160,7 +1174,6 @@ export default function Landing() {
                 data-active={transformActive === 'generate' ? 'true' : 'false'}
                 onMouseEnter={() => setTransformActive('generate')}
                 onFocus={() => setTransformActive('generate')}
-                tabIndex={0}
               >
                 <span className="paygate-transform-step-number">3</span>
                 <div>
@@ -1277,7 +1290,6 @@ export default function Landing() {
               className="paygate-protected-card is-client"
               onMouseEnter={() => setProtectedActive('client')}
               onFocus={() => setProtectedActive('client')}
-              tabIndex={0}
             >
               <div className="paygate-protected-card-title">
                 <span><MachineClientIcon size={26} /></span>
@@ -1327,7 +1339,6 @@ export default function Landing() {
               className="paygate-protected-card is-guard"
               onMouseEnter={() => setProtectedActive('guard')}
               onFocus={() => setProtectedActive('guard')}
-              tabIndex={0}
             >
               <img src="/brand/paygate-mark.svg" alt="" />
               <h3>PayGate guard</h3>
@@ -1360,7 +1371,6 @@ export default function Landing() {
               className="paygate-protected-card is-upstream"
               onMouseEnter={() => setProtectedActive('upstream')}
               onFocus={() => setProtectedActive('upstream')}
-              tabIndex={0}
             >
               <div className="paygate-protected-card-title">
                 <span><UpstreamLockIcon size={27} /></span>

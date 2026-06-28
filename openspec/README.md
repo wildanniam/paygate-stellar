@@ -14,15 +14,24 @@ Read order for agents:
 
 ## Current Specs
 
-- `specs/mpp-code-generator/spec.md` — backend generator API.
-- `specs/generated-middleware/spec.md` — code emitted by PayGate.
-- `specs/website-frontend/spec.md` — React SPA routes and UX.
-- `specs/monitoring-dashboard/spec.md` — Horizon-backed earnings dashboard.
+Canonical specs should describe the product as it exists now:
 
-## Current Active Change
+- `specs/wallet-auth/spec.md` — Freighter sign-message login and session behavior.
+- `specs/api-registry/spec.md` — registered API lifecycle, encrypted upstream secrets, and setup verification.
+- `specs/paid-proxy/spec.md` — `/api/pay/:apiId` payment challenge, MPP verification, upstream forwarding, and request logging.
+- `specs/escrow-settlement/spec.md` — Soroban escrow crediting, developer withdrawals, and platform fee accounting.
+- `specs/monitoring-dashboard/spec.md` — authenticated PayGate workspace dashboard backed by registry, payment, request, withdrawal, and escrow data.
+- `specs/website-frontend/spec.md` — React SPA routes, marketing landing page, app shell, dashboard workspace, create endpoint, and endpoint detail UX.
 
-- `changes/prove-e2e-mpp-payment/` — prove the SOW-critical flow: generate middleware, run it in a sample Express API, execute a real Stellar testnet MPP payment, and show it in the dashboard.
-- `changes/build-paygate-v1-gateway/` — build the approved V1 direction: paid proxy, Freighter auth, Supabase API registry, Soroban escrow settlement, and AI-agent payment flow.
+Legacy/SOW specs are still kept for evidence and regression context:
+
+- `specs/mpp-code-generator/spec.md` — historical backend generator API at `/api/generate`.
+- `specs/generated-middleware/spec.md` — historical Express middleware emitted by the V0 generator and used by the sample Express proof.
+
+## Current Change Folders
+
+- `changes/build-paygate-v1-gateway/` — implemented V1 gateway direction. Kept as the implementation/evidence trail; canonical V1 requirements are now promoted into `openspec/specs/*`.
+- `changes/prove-e2e-mpp-payment/` — historical V0/SOW generated-middleware proof path. Kept for Instawards/SOW evidence, not as the current product direction.
 
 ## How To Use
 
@@ -34,3 +43,5 @@ When adding a feature or changing behavior:
 4. After implementation is verified, update the canonical spec under `openspec/specs`.
 
 Keep this lightweight. For V0 work, document behavior that matters for the SOW, official Instawards review, and demo evidence. For V1 work, document the product behavior that makes PayGate a pay-per-call gateway rather than only a code generator.
+
+Last canonical alignment pass: 2026-06-27.

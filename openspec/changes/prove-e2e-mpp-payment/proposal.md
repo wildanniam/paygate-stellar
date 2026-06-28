@@ -2,7 +2,7 @@
 
 ## Summary
 
-Prove the SOW-critical PayGate flow end-to-end:
+Historical V0/SOW proof track: prove the original generator-based PayGate flow end-to-end:
 
 1. Generate middleware from the PayGate web app.
 2. Install the generated middleware into a sample Express API.
@@ -13,11 +13,13 @@ Prove the SOW-critical PayGate flow end-to-end:
 
 ## Why
 
-PayGate is currently a functional alpha. The generator, frontend, backend, and dashboard shell exist, but the most important business claim is not proven yet:
+At the time of this change, PayGate was a functional alpha. The generator, frontend, backend, and dashboard shell existed, but the most important business claim was not proven yet:
 
 > A developer can generate code, paste it into an API, receive a Stellar testnet USDC payment, and monitor that payment in PayGate.
 
 The SOW requires demo evidence, tx hashes, and a dashboard showing real on-chain activity. Without this change, PayGate is still perceived as a code generator mockup rather than a working MPP integration tool.
+
+Current status: PayGate V1 has moved beyond this generator-first path. The current product direction is the hosted paid proxy: wallet auth, API registry, `/api/pay/:apiId`, escrow settlement, and the wallet-scoped dashboard workspace. Use this change only as historical evidence for the earlier SOW path.
 
 ## Scope
 
@@ -49,4 +51,3 @@ Out of scope:
 - The tx hash opens in Stellar Expert testnet.
 - PayGate dashboard shows the payment row for the recipient wallet.
 - Demo script can be followed by a human or agent.
-

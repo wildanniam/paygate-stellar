@@ -93,3 +93,10 @@
 - [x] Add browser route smoke automation for desktop/mobile SPA refresh states.
 - [x] Add live replay evidence template and run-folder initializer.
 - [x] Mark older V0/SOW planning docs as historical so current V1 beta gaps remain clear.
+
+## 11. OpenSpec Canonical Alignment
+
+- [x] Promote V1 wallet auth, API registry, paid proxy, and escrow settlement requirements into canonical OpenSpec specs.
+- [x] Rewrite the monitoring dashboard spec from Horizon wallet lookup to the current authenticated PayGate workspace.
+- [x] Rewrite the website frontend spec to cover the current marketing landing page, `/apis/new`, `/apis/:apiId`, and dashboard subroutes.
+- [x] Mark generator and generated middleware specs as legacy V0/SOW compatibility capabilities.

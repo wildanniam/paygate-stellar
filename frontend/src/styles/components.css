@@ -2354,6 +2354,11 @@
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
+.paygate-mobile-menu-trigger,
+.paygate-mobile-menu {
+  display: none;
+}
+
 #workspace,
 #how-it-works,
 #protected-calls,
@@ -2495,6 +2500,10 @@
   min-height: 40px;
   font-size: 14px;
   padding: 0 16px;
+}
+
+.paygate-nav-cta-short {
+  display: none;
 }
 
 .paygate-nav-cta:hover {
@@ -8120,13 +8129,15 @@
 
   .paygate-nav-inner {
     display: flex;
-    width: min(100% - 32px, 1320px);
-    min-height: 58px;
-    gap: 12px;
+    width: min(100% - 28px, 1320px);
+    min-height: 54px;
+    gap: 10px;
   }
 
   .paygate-brand-link {
+    flex: 0 1 auto;
     gap: 8px;
+    min-width: 0;
     font-size: 16px;
   }
 
@@ -8142,26 +8153,136 @@
   }
 
   .paygate-nav-center,
-  .paygate-nav-secondary {
+  .paygate-nav-secondary,
+  .paygate-nav-cta {
     display: none !important;
   }
 
   .paygate-nav-actions {
+    flex: 0 0 auto;
     margin-left: auto;
-  }
-
-  .paygate-nav-cta {
-    min-height: 36px;
-    padding: 0 12px;
-    font-size: 12px;
   }
 
   .paygate-nav-icon {
     display: none;
   }
 
+  .paygate-mobile-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(82, 94, 118, 0.38);
+    border-radius: 12px;
+    background: rgba(13, 17, 23, 0.58);
+    color: var(--pg-text-primary);
+    cursor: pointer;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .paygate-mobile-menu-trigger:hover,
+  .paygate-mobile-menu-trigger[data-open='true'] {
+    border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.32);
+    background: rgba(var(--pg-brand-purple-rgb), 0.14);
+    color: var(--pg-brand-purple-soft);
+    transform: translateY(-1px);
+  }
+
+  .paygate-mobile-menu-trigger:focus-visible {
+    outline: none;
+    box-shadow: var(--pg-shadow-focus);
+  }
+
+  .paygate-mobile-menu {
+    display: grid;
+    width: min(100% - 28px, 1320px);
+    margin: 0 auto 10px;
+    gap: 9px;
+    border: 1px solid rgba(82, 94, 118, 0.24);
+    border-radius: 16px;
+    background:
+      linear-gradient(180deg, rgba(17, 23, 34, 0.88), rgba(8, 11, 17, 0.82)),
+      rgba(13, 17, 23, 0.86);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.045),
+      0 18px 42px rgba(0, 0, 0, 0.22);
+    padding: 8px;
+  }
+
+  .paygate-mobile-menu[hidden] {
+    display: none;
+  }
+
+  .paygate-mobile-menu-links,
+  .paygate-mobile-menu-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .paygate-mobile-menu-actions {
+    border-top: 1px solid rgba(82, 94, 118, 0.22);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-top: 9px;
+  }
+
+  .paygate-mobile-menu-link,
+  .paygate-mobile-menu-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 38px;
+    border: 1px solid rgba(82, 94, 118, 0.22);
+    border-radius: 11px;
+    background: rgba(13, 17, 23, 0.38);
+    color: var(--pg-text-secondary);
+    font-size: 12px;
+    font-weight: 760;
+    line-height: 1;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .paygate-mobile-menu-link[data-active='true'] {
+    border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.30);
+    background: rgba(var(--pg-brand-purple-rgb), 0.13);
+    color: var(--pg-brand-purple-soft);
+  }
+
+  .paygate-mobile-menu-link:hover,
+  .paygate-mobile-menu-secondary:hover {
+    border-color: rgba(165, 173, 189, 0.26);
+    background: rgba(165, 173, 189, 0.08);
+    color: var(--pg-text-primary);
+    transform: translateY(-1px);
+  }
+
+  .paygate-mobile-menu-link:focus-visible,
+  .paygate-mobile-menu-secondary:focus-visible {
+    outline: none;
+    box-shadow: var(--pg-shadow-focus);
+  }
+
+  #workspace,
+  #how-it-works,
+  #protected-calls,
+  #features,
+  #proof {
+    scroll-margin-top: 104px;
+  }
+
   .paygate-hero {
-    padding: 52px 24px 8px;
+    padding: 54px 24px 8px;
   }
 
   .paygate-hero-title {
@@ -8178,17 +8299,16 @@
 
   .paygate-hero-actions {
     margin-top: 26px;
-  }
-
-  .paygate-hero-actions {
-    width: 100%;
+    align-items: center;
+    width: auto;
   }
 
   .paygate-hero-actions .pg-button {
-    width: 100%;
+    width: min(100%, 282px);
   }
 
   .paygate-hero-actions .pg-button[data-variant='secondary'] {
+    width: auto;
     min-height: 34px;
     border-color: transparent;
     background: transparent;

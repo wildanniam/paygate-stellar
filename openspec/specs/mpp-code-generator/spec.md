@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Allow a developer to submit three fields and receive copy-paste-ready Express MPP integration code without needing to understand Stellar internals.
+Legacy V0/SOW capability: allow a developer to submit three fields and receive copy-paste-ready Express MPP integration code without needing to understand Stellar internals.
+
+The current PayGate V1 product no longer treats this generator as the primary monetization flow. V1 monetization is covered by `api-registry`, `paid-proxy`, `wallet-auth`, `escrow-settlement`, `monitoring-dashboard`, and `website-frontend`: users connect a wallet, register an upstream API, receive a hosted PayGate proxy URL, and monitor paid traffic from the dashboard. This spec remains canonical only for the still-present `/api/generate` compatibility endpoint and the historical SOW demo path.
 
 ## Requirements
 
@@ -83,14 +85,9 @@ The backend SHALL generate code as a pure function of the request body and SHALL
 - THEN both responses contain equivalent generated code
 - AND no user account or stored project state is required
 
-### Requirement: Rate limit generator API
+## Known Limitations
 
-The backend SHALL rate limit `/api/*` requests to reduce abuse during the POC.
-
-#### Scenario: Too many requests
-
-- GIVEN one client sends more than 20 API requests within 1 minute
-- WHEN the rate limit is exceeded
-- THEN the API returns HTTP 429
-- AND the response includes `Too many requests, please try again later.`
-
+- This flow generates self-hosted Express middleware and does not create a PayGate-hosted proxy URL.
+- This flow does not create a wallet-scoped API registry record.
+- This flow does not power the current V1 dashboard, endpoint detail pages, or payout workflow.
+- Rate limiting is not specified by this legacy generator implementation; deployment-level protection may be added separately.
