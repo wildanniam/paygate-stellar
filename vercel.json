@@ -44,6 +44,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/dashboard/:path*",
+      "destination": "/index.html"
+    },
+    {
       "source": "/apis/new",
       "destination": "/index.html"
     },
