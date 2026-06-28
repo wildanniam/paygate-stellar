@@ -43,9 +43,11 @@ function getMemoryState() {
       mppStore: new Map(),
       payments: new Map(),
       proxyRequests: new Map(),
+      withdrawalPreparations: new Map(),
       withdrawals: new Map(),
     };
   }
+  globalThis.__PAYGATE_REGISTRY_MEMORY.withdrawalPreparations ??= new Map();
   return globalThis.__PAYGATE_REGISTRY_MEMORY;
 }
 
@@ -112,6 +114,23 @@ function publicWithdrawalFields(record) {
     tx_hash: record.tx_hash,
     status: record.status,
     created_at: record.created_at,
+    completed_at: record.completed_at,
+  };
+}
+
+function publicWithdrawalPreparationFields(record) {
+  return {
+    id: record.id,
+    wallet_address: record.wallet_address,
+    withdrawal_id: record.withdrawal_id,
+    tx_hash: record.tx_hash,
+    amount_usdc: record.amount_usdc,
+    amount_base_units: record.amount_base_units,
+    status: record.status,
+    expires_at: record.expires_at,
+    submitted_tx_hash: record.submitted_tx_hash,
+    created_at: record.created_at,
+    submitted_at: record.submitted_at,
     completed_at: record.completed_at,
   };
 }
@@ -286,6 +305,56 @@ function createMemoryRegistry() {
       };
       state.withdrawals.set(row.id, row);
       return publicWithdrawalFields(row);
+    },
+    async createWithdrawalPreparation(record) {
+      const row = {
+        ...record,
+        id: crypto.randomUUID(),
+        withdrawal_id: record.withdrawal_id ?? null,
+        status: record.status ?? 'prepared',
+        submitted_tx_hash: record.submitted_tx_hash ?? null,
+        submitted_at: record.submitted_at ?? null,
+        completed_at: record.completed_at ?? null,
+        created_at: nowIso(),
+      };
+      state.withdrawalPreparations.set(row.id, row);
+      return publicWithdrawalPreparationFields(row);
+    },
+    async getWithdrawalPreparation(preparationId, walletAddress) {
+      const row = state.withdrawalPreparations.get(preparationId);
+      if (!row || row.wallet_address !== walletAddress) return null;
+      return publicWithdrawalPreparationFields(row);
+    },
+    async claimWithdrawalPreparation(preparationId, walletAddress) {
+      const row = state.withdrawalPreparations.get(preparationId);
+      if (!row || row.wallet_address !== walletAddress) return null;
+      if (row.status !== 'prepared') return null;
+      if (Date.parse(row.expires_at) <= Date.now()) {
+        const expired = {
+          ...row,
+          status: 'expired',
+          completed_at: nowIso(),
+        };
+        state.withdrawalPreparations.set(preparationId, expired);
+        return null;
+      }
+      const next = {
+        ...row,
+        status: 'submitted',
+        submitted_at: nowIso(),
+      };
+      state.withdrawalPreparations.set(preparationId, next);
+      return publicWithdrawalPreparationFields(next);
+    },
+    async updateWithdrawalPreparation(preparationId, walletAddress, updates) {
+      const row = state.withdrawalPreparations.get(preparationId);
+      if (!row || row.wallet_address !== walletAddress) return null;
+      const next = {
+        ...row,
+        ...updates,
+      };
+      state.withdrawalPreparations.set(preparationId, next);
+      return publicWithdrawalPreparationFields(next);
     },
     async updateWithdrawal(withdrawalId, updates) {
       const row = state.withdrawals.get(withdrawalId);
@@ -540,6 +609,65 @@ function createSupabaseRegistry() {
       if (error) throw error;
       return data;
     },
+    async createWithdrawalPreparation(record) {
+      const { data, error } = await client
+        .from('withdrawal_preparations')
+        .insert(record)
+        .select('*')
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    async getWithdrawalPreparation(preparationId, walletAddress) {
+      const { data, error } = await client
+        .from('withdrawal_preparations')
+        .select('*')
+        .eq('id', preparationId)
+        .eq('wallet_address', walletAddress)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async claimWithdrawalPreparation(preparationId, walletAddress) {
+      const { data, error } = await client
+        .from('withdrawal_preparations')
+        .update({
+          status: 'submitted',
+          submitted_at: nowIso(),
+        })
+        .eq('id', preparationId)
+        .eq('wallet_address', walletAddress)
+        .eq('status', 'prepared')
+        .gt('expires_at', nowIso())
+        .select('*')
+        .maybeSingle();
+      if (error) throw error;
+
+      if (!data) {
+        await client
+          .from('withdrawal_preparations')
+          .update({
+            status: 'expired',
+            completed_at: nowIso(),
+          })
+          .eq('id', preparationId)
+          .eq('wallet_address', walletAddress)
+          .eq('status', 'prepared')
+          .lte('expires_at', nowIso());
+      }
+      return data;
+    },
+    async updateWithdrawalPreparation(preparationId, walletAddress, updates) {
+      const { data, error } = await client
+        .from('withdrawal_preparations')
+        .update(updates)
+        .eq('id', preparationId)
+        .eq('wallet_address', walletAddress)
+        .select('*')
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
     async updateWithdrawal(withdrawalId, updates) {
       const { data, error } = await client
         .from('withdrawals')
@@ -601,6 +729,7 @@ export function clearRegistryForTest() {
   state.mppStore?.clear();
   state.payments?.clear();
   state.proxyRequests?.clear();
+  state.withdrawalPreparations?.clear();
   state.withdrawals?.clear();
 }
 
@@ -618,6 +747,10 @@ export function getRawPaymentsForTest() {
 
 export function getRawWithdrawalsForTest() {
   return [...getMemoryState().withdrawals.values()];
+}
+
+export function getRawWithdrawalPreparationsForTest() {
+  return [...getMemoryState().withdrawalPreparations.values()];
 }
 
 export function getRawMppStoreForTest() {

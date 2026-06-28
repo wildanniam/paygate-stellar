@@ -28,6 +28,7 @@ const TABLE_CHECKS = [
   ['proxy_requests', 'id,api_id,owner_wallet,payment_id,status,price_usdc,tx_hash,created_at'],
   ['payments', 'id,request_id,api_id,payment_id,tx_hash,credit_tx_hash,gross_amount_usdc,created_at'],
   ['withdrawals', 'id,wallet_address,amount_usdc,tx_hash,status,created_at,completed_at'],
+  ['withdrawal_preparations', 'id,wallet_address,withdrawal_id,tx_hash,amount_usdc,status,expires_at,created_at'],
   ['mpp_store', 'key,value,created_at,updated_at'],
 ];
 

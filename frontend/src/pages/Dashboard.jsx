@@ -1325,7 +1325,10 @@ export default function Dashboard() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ signedTransactionXdr }),
+        body: JSON.stringify({
+          preparationId: prepared.preparationId,
+          signedTransactionXdr,
+        }),
       });
       const submitted = await readJsonResponse(submitRes);
       if (submitRes.status === 401) {

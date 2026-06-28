@@ -1,6 +1,11 @@
 import { createServer } from 'node:http';
 import { createSessionToken, SESSION_COOKIE } from '../server/lib/auth.js';
-import { clearRegistryForTest, getRawWithdrawalsForTest, getRegistryStore } from '../server/lib/registryStore.js';
+import {
+  clearRegistryForTest,
+  getRawWithdrawalPreparationsForTest,
+  getRawWithdrawalsForTest,
+  getRegistryStore,
+} from '../server/lib/registryStore.js';
 import dashboardHandler from '../api/dashboard/summary.js';
 import { handlePrepare as prepareHandler, handleSubmit as submitHandler } from '../api/withdraw/[action].js';
 import { withdrawPlatformFees } from '../server/lib/escrowContract.js';
@@ -65,7 +70,29 @@ try {
   assert(preparedResponse.status === 200, `prepare expected 200, got ${preparedResponse.status}`);
   const prepared = await preparedResponse.json();
   assert(prepared.amountUsdc === '0.0180000', 'prepare amount mismatch');
+  assert(prepared.preparationId, 'prepare should return a preparation id');
   assert(prepared.transactionXdr.includes(ownerWallet), 'prepare should bind tx to developer wallet');
+
+  const tamperedSubmit = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      preparationId: prepared.preparationId,
+      signedTransactionXdr: `mock-signed:mock-withdrawal-xdr:${ownerWallet}:wrong-hash`,
+    }),
+  });
+  assert(tamperedSubmit.status === 400, `tampered submit expected 400, got ${tamperedSubmit.status}`);
+  assert(getRawWithdrawalsForTest().length === 0, 'tampered submit should not create a withdrawal row');
+
+  const retryPrepareResponse = await fetch(`${server.baseUrl}/api/withdraw/prepare`, {
+    method: 'POST',
+    headers: authHeaders,
+  });
+  assert(retryPrepareResponse.status === 200, `retry prepare expected 200, got ${retryPrepareResponse.status}`);
+  const retryPrepared = await retryPrepareResponse.json();
 
   const submittedResponse = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
     method: 'POST',
@@ -74,7 +101,8 @@ try {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      signedTransactionXdr: `mock-signed:${prepared.transactionXdr}`,
+      preparationId: retryPrepared.preparationId,
+      signedTransactionXdr: `mock-signed:${retryPrepared.transactionXdr}`,
     }),
   });
   assert(submittedResponse.status === 200, `submit expected 200, got ${submittedResponse.status}`);
@@ -86,6 +114,10 @@ try {
   const withdrawals = getRawWithdrawalsForTest();
   assert(withdrawals.length === 1, 'withdrawal row was not recorded');
   assert(withdrawals[0].wallet_address === ownerWallet, 'withdrawal wallet mismatch');
+  const preparations = getRawWithdrawalPreparationsForTest();
+  assert(preparations.length === 2, 'withdrawal preparations should be recorded');
+  assert(preparations.some((row) => row.status === 'prepared'), 'tampered preparation should remain reusable');
+  assert(preparations.some((row) => row.status === 'succeeded'), 'successful preparation status missing');
 
   const dashboardResponse = await fetch(`${server.baseUrl}/api/dashboard/summary`, {
     headers: authHeaders,

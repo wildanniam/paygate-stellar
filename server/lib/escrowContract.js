@@ -261,12 +261,51 @@ export async function prepareEscrowWithdrawal(developerWallet) {
   };
 }
 
-export async function submitEscrowWithdrawal(signedTransactionXdr, expectedDeveloperWallet) {
+function createWithdrawalPreparationMismatchError() {
+  const error = new Error('Signed withdrawal transaction does not match the prepared withdrawal');
+  error.code = 'WITHDRAWAL_PREPARATION_MISMATCH';
+  return error;
+}
+
+export function validateEscrowWithdrawalTransaction(signedTransactionXdr, expectedDeveloperWallet, options = {}) {
+  const expectedTxHash = options.expectedTxHash || null;
+
   if (isMockEscrowWithdrawMode()) {
     requireSafeMockWithdrawMode();
     if (!signedTransactionXdr.includes(expectedDeveloperWallet)) {
       throw new Error('Signed withdrawal transaction source does not match the authenticated wallet');
     }
+    if (expectedTxHash && !signedTransactionXdr.includes(expectedTxHash)) {
+      throw createWithdrawalPreparationMismatchError();
+    }
+    return {
+      mode: 'memory',
+      source: expectedDeveloperWallet,
+      txHash: expectedTxHash,
+    };
+  }
+
+  const tx = TransactionBuilder.fromXDR(signedTransactionXdr, getNetworkPassphrase());
+  if (tx.source !== expectedDeveloperWallet) {
+    throw new Error('Signed withdrawal transaction source does not match the authenticated wallet');
+  }
+
+  const txHash = tx.hash().toString('hex');
+  if (expectedTxHash && txHash !== expectedTxHash) {
+    throw createWithdrawalPreparationMismatchError();
+  }
+
+  return {
+    mode: 'contract',
+    source: tx.source,
+    txHash,
+  };
+}
+
+export async function submitEscrowWithdrawal(signedTransactionXdr, expectedDeveloperWallet, options = {}) {
+  const validation = validateEscrowWithdrawalTransaction(signedTransactionXdr, expectedDeveloperWallet, options);
+
+  if (isMockEscrowWithdrawMode()) {
     const state = getMockWithdrawState();
     const amountBaseUnits = state.developerBalanceBaseUnits;
     state.developerBalanceBaseUnits = '0';
@@ -279,12 +318,10 @@ export async function submitEscrowWithdrawal(signedTransactionXdr, expectedDevel
   }
 
   const tx = TransactionBuilder.fromXDR(signedTransactionXdr, getNetworkPassphrase());
-  if (tx.source !== expectedDeveloperWallet) {
-    throw new Error('Signed withdrawal transaction source does not match the authenticated wallet');
-  }
 
   const server = new rpc.Server(getRpcUrl());
-  const txHash = tx.hash().toString('hex');
+  const txHash = validation.txHash;
+
   const submitted = await server.sendTransaction(tx);
   if (submitted.status !== 'PENDING') {
     throw new Error(`Escrow withdrawal submission failed with status ${submitted.status}`);

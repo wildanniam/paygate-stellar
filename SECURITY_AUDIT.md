@@ -14,9 +14,9 @@ Temuan paling penting:
 2. High - Setup verification bisa meloloskan upstream yang sebenarnya tidak punya secret guard. Sudah diperbaiki.
 3. High - Dependency vulnerable di payment/frontend tooling. Sudah diperbaiki.
 4. High - Payment bisa tercatat/escrow credited sebelum upstream sukses. Belum diperbaiki karena perlu keputusan produk.
-5. Medium - Rate limiting produksi belum ada di Vercel route. Belum diperbaiki.
-6. Medium - Body/request/response size belum dibatasi. Belum diperbaiki.
-7. Medium - Withdrawal submit hanya cek source wallet, belum cek full intent transaksi. Belum diperbaiki.
+5. Medium - Rate limiting produksi belum ada di Vercel route. Sudah diperbaiki dengan Upstash-backed limiter.
+6. Medium - Body/request/response size belum dibatasi. Sudah diperbaiki.
+7. Medium - Withdrawal submit hanya cek source wallet, belum cek full intent transaksi. Sudah diperbaiki.
 
 Tidak ada temuan Critical yang terkonfirmasi.
 
@@ -445,12 +445,15 @@ Cara tes:
 
 Severity: Medium
 
-Status: belum diperbaiki.
+Status: sudah diperbaiki pada Phase 5.
 
 File terdampak:
 
 - `api/withdraw/[action].js`
 - `server/lib/escrowContract.js`
+- `server/lib/registryStore.js`
+- `supabase/migrations/20260628050000_paygate_withdrawal_preparations.sql`
+- `frontend/src/pages/Dashboard.jsx`
 
 Masalah:
 
@@ -474,23 +477,20 @@ Dampak:
 
 Rekomendasi:
 
-Saat prepare withdrawal, simpan:
+Patch yang diterapkan:
 
-- preparation ID
-- expected transaction hash
-- wallet
-- contract ID
-- method
-- amount
+- `prepare` membuat record `withdrawal_preparations` berisi wallet, expected transaction hash, amount, status, dan expiry.
+- `submit` wajib mengirim `preparationId`.
+- Server memvalidasi signed XDR terhadap wallet dan expected transaction hash sebelum klaim preparation.
+- Klaim preparation bersifat conditional: hanya status `prepared` dan belum expired yang bisa lanjut.
+- Submit tetap memvalidasi ulang hash sebelum mengirim transaksi ke Stellar.
 
-Saat submit, cocokkan signed XDR dengan preparation record.
-
-Contoh patch:
+Potongan patch utama:
 
 ```js
-if (tx.hash().toString('hex') !== prepared.tx_hash) {
-  throw new Error('Signed withdrawal transaction does not match prepared withdrawal');
-}
+validateEscrowWithdrawalTransaction(signedTransactionXdr, walletAddress, {
+  expectedTxHash: preparation.tx_hash,
+});
 ```
 
 Cara tes:
