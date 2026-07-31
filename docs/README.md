@@ -222,6 +222,7 @@ Set these variables for **Development** first, then add the same set to Preview/
 | `SESSION_SECRET` | Signs wallet login sessions | Strong random string, 32+ chars |
 | `API_SECRET_ENCRYPTION_KEY` | Encrypts generated API secrets | Strong random string, 32+ chars or 64-char hex |
 | `MPP_SECRET_KEY` | Signs MPP challenge state | Strong random string, 32+ chars |
+| `CRON_SECRET` | Authenticates the daily database availability check | Strong random string, 16+ chars |
 | `ESCROW_CONTRACT_ID` | Soroban escrow contract recipient | Testnet contract id, `C...` |
 | `PAYGATE_OPERATOR_SECRET` | Operator/admin signer for escrow credit and platform fee withdrawal | Stellar testnet secret seed, `S...` |
 | `PAYGATE_DEMO_UPSTREAM_SECRET` | Secret expected by the demo upstream endpoint | Generated API secret during demo setup |
@@ -235,6 +236,12 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 Do not set `STELLAR_SECRET` in Vercel. The payer secret belongs only in the local agent/client `.env`. Do not set `PAYGATE_AUTH_CHALLENGE_STORE=memory` or `PAYGATE_REGISTRY_STORE=memory` in Vercel; memory mode is only for deterministic local smoke tests.
+
+The Vercel Hobby deployment runs `/api/cron/database-health` once per day. The
+route requires `CRON_SECRET` and performs three read-only Supabase queries to
+reduce the risk of automatic Free Plan pausing. This is a beta reliability
+measure, not an uptime guarantee; upgrade Supabase before treating PayGate as an
+always-on production service.
 
 After adding env vars in Vercel:
 
