@@ -373,6 +373,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 SESSION_SECRET=
 API_SECRET_ENCRYPTION_KEY=
 MPP_SECRET_KEY=
+CRON_SECRET=
 ESCROW_CONTRACT_ID=
 PAYGATE_OPERATOR_SECRET=
 PAYGATE_DEMO_UPSTREAM_SECRET=
@@ -392,6 +393,7 @@ Important rules:
 - Do not put payer wallet secrets in Vercel.
 - `STELLAR_SECRET` belongs only in the local agent/client environment.
 - Do not use `PAYGATE_AUTH_CHALLENGE_STORE=memory` or `PAYGATE_REGISTRY_STORE=memory` in Vercel.
+- Set `CRON_SECRET` to a random value of at least 16 characters in Vercel Production.
 
 ---
 
@@ -417,6 +419,12 @@ mpp_store
 ```
 
 Use the Supabase service role key only on the server side.
+
+Supabase Free Plan projects may be paused after sustained low activity. PayGate
+uses a secured daily Vercel cron request to perform three read-only health
+queries. This reduces pause risk for the testnet beta, but a paid Supabase plan
+is still required when uninterrupted production availability becomes a
+requirement.
 
 ---
 
@@ -454,6 +462,10 @@ After setting env vars in Vercel:
 vercel env pull .env.local --environment=development --yes
 ```
 
+The Hobby-compatible cron schedule is defined in `vercel.json` and calls
+`/api/cron/database-health` once per day. Vercel sends `CRON_SECRET` as a Bearer
+token; requests without the matching token are rejected.
+
 ---
 
 ## Verification Checklist
@@ -464,6 +476,7 @@ Run from the repo root:
 npm run test:beta
 npm run audit:prod
 npm run test:browser
+npm run test:database-health
 git diff --check
 ```
 

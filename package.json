@@ -20,10 +20,11 @@
     "test:demo-flow": "node scripts/phase7-full-demo-flow-smoke.mjs",
     "test:dashboard": "node scripts/phase7-dashboard-smoke.mjs",
     "test:withdrawal": "node scripts/phase8-withdrawal-smoke.mjs",
+    "test:database-health": "node scripts/database-health-smoke.mjs",
     "test:auth:supabase": "node scripts/supabase-auth-challenge-smoke.mjs",
     "test:browser": "node scripts/browser-smoke.mjs",
     "test:security": "node scripts/security-upstream-url-smoke.mjs",
-    "test:beta": "npm run test:auth && npm run test:registry && npm run test:verify-setup && npm run test:api-reset && npm run test:upstream && npm run test:proxy-unpaid && npm run test:proxy-paid && npm run test:demo-flow && npm run test:dashboard && npm run test:withdrawal && npm run test:security && npm run build && cd contracts && cargo test && cd .. && git diff --check",
+    "test:beta": "npm run test:auth && npm run test:registry && npm run test:verify-setup && npm run test:api-reset && npm run test:upstream && npm run test:proxy-unpaid && npm run test:proxy-paid && npm run test:demo-flow && npm run test:dashboard && npm run test:withdrawal && npm run test:database-health && npm run test:security && npm run build && cd contracts && cargo test && cd .. && git diff --check",
     "scan:secrets": "node scripts/secret-scan.mjs",
     "beta:preflight": "node scripts/beta-preflight.mjs",
     "evidence:init": "node scripts/prepare-beta-evidence.mjs",
@@ -42,7 +43,8 @@
     "zod": "^3.22.0"
   },
   "overrides": {
-    "axios": "^1.17.0",
+    "axios": "^1.19.0",
+    "body-parser": "^2.3.0",
     "form-data": "^4.0.6",
     "ws": "^8.21.0"
   }

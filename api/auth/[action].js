@@ -23,15 +23,8 @@ function getAction(req) {
 }
 
 function authStoreErrorMessage(error) {
-  const raw = error instanceof Error ? error.message : String(error || '');
-  const looksLikeHtml = /<(!doctype|html|head|body|div|span|meta|script)\b/i.test(raw);
-  const looksLikeGatewayError = /cloudflare|connection timed out|error code 52\d|supabase\.co/i.test(raw);
-
-  if (looksLikeHtml || looksLikeGatewayError || raw.length > 320) {
-    return 'PayGate could not reach the wallet challenge database. Please try again in a moment.';
-  }
-
-  return raw || 'PayGate auth challenge store is not configured';
+  void error;
+  return 'PayGate could not reach the wallet challenge database. Please try again in a moment.';
 }
 
 export async function handleChallenge(req, res) {
