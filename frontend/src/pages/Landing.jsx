@@ -1,10 +1,12 @@
-import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Info, Layers3, LayoutDashboard, Link2, Plus, ShieldCheck, TrendingUp, Upload, Zap } from 'lucide-react';
+import { Activity, ArrowRight, CalendarDays, CheckCircle2, Copy, Database, FileText, Fingerprint, Info, Layers3, LayoutDashboard, Link2, Play, Plus, ShieldCheck, TrendingUp, Upload, Zap } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import MarketingNavbar from '../components/MarketingNavbar.jsx';
+import HeroWorkspace from '../components/HeroWorkspace.jsx';
+import HowItWorksDiagram from '../components/HowItWorksDiagram.jsx';
 import SiteFooter from '../components/SiteFooter.jsx';
 import Button from '../components/ui/Button.jsx';
 
@@ -125,15 +127,6 @@ function TransformIcon({ size = 22, children, ...props }) {
   );
 }
 
-function BillingIcon(props) {
-  return (
-    <TransformIcon {...props}>
-      <path d="M7.1 4.4h9.8c.8 0 1.4.6 1.4 1.4v13.8l-2-1.1-2.1 1.1-2.2-1.1-2.1 1.1-2.2-1.1-2 1.1V5.8c0-.8.6-1.4 1.4-1.4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M9 8.4h6M9 11.7h6M9 15h3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </TransformIcon>
-  );
-}
-
 function GuardIcon(props) {
   return (
     <TransformIcon {...props}>
@@ -143,59 +136,11 @@ function GuardIcon(props) {
   );
 }
 
-function RevenueLineIcon(props) {
-  return (
-    <TransformIcon {...props}>
-      <path d="M4.6 16.7 9 12.4l3.3 2.7 6.7-7.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M14.7 7.7H19v4.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M4.6 19.3h14.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.36" />
-    </TransformIcon>
-  );
-}
-
-function AgentNodesIcon(props) {
-  return (
-    <TransformIcon {...props}>
-      <circle cx="7.4" cy="8" r="2.4" stroke="currentColor" strokeWidth="1.8" />
-      <circle cx="16.6" cy="8" r="2.4" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M4.4 18.3c.5-2.2 1.8-3.4 3.7-3.4s3.2 1.2 3.7 3.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M12.2 18.3c.5-2.2 1.8-3.4 3.7-3.4s3.2 1.2 3.7 3.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M10 10.4h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.58" />
-    </TransformIcon>
-  );
-}
-
 function CodeTileIcon(props) {
   return (
     <TransformIcon {...props}>
       <path d="m9.1 8.2-3.5 3.7 3.5 3.9M14.9 8.2l3.5 3.7-3.5 3.9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <path d="m12.9 6.8-1.8 10.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.64" />
-    </TransformIcon>
-  );
-}
-
-function ApiTileIcon(props) {
-  return (
-    <TransformIcon {...props}>
-      <rect x="4.5" y="6.2" width="15" height="11.6" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M8.1 14.5V10l2.2 4.5 2.2-4.5v4.5M14.7 10v4.5M16.8 10v4.5" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" />
-    </TransformIcon>
-  );
-}
-
-function SignalTileIcon(props) {
-  return (
-    <TransformIcon {...props}>
-      <path d="M6.5 14.8V9.2M10.2 17V7M13.9 15.7V8.3M17.5 13.7v-3.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </TransformIcon>
-  );
-}
-
-function EndpointSparkIcon(props) {
-  return (
-    <TransformIcon {...props}>
-      <path d="M12 3.8 13.4 8l4.1 1.4-4.1 1.4L12 15l-1.4-4.2-4.1-1.4 4.1-1.4L12 3.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-      <path d="M18.4 14.2 19 16l1.8.6-1.8.6-.6 1.8-.6-1.8-1.8-.6 1.8-.6.6-1.8ZM5.6 14.2l.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5.5-1.4Z" fill="currentColor" />
     </TransformIcon>
   );
 }
@@ -300,60 +245,6 @@ const PROOF_REASONS = [
   },
 ];
 
-const TRANSFORM_PROBLEMS = [
-  {
-    label: 'Manual billing',
-    body: 'Invoices, spreadsheets, chasing payments',
-    icon: BillingIcon,
-  },
-  {
-    label: 'Custom auth',
-    body: 'Build and maintain your own access layer',
-    icon: GuardIcon,
-  },
-  {
-    label: 'No per-call revenue',
-    body: 'Useful calls stay free and unmonetized',
-    icon: RevenueLineIcon,
-  },
-  {
-    label: 'Hard to share with agents',
-    body: 'Complex setup for AI agents and clients',
-    icon: AgentNodesIcon,
-  },
-];
-
-const TRANSFORM_OUTCOMES = [
-  {
-    tone: 'amber',
-    label: '402',
-    body: 'Before payment',
-    detail: 'Access blocked until paid',
-    icon: GuardIcon,
-  },
-  {
-    tone: 'purple',
-    label: 'MPP verified',
-    body: 'Payment verified on Stellar',
-    detail: 'Credential accepted',
-    icon: GuardIcon,
-  },
-  {
-    tone: 'green',
-    label: '200',
-    body: 'Forwarded',
-    detail: 'Request sent to your API',
-    icon: CheckCircle2,
-  },
-  {
-    tone: 'revenue',
-    label: '+0.009 USDC',
-    body: 'Your revenue per call',
-    detail: 'Posted to dashboard',
-    icon: RevenueLineIcon,
-  },
-];
-
 const PROTECTED_GUARD_ROWS = [
   { tone: 'blocked', label: 'Unpaid blocked', icon: BlockedTrafficIcon },
   { tone: 'green', label: 'Payment verified', icon: CheckCircle2 },
@@ -420,60 +311,19 @@ const AUDIENCE_TRUST_NOTES = [
 ];
 
 export default function Landing() {
-  const [heroActive, setHeroActive]   = useState('idle');
-  const [copiedFlow, setCopiedFlow]   = useState(null);
   const [proofActive, setProofActive] = useState('mpp');
   const [proofVisible, setProofVisible] = useState(false);
   const [copiedProof, setCopiedProof] = useState(null);
-  const [transformActive, setTransformActive] = useState('generate');
-  const [copiedTransform, setCopiedTransform] = useState(null);
   const [protectedActive, setProtectedActive] = useState('forwarded');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return window.localStorage.getItem('paygate-theme') === 'light' ? 'light' : 'dark';
+  });
 
   const landingRef     = useRef(null);
   const scrollProgressRef = useRef(null);
-  const heroRailRef    = useRef(null);
   const proofRef       = useRef(null);
-  const copyTimerRef   = useRef(null);
   const proofCopyTimerRef = useRef(null);
-  const transformCopyTimerRef = useRef(null);
-
-  const resetHeroActive = useCallback(() => setHeroActive('idle'), []);
-
-  const copyHeroUrl = useCallback(async key => {
-    const value = HERO_FLOW_URLS[key];
-    if (!value) return;
-
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = value;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        textarea.remove();
-      }
-
-      window.clearTimeout(copyTimerRef.current);
-      setHeroActive(key);
-      setCopiedFlow(key);
-      copyTimerRef.current = window.setTimeout(() => setCopiedFlow(null), 1500);
-    } catch {
-      window.clearTimeout(copyTimerRef.current);
-      setCopiedFlow(`${key}-error`);
-      copyTimerRef.current = window.setTimeout(() => setCopiedFlow(null), 1500);
-    }
-  }, []);
-
-  const getHeroCopyState = key => {
-    if (copiedFlow === key) return 'copied';
-    if (copiedFlow === `${key}-error`) return 'error';
-    return 'idle';
-  };
 
   const copyProofValue = useCallback(async (key, value) => {
     if (!value) return;
@@ -510,46 +360,17 @@ export default function Landing() {
     return 'idle';
   };
 
-  const copyTransformValue = useCallback(async (key, value) => {
-    if (!value) return;
-
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = value;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        textarea.remove();
-      }
-
-      window.clearTimeout(transformCopyTimerRef.current);
-      setTransformActive(key);
-      setCopiedTransform(key);
-      transformCopyTimerRef.current = window.setTimeout(() => setCopiedTransform(null), 1500);
-    } catch {
-      window.clearTimeout(transformCopyTimerRef.current);
-      setCopiedTransform(`${key}-error`);
-      transformCopyTimerRef.current = window.setTimeout(() => setCopiedTransform(null), 1500);
-    }
-  }, []);
-
-  const getTransformCopyState = key => {
-    if (copiedTransform === key) return 'copied';
-    if (copiedTransform === `${key}-error`) return 'error';
-    return 'idle';
-  };
-
   useEffect(() => () => {
-    window.clearTimeout(copyTimerRef.current);
     window.clearTimeout(proofCopyTimerRef.current);
-    window.clearTimeout(transformCopyTimerRef.current);
   }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('paygate-theme', theme);
+    } catch {
+      // Local theme persistence is an enhancement; the landing still works when storage is unavailable.
+    }
+  }, [theme]);
 
   // ── Landing scroll motion foundation ──
   useGSAP(() => {
@@ -558,7 +379,7 @@ export default function Landing() {
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const progressBar = scrollProgressRef.current;
-    const sections = gsap.utils.toArray('.fs', root);
+    const sections = gsap.utils.toArray('.fs:not(.paygate-transform-section)', root);
 
     if (progressBar) {
       gsap.set(progressBar, { scaleX: 0, transformOrigin: 'left center' });
@@ -575,7 +396,6 @@ export default function Landing() {
       gsap.set(sections, { autoAlpha: 1, y: 0, clearProps: 'transform,opacity,visibility' });
       setProofVisible(true);
       setProofActive('ok');
-      setTransformActive('proxy');
       setProtectedActive('forwarded');
       return;
     }
@@ -622,17 +442,11 @@ export default function Landing() {
 
     const setStage = () => {
       const current = {
-        transform: transformActive,
         protected: protectedActive,
         proof: proofActive,
       };
 
       return {
-        transform(stage) {
-          if (current.transform === stage) return;
-          current.transform = stage;
-          setTransformActive(stage);
-        },
         protected(stage) {
           if (current.protected === stage) return;
           current.protected = stage;
@@ -654,34 +468,17 @@ export default function Landing() {
     const audienceSection = root.querySelector('.paygate-audience-section');
 
     if (transformSection) {
-      gsap.from(transformSection.querySelectorAll('.paygate-transform-head > *, .paygate-transform-panel, .paygate-transform-outcome'), {
-        autoAlpha: 0,
-        y: 20,
-        scale: 0.99,
-        duration: 0.64,
+      gsap.from(transformSection.querySelectorAll('.paygate-gate-header > *, .paygate-gate-route > *, .paygate-gate-lifecycle, .paygate-gate-footer'), {
+        y: 18,
+        duration: 0.72,
         ease: 'power3.out',
-        stagger: 0.07,
+        stagger: 0.08,
+        clearProps: 'transform',
         scrollTrigger: {
           trigger: transformSection,
-          start: 'top 76%',
+          start: 'top 88%',
           once: true,
         },
-      });
-
-      ScrollTrigger.create({
-        trigger: transformSection,
-        start: 'top 68%',
-        end: 'bottom 34%',
-        onUpdate: self => {
-          const progress = self.progress;
-          if (progress < 0.24) stage.transform('paste');
-          else if (progress < 0.48) stage.transform('price');
-          else if (progress < 0.74) stage.transform('generate');
-          else stage.transform('proxy');
-        },
-        onEnter: () => stage.transform('paste'),
-        onLeave: () => stage.transform('proxy'),
-        onEnterBack: () => stage.transform('generate'),
       });
     }
 
@@ -816,53 +613,8 @@ export default function Landing() {
   }, { scope: landingRef });
 
   // ── Hero transformation rail ──
-  useGSAP(() => {
-    const root = heroRailRef.current;
-    if (!root) return;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const leftPill = root.querySelector('[data-flow-pill="source"]');
-    const rightPill = root.querySelector('[data-flow-pill="proxy"]');
-    const node = root.querySelector('[data-flow-node]');
-    const lines = root.querySelectorAll('[data-flow-line]');
-    const arrows = root.querySelectorAll('[data-flow-arrow]');
-    const statuses = root.querySelectorAll('[data-status-step]');
-    const revenue = root.querySelector('[data-revenue-split]');
-    const animated = [leftPill, rightPill, node, revenue, ...lines, ...arrows, ...statuses].filter(Boolean);
-
-    if (prefersReducedMotion) {
-      gsap.set(animated, { clearProps: 'all' });
-      return;
-    }
-
-    gsap.set(leftPill, { autoAlpha: 0, x: -32 });
-    gsap.set(rightPill, { autoAlpha: 0, x: 32 });
-    gsap.set(node, { autoAlpha: 0, scale: 0.9, y: 8 });
-    gsap.set(lines, { scaleX: 0, transformOrigin: 'center center' });
-    gsap.set(arrows, { autoAlpha: 0, scale: 0.75 });
-    gsap.set(statuses, { autoAlpha: 0, y: 14 });
-    gsap.set(revenue, { autoAlpha: 0, y: 16 });
-
-    const timeline = gsap.timeline({ defaults: { ease: 'power2.out' } });
-    timeline
-      .to(node, { autoAlpha: 1, scale: 1, y: 0, duration: 0.55 }, 0)
-      .to(leftPill, { autoAlpha: 1, x: 0, duration: 0.48 }, 0.1)
-      .to(rightPill, { autoAlpha: 1, x: 0, duration: 0.48 }, 0.22)
-      .to(lines, { scaleX: 1, duration: 0.72, stagger: 0.08 }, 0.34)
-      .to(arrows, { autoAlpha: 1, scale: 1, duration: 0.26, stagger: 0.08 }, 0.7)
-      .to(statuses, { autoAlpha: 1, y: 0, duration: 0.36, stagger: 0.12 }, 0.88)
-      .to(revenue, { autoAlpha: 1, y: 0, duration: 0.44 }, 1.28)
-      .call(() => setHeroActive('challenge'), null, 1.05)
-      .call(() => setHeroActive('paid'), null, 1.35)
-      .call(() => setHeroActive('success'), null, 1.68)
-      .call(() => setHeroActive('proxy'), null, 2.02)
-      .call(() => setHeroActive('idle'), null, 2.9);
-
-    return () => timeline.kill();
-  }, { scope: heroRailRef });
-
   return (
-    <div ref={landingRef} className="paygate-landing">
+    <div ref={landingRef} className="paygate-landing" data-theme={theme}>
 
       {/* SVG noise filter */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
@@ -878,392 +630,67 @@ export default function Landing() {
       {/* Scroll progress */}
       <div ref={scrollProgressRef} className="paygate-scroll-progress" aria-hidden="true" />
 
-      <MarketingNavbar />
+      <MarketingNavbar theme={theme} onThemeChange={setTheme} />
 
       {/* ── HERO ── */}
       <section className="paygate-hero">
         <div className="paygate-hero-inner">
-          <h1 className="paygate-hero-title">
+          <div className="paygate-hero-copy-block">
+            <p className="paygate-hero-eyebrow">
+              <span className="paygate-hero-eyebrow-dot" aria-hidden="true" />
+              Monetize your API
+            </p>
+
+            <h1 className="paygate-hero-title">
             Paste an API URL.
             <span>Charge per call.</span>
-          </h1>
+            </h1>
 
-          <p className="paygate-hero-copy">
-            PayGate creates a paid proxy, verifies payment, and tracks API revenue.
-          </p>
+            <p className="paygate-hero-copy">
+            PayGate creates a paid proxy, verifies payments,
+            <br className="paygate-hero-copy-break" />
+            and tracks API revenue &mdash; so you can focus on building.
+            </p>
 
-          <div className="paygate-hero-actions">
-            <Button
-              as={Link}
-              to="/apis/new"
-              size="lg"
-              icon={<ArrowRight size={17} aria-hidden="true" />}
-            >
-              Create paid endpoint
-            </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-              icon={<Link2 size={17} aria-hidden="true" />}
-            >
-              See the flow
-            </Button>
-          </div>
-
-          <div
-            ref={heroRailRef}
-            className="paygate-flow-stage"
-            data-hero-active={heroActive}
-            data-copy-state={copiedFlow || 'idle'}
-            onMouseLeave={resetHeroActive}
-            aria-label="PayGate turns an original API URL into a paid proxy URL, blocks unpaid requests with 402, accepts MPP payment, forwards the request upstream, and records revenue."
-          >
-            <div className="paygate-flow-grid">
-              <div className="paygate-flow-label paygate-flow-label-left">Your API URL</div>
-              <div className="paygate-flow-label paygate-flow-label-right">Your paid endpoint</div>
-
-              <button
-                type="button"
-                className="paygate-flow-pill is-source"
-                data-flow-pill="source"
-                data-copy-state={getHeroCopyState('source')}
-                onClick={() => copyHeroUrl('source')}
-                onMouseEnter={() => setHeroActive('source')}
-                onFocus={() => setHeroActive('source')}
-                onBlur={resetHeroActive}
-                aria-label={`Copy original API URL ${HERO_FLOW_URLS.source}`}
+            <div className="paygate-hero-actions">
+              <Button
+                as={Link}
+                to="/apis/new"
+                size="lg"
+                iconAfter={<ArrowRight size={17} aria-hidden="true" />}
               >
-                <span className="paygate-flow-pill-icon">
-                  {getHeroCopyState('source') === 'copied' ? <CheckCircle2 size={19} aria-hidden="true" /> : <Link2 size={19} aria-hidden="true" />}
-                </span>
-                <code>{HERO_FLOW_URLS.source}</code>
-                <span className="paygate-copy-feedback" aria-hidden="true">
-                  {getHeroCopyState('source') === 'copied' ? 'Copied' : getHeroCopyState('source') === 'error' ? 'Error' : 'Copy'}
-                </span>
-              </button>
-
-              <div className="paygate-flow-connector is-left" aria-hidden="true">
-                <span data-flow-line />
-                <ArrowRight data-flow-arrow size={34} strokeWidth={2.4} />
-              </div>
-
-              <div
-                className="paygate-node-wrap"
-                data-flow-node
-                onMouseEnter={() => setHeroActive('node')}
-                onFocus={() => setHeroActive('node')}
-                onBlur={resetHeroActive}
-                aria-label="PayGate paid proxy verifies payment and forwards authorized API calls."
+                Create paid endpoint
+              </Button>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                icon={<Play size={16} aria-hidden="true" />}
               >
-                <div className="paygate-node-matrix" aria-hidden="true" />
-                <div className="paygate-node-card">
-                  <img src="/brand/paygate-mark.svg" alt="" />
-                  <strong>PayGate</strong>
-                  <span>Paid proxy</span>
-                </div>
-              </div>
-
-              <div className="paygate-flow-connector is-right" aria-hidden="true">
-                <span data-flow-line />
-                <ArrowRight data-flow-arrow size={34} strokeWidth={2.4} />
-              </div>
-
-              <button
-                type="button"
-                className="paygate-flow-pill is-proxy"
-                data-flow-pill="proxy"
-                data-copy-state={getHeroCopyState('proxy')}
-                onClick={() => copyHeroUrl('proxy')}
-                onMouseEnter={() => setHeroActive('proxy')}
-                onFocus={() => setHeroActive('proxy')}
-                onBlur={resetHeroActive}
-                aria-label={`Copy paid endpoint URL ${HERO_FLOW_URLS.proxy}`}
-              >
-                <span className="paygate-flow-pill-icon">
-                  {getHeroCopyState('proxy') === 'copied' ? <CheckCircle2 size={19} aria-hidden="true" /> : <Copy size={19} aria-hidden="true" />}
-                </span>
-                <code>{HERO_FLOW_URLS.proxy}</code>
-                <span className="paygate-copy-feedback" aria-hidden="true">
-                  {getHeroCopyState('proxy') === 'copied' ? 'Copied' : getHeroCopyState('proxy') === 'error' ? 'Error' : 'Copy'}
-                </span>
-              </button>
+                See the flow
+              </Button>
             </div>
 
-            <div className="paygate-status-track" aria-hidden="true">
-              <span />
-            </div>
-
-            <div className="paygate-status-row">
-              <button
-                type="button"
-                className="paygate-lifecycle-chip is-warning"
-                data-status-step
-                onMouseEnter={() => setHeroActive('challenge')}
-                onFocus={() => setHeroActive('challenge')}
-                onBlur={resetHeroActive}
-                onClick={() => setHeroActive('challenge')}
-                aria-label="Step one, unpaid request receives a 402 payment required response."
-              >
-                <span className="paygate-lifecycle-number">1</span>
-                <ShieldCheck size={20} aria-hidden="true" />
-                <strong>402 Required</strong>
-              </button>
-              <button
-                type="button"
-                className="paygate-lifecycle-chip is-paid"
-                data-status-step
-                onMouseEnter={() => setHeroActive('paid')}
-                onFocus={() => setHeroActive('paid')}
-                onBlur={resetHeroActive}
-                onClick={() => setHeroActive('paid')}
-                aria-label="Step two, the machine client pays with MPP."
-              >
-                <span className="paygate-lifecycle-number">2</span>
-                <CheckCircle2 size={20} aria-hidden="true" />
-                <strong>MPP Paid</strong>
-              </button>
-              <button
-                type="button"
-                className="paygate-lifecycle-chip is-success"
-                data-status-step
-                onMouseEnter={() => setHeroActive('success')}
-                onFocus={() => setHeroActive('success')}
-                onBlur={resetHeroActive}
-                onClick={() => setHeroActive('success')}
-                aria-label="Step three, paid request is forwarded and receives a 200 OK response."
-              >
-                <span className="paygate-lifecycle-number">3</span>
-                <CheckCircle2 size={20} aria-hidden="true" />
-                <strong>200 OK</strong>
-              </button>
-            </div>
-
-            <div className="paygate-revenue-split" data-revenue-split>
-              <div>
-                <TrendingUp size={30} aria-hidden="true" />
-                <span>
-                  <strong>+0.009 USDC</strong>
-                  developer
-                </span>
-              </div>
-              <i aria-hidden="true" />
-              <div>
-                <span>
-                  <strong>+0.001 fee</strong>
-                  PayGate fee
-                </span>
-              </div>
+            <div className="paygate-hero-trust" aria-label="PayGate product capabilities">
+              <span className="paygate-hero-trust-kicker">Built for API developers</span>
+              <i className="paygate-hero-trust-rule" aria-hidden="true" />
+              <span className="paygate-hero-trust-proof">Testnet-ready payment rails</span>
             </div>
           </div>
+
+          <HeroWorkspace proxyUrl={HERO_FLOW_URLS.proxy} />
+
         </div>
       </section>
 
       {/* ── TRANSFORMATION ── */}
       <section
         id="how-it-works"
-        className="paygate-transform-section fs"
-        data-transform-active={transformActive}
+        className="paygate-transform-section paygate-gate-section fs"
         aria-labelledby="paygate-transform-title"
       >
-        <div className="paygate-transform-inner">
-          <div className="paygate-transform-head">
-            <p>Transform in minutes</p>
-            <h2 id="paygate-transform-title">
-              From ordinary API to <span>paid endpoint</span>
-            </h2>
-            <p>
-              Paste your URL, choose a price, and share a proxy that handles payment before every call.
-            </p>
-          </div>
-
-          <div className="paygate-transform-stage" aria-label="PayGate transforms an ordinary API into a paid endpoint">
-            <div className="paygate-transform-beam" aria-hidden="true" />
-            <div className="paygate-transform-floaters" aria-hidden="true">
-              <span className="is-code"><CodeTileIcon size={25} /></span>
-              <span className="is-api"><ApiTileIcon size={25} /></span>
-              <span className="is-chart"><RevenueLineIcon size={25} /></span>
-              <span className="is-guard"><GuardIcon size={25} /></span>
-              <span className="is-money"><RevenueLineIcon size={25} /></span>
-              <span className="is-signal"><SignalTileIcon size={25} /></span>
-            </div>
-
-            <article
-              className="paygate-transform-panel is-before"
-              onMouseEnter={() => setTransformActive('paste')}
-              onFocus={() => setTransformActive('paste')}
-            >
-              <h3>Your API today</h3>
-              <button
-                type="button"
-                className="paygate-transform-url"
-                data-copy-state={getTransformCopyState('source')}
-                onClick={() => copyTransformValue('source', HERO_FLOW_URLS.source)}
-                aria-label={`Copy original API URL ${HERO_FLOW_URLS.source}`}
-              >
-                <span className="paygate-transform-url-icon"><Link2 size={18} aria-hidden="true" /></span>
-                <code>{HERO_FLOW_URLS.source}</code>
-                <span className="paygate-transform-copy">
-                  {getTransformCopyState('source') === 'copied' ? <CheckCircle2 size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />}
-                </span>
-              </button>
-
-              <div className="paygate-transform-problem-divider" />
-              <p className="paygate-transform-label">The problem</p>
-
-              <div className="paygate-transform-problems">
-                {TRANSFORM_PROBLEMS.map(problem => {
-                  const Icon = problem.icon;
-                  return (
-                    <div key={problem.label} className="paygate-transform-problem-row">
-                      <span><Icon size={18} aria-hidden="true" /></span>
-                      <div>
-                        <strong>{problem.label}</strong>
-                        <small>{problem.body}</small>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </article>
-
-            <article className="paygate-transform-panel is-action" aria-label="PayGate setup actions">
-              <div
-                className="paygate-transform-step"
-                data-active={transformActive === 'paste' ? 'true' : 'false'}
-                onMouseEnter={() => setTransformActive('paste')}
-                onFocus={() => setTransformActive('paste')}
-              >
-                <span className="paygate-transform-step-number">1</span>
-                <div>
-                  <strong>Paste URL</strong>
-                  <button
-                    type="button"
-                    className="paygate-transform-mini-url"
-                    data-copy-state={getTransformCopyState('paste')}
-                    onClick={() => copyTransformValue('paste', HERO_FLOW_URLS.source)}
-                    aria-label={`Copy pasted API URL ${HERO_FLOW_URLS.source}`}
-                  >
-                    <Link2 size={15} aria-hidden="true" />
-                    <code>{HERO_FLOW_URLS.source}</code>
-                    {getTransformCopyState('paste') === 'copied' ? <CheckCircle2 size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
-                  </button>
-                </div>
-              </div>
-
-              <div
-                className="paygate-transform-step"
-                data-active={transformActive === 'price' ? 'true' : 'false'}
-                onMouseEnter={() => setTransformActive('price')}
-                onFocus={() => setTransformActive('price')}
-              >
-                <span className="paygate-transform-step-number">2</span>
-                <div>
-                  <strong>Set price per call</strong>
-                  <div className="paygate-transform-price-control" aria-hidden="true">
-                    <span>$</span>
-                    <code>0.009</code>
-                    <span>USDC</span>
-                  </div>
-                  <small>You earn $0.009 per successful call</small>
-                </div>
-              </div>
-
-              <div
-                className="paygate-transform-step"
-                data-active={transformActive === 'generate' ? 'true' : 'false'}
-                onMouseEnter={() => setTransformActive('generate')}
-                onFocus={() => setTransformActive('generate')}
-              >
-                <span className="paygate-transform-step-number">3</span>
-                <div>
-                  <strong>Generate proxy</strong>
-                  <Button
-                    as={Link}
-                    to="/apis/new"
-                    className="paygate-transform-generate"
-                  >
-                    Generate paid endpoint
-                  </Button>
-                  <p>PayGate handles payment and forwards successful calls.</p>
-                </div>
-              </div>
-            </article>
-
-            <article
-              className="paygate-transform-panel is-after"
-              onMouseEnter={() => setTransformActive('proxy')}
-              onFocus={() => setTransformActive('proxy')}
-            >
-              <div className="paygate-transform-after-title">
-                <span><EndpointSparkIcon size={25} /></span>
-                <h3>Paid endpoint</h3>
-              </div>
-
-              <button
-                type="button"
-                className="paygate-transform-url"
-                data-copy-state={getTransformCopyState('proxy')}
-                onClick={() => copyTransformValue('proxy', HERO_FLOW_URLS.proxy)}
-                aria-label={`Copy paid endpoint URL ${HERO_FLOW_URLS.proxy}`}
-              >
-                <span className="paygate-transform-url-icon"><Link2 size={18} aria-hidden="true" /></span>
-                <code>{HERO_FLOW_URLS.proxy}</code>
-                <span className="paygate-transform-copy">
-                  {getTransformCopyState('proxy') === 'copied' ? <CheckCircle2 size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />}
-                </span>
-              </button>
-
-              <div className="paygate-transform-chip-row">
-                <span>$0.009 / call</span>
-                <span><ShieldCheck size={14} aria-hidden="true" /> MPP guard enabled</span>
-              </div>
-
-              <div className="paygate-transform-live">
-                <p>Live example</p>
-                <div>
-                  <span aria-hidden="true" />
-                  <small>REQ ID</small>
-                  <code>req_01HZ8XQ4F2J7Q9K3T6V1</code>
-                  <time>13:23:45</time>
-                  <ReceiptCopyIcon size={16} />
-                </div>
-              </div>
-
-              <div className="paygate-transform-result-grid">
-                <div>
-                  <span>Revenue today</span>
-                  <strong>+0.009 USDC</strong>
-                  <small><TrendingUp size={15} aria-hidden="true" /> posted after success</small>
-                </div>
-                <div>
-                  <span>Success rate</span>
-                  <strong>99.8%</strong>
-                  <small>200 OK</small>
-                </div>
-              </div>
-
-              <p className="paygate-transform-after-note">
-                <i aria-hidden="true" /> Payment collected before every call
-              </p>
-            </article>
-          </div>
-
-          <div className="paygate-transform-outcomes" aria-label="Paid endpoint outcomes">
-            {TRANSFORM_OUTCOMES.map(outcome => {
-              const Icon = outcome.icon;
-              return (
-                <div key={outcome.label} className="paygate-transform-outcome" data-tone={outcome.tone}>
-                  <span><Icon size={24} aria-hidden="true" /></span>
-                  <div>
-                    <strong>{outcome.label}</strong>
-                    <p>{outcome.body}</p>
-                    <small>{outcome.detail}</small>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <div className="paygate-concept-flow-wrap">
+          <HowItWorksDiagram sourceUrl={HERO_FLOW_URLS.source} proxyUrl={HERO_FLOW_URLS.proxy} />
         </div>
       </section>
 

@@ -1,4 +1,4 @@
-import { Github, Menu, X } from 'lucide-react';
+import { ArrowRight, Menu, Moon, Sun, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from './ui/Button.jsx';
@@ -28,8 +28,7 @@ function isLinkActive(item, activeSection) {
   return item.activeSections?.includes(activeSection);
 }
 
-export default function MarketingNavbar() {
-  const [githubActive, setGithubActive] = useState(false);
+export default function MarketingNavbar({ theme = 'dark', onThemeChange }) {
   const [activeSection, setActiveSection] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
@@ -98,6 +97,7 @@ export default function MarketingNavbar() {
   }, []);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
+  const toggleTheme = () => onThemeChange?.(theme === 'dark' ? 'light' : 'dark');
 
   return (
     <nav ref={navRef} className="paygate-nav" aria-label="PayGate navigation">
@@ -128,22 +128,25 @@ export default function MarketingNavbar() {
           <Link className="paygate-nav-secondary" to="/dashboard">
             Dashboard
           </Link>
-          <Button as={Link} className="paygate-nav-cta" to="/apis/new" aria-label="Create paid endpoint">
+          <Button
+            as={Link}
+            className="paygate-nav-cta"
+            to="/apis/new"
+            aria-label="Create paid endpoint"
+            iconAfter={<ArrowRight size={15} aria-hidden="true" />}
+          >
             <span className="paygate-nav-cta-full">Create paid endpoint</span>
             <span className="paygate-nav-cta-short">Create</span>
           </Button>
-          <a
-            className="paygate-nav-icon desktop-nav-link"
-            href="https://github.com/wildanniam/paygate-stellar"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="View PayGate on GitHub"
-            onMouseEnter={() => setGithubActive(true)}
-            onMouseLeave={() => setGithubActive(false)}
-            data-active={githubActive ? 'true' : 'false'}
+          <button
+            type="button"
+            className="paygate-nav-icon paygate-theme-toggle desktop-nav-link"
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            onClick={toggleTheme}
           >
-            <Github size={14} />
-          </a>
+            {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
+          </button>
           <button
             type="button"
             className="paygate-mobile-menu-trigger"
@@ -194,6 +197,18 @@ export default function MarketingNavbar() {
           <Link className="paygate-mobile-menu-secondary" to="/apis/new" aria-label="Create paid endpoint" onClick={closeMobileMenu}>
             Create
           </Link>
+          <button
+            type="button"
+            className="paygate-mobile-menu-secondary paygate-mobile-theme-toggle"
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            onClick={() => {
+              toggleTheme();
+              closeMobileMenu();
+            }}
+          >
+            {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
+            <span>{theme === 'dark' ? 'Light theme' : 'Dark theme'}</span>
+          </button>
         </div>
       </div>
     </nav>
