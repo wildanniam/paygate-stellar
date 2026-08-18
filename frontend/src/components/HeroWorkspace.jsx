@@ -1,9 +1,9 @@
 import {
   Activity,
-  BarChart3,
+  ChartNoAxesColumnIncreasing,
   Check,
   ChevronDown,
-  Clock3,
+  Circle,
   Copy,
   Pause,
   Play,
@@ -16,12 +16,12 @@ const RANGE_DATA = {
   '7d': {
     label: 'Last 7 days',
     revenue: '+18.40 USDC',
-    revenueNote: 'illustrative API revenue',
+    revenueNote: 'illustrative period trend',
     axis: ['20', '15', '10', '0'],
     points: [
       { label: 'Mon', value: '12.10', y: 178 },
       { label: 'Tue', value: '13.80', y: 160 },
-      { label: 'Wed', value: '14.60', y: 160 },
+      { label: 'Wed', value: '14.60', y: 154 },
       { label: 'Thu', value: '15.20', y: 138 },
       { label: 'Fri', value: '16.80', y: 126 },
       { label: 'Sat', value: '17.60', y: 86 },
@@ -32,23 +32,25 @@ const RANGE_DATA = {
   '30d': {
     label: 'This month',
     revenue: '+84.20 USDC',
-    revenueNote: 'illustrative API revenue',
+    revenueNote: 'illustrative period trend',
     axis: ['100', '75', '50', '0'],
     points: [
-      { label: 'May 1', value: '42.10', y: 188 },
-      { label: 'May 8', value: '48.30', y: 178 },
-      { label: 'May 15', value: '54.70', y: 150 },
-      { label: 'May 22', value: '62.40', y: 144 },
-      { label: 'May 29', value: '69.80', y: 144 },
-      { label: 'Jun 5', value: '77.60', y: 84 },
-      { label: 'Jun 12', value: '84.20', y: 54 },
+      { label: 'May 1', axisLabel: 'May 1', value: '42.10', chartX: 119, y: 126 },
+      { label: 'May 4', value: '39.80', chartX: 188, y: 152 },
+      { label: 'May 8', axisLabel: 'May 8', value: '46.30', chartX: 260, y: 118 },
+      { label: 'May 12', value: '51.20', chartX: 326, y: 105 },
+      { label: 'May 15', axisLabel: 'May 15', value: '48.90', chartX: 394, y: 119 },
+      { label: 'May 22', axisLabel: 'May 22', value: '69.80', chartX: 474, y: 33 },
+      { label: 'May 25', value: '67.40', chartX: 544, y: 42 },
+      { label: 'May 27', value: '78.60', chartX: 619, y: -4 },
+      { label: 'May 29', axisLabel: 'May 29', value: '84.20', chartX: 679, y: -25 },
     ],
     metrics: { calls: '2,842', success: '99.9%', latency: '124ms' },
   },
   '90d': {
     label: 'Last 90 days',
     revenue: '+241.60 USDC',
-    revenueNote: 'illustrative API revenue',
+    revenueNote: 'illustrative period trend',
     axis: ['250', '175', '100', '0'],
     points: [
       { label: 'Apr', value: '98.00', y: 198 },
@@ -69,36 +71,57 @@ const RANGE_OPTIONS = [
   { key: '90d', shortLabel: '90D' },
 ];
 
+function LatencyWaveIcon({ size = 17, ...props }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 36 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M1 10c3.1-6 6.2-6 9.3 0s6.2 6 9.3 0" />
+      <path d="M22.4 10c2.4-5.2 4.8-5.2 7.2 0s4.8 5.2 5.4 0" />
+    </svg>
+  );
+}
+
 const METRIC_DEFINITIONS = [
-  { key: 'calls', label: 'Total calls', note: 'paid requests', icon: BarChart3 },
-  { key: 'success', label: 'Success rate', note: '200 OK responses', icon: Check },
-  { key: 'latency', label: 'Avg. latency', note: 'upstream response', icon: Clock3 },
+  { key: 'calls', label: 'Total Calls', note: 'paid requests', icon: ChartNoAxesColumnIncreasing },
+  { key: 'success', label: 'Success Rate', note: '200 OK responses', icon: Circle },
+  { key: 'latency', label: 'Avg. Latency', note: 'upstream response', icon: LatencyWaveIcon },
 ];
 
-const CHART_X = [24, 130, 236, 342, 448, 554, 656];
+const CHART_START_X = 118;
+const CHART_END_X = 675;
+
+function getChartX(index, pointCount) {
+  if (pointCount <= 1) return CHART_START_X;
+  return CHART_START_X + ((CHART_END_X - CHART_START_X) * index) / (pointCount - 1);
+}
 
 function buildPath(points) {
-  const positions = points.map((point, index) => ({ x: CHART_X[index], y: point.y }));
+  const positions = points.map((point) => ({ x: point.x, y: point.y }));
+  const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
   return positions.reduce((path, point, index) => {
     if (index === 0) return `M ${point.x} ${point.y}`;
 
-    const previous = positions[index - 1] || point;
-    const next = positions[index + 1] || point;
-    const nextNext = positions[index + 2] || next;
-    const control1 = {
-      x: point.x + (next.x - previous.x) / 6,
-      y: point.y + (next.y - previous.y) / 6,
-    };
-    const control2 = {
-      x: next.x - (nextNext.x - point.x) / 6,
-      y: next.y - (nextNext.y - point.y) / 6,
-    };
-    return `${path} C ${control1.x} ${control1.y}, ${control2.x} ${control2.y}, ${next.x} ${next.y}`;
+    const next = positions[index];
+    const previous = positions[index - 1];
+    const segment = next.x - previous.x;
+    const controlOffset = segment / 3;
+    const before = positions[index - 2] || previous;
+    const after = positions[index + 1] || next;
+    const incomingSlope = (next.y - before.y) / Math.max(1, next.x - before.x);
+    const outgoingSlope = (after.y - previous.y) / Math.max(1, after.x - previous.x);
+    const minimum = Math.min(previous.y, next.y);
+    const maximum = Math.max(previous.y, next.y);
+    const firstControlY = clamp(previous.y + incomingSlope * controlOffset, minimum, maximum);
+    const secondControlY = clamp(next.y - outgoingSlope * controlOffset, minimum, maximum);
+
+    // Smooth the period trend without introducing overshoot between data points.
+    return `${path} C ${previous.x + controlOffset} ${firstControlY}, ${next.x - controlOffset} ${secondControlY}, ${next.x} ${next.y}`;
   }, '');
 }
 
 function buildAreaPath(points) {
-  return `${buildPath(points)} L ${CHART_X[CHART_X.length - 1]} 214 L ${CHART_X[0]} 214 Z`;
+  const firstPoint = points[0];
+  const lastPoint = points[points.length - 1];
+  return `${buildPath(points)} L ${lastPoint.x} 214 L ${firstPoint.x} 214 Z`;
 }
 
 async function copyText(value) {
@@ -145,8 +168,9 @@ function setMotionVariables(element, x, y) {
 
 export default function HeroWorkspace({ proxyUrl }) {
   const [range, setRange] = useState('30d');
-  const [activeMetric, setActiveMetric] = useState('calls');
-  const [activePoint, setActivePoint] = useState(6);
+  const [activeMetric, setActiveMetric] = useState(null);
+  const [activePoint, setActivePoint] = useState(null);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isRangeMenuOpen, setIsRangeMenuOpen] = useState(false);
@@ -161,18 +185,8 @@ export default function HeroWorkspace({ proxyUrl }) {
 
   const points = useMemo(() => data.points.map((point, index) => ({
     ...point,
-    x: CHART_X[index],
+    x: point.chartX ?? getChartX(index, data.points.length),
   })), [data]);
-
-  useEffect(() => {
-    if (isPaused || !isVisible || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-
-    const interval = window.setInterval(() => {
-      setActivePoint((current) => (current + 1) % points.length);
-    }, 2200);
-
-    return () => window.clearInterval(interval);
-  }, [isPaused, isVisible, points.length]);
 
   useEffect(() => {
     const element = workspaceRef.current;
@@ -254,7 +268,8 @@ export default function HeroWorkspace({ proxyUrl }) {
 
   const handleRangeChange = (nextRange) => {
     setRange(nextRange);
-    setActivePoint(RANGE_DATA[nextRange].points.length - 1);
+    setActivePoint(null);
+    setIsTooltipVisible(false);
     setIsRangeMenuOpen(false);
   };
 
@@ -309,7 +324,7 @@ export default function HeroWorkspace({ proxyUrl }) {
 
         <div className="paygate-workspace-heading">
           <div>
-            <p className="paygate-workspace-label">API revenue</p>
+            <p className="paygate-workspace-label">Revenue</p>
             <strong>{data.revenue}</strong>
             <span>{data.revenueNote}</span>
           </div>
@@ -349,9 +364,14 @@ export default function HeroWorkspace({ proxyUrl }) {
           <div className="paygate-workspace-y-axis" aria-hidden="true">
             {data.axis.map((label) => <span key={label}>{label}</span>)}
           </div>
-          <div className="paygate-workspace-chart" data-range={range} aria-label={`Illustrative cumulative API revenue chart for ${data.label}`}>
-            <svg viewBox="0 0 680 240" role="img" aria-labelledby="paygate-workspace-chart-title">
-              <title id="paygate-workspace-chart-title">Illustrative cumulative PayGate API revenue</title>
+          <div
+            className="paygate-workspace-chart"
+            data-range={range}
+            aria-label={`Illustrative API revenue trend for ${data.label}`}
+            onMouseLeave={() => setIsTooltipVisible(false)}
+          >
+            <svg viewBox="0 0 680 240" preserveAspectRatio="none" role="img" aria-labelledby="paygate-workspace-chart-title">
+              <title id="paygate-workspace-chart-title">Illustrative PayGate API revenue trend</title>
               <path className="paygate-workspace-chart-area" d={buildAreaPath(points)} />
               <path key={range} className="paygate-workspace-chart-line" d={buildPath(points)} pathLength="1" />
               {points.map((point, index) => (
@@ -364,9 +384,18 @@ export default function HeroWorkspace({ proxyUrl }) {
                   tabIndex="0"
                   role="button"
                   aria-label={`${point.label}: ${point.value} USDC`}
-                  onClick={() => setActivePoint(index)}
-                  onMouseEnter={() => setActivePoint(index)}
-                  onFocus={() => setActivePoint(index)}
+                  onClick={() => {
+                    setActivePoint(index);
+                    setIsTooltipVisible(true);
+                  }}
+                  onMouseEnter={() => {
+                    setActivePoint(index);
+                    setIsTooltipVisible(true);
+                  }}
+                  onFocus={() => {
+                    setActivePoint(index);
+                    setIsTooltipVisible(true);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
@@ -374,21 +403,25 @@ export default function HeroWorkspace({ proxyUrl }) {
                     }
                   }}
                 />
-              ))}
-          </svg>
-          <div
-            className="paygate-workspace-chart-tooltip"
-            style={{ left: `${(selectedPoint.x / 680) * 100}%`, top: `${(selectedPoint.y / 240) * 100}%` }}
-            aria-live="polite"
-          >
-            <strong>{selectedPoint.value} USDC</strong>
-            <span>{selectedPoint.label}</span>
+            ))}
+            </svg>
+            {isTooltipVisible && activePoint !== null ? (
+              <div
+                className="paygate-workspace-chart-tooltip"
+                style={{ left: `${(selectedPoint.x / 680) * 100}%`, top: `${(selectedPoint.y / 240) * 100}%` }}
+                aria-live="polite"
+              >
+                <strong>{selectedPoint.value} USDC</strong>
+                <span>{selectedPoint.label}</span>
+              </div>
+            ) : null}
+            <div className="paygate-workspace-x-axis" aria-hidden="true">
+              {points
+                .filter((point) => point.axisLabel || range !== '30d')
+                .map((point) => <span key={point.label}>{point.axisLabel || point.label}</span>)}
+            </div>
           </div>
-          <div className="paygate-workspace-x-axis" aria-hidden="true">
-            {points.map((point) => <span key={point.label}>{point.label}</span>)}
-          </div>
-          </div>
-          </div>
+        </div>
 
         <div className="paygate-workspace-range" role="group" aria-label="Quickly change revenue chart range">
           {RANGE_OPTIONS.map((option) => (

@@ -16031,3 +16031,1161 @@
 .paygate-landing[data-theme='light'] .paygate-gate-flow .paygate-gate-core {
   visibility: visible;
 }
+
+/* Hero workspace focus pass: keep the content readable while the instrument carries the depth. */
+@media (min-width: 901px) {
+  .paygate-hero-workspace {
+    min-height: 548px;
+    margin-right: -28px;
+    padding: 22px 0 30px 22px;
+    perspective: 1500px;
+  }
+
+  .paygate-hero-workspace::before {
+    inset: -12% -16% -16% -18%;
+    background:
+      linear-gradient(rgba(154, 165, 184, 0.075) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(154, 165, 184, 0.075) 1px, transparent 1px),
+      linear-gradient(122deg, transparent 0 42%, rgba(var(--pg-brand-purple-soft-rgb), 0.23) 42.2%, transparent 42.45%),
+      linear-gradient(69deg, transparent 0 63%, rgba(96, 165, 250, 0.13) 63.2%, transparent 63.42%),
+      radial-gradient(circle at 72% 48%, rgba(var(--pg-brand-purple-rgb), 0.24) 0 1px, transparent 2px);
+    background-size: 58px 58px, 58px 58px, 100% 100%, 100% 100%, 42px 42px;
+    opacity: 0.62;
+    transform: rotate(-2.4deg) translate3d(22px, 8px, -100px);
+  }
+
+  /* Each rail is a translucent depth plate. The old inner outlines made the stack read as nested cards. */
+  .paygate-workspace-rail {
+    inset: 28px -2px 32px 24px;
+    border: 1px solid rgba(154, 165, 184, 0.20);
+    border-radius: 26px;
+    background:
+      linear-gradient(135deg, rgba(var(--pg-brand-purple-soft-rgb), 0.14), rgba(17, 22, 34, 0.12) 46%, rgba(var(--pg-brand-purple-soft-rgb), 0.08)),
+      rgba(13, 17, 23, 0.22);
+    box-shadow:
+      0 38px 100px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(3px);
+  }
+
+  .paygate-workspace-rail::before,
+  .paygate-workspace-rail::after {
+    content: none;
+  }
+
+  .paygate-workspace-rail.is-back {
+    opacity: 0.40;
+    transform: translate3d(calc(76px + var(--workspace-back-x)), calc(58px + var(--workspace-back-y)), -92px) rotateX(3deg) rotateY(-8deg) rotateZ(3.4deg);
+  }
+
+  .paygate-workspace-rail.is-middle {
+    opacity: 0.58;
+    transform: translate3d(calc(40px + var(--workspace-middle-x)), calc(31px + var(--workspace-middle-y)), -54px) rotateX(3deg) rotateY(-7deg) rotateZ(2deg);
+  }
+
+  .paygate-workspace-rail.is-front {
+    opacity: 0.72;
+    transform: translate3d(calc(15px + var(--workspace-front-x)), calc(15px + var(--workspace-front-y)), -24px) rotateX(3deg) rotateY(-6deg) rotateZ(0.8deg);
+  }
+
+  /* The face stays optically level for reading; its framing layer carries the reference perspective. */
+  .paygate-workspace-surface {
+    width: calc(100% - 16px);
+    height: 462px;
+    min-height: 462px;
+    margin-left: auto;
+    overflow: visible;
+    border-color: transparent;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 30px 32px 20px;
+    transform: translate3d(var(--workspace-surface-x), var(--workspace-surface-y), var(--workspace-surface-z));
+    animation: paygate-workspace-float-readable 7s ease-in-out infinite;
+  }
+
+  .paygate-workspace-surface::before {
+    inset: 0 -2% 0 -5%;
+    z-index: 0;
+    border: 1px solid rgba(var(--pg-brand-purple-soft-rgb), 0.46);
+    border-radius: 22px;
+    background:
+      linear-gradient(118deg, rgba(255, 255, 255, 0.10), transparent 24%),
+      linear-gradient(180deg, rgba(21, 28, 43, 0.96), rgba(7, 10, 16, 0.985)),
+      rgba(13, 17, 23, 0.96);
+    box-shadow:
+      0 42px 112px rgba(0, 0, 0, 0.40),
+      0 0 0 9px rgba(var(--pg-brand-purple-rgb), 0.052),
+      0 0 62px rgba(var(--pg-brand-purple-rgb), 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.13),
+      inset -22px -26px 58px rgba(var(--pg-brand-purple-rgb), 0.07);
+    clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%);
+    transform: perspective(1400px) rotateX(3deg) rotateY(-7deg) rotateZ(-1.15deg);
+    transform-origin: 54% 52%;
+    mix-blend-mode: normal;
+  }
+
+  .paygate-workspace-surface::after {
+    inset: 12px 3% 12px 1%;
+    z-index: 0;
+    right: auto;
+    bottom: auto;
+    width: auto;
+    height: auto;
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    border-radius: 18px;
+    box-shadow: inset 0 0 30px rgba(var(--pg-brand-purple-rgb), 0.05);
+    clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%);
+    transform: perspective(1400px) rotateX(3deg) rotateY(-7deg) rotateZ(-1.15deg);
+    transform-origin: 54% 52%;
+  }
+
+  .paygate-workspace-surface > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .paygate-workspace-topbar {
+    position: absolute;
+  }
+
+  .paygate-workspace-range-menu-wrap {
+    z-index: 6;
+  }
+
+  .paygate-workspace-heading {
+    z-index: 5;
+  }
+
+  .paygate-hero-workspace[data-pointer-active='true'] .paygate-workspace-surface::before {
+    border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.72);
+    box-shadow:
+      0 46px 124px rgba(0, 0, 0, 0.43),
+      0 0 0 9px rgba(var(--pg-brand-purple-rgb), 0.07),
+      0 0 72px rgba(var(--pg-brand-purple-rgb), 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset -22px -26px 58px rgba(var(--pg-brand-purple-rgb), 0.08);
+  }
+
+  @keyframes paygate-workspace-float-readable {
+    0%,
+    100% { translate: 0 0; }
+    50% { translate: 0 -6px; }
+  }
+
+  .paygate-workspace-heading {
+    min-height: 64px;
+  }
+
+  .paygate-workspace-label {
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .paygate-workspace-heading strong {
+    font-size: clamp(34px, 2.6vw, 40px);
+  }
+
+  .paygate-workspace-chart-shell,
+  .paygate-workspace-chart svg {
+    min-height: 190px;
+    height: 190px;
+  }
+
+  .paygate-workspace-chart {
+    background-image:
+      linear-gradient(rgba(154, 165, 184, 0.075) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(154, 165, 184, 0.075) 1px, transparent 1px),
+      linear-gradient(116deg, transparent 0 66%, rgba(var(--pg-brand-purple-soft-rgb), 0.075) 66.2%, transparent 66.5%);
+  }
+
+  .paygate-workspace-chart-line {
+    stroke-width: 4;
+    filter: drop-shadow(0 0 9px rgba(var(--pg-brand-purple-soft-rgb), 0.82));
+  }
+
+  .paygate-workspace-chart-area {
+    fill: rgba(var(--pg-brand-purple-rgb), 0.075);
+  }
+
+  .paygate-workspace-metrics {
+    gap: 13px;
+    margin-top: 4px;
+  }
+
+  .paygate-workspace-metrics button {
+    min-height: 100px;
+    border-color: rgba(154, 165, 184, 0.24);
+    border-radius: 13px;
+    background: linear-gradient(180deg, rgba(28, 34, 48, 0.66), rgba(13, 17, 23, 0.70));
+    padding: 12px 13px;
+  }
+
+  .paygate-workspace-metric-icon {
+    width: 28px;
+    height: 28px;
+    border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.24);
+    border-radius: 8px;
+  }
+
+  .paygate-workspace-metric-copy > span {
+    font-size: 10px;
+  }
+
+  .paygate-workspace-metric-copy strong {
+    font-size: 23px;
+  }
+
+  .paygate-workspace-metric-copy small {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .paygate-hero-workspace {
+    margin-right: -12px;
+    padding-left: 12px;
+  }
+
+  .paygate-workspace-surface {
+    width: calc(100% - 4px);
+    padding-inline: 26px;
+  }
+}
+
+@media (max-width: 900px) {
+  .paygate-workspace-surface::before,
+  .paygate-workspace-surface::after {
+    clip-path: none;
+    transform: none;
+  }
+
+  .paygate-workspace-surface > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paygate-workspace-chart-line {
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+.paygate-landing[data-theme='light'] .paygate-workspace-surface::before {
+  border-color: rgba(118, 92, 255, 0.34);
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0.94), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(238, 240, 252, 0.98)),
+    #ffffff;
+  box-shadow:
+    0 42px 112px rgba(56, 61, 113, 0.17),
+    0 0 0 9px rgba(var(--pg-brand-purple-rgb), 0.045),
+    0 0 62px rgba(var(--pg-brand-purple-rgb), 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset -22px -26px 58px rgba(var(--pg-brand-purple-rgb), 0.05);
+}
+
+.paygate-landing[data-theme='light'] .paygate-workspace-surface::after {
+  border-color: rgba(118, 92, 255, 0.12);
+  box-shadow: inset 0 0 30px rgba(var(--pg-brand-purple-rgb), 0.045);
+}
+
+/* Match the reference crop: the first viewport is top-led, with the right instrument carrying the weight. */
+@media (min-width: 901px) {
+  .paygate-hero {
+    align-items: flex-start;
+  }
+
+  .paygate-hero-workspace {
+    width: calc(100% + 82px);
+    margin-right: -82px;
+  }
+
+  .paygate-workspace-surface {
+    height: 480px;
+    min-height: 480px;
+  }
+
+  .paygate-workspace-topbar,
+  .paygate-workspace-footer {
+    visibility: visible;
+    opacity: 0;
+    pointer-events: auto;
+  }
+
+  .paygate-workspace-topbar:focus-within,
+  .paygate-workspace-footer:focus-within {
+    opacity: 0.82;
+  }
+
+  .paygate-workspace-chart-shell,
+  .paygate-workspace-chart svg {
+    min-height: 204px;
+    height: 204px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .paygate-hero-workspace {
+    width: calc(100% + 38px);
+    margin-right: -38px;
+  }
+}
+
+/* Reference-scale composition: let the hero use the canvas before adding detail. */
+@media (min-width: 901px) {
+  .paygate-hero {
+    padding-inline: clamp(40px, 5.55vw, 132px);
+  }
+
+  .paygate-hero-inner {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    grid-template-columns: minmax(0, 0.40fr) minmax(0, 0.60fr);
+    gap: clamp(32px, 2.35vw, 56px);
+  }
+
+  .paygate-hero-copy-block {
+    left: 0;
+    max-width: 640px;
+    margin-top: 22px;
+  }
+
+  .paygate-hero-title {
+    max-width: 760px;
+    font-size: clamp(56px, 3.55vw, 84px);
+  }
+
+  .paygate-hero-copy {
+    max-width: 620px;
+    font-size: clamp(16px, 0.95vw, 20px);
+  }
+
+  .paygate-hero-actions {
+    margin-top: 36px;
+  }
+
+  .paygate-hero-actions .pg-button {
+    min-height: clamp(52px, 3vw, 72px);
+    font-size: clamp(15px, 0.9vw, 18px);
+  }
+
+  .paygate-hero-actions .pg-button:first-child {
+    min-width: clamp(244px, 14.3vw, 340px);
+  }
+
+  .paygate-hero-actions .pg-button:nth-child(2) {
+    min-width: clamp(188px, 11.2vw, 266px);
+  }
+
+  .paygate-hero-trust {
+    margin-top: 44px;
+  }
+
+  .paygate-hero-workspace {
+    left: 0;
+    width: calc(100% + 24px);
+    margin-right: -24px;
+    padding-left: 18px;
+  }
+
+  .paygate-workspace-surface {
+    width: min(calc(100% - 24px), clamp(720px, 42vw, 1000px));
+    height: clamp(480px, 28vw, 650px);
+    min-height: clamp(480px, 28vw, 650px);
+    margin-left: 0;
+    margin-right: auto;
+    padding: clamp(30px, 1.9vw, 44px) clamp(30px, 2.15vw, 52px) clamp(20px, 1.3vw, 30px);
+  }
+
+  .paygate-workspace-heading {
+    min-height: clamp(64px, 4.2vw, 88px);
+  }
+
+  .paygate-workspace-heading strong {
+    font-size: clamp(34px, 2.6vw, 52px);
+  }
+
+  .paygate-workspace-chart-shell,
+  .paygate-workspace-chart svg {
+    min-height: clamp(204px, 13vw, 300px);
+    height: clamp(204px, 13vw, 300px);
+  }
+
+  .paygate-workspace-metrics {
+    gap: clamp(13px, 0.8vw, 20px);
+    margin-top: clamp(4px, 0.3vw, 8px);
+  }
+
+  .paygate-workspace-metrics button {
+    min-height: clamp(100px, 6vw, 142px);
+    padding: clamp(12px, 0.8vw, 18px);
+  }
+
+  .paygate-workspace-metric-icon {
+    width: clamp(28px, 1.5vw, 36px);
+    height: clamp(28px, 1.5vw, 36px);
+  }
+
+  .paygate-workspace-metric-copy strong {
+    font-size: clamp(23px, 1.5vw, 32px);
+  }
+
+  .paygate-workspace-metric-copy > span {
+    font-style: italic;
+  }
+}
+
+@media (min-width: 1900px) {
+  .paygate-hero-inner {
+    grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);
+  }
+
+  /* Match the supplied wide reference's hierarchy without changing the mobile or tablet composition. */
+  .paygate-hero-copy-block {
+    max-width: 760px;
+    margin-top: 48px;
+  }
+
+  .paygate-hero-eyebrow {
+    min-height: 52px;
+    margin-bottom: 44px;
+    padding: 12px 18px;
+    font-size: 19px;
+    letter-spacing: 0.14em;
+    transform: translate(21px, 3px);
+  }
+
+  .paygate-hero-title {
+    max-width: 900px;
+    font-size: clamp(72px, 4.1vw, 98px);
+    line-height: 1.10;
+    transform: translate(21px, -8px);
+  }
+
+  .paygate-hero-copy {
+    max-width: 700px;
+    margin-top: 26px;
+    font-size: 24px;
+    line-height: 1.90;
+    transform: translate(21px, -9px);
+  }
+
+  .paygate-hero-actions {
+    gap: 22px;
+    margin-top: 50px;
+    transform: translateX(21px);
+  }
+
+  .paygate-hero-actions .pg-button {
+    min-height: 84px;
+    font-size: 20px;
+  }
+
+  .paygate-hero-actions .pg-button:first-child {
+    min-width: 398px;
+  }
+
+  .paygate-hero-actions .pg-button:nth-child(2) {
+    min-width: 310px;
+  }
+
+  .paygate-hero-trust {
+    margin-top: 68px;
+    font-size: 13px;
+  }
+
+  /* The dropdown is the single range control in the hero; don't reserve space for its old duplicate row. */
+  .paygate-workspace-range {
+    display: none;
+  }
+
+  /* Keep the dashboard readable while its framing layers carry the reference trapezoid. */
+  .paygate-workspace-surface {
+    height: 630px;
+    min-height: 630px;
+    animation: none;
+    transform: perspective(1500px) rotateX(3deg) rotateY(-6deg) rotateZ(-1.7deg);
+    transform-origin: 54% 52%;
+  }
+
+  .paygate-workspace-surface::before,
+  .paygate-workspace-surface::after {
+    clip-path: polygon(18% 0, 100% 0, 94% 100%, 0 100%);
+    transform: none;
+  }
+
+  .paygate-workspace-surface {
+    width: min(calc(100% - 24px), 920px);
+  }
+
+  .paygate-workspace-y-axis {
+    padding-bottom: 74px;
+    transform: translateX(77px);
+  }
+
+  .paygate-workspace-heading > div:first-child {
+    transform: translateX(127px);
+  }
+
+  .paygate-workspace-heading strong {
+    font-size: 40px;
+  }
+
+  .paygate-workspace-range-menu-wrap {
+    transform: translateX(40px);
+  }
+
+  .paygate-workspace-chart {
+    width: calc(100% - 54px);
+    transform: translateX(77px);
+  }
+
+  .paygate-workspace-x-axis {
+    bottom: 34px;
+  }
+
+  .paygate-workspace-metrics {
+    width: calc(100% + 15px);
+    transform: translateX(-15px);
+  }
+}
+
+/* Keep the trust signal typographic so the revenue graph remains the hero visual. */
+@media (min-width: 901px) {
+  .paygate-hero-trust {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 68px;
+    transform: translateX(21px);
+  }
+
+  .paygate-hero-trust-kicker {
+    color: var(--pg-text-secondary) !important;
+    font-family: var(--pg-font-mono) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.12em !important;
+    line-height: 1.2 !important;
+    text-transform: uppercase;
+  }
+
+  .paygate-hero-trust-rule {
+    flex: 0 1 112px;
+    width: 112px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(var(--pg-brand-purple-soft-rgb), 0.64), rgba(var(--pg-brand-purple-soft-rgb), 0.10));
+  }
+
+  .paygate-hero-trust-proof {
+    color: var(--pg-brand-purple-soft) !important;
+    font-family: var(--pg-font-mono) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.3 !important;
+    text-transform: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .paygate-hero-trust {
+    transform: none;
+  }
+
+  .paygate-hero-trust-rule {
+    flex: 0 1 44px;
+    width: 44px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(var(--pg-brand-purple-soft-rgb), 0.56), rgba(var(--pg-brand-purple-soft-rgb), 0.12));
+  }
+
+  .paygate-hero-trust-proof {
+    font-size: 9px !important;
+    letter-spacing: 0.06em !important;
+    text-align: left;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1899px) {
+  .paygate-hero-trust {
+    gap: 12px;
+  }
+
+  .paygate-hero-trust-kicker,
+  .paygate-hero-trust-proof {
+    white-space: nowrap;
+  }
+
+  .paygate-hero-trust-kicker {
+    font-size: 11px !important;
+    letter-spacing: 0.10em !important;
+  }
+
+  .paygate-hero-trust-rule {
+    flex-basis: 64px;
+    width: 64px;
+  }
+
+  .paygate-hero-trust-proof {
+    font-size: 11px !important;
+    letter-spacing: 0.03em !important;
+  }
+}
+
+/* Right workspace parity pass: keep the dashboard face dark and let its graph carry the detail. */
+@media (min-width: 901px) {
+  .paygate-workspace-surface::before {
+    border-color: rgba(var(--pg-brand-purple-soft-rgb), 0.40);
+    background:
+      linear-gradient(118deg, rgba(255, 255, 255, 0.045), transparent 22%),
+      linear-gradient(180deg, rgba(22, 25, 34, 0.95), rgba(7, 10, 16, 0.975)),
+      rgba(13, 16, 23, 0.95);
+    box-shadow:
+      0 42px 112px rgba(0, 0, 0, 0.40),
+      0 0 0 9px rgba(var(--pg-brand-purple-rgb), 0.045),
+      0 0 58px rgba(var(--pg-brand-purple-rgb), 0.13),
+      inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      inset -22px -26px 58px rgba(var(--pg-brand-purple-rgb), 0.045);
+    clip-path: polygon(7% 0, 100% 0, 93% 100%, 0 100%);
+    transform: perspective(1400px) rotateX(3deg) rotateY(-7deg) rotateZ(-0.82deg);
+  }
+
+  .paygate-workspace-surface::after {
+    border-color: rgba(255, 255, 255, 0.055);
+    box-shadow: inset 0 0 30px rgba(var(--pg-brand-purple-rgb), 0.035);
+    clip-path: polygon(7% 0, 100% 0, 93% 100%, 0 100%);
+    transform: perspective(1400px) rotateX(3deg) rotateY(-7deg) rotateZ(-0.82deg);
+  }
+
+  .paygate-workspace-chart-line {
+    stroke-width: 3.5;
+    filter: drop-shadow(0 0 8px rgba(var(--pg-brand-purple-soft-rgb), 0.68));
+  }
+
+  .paygate-workspace-chart-area {
+    fill: rgba(var(--pg-brand-purple-rgb), 0.055);
+  }
+
+  .paygate-workspace-chart circle.is-active {
+    fill: var(--pg-brand-purple-soft);
+    r: 4.5px;
+  }
+
+  .paygate-workspace-metric-icon {
+    width: 31px;
+    height: 31px;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .paygate-workspace-metric-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.7;
+  }
+
+  .paygate-workspace-label,
+  .paygate-workspace-status {
+    font-size: 11px;
+  }
+
+  .paygate-workspace-y-axis,
+  .paygate-workspace-x-axis {
+    font-size: 10px;
+    font-style: italic;
+  }
+
+  .paygate-workspace-metric-copy > span {
+    font-size: 11px;
+  }
+
+  .paygate-workspace-metric-copy strong {
+    font-size: 25px;
+  }
+}
+
+@media (min-width: 1900px) {
+  .paygate-workspace-label,
+  .paygate-workspace-status {
+    font-size: 13px;
+  }
+
+  .paygate-workspace-y-axis,
+  .paygate-workspace-x-axis {
+    font-size: 12px;
+  }
+
+  .paygate-workspace-metric-copy > span {
+    font-size: 13px;
+  }
+
+  .paygate-workspace-metric-copy strong {
+    font-size: 30px;
+  }
+}
+
+/* Keep the hero instrument as one readable 3D object at desktop sizes. */
+@media (min-width: 1181px) and (max-width: 1899px) {
+  .paygate-workspace-surface {
+    width: clamp(600px, 43vw, 640px);
+    height: clamp(390px, 26.2vw, 410px);
+    min-height: clamp(390px, 26.2vw, 410px);
+    margin-left: clamp(36px, 4vw, 60px);
+    padding: 30px 32px 20px;
+    transform:
+      translate3d(var(--workspace-surface-x), var(--workspace-surface-y), var(--workspace-surface-z))
+      perspective(1500px)
+      rotateX(calc(2deg + var(--workspace-surface-rotate-x)))
+      rotateY(calc(-4deg + var(--workspace-surface-rotate-y)))
+      rotateZ(calc(-0.7deg + var(--workspace-surface-rotate-z)));
+    transform-origin: 54% 52%;
+    animation: none;
+  }
+
+  .paygate-workspace-surface::before,
+  .paygate-workspace-surface::after {
+    clip-path: polygon(22% 0, 100% 0, 90.5% 100%, 9% 100%);
+    transform: none;
+  }
+
+  .paygate-workspace-chart-shell,
+  .paygate-workspace-chart svg {
+    min-height: clamp(130px, 8.7vw, 150px);
+    height: clamp(130px, 8.7vw, 150px);
+  }
+
+  .paygate-workspace-heading > div:first-child {
+    transform: translateX(clamp(70px, 7.4vw, 110px));
+  }
+
+  .paygate-workspace-chart {
+    width: calc(100% - clamp(10px, 1vw, 15px));
+    transform: translateX(clamp(10px, 1vw, 15px));
+  }
+
+  .paygate-workspace-heading strong {
+    font-size: clamp(30px, 2.2vw, 34px);
+  }
+
+  .paygate-workspace-metrics button {
+    min-height: 90px;
+  }
+
+  .paygate-workspace-metric-copy strong {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 1900px) {
+  .paygate-workspace-surface {
+    width: min(calc(100% - 24px), 920px);
+    height: 630px;
+    min-height: 630px;
+    transform:
+      translate3d(calc(-10px + var(--workspace-surface-x)), calc(60px + var(--workspace-surface-y)), var(--workspace-surface-z))
+      perspective(1500px)
+      rotateX(calc(1deg + var(--workspace-surface-rotate-x)))
+      rotateY(calc(-2.5deg + var(--workspace-surface-rotate-y)))
+      rotateZ(calc(-0.2deg + var(--workspace-surface-rotate-z)));
+    transform-origin: 54% 52%;
+    animation: none;
+  }
+
+  .paygate-workspace-surface::before,
+  .paygate-workspace-surface::after {
+    clip-path: polygon(15.5% 0, 100% 0, 90.5% 100%, 3.5% 100%);
+    transform: none;
+  }
+}
+
+/* Desktop dashboard calibration: the surface is the front glass; rails are restrained depth plates behind it. */
+@media (min-width: 1181px) {
+  .paygate-workspace-rail {
+    inset: 38px 48px 110px 88px;
+    border-color: rgba(177, 187, 214, 0.24);
+    border-radius: 24px;
+    background:
+      linear-gradient(135deg, rgba(var(--pg-brand-purple-soft-rgb), 0.055), rgba(36, 41, 53, 0.09) 52%, rgba(var(--pg-brand-purple-soft-rgb), 0.028)),
+      rgba(25, 30, 40, 0.12);
+    box-shadow:
+      0 26px 72px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.075);
+    backdrop-filter: blur(1px);
+  }
+
+  .paygate-workspace-rail.is-back {
+    opacity: 0.36;
+    transform: translate3d(calc(68px + var(--workspace-back-x)), calc(50px + var(--workspace-back-y)), -88px) rotateX(3deg) rotateY(-7deg) rotateZ(2.6deg);
+  }
+
+  .paygate-workspace-rail.is-middle {
+    opacity: 0.52;
+    transform: translate3d(calc(36px + var(--workspace-middle-x)), calc(28px + var(--workspace-middle-y)), -52px) rotateX(3deg) rotateY(-6deg) rotateZ(1.8deg);
+  }
+
+  .paygate-workspace-rail.is-front {
+    opacity: 0.66;
+    transform: translate3d(calc(14px + var(--workspace-front-x)), calc(14px + var(--workspace-front-y)), -24px) rotateX(3deg) rotateY(-5deg) rotateZ(0.8deg);
+  }
+
+  .paygate-workspace-surface {
+    width: clamp(600px, 41.6vw, 620px);
+    height: clamp(388px, 25.7vw, 392px);
+    min-height: clamp(388px, 25.7vw, 392px);
+    overflow: visible;
+    border-color: transparent;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transform:
+      translate3d(var(--workspace-surface-x), var(--workspace-surface-y), var(--workspace-surface-z))
+      perspective(1500px)
+      rotateX(calc(2.8deg + var(--workspace-surface-rotate-x)))
+      rotateY(calc(-5.6deg + var(--workspace-surface-rotate-y)))
+      rotateZ(calc(-0.35deg + var(--workspace-surface-rotate-z)));
+    transform-origin: 54% 52%;
+    animation: none;
+  }
+
+  .paygate-workspace-surface::before {
+    inset: -7px -2% 0 -5%;
+    z-index: 0;
+    border: 1px solid rgba(196, 202, 224, 0.42);
+    border-radius: 21px;
+    background:
+      linear-gradient(118deg, rgba(255, 255, 255, 0.075), transparent 23%),
+      linear-gradient(180deg, rgba(24, 28, 37, 0.97), rgba(15, 19, 28, 0.985)),
+      rgba(17, 21, 29, 0.96);
+    box-shadow:
+      0 34px 92px rgba(0, 0, 0, 0.34),
+      0 0 0 8px rgba(var(--pg-brand-purple-rgb), 0.035),
+      0 0 44px rgba(var(--pg-brand-purple-rgb), 0.11),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      inset -22px -26px 58px rgba(var(--pg-brand-purple-rgb), 0.05);
+    clip-path: polygon(24% 0, 100% 0, 87.8% 100%, 9% 100%);
+    filter: drop-shadow(0 22px 30px rgba(0, 0, 0, 0.20));
+    transform: none;
+    mix-blend-mode: normal;
+  }
+
+  .paygate-workspace-surface::after {
+    inset: 5px 3% 12px 1%;
+    z-index: 0;
+    right: auto;
+    bottom: auto;
+    width: auto;
+    height: auto;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 18px;
+    box-shadow: inset 0 0 28px rgba(var(--pg-brand-purple-rgb), 0.035);
+    clip-path: polygon(24% 0, 100% 0, 87.8% 100%, 9% 100%);
+    transform: none;
+  }
+
+  .paygate-workspace-surface > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .paygate-workspace-topbar,
+  .paygate-workspace-footer {
+    display: none;
+  }
+
+  .paygate-workspace-heading > div:first-child > span {
+    display: none;
+  }
+
+  .paygate-workspace-metrics {
+    width: calc(100% - 64px);
+    grid-template-columns: 1.20fr 1.08fr 1.07fr;
+    gap: 14px;
+    transform: translate(26px, -4px);
+  }
+
+  .paygate-workspace-metrics button {
+    padding-top: 9px;
+  }
+
+  .paygate-workspace-y-axis {
+    transform: translateX(82px);
+  }
+
+  .paygate-workspace-metrics button {
+    min-height: 90px;
+  }
+
+  .paygate-workspace-heading {
+    transform: translateY(-8px);
+    z-index: 20;
+  }
+
+  .paygate-workspace-range-menu-wrap {
+    z-index: 30;
+  }
+
+  .paygate-workspace-range-menu {
+    z-index: 40;
+  }
+
+  .paygate-workspace-status {
+    transform: translate(18px, -18px);
+  }
+
+  .paygate-workspace-heading strong {
+    font-size: clamp(28px, 1.9vw, 30px);
+  }
+
+  .paygate-workspace-chart-shell {
+    transform: translateY(-4px);
+  }
+
+  .paygate-workspace-x-axis {
+    right: 38px;
+    left: 38px;
+  }
+
+  .paygate-workspace-chart {
+    transform: translateX(3px);
+  }
+}
+
+/* Wide desktop needs the same instrument proportions, not the standard viewport's fixed face. */
+@media (min-width: 1900px) {
+  .paygate-workspace-surface {
+    width: min(calc(100% - 24px), 920px);
+    height: 630px;
+    min-height: 630px;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 44px 52px 30px;
+    transform:
+      translate3d(calc(-10px + var(--workspace-surface-x)), calc(60px + var(--workspace-surface-y)), var(--workspace-surface-z))
+      perspective(1500px)
+      rotateX(calc(1deg + var(--workspace-surface-rotate-x)))
+      rotateY(calc(-2.5deg + var(--workspace-surface-rotate-y)))
+      rotateZ(calc(-0.2deg + var(--workspace-surface-rotate-z)));
+    transform-origin: 54% 52%;
+  }
+
+  .paygate-workspace-surface::before,
+  .paygate-workspace-surface::after {
+    clip-path: polygon(15.5% 0, 100% 0, 90.5% 100%, 3.5% 100%);
+  }
+
+  .paygate-workspace-chart-shell,
+  .paygate-workspace-chart svg {
+    min-height: 300px;
+    height: 300px;
+  }
+
+  .paygate-workspace-heading strong {
+    font-size: 34px;
+  }
+
+  .paygate-workspace-y-axis {
+    transform: translateX(94px);
+  }
+
+  .paygate-workspace-x-axis {
+    right: 52px;
+    left: 52px;
+  }
+
+  .paygate-workspace-metrics {
+    width: calc(100% - 72px);
+  }
+}
+
+/* Final desktop face calibration: make the dark glass start behind the content, then let the rails carry the depth. */
+@media (min-width: 1181px) and (max-width: 1899px) {
+  .paygate-hero-workspace::before {
+    opacity: 0.30;
+  }
+
+  .paygate-workspace-rail {
+    inset: 38px 48px 140px 88px;
+    border-color: rgba(196, 202, 224, 0.31);
+    background:
+      linear-gradient(135deg, rgba(var(--pg-brand-purple-soft-rgb), 0.045), rgba(36, 41, 53, 0.16) 52%, rgba(var(--pg-brand-purple-soft-rgb), 0.035)),
+      rgba(25, 30, 40, 0.17);
+  }
+
+  .paygate-workspace-rail.is-back { opacity: 0.48; }
+  .paygate-workspace-rail.is-middle { opacity: 0.64; }
+  .paygate-workspace-rail.is-front { opacity: 0.78; }
+
+  .paygate-workspace-surface::before {
+    inset: -7px 5% 0 12%;
+    border-color: rgba(196, 202, 224, 0.49);
+    background:
+      linear-gradient(118deg, rgba(255, 255, 255, 0.025), transparent 23%),
+      linear-gradient(180deg, rgba(18, 23, 31, 0.97), rgba(10, 14, 21, 0.985)),
+      rgba(15, 19, 27, 0.98);
+    border-radius: 21px;
+    clip-path: none;
+    transform: skewX(-12deg);
+    box-shadow:
+      0 34px 92px rgba(0, 0, 0, 0.38),
+      0 0 0 8px rgba(var(--pg-brand-purple-rgb), 0.035),
+      0 0 44px rgba(var(--pg-brand-purple-rgb), 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      inset -22px -26px 58px rgba(var(--pg-brand-purple-rgb), 0.035);
+  }
+
+  .paygate-workspace-surface::after {
+    inset: 5px 6% 12px 13%;
+    border-color: rgba(255, 255, 255, 0.075);
+    border-radius: 18px;
+    clip-path: none;
+    opacity: 0.28;
+    transform: skewX(-12deg);
+  }
+
+  .paygate-workspace-metrics button {
+    border-color: rgba(177, 187, 214, 0.31);
+    background: linear-gradient(180deg, rgba(31, 36, 48, 0.80), rgba(15, 19, 28, 0.90));
+  }
+
+  .paygate-workspace-metrics {
+    grid-template-columns: 1.25fr 1.08fr 1.12fr;
+    gap: 13px;
+  }
+
+  .paygate-workspace-metric-icon svg {
+    stroke-width: 2.15;
+  }
+
+  .paygate-workspace-chart-area {
+    fill: transparent;
+    opacity: 0;
+  }
+
+  .paygate-workspace-metric-copy > span {
+    font-family: var(--pg-font-sans);
+    font-style: italic;
+  }
+
+  .paygate-workspace-metric-copy strong {
+    font-family: var(--pg-font-sans);
+    font-style: italic;
+    font-weight: 700;
+  }
+
+  .paygate-workspace-heading {
+    transform: translateY(-16px);
+  }
+
+  .paygate-workspace-label {
+    transform: translateY(-7px);
+  }
+
+  .paygate-workspace-heading strong {
+    transform: translateY(6px);
+  }
+
+  .paygate-workspace-status {
+    transform: translate(18px, -22px);
+  }
+}
+
+/* The transformed chart creates a stacking context on narrow screens too; keep the open range menu above it. */
+.paygate-workspace-range-menu-wrap {
+  z-index: 30;
+}
+
+.paygate-workspace-range-menu {
+  z-index: 40;
+}
+
+.paygate-workspace-heading {
+  z-index: 5;
+}
+
+/* Final right-dashboard calibration: match the reference's quiet depth and balanced metric row. */
+@media (min-width: 1181px) and (max-width: 1899px) {
+  .paygate-hero-workspace::before {
+    opacity: 0.18;
+  }
+
+  .paygate-hero-workspace::after {
+    display: none;
+  }
+
+  .paygate-workspace-rail {
+    inset: 70px 48px 108px 88px;
+    border-color: rgba(196, 202, 224, 0.30);
+    background:
+      linear-gradient(135deg, rgba(54, 60, 72, 0.12), rgba(24, 30, 40, 0.16) 52%, rgba(54, 58, 70, 0.08)),
+      rgba(28, 34, 44, 0.16);
+    box-shadow:
+      0 26px 72px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: none;
+  }
+
+  .paygate-workspace-surface::before {
+    inset: -7px 5% -20px 12%;
+    border-color: rgba(196, 202, 224, 0.46);
+    background:
+      linear-gradient(118deg, rgba(255, 255, 255, 0.006), transparent 23%),
+      linear-gradient(180deg, rgba(18, 21, 29, 0.985), rgba(16, 20, 28, 0.99)),
+      rgba(17, 21, 29, 0.99);
+    box-shadow:
+      0 34px 92px rgba(0, 0, 0, 0.38),
+      0 0 0 8px rgba(var(--pg-brand-purple-rgb), 0.035),
+      0 0 36px rgba(var(--pg-brand-purple-rgb), 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      inset -22px -26px 58px rgba(var(--pg-brand-purple-rgb), 0.015);
+    transform: perspective(1400px) rotateX(2.5deg) rotateY(-5deg) rotateZ(-0.5deg) skewX(-12deg);
+  }
+
+  .paygate-workspace-surface::after {
+    inset: 5px 6% -8px 13%;
+    transform: perspective(1400px) rotateX(2.5deg) rotateY(-5deg) rotateZ(-0.5deg) skewX(-12deg);
+  }
+
+  .paygate-workspace-chart-line {
+    stroke-width: 2.8;
+    filter: drop-shadow(0 0 6px rgba(var(--pg-brand-purple-soft-rgb), 0.56));
+  }
+
+  .paygate-workspace-chart {
+    background-image:
+      linear-gradient(rgba(154, 165, 184, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(154, 165, 184, 0.055) 1px, transparent 1px),
+      linear-gradient(116deg, transparent 0 66%, rgba(var(--pg-brand-purple-soft-rgb), 0.045) 66.2%, transparent 66.5%);
+  }
+
+  .paygate-workspace-metrics button {
+    align-items: center;
+    border-color: rgba(177, 187, 214, 0.23);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(25, 30, 40, 0.72), rgba(16, 20, 28, 0.88));
+  }
+
+  .paygate-workspace-metric-icon {
+    align-self: center;
+  }
+
+  .paygate-workspace-heading {
+    transform: translate(5px, -16px);
+  }
+
+  .paygate-workspace-status {
+    transform: translate(23px, -16px);
+  }
+
+  .paygate-workspace-y-axis,
+  .paygate-workspace-x-axis {
+    color: rgba(184, 190, 205, 0.72);
+  }
+
+  .paygate-workspace-metric-copy > span {
+    color: rgba(233, 234, 242, 0.70);
+  }
+}
