@@ -1,0 +1,34 @@
+{
+  "regions": [
+    {
+      "id": "hero-copy",
+      "label": "Hero copy and actions",
+      "box": [80, 36, 820, 590],
+      "note": "Reference left rail, including eyebrow, title, description, actions, and proof signal."
+    },
+    {
+      "id": "front-surface",
+      "label": "Front dashboard face",
+      "box": [930, 20, 1160, 780],
+      "note": "Main angled glass face and its readable content."
+    },
+    {
+      "id": "chart",
+      "label": "Revenue chart",
+      "box": [1040, 120, 1040, 420],
+      "note": "Chart heading, axes, line, points, and range control."
+    },
+    {
+      "id": "metrics",
+      "label": "Revenue metrics",
+      "box": [980, 450, 1080, 300],
+      "note": "Three metric cards integrated into the dashboard face."
+    },
+    {
+      "id": "depth-stack",
+      "label": "Depth plates and circuit field",
+      "box": [1320, 50, 1056, 840],
+      "note": "Translucent rear plates, grid, and peripheral circuit traces."
+    }
+  ]
+}
