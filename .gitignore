@@ -21,7 +21,6 @@ backend/.env
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-__pycache__/
 
 # Vercel local project metadata
 .vercel/
@@ -33,5 +32,3 @@ __pycache__/
 # Local UI QA artifacts
 output/playwright/
 output/impeccable/
-docs/evidence/browser-smoke/
-docs/evidence/landing-reference/latest/

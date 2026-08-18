@@ -76,8 +76,8 @@ async function stopProcess(child) {
 
 function routeExpectation(pathname) {
   if (pathname === '/') return 'PayGate';
-  if (pathname === '/dashboard') return 'Wallet not connected';
-  if (pathname === '/apis/new') return 'Connect wallet to create paid endpoints';
+  if (pathname === '/dashboard') return 'Wallet login required';
+  if (pathname === '/apis/new') return 'Connect wallet to register APIs';
   return 'Connect wallet to view this API';
 }
 
@@ -127,7 +127,7 @@ try {
       });
     });
     for (const route of routes) {
-      const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+      const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded', timeout: 15_000 });
       assert(response && response.status() < 500, `${route} returned ${response?.status() ?? 'no response'}`);
 
       const expectedText = routeExpectation(route);

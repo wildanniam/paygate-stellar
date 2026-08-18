@@ -6,7 +6,6 @@ const Button = forwardRef(function Button({
   variant = 'primary',
   size = 'md',
   icon,
-  iconAfter,
   iconOnly = false,
   className,
   children,
@@ -27,7 +26,6 @@ const Button = forwardRef(function Button({
       <span className="pg-button-content">
         {icon}
         {!iconOnly && children}
-        {iconAfter}
       </span>
     </Component>
   );
