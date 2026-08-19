@@ -28,7 +28,7 @@ function isLinkActive(item, activeSection) {
   return item.activeSections?.includes(activeSection);
 }
 
-export default function MarketingNavbar({ theme = 'dark', onThemeChange }) {
+export default function MarketingNavbar({ theme = 'dark', onThemeChange, themeToggleEnabled = false }) {
   const [activeSection, setActiveSection] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
@@ -138,15 +138,17 @@ export default function MarketingNavbar({ theme = 'dark', onThemeChange }) {
             <span className="paygate-nav-cta-full">Create paid endpoint</span>
             <span className="paygate-nav-cta-short">Create</span>
           </Button>
-          <button
-            type="button"
-            className="paygate-nav-icon paygate-theme-toggle desktop-nav-link"
-            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            onClick={toggleTheme}
-          >
-            {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
-          </button>
+          {themeToggleEnabled ? (
+            <button
+              type="button"
+              className="paygate-nav-icon paygate-theme-toggle desktop-nav-link"
+              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              onClick={toggleTheme}
+            >
+              {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
+            </button>
+          ) : null}
           <button
             type="button"
             className="paygate-mobile-menu-trigger"
@@ -197,18 +199,20 @@ export default function MarketingNavbar({ theme = 'dark', onThemeChange }) {
           <Link className="paygate-mobile-menu-secondary" to="/apis/new" aria-label="Create paid endpoint" onClick={closeMobileMenu}>
             Create
           </Link>
-          <button
-            type="button"
-            className="paygate-mobile-menu-secondary paygate-mobile-theme-toggle"
-            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            onClick={() => {
-              toggleTheme();
-              closeMobileMenu();
-            }}
-          >
-            {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
-            <span>{theme === 'dark' ? 'Light theme' : 'Dark theme'}</span>
-          </button>
+          {themeToggleEnabled ? (
+            <button
+              type="button"
+              className="paygate-mobile-menu-secondary paygate-mobile-theme-toggle"
+              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              onClick={() => {
+                toggleTheme();
+                closeMobileMenu();
+              }}
+            >
+              {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
+              <span>{theme === 'dark' ? 'Light theme' : 'Dark theme'}</span>
+            </button>
+          ) : null}
         </div>
       </div>
     </nav>

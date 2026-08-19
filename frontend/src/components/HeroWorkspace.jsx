@@ -1,485 +1,425 @@
-import {
-  Activity,
-  ChartNoAxesColumnIncreasing,
-  Check,
-  ChevronDown,
-  Circle,
-  Copy,
-  Pause,
-  Play,
-  ShieldCheck,
-  WalletCards,
-} from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+
+const RANGE_ORDER = ['7d', '30d', '90d'];
 
 const RANGE_DATA = {
   '7d': {
     label: 'Last 7 days',
     revenue: '+18.40 USDC',
-    revenueNote: 'illustrative period trend',
-    axis: ['20', '15', '10', '0'],
+    axis: ['18.4', '12.3', '6.1', '0'],
+    dates: [
+      { x: 202, label: 'Mon' },
+      { x: 344, label: 'Wed' },
+      { x: 492, label: 'Fri' },
+      { x: 642, label: 'Sat' },
+      { x: 776, label: 'Sun' },
+    ],
     points: [
-      { label: 'Mon', value: '12.10', y: 178 },
-      { label: 'Tue', value: '13.80', y: 160 },
-      { label: 'Wed', value: '14.60', y: 154 },
-      { label: 'Thu', value: '15.20', y: 138 },
-      { label: 'Fri', value: '16.80', y: 126 },
-      { label: 'Sat', value: '17.60', y: 86 },
-      { label: 'Sun', value: '18.40', y: 48 },
+      { x: 202, y: 344, label: 'Mon', value: '4.20' },
+      { x: 286, y: 330, label: 'Tue', value: '6.10' },
+      { x: 370, y: 306, label: 'Wed', value: '8.30' },
+      { x: 454, y: 278, label: 'Thu', value: '10.90' },
+      { x: 538, y: 262, label: 'Fri', value: '12.70' },
+      { x: 632, y: 211, label: 'Sat', value: '15.80' },
+      { x: 774, y: 173, label: 'Sun', value: '18.40' },
     ],
     metrics: { calls: '628', success: '99.7%', latency: '128ms' },
   },
   '30d': {
     label: 'This month',
     revenue: '+84.20 USDC',
-    revenueNote: 'illustrative period trend',
-    axis: ['100', '75', '50', '0'],
+    axis: ['84.2', '56.1', '28.1', '0'],
+    dates: [
+      { x: 202, label: 'May 1' },
+      { x: 344, label: 'May 8' },
+      { x: 492, label: 'May 15' },
+      { x: 642, label: 'May 22' },
+      { x: 776, label: 'May 29' },
+    ],
     points: [
-      { label: 'May 1', axisLabel: 'May 1', value: '42.10', chartX: 119, y: 126 },
-      { label: 'May 4', value: '39.80', chartX: 188, y: 152 },
-      { label: 'May 8', axisLabel: 'May 8', value: '46.30', chartX: 260, y: 118 },
-      { label: 'May 12', value: '51.20', chartX: 326, y: 105 },
-      { label: 'May 15', axisLabel: 'May 15', value: '48.90', chartX: 394, y: 119 },
-      { label: 'May 22', axisLabel: 'May 22', value: '69.80', chartX: 474, y: 33 },
-      { label: 'May 25', value: '67.40', chartX: 544, y: 42 },
-      { label: 'May 27', value: '78.60', chartX: 619, y: -4 },
-      { label: 'May 29', axisLabel: 'May 29', value: '84.20', chartX: 679, y: -25 },
+      { x: 202, y: 346, label: 'May 1', value: '12.40' },
+      { x: 272, y: 337, label: 'May 4', value: '16.10' },
+      { x: 344, y: 312, label: 'May 8', value: '24.80' },
+      { x: 416, y: 302, label: 'May 12', value: '31.50' },
+      { x: 488, y: 274, label: 'May 15', value: '42.10' },
+      { x: 558, y: 254, label: 'May 18', value: '49.80' },
+      { x: 628, y: 207, label: 'May 22', value: '63.40' },
+      { x: 702, y: 181, label: 'May 26', value: '75.60' },
+      { x: 778, y: 154, label: 'May 29', value: '84.20' },
     ],
     metrics: { calls: '2,842', success: '99.9%', latency: '124ms' },
   },
   '90d': {
     label: 'Last 90 days',
     revenue: '+241.60 USDC',
-    revenueNote: 'illustrative period trend',
-    axis: ['250', '175', '100', '0'],
+    axis: ['241.6', '161.0', '80.5', '0'],
+    dates: [
+      { x: 202, label: 'Aug' },
+      { x: 344, label: 'Sep' },
+      { x: 492, label: 'Oct' },
+      { x: 642, label: 'Nov' },
+      { x: 776, label: 'Dec' },
+    ],
     points: [
-      { label: 'Apr', value: '98.00', y: 198 },
-      { label: 'May', value: '121.50', y: 186 },
-      { label: 'Jun', value: '158.40', y: 180 },
-      { label: 'Jul', value: '182.90', y: 142 },
-      { label: 'Aug', value: '207.30', y: 138 },
-      { label: 'Sep', value: '226.80', y: 84 },
-      { label: 'Oct', value: '241.60', y: 46 },
+      { x: 202, y: 354, label: 'Aug 1', value: '38.20' },
+      { x: 274, y: 341, label: 'Aug 15', value: '52.40' },
+      { x: 346, y: 329, label: 'Sep 1', value: '67.10' },
+      { x: 418, y: 294, label: 'Sep 15', value: '98.30' },
+      { x: 490, y: 276, label: 'Oct 1', value: '121.50' },
+      { x: 560, y: 236, label: 'Oct 15', value: '158.40' },
+      { x: 630, y: 212, label: 'Nov 1', value: '182.90' },
+      { x: 704, y: 169, label: 'Nov 15', value: '215.70' },
+      { x: 778, y: 133, label: 'Dec 1', value: '241.60' },
     ],
     metrics: { calls: '8,412', success: '99.8%', latency: '121ms' },
   },
 };
 
-const RANGE_OPTIONS = [
-  { key: '7d', shortLabel: '7D' },
-  { key: '30d', shortLabel: '30D' },
-  { key: '90d', shortLabel: '90D' },
+const METRICS = [
+  {
+    key: 'calls',
+    label: 'Total Calls',
+    note: 'paid requests',
+    path: 'M118 463 Q116 463 114 471 L95 545 Q93 556 105 557 L306 554 Q314 554 316 545 L330 468 Q332 458 321 458 Z',
+    textX: 126,
+    iconX: 280,
+    contentY: 0,
+  },
+  {
+    key: 'success',
+    label: 'Success Rate',
+    note: 'successful calls',
+    path: 'M347 456 Q344 456 342 465 L326 542 Q324 551 336 551 L531 545 Q539 545 541 536 L552 458 Q554 449 543 449 Z',
+    textX: 354,
+    iconX: 502,
+    contentY: -4,
+  },
+  {
+    key: 'latency',
+    label: 'Avg. Latency',
+    note: 'upstream response',
+    path: 'M568 447 Q565 447 563 456 L551 535 Q549 544 560 543 L750 535 Q758 535 760 526 L770 448 Q772 439 761 439 Z',
+    textX: 575,
+    iconX: 720,
+    contentY: -8,
+  },
 ];
 
-function LatencyWaveIcon({ size = 17, ...props }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 36 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M1 10c3.1-6 6.2-6 9.3 0s6.2 6 9.3 0" />
-      <path d="M22.4 10c2.4-5.2 4.8-5.2 7.2 0s4.8 5.2 5.4 0" />
-    </svg>
-  );
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
 }
 
-const METRIC_DEFINITIONS = [
-  { key: 'calls', label: 'Total Calls', note: 'paid requests', icon: ChartNoAxesColumnIncreasing },
-  { key: 'success', label: 'Success Rate', note: '200 OK responses', icon: Circle },
-  { key: 'latency', label: 'Avg. Latency', note: 'upstream response', icon: LatencyWaveIcon },
-];
-
-const CHART_START_X = 118;
-const CHART_END_X = 675;
-
-function getChartX(index, pointCount) {
-  if (pointCount <= 1) return CHART_START_X;
-  return CHART_START_X + ((CHART_END_X - CHART_START_X) * index) / (pointCount - 1);
-}
-
-function buildPath(points) {
-  const positions = points.map((point) => ({ x: point.x, y: point.y }));
-  const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
-  return positions.reduce((path, point, index) => {
+function buildSmoothPath(points) {
+  return points.reduce((path, point, index) => {
     if (index === 0) return `M ${point.x} ${point.y}`;
 
-    const next = positions[index];
-    const previous = positions[index - 1];
-    const segment = next.x - previous.x;
-    const controlOffset = segment / 3;
-    const before = positions[index - 2] || previous;
-    const after = positions[index + 1] || next;
-    const incomingSlope = (next.y - before.y) / Math.max(1, next.x - before.x);
+    const previous = points[index - 1];
+    const before = points[index - 2] || previous;
+    const after = points[index + 1] || point;
+    const segment = point.x - previous.x;
+    const offset = segment * 0.36;
+    const incomingSlope = (point.y - before.y) / Math.max(1, point.x - before.x);
     const outgoingSlope = (after.y - previous.y) / Math.max(1, after.x - previous.x);
-    const minimum = Math.min(previous.y, next.y);
-    const maximum = Math.max(previous.y, next.y);
-    const firstControlY = clamp(previous.y + incomingSlope * controlOffset, minimum, maximum);
-    const secondControlY = clamp(next.y - outgoingSlope * controlOffset, minimum, maximum);
+    const minimum = Math.min(previous.y, point.y);
+    const maximum = Math.max(previous.y, point.y);
+    const firstY = clamp(previous.y + incomingSlope * offset, minimum, maximum);
+    const secondY = clamp(point.y - outgoingSlope * offset, minimum, maximum);
 
-    // Smooth the period trend without introducing overshoot between data points.
-    return `${path} C ${previous.x + controlOffset} ${firstControlY}, ${next.x - controlOffset} ${secondControlY}, ${next.x} ${next.y}`;
+    return `${path} C ${previous.x + offset} ${firstY}, ${point.x - offset} ${secondY}, ${point.x} ${point.y}`;
   }, '');
 }
 
-function buildAreaPath(points) {
-  const firstPoint = points[0];
-  const lastPoint = points[points.length - 1];
-  return `${buildPath(points)} L ${lastPoint.x} 214 L ${firstPoint.x} 214 Z`;
-}
-
-async function copyText(value) {
-  if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(value);
-      return;
-    } catch {
-      // Fall through to the browser-compatible copy path when permission is denied.
-    }
+function metricIcon(metric, iconX) {
+  if (metric === 'calls') {
+    return (
+      <g className="paygate-workspace-metric-icon" transform={`translate(${iconX} 500)`} aria-hidden="true">
+        <path d="M0 20V11M8 20V5M16 20V0" />
+        <path d="M-3 22H20" opacity="0.45" />
+      </g>
+    );
   }
 
-  const textarea = document.createElement('textarea');
-  textarea.value = value;
-  textarea.setAttribute('readonly', '');
-  textarea.style.position = 'fixed';
-  textarea.style.opacity = '0';
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand('copy');
-  textarea.remove();
+  if (metric === 'success') {
+    return (
+      <g className="paygate-workspace-metric-icon" transform={`translate(${iconX} 500)`} aria-hidden="true">
+        <circle cx="8" cy="10" r="10" />
+        <path d="m3 10 3 3 7-8" />
+      </g>
+    );
+  }
+
+  return (
+    <g className="paygate-workspace-metric-icon" transform={`translate(${iconX} 502)`} aria-hidden="true">
+      <path d="M-2 12c4-9 8-9 12 0s8 9 12 0" />
+    </g>
+  );
 }
 
-function setMotionVariables(element, x, y) {
-  if (!element) return;
-
-  const set = (name, value, unit = 'px') => element.style.setProperty(name, `${value}${unit}`);
-
-  set('--workspace-back-x', x * 11);
-  set('--workspace-back-y', y * 7);
-  set('--workspace-middle-x', x * 7);
-  set('--workspace-middle-y', y * 5);
-  set('--workspace-front-x', x * 4);
-  set('--workspace-front-y', y * 3);
-  set('--workspace-surface-x', x * 2.6);
-  set('--workspace-surface-y', y * 2.1);
-  set('--workspace-surface-z', Math.abs(x) + Math.abs(y) > 0.08 ? 11 : 0);
-  set('--workspace-surface-rotate-x', y * -1.8, 'deg');
-  set('--workspace-surface-rotate-y', x * 2.2, 'deg');
-  set('--workspace-surface-rotate-z', x * 0.32, 'deg');
-  set('--workspace-shine-x', 50 + x * 30, '%');
-  set('--workspace-shine-y', 38 + y * 24, '%');
-}
-
-export default function HeroWorkspace({ proxyUrl }) {
+export default function HeroWorkspace() {
   const [range, setRange] = useState('30d');
-  const [activeMetric, setActiveMetric] = useState(null);
   const [activePoint, setActivePoint] = useState(null);
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [isRangeMenuOpen, setIsRangeMenuOpen] = useState(false);
-  const [copyState, setCopyState] = useState('idle');
+  const [activeMetric, setActiveMetric] = useState(null);
   const workspaceRef = useRef(null);
-  const rangeMenuRef = useRef(null);
-  const motionFrameRef = useRef(null);
-  const motionTargetRef = useRef({ x: 0, y: 0 });
-  const motionValueRef = useRef({ x: 0, y: 0 });
-  const copyTimerRef = useRef(null);
   const data = RANGE_DATA[range];
+  const chartPath = useMemo(() => buildSmoothPath(data.points), [data.points]);
+  const areaPath = `${chartPath} L 778 392 L 202 392 Z`;
 
-  const points = useMemo(() => data.points.map((point, index) => ({
-    ...point,
-    x: point.chartX ?? getChartX(index, data.points.length),
-  })), [data]);
-
-  useEffect(() => {
-    const element = workspaceRef.current;
-    if (!element || typeof IntersectionObserver === 'undefined') return undefined;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsVisible(entry.isIntersecting);
-    }, { rootMargin: '120px 0px', threshold: 0 });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => () => {
-    window.clearTimeout(copyTimerRef.current);
-    window.cancelAnimationFrame(motionFrameRef.current);
-  }, []);
-
-  useEffect(() => {
-    if (!isRangeMenuOpen) return undefined;
-
-    const closeOnOutsideClick = (event) => {
-      if (!rangeMenuRef.current?.contains(event.target)) setIsRangeMenuOpen(false);
-    };
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setIsRangeMenuOpen(false);
-    };
-
-    document.addEventListener('pointerdown', closeOnOutsideClick);
-    document.addEventListener('keydown', closeOnEscape);
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsideClick);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, [isRangeMenuOpen]);
-
-  const animatePointer = () => {
-    const element = workspaceRef.current;
-    if (!element) return;
-
-    const target = motionTargetRef.current;
-    const current = motionValueRef.current;
-    const easing = target.x === 0 && target.y === 0 ? 0.22 : 0.12;
-    current.x += (target.x - current.x) * easing;
-    current.y += (target.y - current.y) * easing;
-    if (Math.abs(target.x - current.x) < 0.005) current.x = target.x;
-    if (Math.abs(target.y - current.y) < 0.005) current.y = target.y;
-    setMotionVariables(element, current.x, current.y);
-
-    const settled = Math.abs(target.x - current.x) < 0.001 && Math.abs(target.y - current.y) < 0.001;
-    if (!settled) motionFrameRef.current = window.requestAnimationFrame(animatePointer);
-    else motionFrameRef.current = null;
-  };
-
-  const schedulePointerMotion = () => {
-    if (motionFrameRef.current === null) motionFrameRef.current = window.requestAnimationFrame(animatePointer);
+  const cycleRange = () => {
+    const index = RANGE_ORDER.indexOf(range);
+    setRange(RANGE_ORDER[(index + 1) % RANGE_ORDER.length]);
+    setActivePoint(null);
   };
 
   const handlePointerMove = (event) => {
     if (event.pointerType === 'touch' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const element = workspaceRef.current;
     if (!element) return;
-
     const rect = element.getBoundingClientRect();
-    motionTargetRef.current = {
-      x: Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1)),
-      y: Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1)),
-    };
+    const x = clamp(((event.clientX - rect.left) / rect.width) * 2 - 1, -1, 1);
+    const y = clamp(((event.clientY - rect.top) / rect.height) * 2 - 1, -1, 1);
+    element.style.setProperty('--workspace-scene-rx', `${y * -1.15}deg`);
+    element.style.setProperty('--workspace-scene-ry', `${x * 1.55}deg`);
+    element.style.setProperty('--workspace-scene-x', `${x * 4}px`);
+    element.style.setProperty('--workspace-scene-y', `${y * 3}px`);
+    element.style.setProperty('--workspace-shine-x', `${44 + x * 13}%`);
+    element.style.setProperty('--workspace-shine-y', `${36 + y * 11}%`);
     element.dataset.pointerActive = 'true';
-    schedulePointerMotion();
   };
 
-  const handlePointerLeave = () => {
+  const resetPointer = () => {
     const element = workspaceRef.current;
     if (!element) return;
-    motionTargetRef.current = { x: 0, y: 0 };
+    element.style.setProperty('--workspace-scene-rx', '0deg');
+    element.style.setProperty('--workspace-scene-ry', '0deg');
+    element.style.setProperty('--workspace-scene-x', '0px');
+    element.style.setProperty('--workspace-scene-y', '0px');
+    element.style.setProperty('--workspace-shine-x', '44%');
+    element.style.setProperty('--workspace-shine-y', '36%');
     element.dataset.pointerActive = 'false';
-    schedulePointerMotion();
-  };
-
-  const handleRangeChange = (nextRange) => {
-    setRange(nextRange);
     setActivePoint(null);
-    setIsTooltipVisible(false);
-    setIsRangeMenuOpen(false);
+    setActiveMetric(null);
   };
 
-  const handleCopy = async () => {
-    try {
-      await copyText(proxyUrl);
-      setCopyState('copied');
-      window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopyState('idle'), 1600);
-    } catch {
-      setCopyState('error');
-      window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopyState('idle'), 1600);
+  const handleKeyboardAction = (event, action) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
     }
   };
-
-  const selectedPoint = points[activePoint] || points[points.length - 1];
 
   return (
     <div
       ref={workspaceRef}
       className="paygate-hero-workspace"
-      data-paused={isPaused ? 'true' : 'false'}
-      data-visible={isVisible ? 'true' : 'false'}
       data-pointer-active="false"
+      data-paused="false"
+      data-range={range}
       onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
+      onPointerLeave={resetPointer}
     >
-      <div className="paygate-workspace-rail is-back" aria-hidden="true" />
-      <div className="paygate-workspace-rail is-middle" aria-hidden="true" />
-      <div className="paygate-workspace-rail is-front" aria-hidden="true" />
+      <svg
+        className="paygate-workspace-surface"
+        viewBox="0 0 1070 744"
+        role="img"
+        aria-labelledby="paygate-workspace-title paygate-workspace-description"
+      >
+        <title id="paygate-workspace-title">PayGate revenue workspace</title>
+        <desc id="paygate-workspace-description">
+          An illustrative testnet revenue dashboard showing cumulative paid API calls, success rate, and latency.
+        </desc>
 
-      <div className="paygate-workspace-surface">
-        <div className="paygate-workspace-topbar">
-          <div className="paygate-workspace-window-title">
-            <span className="paygate-workspace-dots" aria-hidden="true"><i /><i /><i /></span>
-            <span>PayGate / Revenue workspace</span>
-          </div>
-          <div className="paygate-workspace-toolbar-actions">
-            <span className="paygate-workspace-preview-label">Illustrative testnet preview</span>
-            <button
-              type="button"
-              className="paygate-workspace-icon-button"
-              onClick={() => setIsPaused((paused) => !paused)}
-              aria-label={isPaused ? 'Play revenue chart animation' : 'Pause revenue chart animation'}
-              title={isPaused ? 'Play chart animation' : 'Pause chart animation'}
-            >
-              {isPaused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
-            </button>
-          </div>
-        </div>
+        <defs>
+          <clipPath id="paygate-workspace-face-clip" clipPathUnits="userSpaceOnUse">
+            <path d="M166 45 Q157 46 153 61 L26 591 Q20 616 43 623 L811 634 Q833 634 840 610 L944 50 Q949 20 925 14 Z" />
+          </clipPath>
+          <linearGradient id="paygate-workspace-face-glass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#252b3a" stopOpacity="0.34" />
+            <stop offset="0.46" stopColor="#0d111b" stopOpacity="0.18" />
+            <stop offset="1" stopColor="#6f5cff" stopOpacity="0.08" />
+          </linearGradient>
+          <linearGradient id="paygate-workspace-face-glass-light" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#ffffff" stopOpacity="0.62" />
+            <stop offset="0.48" stopColor="#f8f8ff" stopOpacity="0.28" />
+            <stop offset="1" stopColor="#9b87ff" stopOpacity="0.11" />
+          </linearGradient>
+          <linearGradient id="paygate-workspace-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#8c79ff" stopOpacity="0.26" />
+            <stop offset="0.7" stopColor="#725cff" stopOpacity="0.055" />
+            <stop offset="1" stopColor="#725cff" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="paygate-workspace-area-light" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#7864ff" stopOpacity="0.19" />
+            <stop offset="0.72" stopColor="#8b78ff" stopOpacity="0.035" />
+            <stop offset="1" stopColor="#8b78ff" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="paygate-workspace-line" x1="202" y1="340" x2="778" y2="145" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#7765ff" />
+            <stop offset="0.54" stopColor="#a894ff" />
+            <stop offset="1" stopColor="#7967ff" />
+          </linearGradient>
+          <radialGradient id="paygate-workspace-hover-light">
+            <stop offset="0" stopColor="#aa9aff" stopOpacity="0.20" />
+            <stop offset="0.42" stopColor="#7461ff" stopOpacity="0.065" />
+            <stop offset="1" stopColor="#7461ff" stopOpacity="0" />
+          </radialGradient>
+          <filter id="paygate-workspace-line-glow" x="-30%" y="-70%" width="160%" height="240%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="paygate-workspace-point-glow" x="-300%" y="-300%" width="700%" height="700%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-        <div className="paygate-workspace-heading">
-          <div>
-            <p className="paygate-workspace-label">Revenue</p>
-            <strong>{data.revenue}</strong>
-            <span>{data.revenueNote}</span>
-          </div>
-          <div className="paygate-workspace-range-menu-wrap" ref={rangeMenuRef}>
-            <button
-              type="button"
-              className="paygate-workspace-status"
-              aria-haspopup="menu"
-              aria-expanded={isRangeMenuOpen}
-              onClick={() => setIsRangeMenuOpen((open) => !open)}
-            >
-              <span className="paygate-workspace-status-dot" aria-hidden="true" />
-              <span>{data.label}</span>
-              <ChevronDown size={14} aria-hidden="true" />
-            </button>
-            {isRangeMenuOpen ? (
-              <div className="paygate-workspace-range-menu" role="menu" aria-label="Revenue chart range">
-                {RANGE_OPTIONS.map((option) => (
-                  <button
-                    key={option.key}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={range === option.key}
-                    className={range === option.key ? 'is-active' : ''}
-                    onClick={() => handleRangeChange(option.key)}
-                  >
-                    <span>{RANGE_DATA[option.key].label}</span>
-                    <small>{option.shortLabel}</small>
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </div>
+        <g className="paygate-workspace-ambient" aria-hidden="true">
+          <path d="M28 245H116L151 202" />
+          <path d="M10 388H86L125 430" />
+          <path d="M854 120H1006L1042 94" />
+          <path d="M870 506H1000L1045 550" />
+          <circle cx="116" cy="245" r="3" />
+          <circle cx="86" cy="388" r="2.5" />
+          <circle cx="1006" cy="120" r="3" />
+          <circle cx="1000" cy="506" r="2.5" />
+        </g>
 
-        <div className="paygate-workspace-chart-shell">
-          <div className="paygate-workspace-y-axis" aria-hidden="true">
-            {data.axis.map((label) => <span key={label}>{label}</span>)}
-          </div>
-          <div
-            className="paygate-workspace-chart"
-            data-range={range}
-            aria-label={`Illustrative API revenue trend for ${data.label}`}
-            onMouseLeave={() => setIsTooltipVisible(false)}
+        <image
+          className="paygate-workspace-shell-image is-dark"
+          href="/brand/paygate-workspace-shell-v2-tight.png"
+          x="0"
+          y="0"
+          width="1070"
+          height="744"
+          preserveAspectRatio="xMidYMid meet"
+        />
+        <image
+          className="paygate-workspace-shell-image is-light"
+          href="/brand/paygate-workspace-shell-light-v1.svg"
+          x="0"
+          y="0"
+          width="1070"
+          height="744"
+          preserveAspectRatio="xMidYMid meet"
+        />
+
+        <g clipPath="url(#paygate-workspace-face-clip)">
+          <path
+            className="paygate-workspace-glass"
+            d="M166 45 Q157 46 153 61 L26 591 Q20 616 43 623 L811 634 Q833 634 840 610 L944 50 Q949 20 925 14 Z"
+            fill="url(#paygate-workspace-face-glass)"
+          />
+          <ellipse className="paygate-workspace-shine" cx="465" cy="248" rx="360" ry="280" fill="url(#paygate-workspace-hover-light)" />
+
+          <g className="paygate-workspace-heading">
+            <text className="paygate-workspace-kicker" x="194" y="104">Revenue</text>
+            <text className="paygate-workspace-revenue" x="190" y="154">{data.revenue}</text>
+            <text className="paygate-workspace-caption" x="192" y="181">settled from paid API calls</text>
+          </g>
+
+          <g
+            className="paygate-workspace-status"
+            role="button"
+            tabIndex="0"
+            aria-label={`${data.label}. Activate to show the next range.`}
+            onClick={cycleRange}
+            onKeyDown={(event) => handleKeyboardAction(event, cycleRange)}
           >
-            <svg viewBox="0 0 680 240" preserveAspectRatio="none" role="img" aria-labelledby="paygate-workspace-chart-title">
-              <title id="paygate-workspace-chart-title">Illustrative PayGate API revenue trend</title>
-              <path className="paygate-workspace-chart-area" d={buildAreaPath(points)} />
-              <path key={range} className="paygate-workspace-chart-line" d={buildPath(points)} pathLength="1" />
-              {points.map((point, index) => (
+            <path d="M747 83 Q747 72 758 71 L885 66 Q898 65 896 78 L891 111 Q889 121 878 121 L750 125 Q739 125 741 114 Z" />
+            <text x="757" y="101">{data.label}</text>
+            <path className="paygate-workspace-chevron" d="m869 90 6 6 7-7" />
+          </g>
+
+          <g className="paygate-workspace-chart-shell">
+            <g className="paygate-workspace-y-axis" aria-hidden="true">
+              {data.axis.map((label, index) => (
+                <text key={label} x={155 - index * 4} y={215 + index * 57}>{label}</text>
+              ))}
+            </g>
+            <g className="paygate-workspace-chart" aria-label={`Illustrative cumulative revenue for ${data.label}`}>
+              {[214, 271, 328, 385].map((y, index) => (
+                <path key={y} className="paygate-workspace-grid-line" d={`M 184 ${y} L ${805 - index * 8} ${y - 25}`} />
+              ))}
+              {[202, 344, 492, 642, 776].map((x) => (
+                <path key={x} className="paygate-workspace-grid-line is-vertical" d={`M ${x} 195 L ${x - 36} 392`} />
+              ))}
+              <path className="paygate-workspace-chart-area" d={areaPath} />
+              <path key={range} className="paygate-workspace-chart-line" d={chartPath} pathLength="1" />
+              {data.points.map((point, index) => (
                 <circle
                   key={point.label}
-                  className={activePoint === index ? 'is-active' : ''}
+                  className={activePoint === index ? 'paygate-workspace-point is-active' : 'paygate-workspace-point'}
                   cx={point.x}
                   cy={point.y}
-                  r={activePoint === index ? 5 : 3.5}
-                  tabIndex="0"
+                  r={activePoint === index ? 6 : 4}
                   role="button"
+                  tabIndex="0"
                   aria-label={`${point.label}: ${point.value} USDC`}
-                  onClick={() => {
-                    setActivePoint(index);
-                    setIsTooltipVisible(true);
-                  }}
-                  onMouseEnter={() => {
-                    setActivePoint(index);
-                    setIsTooltipVisible(true);
-                  }}
-                  onFocus={() => {
-                    setActivePoint(index);
-                    setIsTooltipVisible(true);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      setActivePoint(index);
-                    }
-                  }}
+                  onPointerEnter={() => setActivePoint(index)}
+                  onFocus={() => setActivePoint(index)}
+                  onBlur={() => setActivePoint(null)}
+                  onClick={() => setActivePoint(index)}
+                  onKeyDown={(event) => handleKeyboardAction(event, () => setActivePoint(index))}
                 />
-            ))}
-            </svg>
-            {isTooltipVisible && activePoint !== null ? (
-              <div
-                className="paygate-workspace-chart-tooltip"
-                style={{ left: `${(selectedPoint.x / 680) * 100}%`, top: `${(selectedPoint.y / 240) * 100}%` }}
-                aria-live="polite"
-              >
-                <strong>{selectedPoint.value} USDC</strong>
-                <span>{selectedPoint.label}</span>
-              </div>
-            ) : null}
-            <div className="paygate-workspace-x-axis" aria-hidden="true">
-              {points
-                .filter((point) => point.axisLabel || range !== '30d')
-                .map((point) => <span key={point.label}>{point.axisLabel || point.label}</span>)}
-            </div>
-          </div>
-        </div>
+              ))}
+              {activePoint !== null ? (
+                <g
+                  className="paygate-workspace-tooltip"
+                  transform={`translate(${data.points[activePoint].x > 680 ? data.points[activePoint].x - 150 : clamp(data.points[activePoint].x - 54, 184, 716)} ${data.points[activePoint].y < 210 ? data.points[activePoint].y + 18 : data.points[activePoint].y - 62})`}
+                  aria-live="polite"
+                >
+                  <rect width="112" height="45" rx="8" />
+                  <text x="12" y="19">{data.points[activePoint].value} USDC</text>
+                  <text className="is-date" x="12" y="35">{data.points[activePoint].label}</text>
+                </g>
+              ) : null}
+            </g>
+            <g className="paygate-workspace-x-axis" aria-hidden="true">
+              {data.dates.map((date, index) => (
+                <text key={date.label} x={date.x - 18} y={421 - index * 2}>{date.label}</text>
+              ))}
+            </g>
+          </g>
 
-        <div className="paygate-workspace-range" role="group" aria-label="Quickly change revenue chart range">
-          {RANGE_OPTIONS.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              aria-pressed={range === option.key}
-              className={range === option.key ? 'is-active' : ''}
-              onClick={() => handleRangeChange(option.key)}
-            >
-              {option.shortLabel}
-            </button>
-          ))}
-        </div>
-
-        <div className="paygate-workspace-metrics">
-          {METRIC_DEFINITIONS.map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <button
+          <g className="paygate-workspace-metrics">
+            {METRICS.map((metric) => (
+              <g
                 key={metric.key}
-                type="button"
-                className={activeMetric === metric.key ? 'is-active' : ''}
-                aria-pressed={activeMetric === metric.key}
-                onClick={() => setActiveMetric(metric.key)}
+                className={activeMetric === metric.key ? 'paygate-workspace-metric is-active' : 'paygate-workspace-metric'}
+                role="button"
+                tabIndex="0"
+                aria-label={`${metric.label}: ${data.metrics[metric.key]}`}
+                onPointerEnter={() => setActiveMetric(metric.key)}
+                onPointerLeave={() => setActiveMetric(null)}
+                onFocus={() => setActiveMetric(metric.key)}
+                onBlur={() => setActiveMetric(null)}
               >
-                <span className="paygate-workspace-metric-icon"><Icon size={17} aria-hidden="true" /></span>
-                <span className="paygate-workspace-metric-copy">
-                  <span>{metric.label}</span>
-                  <strong>{data.metrics[metric.key]}</strong>
-                  <small>{metric.note}</small>
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                <path className="paygate-workspace-metric-card" d={metric.path} />
+                <g className="paygate-workspace-metric-content" transform={`translate(0 ${metric.contentY})`}>
+                  <text className="paygate-workspace-metric-label" x={metric.textX} y="486">{metric.label}</text>
+                  <text className="paygate-workspace-metric-value" x={metric.textX} y="522">{data.metrics[metric.key]}</text>
+                  <text className="paygate-workspace-metric-note" x={metric.textX} y="543">{metric.note}</text>
+                  {metricIcon(metric.key, metric.iconX)}
+                </g>
+              </g>
+            ))}
+          </g>
 
-        <div className="paygate-workspace-footer">
-          <div className="paygate-workspace-footer-health">
-            <span className="paygate-workspace-status-dot" aria-hidden="true" />
-            <span>Paid endpoint healthy</span>
-            <ShieldCheck size={15} aria-hidden="true" />
-          </div>
-          <div className="paygate-workspace-footer-meta">
-            <span><WalletCards size={14} aria-hidden="true" /> 2 active APIs</span>
-            <span><Activity size={14} aria-hidden="true" /> MPP ready</span>
-          </div>
-          <button
-            type="button"
-            className="paygate-workspace-copy"
-            onClick={handleCopy}
-            aria-label={`${copyState === 'copied' ? 'Copied' : 'Copy'} paid endpoint ${proxyUrl}`}
-          >
-            <span>{copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy endpoint'}</span>
-            {copyState === 'copied' ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-          </button>
-        </div>
-      </div>
+          <text className="paygate-workspace-testnet-note" x="394" y="597">TESTNET REVENUE PREVIEW</text>
+          <circle className="paygate-workspace-live-dot" cx="570" cy="591" r="3" />
+        </g>
+
+        <g className="paygate-workspace-topbar" display="none" aria-hidden="true" />
+        <g className="paygate-workspace-footer" display="none" aria-hidden="true" />
+        <g className="paygate-workspace-rail is-back" display="none" aria-hidden="true" />
+        <g className="paygate-workspace-rail is-middle" display="none" aria-hidden="true" />
+        <g className="paygate-workspace-rail is-front" display="none" aria-hidden="true" />
+      </svg>
     </div>
   );
 }

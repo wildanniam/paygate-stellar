@@ -165,7 +165,7 @@ async function collectDomState(page) {
         chartPath: document.querySelector('.paygate-workspace-chart-line')?.getAttribute('d') || '',
         activePoint: document.querySelector('.paygate-workspace-chart circle.is-active')?.getAttribute('aria-label') || '',
         cssVariables: Object.fromEntries(
-          ['--workspace-back-x', '--workspace-middle-x', '--workspace-front-x', '--workspace-surface-x', '--workspace-surface-rotate-y']
+          ['--workspace-scene-x', '--workspace-scene-y', '--workspace-scene-rx', '--workspace-scene-ry']
             .map((key) => [key, getComputedStyle(document.querySelector('.paygate-hero-workspace')).getPropertyValue(key).trim()]),
         ),
       },
@@ -255,17 +255,8 @@ async function captureTheme(browser, baseUrl, theme) {
       .paygate-workspace-chart-line {
         stroke-dashoffset: 0 !important;
       }
-      .paygate-workspace-rail.is-back {
-        transform: translate3d(54px, 50px, -90px) rotateX(3deg) rotateY(-8deg) skewX(-12deg) rotateZ(3.8deg) !important;
-      }
-      .paygate-workspace-rail.is-middle {
-        transform: translate3d(28px, 26px, -52px) rotateX(3deg) rotateY(-7deg) skewX(-12deg) rotateZ(2.1deg) !important;
-      }
-      .paygate-workspace-rail.is-front {
-        transform: translate3d(10px, 11px, -24px) rotateX(3deg) rotateY(-6deg) skewX(-12deg) rotateZ(0.9deg) !important;
-      }
       .paygate-workspace-surface {
-        transform: rotateX(4deg) rotateY(-8deg) skewX(-12deg) rotateZ(-0.4deg) !important;
+        transform: none !important;
       }
     `,
   });
@@ -273,15 +264,16 @@ async function captureTheme(browser, baseUrl, theme) {
     const workspace = document.querySelector('.paygate-hero-workspace');
     if (!workspace) return;
     workspace.dataset.pointerActive = 'false';
-    ['--workspace-back-x', '--workspace-back-y', '--workspace-middle-x', '--workspace-middle-y', '--workspace-front-x', '--workspace-front-y', '--workspace-surface-x', '--workspace-surface-y', '--workspace-surface-z'].forEach((name) => workspace.style.setProperty(name, '0px'));
-    ['--workspace-surface-rotate-x', '--workspace-surface-rotate-y', '--workspace-surface-rotate-z'].forEach((name) => workspace.style.setProperty(name, '0deg'));
+    ['--workspace-scene-x', '--workspace-scene-y'].forEach((name) => workspace.style.setProperty(name, '0px'));
+    ['--workspace-scene-rx', '--workspace-scene-ry'].forEach((name) => workspace.style.setProperty(name, '0deg'));
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   });
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(220);
   captures.push(await capture(page, `${theme}-stable-initial-1491x1055`, 'stable-initial'));
 
   const rangeButton = page.locator('.paygate-workspace-status');
   await rangeButton.click({ force: true });
-  await page.getByRole('menuitemradio', { name: /Last 7 days/ }).click({ force: true });
+  await rangeButton.click({ force: true });
   captures.push(await capture(page, `${theme}-range-7d-1491x1055`, 'range-7d'));
 
   const flow = page.locator('.paygate-concept-flow');
@@ -322,7 +314,7 @@ try {
     await waitForUrl(baseUrl);
   }
   browser = await chromium.launch();
-  const reports = [await captureTheme(browser, baseUrl, 'dark'), await captureTheme(browser, baseUrl, 'light')];
+  const reports = [await captureTheme(browser, baseUrl, 'dark')];
   const report = {
     generatedAt: new Date().toISOString(),
     baseUrl,

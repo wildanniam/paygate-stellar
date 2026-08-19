@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1070 744" role="presentation">
+  <defs>
+    <linearGradient id="rear" x1="0.08" y1="0.08" x2="0.92" y2="0.94">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.42"/>
+      <stop offset="0.48" stop-color="#ebe8ff" stop-opacity="0.58"/>
+      <stop offset="1" stop-color="#b9adff" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="middle" x1="0.05" y1="0.04" x2="0.94" y2="0.96">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.66"/>
+      <stop offset="0.54" stop-color="#f0efff" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#c6bcff" stop-opacity="0.48"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0.04" y1="0.02" x2="0.95" y2="0.98">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.97"/>
+      <stop offset="0.5" stop-color="#fafaff" stop-opacity="0.93"/>
+      <stop offset="1" stop-color="#e9e6ff" stop-opacity="0.82"/>
+    </linearGradient>
+    <linearGradient id="frontEdge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.48" stop-color="#d9d5ef"/>
+      <stop offset="1" stop-color="#9e91ef"/>
+    </linearGradient>
+    <radialGradient id="lavenderGlow" cx="50%" cy="52%" r="50%">
+      <stop offset="0" stop-color="#8a72ff" stop-opacity="0.34"/>
+      <stop offset="0.55" stop-color="#a896ff" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#a896ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheen" x1="0.06" y1="0" x2="0.78" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.72"/>
+      <stop offset="0.32" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.7" stop-color="#8d78ff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.24"/>
+    </linearGradient>
+    <filter id="softShadow" x="-18%" y="-18%" width="150%" height="165%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#6656b4" flood-opacity="0.17"/>
+    </filter>
+    <filter id="plateShadow" x="-18%" y="-18%" width="150%" height="165%">
+      <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#7667bb" flood-opacity="0.12"/>
+    </filter>
+    <clipPath id="frontClip">
+      <path d="M166 45Q157 46 153 61L26 591Q20 616 43 623L811 634Q833 634 840 610L944 50Q949 20 925 14Z"/>
+    </clipPath>
+  </defs>
+
+  <ellipse cx="628" cy="617" rx="392" ry="116" fill="url(#lavenderGlow)"/>
+
+  <g filter="url(#plateShadow)">
+    <path
+      d="M166 45Q157 46 153 61L26 591Q20 616 43 623L811 634Q833 634 840 610L944 50Q949 20 925 14Z"
+      transform="translate(124 96)"
+      fill="url(#rear)"
+      stroke="#b9aff3"
+      stroke-opacity="0.42"
+      stroke-width="2"
+    />
+    <path
+      d="M166 45Q157 46 153 61L26 591Q20 616 43 623L811 634Q833 634 840 610L944 50Q949 20 925 14Z"
+      transform="translate(78 55)"
+      fill="url(#middle)"
+      stroke="#c8c0f1"
+      stroke-opacity="0.62"
+      stroke-width="2"
+    />
+  </g>
+
+  <g filter="url(#softShadow)">
+    <path
+      d="M166 45Q157 46 153 61L26 591Q20 616 43 623L811 634Q833 634 840 610L944 50Q949 20 925 14Z"
+      fill="url(#front)"
+      stroke="url(#frontEdge)"
+      stroke-width="4"
+    />
+    <path
+      d="M166 45Q157 46 153 61L26 591Q20 616 43 623L811 634Q833 634 840 610L944 50Q949 20 925 14Z"
+      fill="none"
+      stroke="#ffffff"
+      stroke-opacity="0.76"
+      stroke-width="1.5"
+      transform="translate(2 2)"
+    />
+  </g>
+
+  <g clip-path="url(#frontClip)" opacity="0.82">
+    <path d="M-24 76L734 -48L546 682L-88 636Z" fill="url(#sheen)"/>
+    <path d="M673 -26L1002 18L882 696L545 647Z" fill="#a68fff" fill-opacity="0.035"/>
+    <path d="M62 576C270 609 584 622 834 603" fill="none" stroke="#8f79f4" stroke-opacity="0.16"/>
+  </g>
+</svg>

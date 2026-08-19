@@ -310,13 +310,15 @@ const AUDIENCE_TRUST_NOTES = [
   { label: 'Upstream guard supported', icon: GuardIcon },
 ];
 
+const LIGHT_THEME_ENABLED = false;
+
 export default function Landing() {
   const [proofActive, setProofActive] = useState('mpp');
   const [proofVisible, setProofVisible] = useState(false);
   const [copiedProof, setCopiedProof] = useState(null);
   const [protectedActive, setProtectedActive] = useState('forwarded');
   const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'dark';
+    if (!LIGHT_THEME_ENABLED || typeof window === 'undefined') return 'dark';
     return window.localStorage.getItem('paygate-theme') === 'light' ? 'light' : 'dark';
   });
 
@@ -365,6 +367,8 @@ export default function Landing() {
   }, []);
 
   useEffect(() => {
+    if (!LIGHT_THEME_ENABLED) return;
+
     try {
       window.localStorage.setItem('paygate-theme', theme);
     } catch {
@@ -630,7 +634,11 @@ export default function Landing() {
       {/* Scroll progress */}
       <div ref={scrollProgressRef} className="paygate-scroll-progress" aria-hidden="true" />
 
-      <MarketingNavbar theme={theme} onThemeChange={setTheme} />
+      <MarketingNavbar
+        theme={theme}
+        onThemeChange={setTheme}
+        themeToggleEnabled={LIGHT_THEME_ENABLED}
+      />
 
       {/* ── HERO ── */}
       <section className="paygate-hero">

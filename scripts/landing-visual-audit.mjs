@@ -75,9 +75,9 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(`console: ${message.text()}`);
   });
-  await context.addInitScript((initialTheme) => {
-    window.localStorage.setItem('paygate-theme', initialTheme);
-  }, theme);
+  await context.addInitScript(() => {
+    window.localStorage.setItem('paygate-theme', 'light');
+  });
   await page.route('**/api/**', (route) => route.fulfill({
     status: route.request().url().endsWith('/api/auth/me') ? 200 : 500,
     contentType: 'application/json',
@@ -113,8 +113,64 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
   });
 
   assert(initial.theme === theme, `Expected ${theme} theme, got ${initial.theme}`);
+  assert(
+    await page.locator('.paygate-theme-toggle, .paygate-mobile-theme-toggle').count() === 0,
+    'Theme controls must remain hidden while the landing is dark-only',
+  );
   assert(initial.scrollWidth <= initial.viewportWidth + 1, `Landing overflows horizontally at ${viewport.width}px`);
   assert(initial.workspace?.width > 0 && initial.surface?.height > 0, 'Hero workspace geometry is missing');
+
+  const landingMaterialState = await page.evaluate(() => {
+    const selectors = [
+      '.paygate-protected-section',
+      '.paygate-proof-section',
+      '.paygate-ops-section',
+      '.paygate-audience-section',
+      '.paygate-footer',
+    ];
+    const panelSelectors = [
+      '.paygate-protected-card',
+      '.paygate-receipt-panel',
+      '.paygate-ops-shell',
+      '.paygate-audience-row',
+      '.paygate-footer-primary',
+    ];
+    const toRgb = (value) => (value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/) || []).slice(1).map(Number);
+    const luminance = (value) => {
+      const values = toRgb(value);
+      if (values.length !== 3) return null;
+      const channels = values.map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+    };
+    const describe = (selector) => {
+      const element = document.querySelector(selector);
+      if (!element) return { selector, missing: true };
+      const style = getComputedStyle(element);
+      return {
+        selector,
+        backgroundColor: style.backgroundColor,
+        luminance: luminance(style.backgroundColor),
+      };
+    };
+    return {
+      sections: selectors.map(describe),
+      panels: panelSelectors.map(describe),
+    };
+  });
+
+  if (theme === 'light') {
+    assert(
+      landingMaterialState.sections.every(({ missing, luminance }) => !missing && luminance >= 0.72),
+      `Light landing sections must stay porcelain: ${JSON.stringify(landingMaterialState.sections)}`,
+    );
+    assert(
+      landingMaterialState.panels.every(({ missing, luminance }) => !missing && luminance >= 0.78),
+      `Light landing panels must remain readable: ${JSON.stringify(landingMaterialState.panels)}`,
+    );
+  }
 
   const workspaceBox = await page.locator('.paygate-hero-workspace').boundingBox();
   assert(workspaceBox, 'Could not measure hero workspace');
@@ -126,45 +182,83 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
     return {
       active: root?.dataset.pointerActive,
       surfaceTransform: getComputedStyle(surface).transform,
-      backX: getComputedStyle(root).getPropertyValue('--workspace-back-x').trim(),
-      surfaceX: getComputedStyle(root).getPropertyValue('--workspace-surface-x').trim(),
+      sceneX: getComputedStyle(root).getPropertyValue('--workspace-scene-x').trim(),
+      sceneY: getComputedStyle(root).getPropertyValue('--workspace-scene-y').trim(),
     };
   });
   assert(pointerState.active === 'true', 'Pointer interaction did not activate workspace');
-  assert(pointerState.backX !== '0px' && pointerState.surfaceX !== '0px', 'Workspace depth variables did not move');
+  assert(pointerState.sceneX !== '0px' && pointerState.sceneY !== '0px', 'Workspace scene variables did not move');
   await page.mouse.move(0, 0);
   await page.waitForTimeout(520);
-  const resetState = await page.evaluate(() => getComputedStyle(document.querySelector('.paygate-hero-workspace')).getPropertyValue('--workspace-surface-x').trim());
+  const resetState = await page.evaluate(() => getComputedStyle(document.querySelector('.paygate-hero-workspace')).getPropertyValue('--workspace-scene-x').trim());
   assert(Math.abs(Number.parseFloat(resetState)) < 0.5, `Workspace did not settle after pointer exit: ${resetState}`);
 
   const rangeButton = page.locator('.paygate-workspace-status');
   await rangeButton.click({ force: true });
-  assert(await page.locator('.paygate-workspace-range-menu').isVisible(), 'Revenue range menu did not open');
-  await page.getByRole('menuitemradio', { name: /Last 7 days/ }).click({ force: true });
-  assert((await rangeButton.innerText()).includes('Last 7 days'), 'Range menu did not change chart range');
-  assert((await page.locator('.paygate-workspace-chart').getAttribute('aria-label')).includes('Last 7 days'), 'Chart aria label did not change with range');
+  assert((await rangeButton.textContent()).includes('Last 90 days'), 'Range control did not advance to the next chart range');
+  assert((await page.locator('.paygate-workspace-chart').getAttribute('aria-label')).includes('Last 90 days'), 'Chart aria label did not change with range');
 
-  for (const [rangeIndex, rangeLabel] of ['Last 7 days', 'This month', 'Last 90 days'].entries()) {
+  for (const rangeLabel of ['Last 7 days', 'This month', 'Last 90 days']) {
     await rangeButton.click({ force: true });
-    const menuOption = page.locator('.paygate-workspace-range-menu button').nth(rangeIndex);
-    await menuOption.click({ force: true });
     await page.waitForTimeout(160);
-    const settledRange = await rangeButton.innerText();
+    const settledRange = await rangeButton.textContent();
     assert(settledRange.includes(rangeLabel), `${rangeLabel} range selection did not settle (got ${settledRange})`);
     const yValues = await page.locator('.paygate-workspace-chart circle').evaluateAll((circles) => circles.map((circle) => Number(circle.getAttribute('cy'))));
     assert(yValues.length >= 3 && yValues.every(Number.isFinite), `${rangeLabel} revenue trend points are invalid`);
-    if (rangeLabel === 'This month') {
-      assert(yValues.some((value, index) => index > 0 && value > yValues[index - 1]), 'Monthly revenue trend should show a local period dip');
-    }
+    assert(yValues.every((value, index) => index === 0 || value <= yValues[index - 1]), `${rangeLabel} cumulative revenue trend must not decrease`);
   }
 
-  const pauseButton = page.getByRole('button', { name: /Pause revenue chart animation/ });
-  if (viewport.width <= 1180) {
-    await pauseButton.click({ force: true });
-    assert((await page.locator('.paygate-hero-workspace').getAttribute('data-paused')) === 'true', 'Workspace pause control did not pause');
-  } else {
-    assert(await page.locator('.paygate-workspace-topbar').evaluate((element) => getComputedStyle(element).display === 'none'), 'Desktop workspace chrome should stay hidden in the reference composition');
-  }
+  const workspaceTextFit = await page.evaluate(() => {
+    const surface = document.querySelector('.paygate-workspace-surface');
+    const surfaceRect = surface.getBoundingClientRect();
+    const status = document.querySelector('.paygate-workspace-status');
+    const statusText = status.querySelector('text').getBoundingClientRect();
+    const statusChevron = status.querySelector('.paygate-workspace-chevron').getBoundingClientRect();
+    const visibleText = Array.from(surface.querySelectorAll('text'))
+      .filter((element) => getComputedStyle(element).display !== 'none')
+      .map((element) => ({ text: element.textContent.trim(), rect: element.getBoundingClientRect() }));
+    const overlaps = [];
+
+    for (let first = 0; first < visibleText.length; first += 1) {
+      for (let second = first + 1; second < visibleText.length; second += 1) {
+        const a = visibleText[first];
+        const b = visibleText[second];
+        if (a.rect.left < b.rect.right && a.rect.right > b.rect.left && a.rect.top < b.rect.bottom && a.rect.bottom > b.rect.top) {
+          overlaps.push(`${a.text} / ${b.text}`);
+        }
+      }
+    }
+
+    return {
+      outside: visibleText
+        .filter(({ rect }) => rect.left < surfaceRect.left || rect.right > surfaceRect.right || rect.top < surfaceRect.top || rect.bottom > surfaceRect.bottom)
+        .map(({ text }) => text),
+      overlaps,
+      statusGap: statusChevron.left - statusText.right,
+      metricClearance: Array.from(surface.querySelectorAll('.paygate-workspace-metric')).map((metric) => {
+        const card = metric.querySelector('.paygate-workspace-metric-card').getBoundingClientRect();
+        const note = metric.querySelector('.paygate-workspace-metric-note').getBoundingClientRect();
+        return card.bottom - note.bottom;
+      }),
+    };
+  });
+  assert(workspaceTextFit.outside.length === 0, `Workspace text exceeds the SVG bounds: ${workspaceTextFit.outside.join(', ')}`);
+  assert(workspaceTextFit.overlaps.length === 0, `Workspace text overlaps: ${workspaceTextFit.overlaps.join(', ')}`);
+  assert(workspaceTextFit.statusGap >= 6, `Workspace range label is too close to its chevron: ${workspaceTextFit.statusGap}px`);
+  assert(workspaceTextFit.metricClearance.every((clearance) => clearance >= 2), `Workspace metric text crosses a card edge: ${workspaceTextFit.metricClearance.join(', ')}`);
+
+  const workspaceShells = await page.locator('.paygate-workspace-shell-image').evaluateAll((elements) => elements.map((element) => ({
+    href: element.getAttribute('href'),
+    display: getComputedStyle(element).display,
+  })));
+  assert(workspaceShells.length === 2, 'Hero instrument must provide dedicated dark and light shell assets');
+  const visibleShells = workspaceShells.filter(({ display }) => display !== 'none');
+  assert(visibleShells.length === 1, `Exactly one hero shell must be visible: ${JSON.stringify(workspaceShells)}`);
+  assert(
+    visibleShells[0].href?.includes(theme === 'light' ? 'shell-light' : 'shell-v2-tight'),
+    `${theme} theme is using the wrong hero shell: ${visibleShells[0].href}`,
+  );
+  assert(await page.locator('.paygate-workspace-topbar').evaluate((element) => getComputedStyle(element).display === 'none'), 'Workspace chrome should stay hidden in the concept composition');
 
   const activePoint = page.locator('.paygate-workspace-chart circle').first();
   await activePoint.focus();
@@ -173,14 +267,7 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
   await page.waitForTimeout(120);
   assert(await activePoint.evaluate((element) => element.classList.contains('is-active')), 'Chart point selection did not work after keyboard focus');
 
-  const copyButton = page.locator('.paygate-workspace-copy');
-  if (viewport.width <= 1180) {
-    await copyButton.click({ force: true });
-    await page.waitForTimeout(180);
-    assert((await copyButton.innerText()).includes('Copied'), 'Workspace copy affordance did not report success');
-  } else {
-    assert(await page.locator('.paygate-workspace-footer').evaluate((element) => getComputedStyle(element).display === 'none'), 'Desktop workspace footer should stay hidden in the reference composition');
-  }
+  assert(await page.locator('.paygate-workspace-footer').evaluate((element) => getComputedStyle(element).display === 'none'), 'Workspace footer should stay hidden in the concept composition');
 
   const flow = page.locator('.paygate-concept-flow');
   await flow.locator('.paygate-concept-flow-status.is-warning').click();
@@ -199,27 +286,43 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
     theme: document.querySelector('.paygate-landing')?.dataset.theme,
   }));
 
-  if (theme === 'dark') {
-    let themeToggle;
-    if (viewport.width <= 640) {
-      await page.getByRole('button', { name: 'Open mobile menu' }).click({ force: true });
-      themeToggle = page.locator('.paygate-mobile-theme-toggle');
-    } else {
-      themeToggle = page.locator('.paygate-theme-toggle');
+  const sectionScreenshots = [];
+  if (viewport.width >= 1491 || (theme === 'light' && viewport.width === 390)) {
+    const sections = [
+      ['flow', '.paygate-transform-section'],
+      ['protected', '.paygate-protected-section'],
+      ['proof', '.paygate-proof-section'],
+      ['workspace', '.paygate-ops-section'],
+      ['audience', '.paygate-audience-section'],
+      ['footer', '.paygate-footer'],
+    ];
+
+    for (const [name, selector] of sections) {
+      const section = page.locator(selector);
+      assert(await section.count() === 1, `Expected one ${name} landing section`);
+      await section.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await page.waitForTimeout(620);
+      assert(await section.isVisible(), `${name} landing section did not reveal after scrolling`);
+      const viewportLabel = viewport.width >= 1491 ? '1491x1055' : '390x844';
+      const filename = `${theme}-section-${name}-${viewportLabel}.png`;
+      await section.screenshot({ path: join(evidencePath, filename) });
+      sectionScreenshots.push(filename);
     }
-    assert(await themeToggle.count() === 1, 'Theme toggle is missing from the landing navigation');
-    await themeToggle.click({ force: true });
-    assert((await page.locator('.paygate-landing').getAttribute('data-theme')) === 'light', 'Theme toggle did not switch to light');
-    if (viewport.width <= 640) {
-      await page.getByRole('button', { name: 'Open mobile menu' }).click({ force: true });
-      themeToggle = page.locator('.paygate-mobile-theme-toggle');
-    }
-    await themeToggle.click({ force: true });
-    assert((await page.locator('.paygate-landing').getAttribute('data-theme')) === 'dark', 'Theme toggle did not switch back to dark');
   }
 
   await context.close();
-  return { theme, viewport, screenshot: screenshotName, initial, pointerState, resetState, afterInteractions, errors };
+  return {
+    theme,
+    viewport,
+    screenshot: screenshotName,
+    sectionScreenshots,
+    initial,
+    landingMaterialState,
+    pointerState,
+    resetState,
+    afterInteractions,
+    errors,
+  };
 }
 
 const port = Number(process.env.PAYGATE_LANDING_AUDIT_PORT || 0) || await getFreePort();
@@ -249,15 +352,13 @@ try {
 
   const results = [];
   for (const viewport of viewports) {
-    for (const theme of ['dark', 'light']) {
-      results.push(await captureLanding({
-        browser,
-        baseUrl,
-        theme,
-        viewport,
-        suffix: viewport.name,
-      }));
-    }
+    results.push(await captureLanding({
+      browser,
+      baseUrl,
+      theme: 'dark',
+      viewport,
+      suffix: viewport.name,
+    }));
   }
 
   await writeFile(join(evidencePath, 'landing-audit.json'), `${JSON.stringify({ baseUrl, results }, null, 2)}\n`, 'utf8');
