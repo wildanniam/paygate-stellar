@@ -10,13 +10,12 @@ import {
   validateEscrowWithdrawalTransaction,
 } from '../../server/lib/escrowContract.js';
 import { publicErrorMessage } from '../../server/lib/errors.js';
+import { WITHDRAWAL_PREPARATION_TTL_MS } from '../../server/lib/withdrawalTiming.js';
 
 const submitSchema = z.object({
   preparationId: z.string().uuid(),
   signedTransactionXdr: z.string().min(20),
 });
-
-const WITHDRAWAL_PREPARATION_TTL_MS = 2 * 60 * 1000;
 
 function nowIso() {
   return new Date().toISOString();

@@ -9,6 +9,12 @@ import {
 import dashboardHandler from '../api/dashboard/summary.js';
 import { handlePrepare as prepareHandler, handleSubmit as submitHandler } from '../api/withdraw/[action].js';
 import { withdrawPlatformFees } from '../server/lib/escrowContract.js';
+import {
+  WITHDRAWAL_PREPARATION_TTL_MS,
+  WITHDRAWAL_PREPARATION_TTL_SECONDS,
+  WITHDRAWAL_SUBMISSION_BUFFER_SECONDS,
+  WITHDRAWAL_TRANSACTION_TIMEOUT_SECONDS,
+} from '../server/lib/withdrawalTiming.js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
 process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
@@ -61,9 +67,16 @@ const authHeaders = {
 const server = await startServer();
 
 try {
+  assert(
+    WITHDRAWAL_TRANSACTION_TIMEOUT_SECONDS - WITHDRAWAL_PREPARATION_TTL_SECONDS
+      >= WITHDRAWAL_SUBMISSION_BUFFER_SECONDS,
+    'withdrawal transaction must outlive the server preparation window by the submission buffer',
+  );
+
   const unauthenticated = await fetch(`${server.baseUrl}/api/withdraw/prepare`, { method: 'POST' });
   assert(unauthenticated.status === 401, `unauthenticated prepare expected 401, got ${unauthenticated.status}`);
 
+  const prepareStartedAt = Date.now();
   const preparedResponse = await fetch(`${server.baseUrl}/api/withdraw/prepare`, {
     method: 'POST',
     headers: authHeaders,
@@ -73,6 +86,12 @@ try {
   assert(prepared.amountUsdc === '0.0180000', 'prepare amount mismatch');
   assert(prepared.preparationId, 'prepare should return a preparation id');
   assert(prepared.transactionXdr.includes(ownerWallet), 'prepare should bind tx to developer wallet');
+  const preparationLifetimeMs = Date.parse(prepared.expiresAt) - prepareStartedAt;
+  assert(
+    preparationLifetimeMs >= WITHDRAWAL_PREPARATION_TTL_MS - 5_000
+      && preparationLifetimeMs <= WITHDRAWAL_PREPARATION_TTL_MS + 5_000,
+    'prepare response should use the shared withdrawal TTL',
+  );
 
   const tamperedSubmit = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
     method: 'POST',

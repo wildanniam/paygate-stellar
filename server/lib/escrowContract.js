@@ -11,6 +11,7 @@ import {
   scValToNative,
 } from '@stellar/stellar-sdk';
 import { SOROBAN_RPC_URLS, STELLAR_TESTNET, fromBaseUnits } from '@stellar/mpp';
+import { WITHDRAWAL_TRANSACTION_TIMEOUT_SECONDS } from './withdrawalTiming.js';
 
 const DEFAULT_POLL_ATTEMPTS = 20;
 const DEFAULT_POLL_DELAY_MS = 1_000;
@@ -246,7 +247,7 @@ export async function prepareEscrowWithdrawal(developerWallet) {
     networkPassphrase: getNetworkPassphrase(),
   })
     .addOperation(contract.call('withdraw', new Address(developerWallet).toScVal()))
-    .setTimeout(60)
+    .setTimeout(WITHDRAWAL_TRANSACTION_TIMEOUT_SECONDS)
     .build();
 
   const prepared = await server.prepareTransaction(tx);

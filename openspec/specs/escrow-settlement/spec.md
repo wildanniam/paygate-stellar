@@ -59,7 +59,8 @@ PayGate SHALL prepare a Freighter-signable withdrawal transaction for the authen
 
 - GIVEN a developer has a positive escrow balance
 - WHEN `POST /api/withdraw/prepare` succeeds
-- THEN PayGate returns transaction XDR and balance metadata
+- THEN PayGate returns transaction XDR, balance metadata, and the preparation expiry
+- AND the transaction remains valid beyond the preparation expiry long enough for server submission
 
 #### Scenario: No withdrawable balance
 
