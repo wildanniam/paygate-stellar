@@ -77,13 +77,15 @@ PayGate SHALL expose registered APIs as `pending_setup`, `active`, or `archived`
 #### Scenario: Setup verification activates API
 
 - GIVEN a pending API has the upstream guard installed
-- WHEN `POST /api/apis/:apiId/verify` reaches the upstream API with `X-PayGate-Secret`
+- WHEN `POST /api/apis/:apiId/verify` sends a fresh unpredictable invalid `X-PayGate-Secret`
+- AND the upstream deliberately rejects it with HTTP 401 or 403
+- AND the upstream accepts the registered secret with a successful valid JSON response
 - THEN PayGate marks the API as `active`
 - AND the paid proxy can return MPP payment challenges
 
 #### Scenario: Setup verification fails
 
-- GIVEN the upstream API is unreachable or rejects the secret
+- GIVEN the upstream API is unreachable, accepts an invalid secret, returns an unrelated error for an invalid secret, rejects the registered secret, or returns an invalid or non-JSON success response
 - WHEN `POST /api/apis/:apiId/verify` runs
 - THEN PayGate keeps the API pending
 - AND returns an actionable setup error

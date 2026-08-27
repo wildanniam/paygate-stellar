@@ -54,15 +54,63 @@ async function call(handler, req) {
 
 async function startUpstream() {
   let expectedSecret = 'not-yet-configured';
+  const rejectedSecrets = [];
   const server = createServer((req, res) => {
+    const suppliedSecret = req.headers['x-paygate-secret'];
+
     if (req.url?.startsWith('/v1/open-market-signal')) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ signal: 'unguarded', confidence: 0.1 }));
       return;
     }
 
+    if (req.url?.startsWith('/v1/old-probe-bypass')) {
+      if (suppliedSecret === 'pgsec_invalid_setup_probe') {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ signal: 'unguarded' }));
+      return;
+    }
+
+    if (req.url?.startsWith('/v1/error-on-invalid')) {
+      if (suppliedSecret !== expectedSecret) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Guard crashed' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ signal: 'bullish' }));
+      return;
+    }
+
+    if (req.url?.startsWith('/v1/non-json-success')) {
+      if (suppliedSecret !== expectedSecret) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('authenticated but not json');
+      return;
+    }
+
+    if (req.url?.startsWith('/v1/malformed-json-success')) {
+      if (suppliedSecret !== expectedSecret) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Forbidden' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end('{"signal":');
+      return;
+    }
+
     if (req.url?.startsWith('/v1/market-signal')) {
-      if (req.headers['x-paygate-secret'] !== expectedSecret) {
+      if (suppliedSecret !== expectedSecret) {
+        rejectedSecrets.push(suppliedSecret);
         res.writeHead(401, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Unauthorized' }));
         return;
@@ -83,6 +131,7 @@ async function startUpstream() {
     setExpectedSecret(secret) {
       expectedSecret = secret;
     },
+    rejectedSecrets,
     close: () => new Promise((resolve) => server.close(resolve)),
   };
 }
@@ -118,6 +167,9 @@ try {
   );
   assert(failed.statusCode === 400, `verification without guard expected 400, got ${failed.statusCode}`);
   assert(failed.body.code === 'setup_verification_failed', 'failed verification should expose setup_verification_failed code');
+  assert(upstream.rejectedSecrets.length === 2, 'failed verification should send negative and positive probes');
+  assert(upstream.rejectedSecrets[0].startsWith('pgsec_'), 'negative probe should resemble a generated PayGate secret');
+  assert(upstream.rejectedSecrets[0] !== 'pgsec_invalid_setup_probe', 'negative probe must not reuse the predictable legacy value');
 
   upstream.setExpectedSecret(upstreamSecret);
   const verified = await call(
@@ -128,6 +180,8 @@ try {
   assert(verified.body.api.status === 'active', 'verified API should become active');
   assert(verified.body.api.active === true, 'verified API should expose active=true');
   assert(verified.body.api.verifiedAt, 'verified API should expose verifiedAt');
+  assert(upstream.rejectedSecrets.length === 3, 'successful verification should still send a negative probe');
+  assert(upstream.rejectedSecrets[2] !== upstream.rejectedSecrets[0], 'each verification attempt must use a fresh negative secret');
 
   const afterPublic = await store.getPublicApi(api.id);
   assert(afterPublic?.id === api.id, 'active verified API should become public');
@@ -167,6 +221,81 @@ try {
   );
   assert(openVerify.statusCode === 400, 'unguarded API verification should return 400');
   assert(openVerify.body.code === 'setup_guard_missing', 'unguarded API should expose setup_guard_missing code');
+
+  const oldProbeBypassApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Old Probe Bypass API',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/old-probe-bypass',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    ...encryptApiSecret('old-probe-secret'),
+  });
+  const oldProbeBypassVerify = await call(
+    verifyHandler,
+    makeReq({ cookie, url: `/api/apis/${oldProbeBypassApi.id}/verify` }),
+  );
+  assert(oldProbeBypassVerify.statusCode === 400, 'legacy fixed-probe bypass should not verify');
+  assert(oldProbeBypassVerify.body.code === 'setup_guard_missing', 'legacy fixed-probe bypass should expose setup_guard_missing');
+
+  const errorOnInvalidApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Error On Invalid API',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/error-on-invalid',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    ...encryptApiSecret(upstreamSecret),
+  });
+  const errorOnInvalidVerify = await call(
+    verifyHandler,
+    makeReq({ cookie, url: `/api/apis/${errorOnInvalidApi.id}/verify` }),
+  );
+  assert(errorOnInvalidVerify.statusCode === 400, '500 response to invalid secret should not verify');
+  assert(
+    errorOnInvalidVerify.body.code === 'setup_guard_rejection_unconfirmed',
+    '500 response should expose setup_guard_rejection_unconfirmed',
+  );
+
+  const nonJsonApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Non JSON API',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/non-json-success',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    ...encryptApiSecret(upstreamSecret),
+  });
+  const nonJsonVerify = await call(
+    verifyHandler,
+    makeReq({ cookie, url: `/api/apis/${nonJsonApi.id}/verify` }),
+  );
+  assert(nonJsonVerify.statusCode === 400, 'non-JSON authenticated response should not verify');
+  assert(nonJsonVerify.body.code === 'setup_response_invalid', 'non-JSON response should expose setup_response_invalid');
+
+  const malformedJsonApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Malformed JSON API',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/malformed-json-success',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    ...encryptApiSecret(upstreamSecret),
+  });
+  const malformedJsonVerify = await call(
+    verifyHandler,
+    makeReq({ cookie, url: `/api/apis/${malformedJsonApi.id}/verify` }),
+  );
+  assert(malformedJsonVerify.statusCode === 400, 'malformed JSON response should not verify');
+  assert(malformedJsonVerify.body.code === 'setup_response_invalid', 'malformed JSON should expose setup_response_invalid');
 } finally {
   await upstream.close();
 }

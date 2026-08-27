@@ -1,9 +1,10 @@
 import { apiDetailResponse, requireRegistryConfig, requireRegistrySession, resolveApiStatus } from '../../../server/lib/apiRegistry.js';
-import { decryptApiSecret } from '../../../server/lib/apiSecret.js';
+import { decryptApiSecret, generateApiSecret } from '../../../server/lib/apiSecret.js';
 import { methodNotAllowed, requireSameOrigin } from '../../../server/lib/auth.js';
 import { publicErrorMessage } from '../../../server/lib/errors.js';
 import {
   MAX_UPSTREAM_VERIFY_PREVIEW_BYTES,
+  MAX_UPSTREAM_RESPONSE_BYTES,
   assertSafeUpstreamUrl,
   readLimitedResponseText,
   upstreamFetchOptions,
@@ -26,9 +27,16 @@ function buildUpstreamUrl(api) {
   return new URL(api.path, `${api.upstream_base_url.replace(/\/+$/, '')}/`);
 }
 
-async function fetchUpstreamGuardProbe(upstreamUrl, secret) {
+function hasJsonContentType(contentType) {
+  const mediaType = String(contentType || '').split(';')[0].trim().toLowerCase();
+  return mediaType === 'application/json' || mediaType.endsWith('+json');
+}
+
+async function fetchUpstreamGuardProbe(upstreamUrl, secret, { validateJson = false } = {}) {
   const headers = {
     Accept: 'application/json',
+    'Cache-Control': 'no-store, max-age=0',
+    Pragma: 'no-cache',
   };
   if (secret) headers['X-PayGate-Secret'] = secret;
 
@@ -37,16 +45,29 @@ async function fetchUpstreamGuardProbe(upstreamUrl, secret) {
     headers,
   }));
 
+  const contentType = response.headers.get('Content-Type');
+  const body = await readLimitedResponseText(response, {
+    maxBytes: validateJson ? MAX_UPSTREAM_RESPONSE_BYTES : MAX_UPSTREAM_VERIFY_PREVIEW_BYTES,
+    errorOnLimit: validateJson,
+  });
+  let bodyIsJson = null;
+  if (validateJson) {
+    bodyIsJson = hasJsonContentType(contentType);
+    if (bodyIsJson) {
+      try {
+        JSON.parse(body);
+      } catch {
+        bodyIsJson = false;
+      }
+    }
+  }
+
   return {
     ok: response.ok,
     status: response.status,
-    contentType: response.headers.get('Content-Type'),
-    bodyPreview: (
-      await readLimitedResponseText(response, {
-        maxBytes: MAX_UPSTREAM_VERIFY_PREVIEW_BYTES,
-        errorOnLimit: false,
-      })
-    ).slice(0, 300),
+    contentType,
+    bodyIsJson,
+    bodyPreview: body.slice(0, 300),
   };
 }
 
@@ -55,22 +76,37 @@ async function verifyUpstreamGuard(api) {
   const upstreamUrl = buildUpstreamUrl(api);
   await assertSafeUpstreamUrl(upstreamUrl);
 
-  const negativeProbe = await fetchUpstreamGuardProbe(upstreamUrl, 'pgsec_invalid_setup_probe');
+  let invalidSecret = generateApiSecret();
+  while (invalidSecret === secret) invalidSecret = generateApiSecret();
+
+  const negativeProbe = await fetchUpstreamGuardProbe(upstreamUrl, invalidSecret);
   if (negativeProbe.ok) {
     return {
       ok: false,
-      guardRejectedInvalidSecret: false,
+      code: 'setup_guard_missing',
+      status: negativeProbe.status,
+      contentType: negativeProbe.contentType,
+      bodyPreview: negativeProbe.bodyPreview,
+    };
+  }
+  if (![401, 403].includes(negativeProbe.status)) {
+    return {
+      ok: false,
+      code: 'setup_guard_rejection_unconfirmed',
       status: negativeProbe.status,
       contentType: negativeProbe.contentType,
       bodyPreview: negativeProbe.bodyPreview,
     };
   }
 
-  const positiveProbe = await fetchUpstreamGuardProbe(upstreamUrl, secret);
-  return {
-    ...positiveProbe,
-    guardRejectedInvalidSecret: true,
-  };
+  const positiveProbe = await fetchUpstreamGuardProbe(upstreamUrl, secret, { validateJson: true });
+  if (!positiveProbe.ok) {
+    return { ...positiveProbe, code: 'setup_verification_failed' };
+  }
+  if (!positiveProbe.bodyIsJson) {
+    return { ...positiveProbe, ok: false, code: 'setup_response_invalid' };
+  }
+  return positiveProbe;
 }
 
 export default async function handler(req, res) {
@@ -116,11 +152,30 @@ export default async function handler(req, res) {
     }
 
     if (!verification.ok) {
-      if (verification.guardRejectedInvalidSecret === false) {
+      if (verification.code === 'setup_guard_missing') {
         return res.status(400).json({
           error: 'Upstream guard verification failed. The endpoint accepted an invalid X-PayGate-Secret.',
           code: 'setup_guard_missing',
           upstreamStatus: verification.status,
+          upstreamBodyPreview: verification.bodyPreview,
+        });
+      }
+
+      if (verification.code === 'setup_guard_rejection_unconfirmed') {
+        return res.status(400).json({
+          error: 'Upstream guard verification was inconclusive. Invalid secrets must return HTTP 401 or 403.',
+          code: 'setup_guard_rejection_unconfirmed',
+          upstreamStatus: verification.status,
+          upstreamBodyPreview: verification.bodyPreview,
+        });
+      }
+
+      if (verification.code === 'setup_response_invalid') {
+        return res.status(400).json({
+          error: 'Upstream guard verification failed. The authenticated endpoint must return valid JSON.',
+          code: 'setup_response_invalid',
+          upstreamStatus: verification.status,
+          upstreamContentType: verification.contentType,
           upstreamBodyPreview: verification.bodyPreview,
         });
       }
