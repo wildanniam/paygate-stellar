@@ -100,6 +100,12 @@ function checkEnvSemantics() {
     pass('PAYGATE_REGISTRY_STORE is deployment-safe', 'Unset means Supabase when env is configured.');
   }
 
+  if (process.env.PAYGATE_RATE_LIMIT_STORE === 'memory') {
+    fail('PAYGATE_RATE_LIMIT_STORE is not memory', 'The deployed rate limiter must use Upstash Redis.');
+  } else {
+    pass('PAYGATE_RATE_LIMIT_STORE is deployment-safe', 'Unset means Upstash when its environment is configured.');
+  }
+
   for (const name of ['PAYGATE_ESCROW_CREDIT_MODE', 'PAYGATE_ESCROW_WITHDRAW_MODE']) {
     if (process.env[name] === 'memory') {
       fail(`${name} is not memory`, 'Mock escrow mode is local-test only.');

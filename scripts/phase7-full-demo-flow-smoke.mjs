@@ -10,6 +10,7 @@ import { createSessionToken, SESSION_COOKIE } from '../server/lib/auth.js';
 import { clearRegistryForTest, getRawPaymentsForTest, getRawProxyRequestsForTest, getRegistryStore } from '../server/lib/registryStore.js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
+process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
 process.env.PAYGATE_MPP_VERIFY_MODE = 'mock';
 process.env.PAYGATE_ESCROW_CREDIT_MODE = 'memory';
 process.env.PAYGATE_ESCROW_WITHDRAW_MODE = 'memory';

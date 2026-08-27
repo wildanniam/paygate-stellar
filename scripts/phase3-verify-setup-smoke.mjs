@@ -8,6 +8,7 @@ import { clearRegistryForTest, getRegistryStore } from '../server/lib/registrySt
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-verify-smoke-session-secret-32';
 process.env.API_SECRET_ENCRYPTION_KEY = process.env.API_SECRET_ENCRYPTION_KEY || 'paygate-verify-smoke-api-secret-key-32';
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
+process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

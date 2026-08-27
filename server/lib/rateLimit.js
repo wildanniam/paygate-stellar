@@ -128,7 +128,15 @@ export async function enforceRateLimit(req, res, {
     return false;
   }
 
-  if (!result) return true;
+  if (!result) {
+    if (failOpen) return true;
+    res.status(503).json({
+      error: 'Rate limiter unavailable',
+      code: 'rate_limiter_unavailable',
+      requiredEnv: ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'],
+    });
+    return false;
+  }
 
   res.setHeader('X-RateLimit-Limit', result.limit);
   res.setHeader('X-RateLimit-Remaining', result.remaining);

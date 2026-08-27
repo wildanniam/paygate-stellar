@@ -4,6 +4,7 @@ import { clearChallengesForTest, expireChallengeForTest } from '../server/lib/au
 
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-phase2-smoke-session-secret-32';
 process.env.PAYGATE_AUTH_CHALLENGE_STORE = 'memory';
+process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
 
 const {
   handleChallenge: challengeHandler,

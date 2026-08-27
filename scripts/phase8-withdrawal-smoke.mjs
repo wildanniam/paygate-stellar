@@ -11,6 +11,7 @@ import { handlePrepare as prepareHandler, handleSubmit as submitHandler } from '
 import { withdrawPlatformFees } from '../server/lib/escrowContract.js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
+process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
 process.env.API_SECRET_ENCRYPTION_KEY = process.env.API_SECRET_ENCRYPTION_KEY || 'paygate-phase8-smoke-api-secret-key-32';
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-phase8-smoke-session-secret-32';
 process.env.PAYGATE_ESCROW_WITHDRAW_MODE = 'memory';

@@ -11,6 +11,14 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function restoreEnv(name, value) {
+  if (value === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = value;
+  }
+}
+
 async function rejects(url) {
   try {
     await assertSafeUpstreamUrl(url);
@@ -53,6 +61,8 @@ const originalRegistryStore = process.env.PAYGATE_REGISTRY_STORE;
 const originalAllowPrivate = process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
 const originalPublicOrigin = process.env.PAYGATE_PUBLIC_ORIGIN;
 const originalRateLimitStore = process.env.PAYGATE_RATE_LIMIT_STORE;
+const originalUpstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+const originalUpstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 delete process.env.PAYGATE_REGISTRY_STORE;
 delete process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
@@ -121,6 +131,37 @@ try {
   assert(isUpstreamResponseTooLarge(error), 'oversized upstream response should throw UpstreamResponseTooLargeError');
 }
 
+delete process.env.PAYGATE_RATE_LIMIT_STORE;
+delete process.env.UPSTASH_REDIS_REST_URL;
+delete process.env.UPSTASH_REDIS_REST_TOKEN;
+const unavailableRateLimitRes = makeRes();
+const unavailableRateLimitAllowed = await enforceRateLimit(
+  { headers: {} },
+  unavailableRateLimitRes,
+  {
+    label: 'security_missing_store',
+    keyParts: ['missing-store'],
+    limit: 1,
+    windowSeconds: 60,
+  },
+);
+assert(!unavailableRateLimitAllowed, 'missing rate-limit store should fail closed by default');
+assert(unavailableRateLimitRes.statusCode === 503, 'missing rate-limit store should return 503');
+assert(unavailableRateLimitRes.body.code === 'rate_limiter_unavailable', 'missing rate-limit store should expose a stable code');
+
+const failOpenRateLimitAllowed = await enforceRateLimit(
+  { headers: {} },
+  makeRes(),
+  {
+    label: 'security_missing_store_fail_open',
+    keyParts: ['missing-store'],
+    limit: 1,
+    windowSeconds: 60,
+    failOpen: true,
+  },
+);
+assert(failOpenRateLimitAllowed, 'explicit fail-open rate limits should preserve availability without a store');
+
 process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
 clearRateLimitsForTest();
 const rateReq = {
@@ -176,5 +217,11 @@ if (originalRateLimitStore === undefined) {
 } else {
   process.env.PAYGATE_RATE_LIMIT_STORE = originalRateLimitStore;
 }
+if (originalUpstashUrl === undefined) {
+  delete process.env.UPSTASH_REDIS_REST_URL;
+} else {
+  process.env.UPSTASH_REDIS_REST_URL = originalUpstashUrl;
+}
+restoreEnv('UPSTASH_REDIS_REST_TOKEN', originalUpstashToken);
 
 console.log('Security upstream URL smoke test passed');
