@@ -8,7 +8,9 @@ Scope: testnet production-beta hardening
 
 The V1 implementation is regression-clean and is a testnet beta candidate. The local product, browser, contract, package-audit, and secret-scan gates pass.
 
-The current environment is **not deployment-ready yet**. `npm run beta:preflight` reports five external configuration failures: four required deployment values are absent, and the configured Supabase project hostname does not resolve. Do not label a deployment production-beta until this command reports zero failures and the live replay evidence is refreshed.
+The hardened branch is deployed and replayed successfully in the isolated staging environment at `https://project-02fi8.vercel.app`. The production Vercel project has its future-only origin, cron secret, and Upstash integration configured, but no production deployment was triggered.
+
+Production release is still gated by Supabase availability. The production project is paused, and Supabase reports that a member of its organization has reached the two-active-free-project limit. PayGate staging belongs to a separate organization and does not count toward that member's limit; pausing staging does not unblock production. Affected organization members must free a slot from one of their own active projects or upgrade before production can resume. Do not label the production URL production-beta until that gate and the final evidence capture are complete.
 
 This is not a mainnet billing product. It remains testnet-only and does not claim refund, compliance, fiat, marketplace, buyer-account, or production incident-response readiness.
 
@@ -19,6 +21,7 @@ This is not a mainnet billing product. It remains testnet-only and does not clai
 - React Router 7 route behavior is covered for logged-out and authenticated desktop/mobile states.
 - Upstream guard verification uses a fresh invalid secret and rejects ambiguous upstream failures.
 - Serverless rate limiting fails closed unless an endpoint explicitly opts into a documented fail-open policy; Upstash is required for deployment.
+- Direct and Vercel Marketplace Upstash environment names are supported, with counters isolated by deployment origin when staging and production share a Redis service.
 - Session tokens have strict shape, timestamp, lifetime, and cookie-decoding validation.
 - Withdrawal preparation expires before the underlying Stellar transaction, leaving a submission buffer.
 - New payment IDs use 120 bits of CSPRNG entropy and fit the escrow contract's Soroban `Symbol` key.
@@ -39,28 +42,53 @@ Commands were run from the repository root on 2026-08-27.
 | `npm run audit:rust` | Pass with 3 allowed maintenance warnings; no RustSec vulnerabilities |
 | `npm run scan:secrets` | Pass: tracked-file scan found no committed credentials |
 | `cargo fmt --all -- --check` | Pass |
-| `npm run beta:preflight` | Blocked: 5 external configuration failures listed below |
+| `npm run beta:preflight` | Release-gated: production Supabase is paused; staging database checks and live replay passed |
 
-## Deployment Preflight Blockers
+## Production Release Gate
 
-The local `.env.local` was checked without printing any values.
+Production Vercel configuration was prepared without deploying or printing secret values.
 
-| Blocker | Required action |
+| Item | Status |
 |---|---|
-| `CRON_SECRET` is absent | Generate a stable random value of at least 16 characters and add it to Vercel environments |
-| `PAYGATE_PUBLIC_ORIGIN` is absent | Set the final HTTPS deployment origin without a path |
-| `UPSTASH_REDIS_REST_URL` is absent | Create or link the deployment Redis database and add its REST URL |
-| `UPSTASH_REDIS_REST_TOKEN` is absent | Add the matching Redis REST token server-side |
-| Supabase REST hostname returns `ENOTFOUND` | Re-copy the active project URL or restore or unpause the project, then rerun all table checks |
+| `CRON_SECRET` | Configured for the next production deployment |
+| `PAYGATE_PUBLIC_ORIGIN` | Configured as `https://frontend-ten-drab-92.vercel.app` for the next production deployment |
+| Upstash REST configuration | Linked to production through Vercel Marketplace aliases; namespace isolation is verified |
+| Production Supabase | Paused; Supabase blocks resume because a production-organization member is at the active free-project limit |
 
-After fixing those items, run:
+Release sequence:
+
+1. Affected production-organization members must pause or delete an active project they explicitly choose, or upgrade the applicable Supabase organization. PayGate staging does not need to be paused.
+2. Resume the existing PayGate production Supabase project.
+3. Verify and, where absent, apply these migrations in order:
+   - `supabase/migrations/20260604000000_paygate_v1_registry.sql`
+   - `supabase/migrations/20260604000001_paygate_v1_paid_proxy.sql`
+   - `supabase/migrations/20260611000000_paygate_api_lifecycle_status.sql`
+   - `supabase/migrations/20260611000001_paygate_api_unique_live_endpoint.sql`
+   - `supabase/migrations/20260628050000_paygate_withdrawal_preparations.sql`
+4. Run the production preflight and Supabase auth smoke before any production deployment:
 
 ```bash
 npm run beta:preflight
 npm run test:auth:supabase
 ```
 
-Both commands automatically load `.env.local` when it exists. Real values must remain untracked.
+5. Deploy production, replay the live flow, and capture the final screenshots and video evidence.
+
+Both commands automatically load `.env.local` when it exists. Real values must remain untracked. No database transfer or staging-to-production data swap is required.
+
+## Production Infrastructure Probe
+
+Read-only probes against the existing production Vercel deployment on 2026-08-27 produced the expected split result for a paused database:
+
+| Probe | Result |
+|---|---|
+| Landing page | `200` |
+| Direct refresh `/dashboard` | `200` |
+| Direct refresh `/apis/new` | `200` |
+| Supabase-backed `POST /api/auth/challenge` | `503`; production Supabase is paused |
+| Staging `POST /api/auth/challenge` after restoration | `200` |
+
+This proves that the current production Vercel routing is available, but it cannot prove database-backed production behavior until Supabase permits the project to resume.
 
 ## Dependency Risk Record
 
@@ -86,9 +114,21 @@ The following evidence predates this hardening branch and proves the underlying 
 | Developer withdraw proof | `8f0647f5595020a394df833b1545e2d4c0e192af960db2b1e3c68dfd679d50d7` |
 | Platform fee withdraw proof | `0bf30b3fd0b5385f933dd9b22de39a6c8167e2c6405ac075a2bd13466a26d04b` |
 
-## Fresh Replay Evidence Slots
+## Hardened Staging Replay
 
-Fill these after deploying the hardened branch and replaying the entire flow.
+The isolated staging deployment completed a fresh end-to-end testnet replay after the withdrawal reconciliation fix.
+
+| Action | Fresh staging evidence |
+|---|---|
+| Stable staging URL | `https://project-02fi8.vercel.app` |
+| Agent pays escrow through MPP | `cc3ca30779097200af3d25f945a19ad84ec0a94d7b9cbb8049310773d78edd92` |
+| PayGate credits escrow ledger | `43fad6b081e50bf32e15217217f3bce3ee9a2b2148deb6fa53363047be617e5f` |
+| Developer withdrawal | `ff373f0a96f99156c6ca16fe0ab011be280ff44629e3c685702847767427330f` |
+| Reconciled prior chain-success/database-failure withdrawal | `aa3c463308b8b0b2ad117383018348d853e3c3c657d818a2af45e6d911198e9b` |
+
+## Production Replay Evidence Slots
+
+Fill these after deploying the exact reviewed commit to production and replaying the entire flow.
 
 | Item | Value |
 |---|---|
@@ -114,4 +154,5 @@ Initialize a timestamped evidence folder with `npm run evidence:init` and follow
 - No automatic refund when upstream fails after payment.
 - No external-user beta, mainnet, fiat checkout, marketplace, buyer accounts, compliance workflow, or production incident response.
 - `PAYGATE_OPERATOR_SECRET` remains a privileged server-side testnet signer.
-- A complete post-hardening deployed replay, screenshot set, and demo video are still outstanding.
+- The production Supabase project is currently paused; an affected production-organization member must free an active-project slot or upgrade before release.
+- A production replay, screenshot set, and demo video are still outstanding. The hardened staging transaction replay is complete.
