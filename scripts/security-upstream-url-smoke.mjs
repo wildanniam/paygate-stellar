@@ -6,6 +6,7 @@ import {
 import { getOrigin, requireSameOrigin } from '../server/lib/auth.js';
 import { isRequestBodyTooLarge, readJsonBody } from '../server/lib/body.js';
 import { clearRateLimitsForTest, enforceRateLimit } from '../server/lib/rateLimit.js';
+import { getRateLimitNamespace, getRateLimitRedisConfig } from '../server/lib/rateLimitConfig.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -130,6 +131,18 @@ try {
 } catch (error) {
   assert(isUpstreamResponseTooLarge(error), 'oversized upstream response should throw UpstreamResponseTooLargeError');
 }
+
+const marketplaceConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_KV_REST_API_URL: 'https://marketplace-upstash.example',
+  UPSTASH_REDIS_REST_KV_REST_API_TOKEN: 'smoke-marketplace-token-at-least-16-characters',
+});
+assert(marketplaceConfig.urlEnvName === 'UPSTASH_REDIS_REST_KV_REST_API_URL', 'marketplace Upstash URL alias should be supported');
+assert(marketplaceConfig.tokenEnvName === 'UPSTASH_REDIS_REST_KV_REST_API_TOKEN', 'marketplace Upstash token alias should be supported');
+assert(
+  getRateLimitNamespace({ PAYGATE_PUBLIC_ORIGIN: 'https://staging.example' })
+    !== getRateLimitNamespace({ PAYGATE_PUBLIC_ORIGIN: 'https://production.example' }),
+  'different deployment origins should use isolated rate-limit namespaces',
+);
 
 delete process.env.PAYGATE_RATE_LIMIT_STORE;
 delete process.env.UPSTASH_REDIS_REST_URL;

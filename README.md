@@ -397,6 +397,7 @@ Important rules:
 - `STELLAR_SECRET` belongs only in the local agent/client environment.
 - Do not use memory stores or mock MPP/escrow modes in Vercel.
 - Leave `PAYGATE_AUTH_CHALLENGE_STORE`, `PAYGATE_REGISTRY_STORE`, `PAYGATE_RATE_LIMIT_STORE`, and `PAYGATE_MPP_VERIFY_MODE` unset for their deployment-safe defaults.
+- Vercel Marketplace aliases ending in `KV_REST_API_URL` and `KV_REST_API_TOKEN` are accepted automatically. Rate-limit counters are isolated by `PAYGATE_PUBLIC_ORIGIN`, even when beta environments share one Redis service.
 - Set `CRON_SECRET` to a random value of at least 16 characters in Vercel Production.
 
 ---
