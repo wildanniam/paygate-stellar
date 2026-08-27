@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
@@ -27,39 +27,74 @@ jobs:
         run: npm run scan:secrets
 
   dependency-audit:
-    name: Dependency audit
+    name: Dependency audit (${{ matrix.package }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: root
+            directory: .
+            lockfile: package-lock.json
+          - package: frontend
+            directory: frontend
+            lockfile: frontend/package-lock.json
+          - package: backend
+            directory: backend
+            lockfile: backend/package-lock.json
+          - package: express-example
+            directory: examples/express-paid-api
+            lockfile: examples/express-paid-api/package-lock.json
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: ${{ matrix.lockfile }}
 
-      - name: Install root dependencies
+      - name: Install dependencies
+        working-directory: ${{ matrix.directory }}
         run: npm ci
 
-      - name: Audit production dependencies
-        run: npm run audit:prod
+      - name: Audit all dependencies
+        working-directory: ${{ matrix.directory }}
+        run: npm audit
+
+  rust-advisory-audit:
+    name: Rust advisory audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked --version 0.22.2
+
+      - name: Audit Rust dependencies
+        run: cargo audit --file contracts/Cargo.lock
 
   beta-smoke:
     name: Beta smoke tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
       - name: Install root dependencies
         run: npm ci

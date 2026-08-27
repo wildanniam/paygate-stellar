@@ -28,7 +28,9 @@
     "scan:secrets": "node scripts/secret-scan.mjs",
     "beta:preflight": "node scripts/beta-preflight.mjs",
     "evidence:init": "node scripts/prepare-beta-evidence.mjs",
-    "audit:prod": "npm audit --omit=dev && npm --prefix frontend audit --omit=dev && npm --prefix backend audit --omit=dev && npm --prefix examples/express-paid-api audit --omit=dev",
+    "audit:prod": "node scripts/audit-dependencies.mjs",
+    "audit:all": "node scripts/audit-dependencies.mjs --include-dev",
+    "audit:rust": "cargo audit --file contracts/Cargo.lock",
     "reconcile:payments": "node scripts/reconcile-payments.mjs",
     "admin:withdraw-fees": "node scripts/admin-withdraw-fees.mjs",
     "vercel-build": "npm run build"
