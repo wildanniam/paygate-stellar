@@ -377,6 +377,9 @@ CRON_SECRET=
 ESCROW_CONTRACT_ID=
 PAYGATE_OPERATOR_SECRET=
 PAYGATE_DEMO_UPSTREAM_SECRET=
+PAYGATE_PUBLIC_ORIGIN=https://your-paygate-domain.example
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 STELLAR_NETWORK=stellar:testnet
 STELLAR_RPC_URL=https://soroban-testnet.stellar.org
 ```
@@ -392,7 +395,8 @@ Important rules:
 - Do not commit `.env.local`.
 - Do not put payer wallet secrets in Vercel.
 - `STELLAR_SECRET` belongs only in the local agent/client environment.
-- Do not use `PAYGATE_AUTH_CHALLENGE_STORE=memory` or `PAYGATE_REGISTRY_STORE=memory` in Vercel.
+- Do not use memory stores or mock MPP/escrow modes in Vercel.
+- Leave `PAYGATE_AUTH_CHALLENGE_STORE`, `PAYGATE_REGISTRY_STORE`, `PAYGATE_RATE_LIMIT_STORE`, and `PAYGATE_MPP_VERIFY_MODE` unset for their deployment-safe defaults.
 - Set `CRON_SECRET` to a random value of at least 16 characters in Vercel Production.
 
 ---
@@ -404,6 +408,9 @@ Run these migrations in the Supabase SQL Editor:
 ```text
 supabase/migrations/20260604000000_paygate_v1_registry.sql
 supabase/migrations/20260604000001_paygate_v1_paid_proxy.sql
+supabase/migrations/20260611000000_paygate_api_lifecycle_status.sql
+supabase/migrations/20260611000001_paygate_api_unique_live_endpoint.sql
+supabase/migrations/20260628050000_paygate_withdrawal_preparations.sql
 ```
 
 They create the V1 storage layer:
@@ -415,6 +422,7 @@ apis
 proxy_requests
 payments
 withdrawals
+withdrawal_preparations
 mpp_store
 ```
 
@@ -475,8 +483,11 @@ Run from the repo root:
 ```bash
 npm run test:beta
 npm run audit:prod
+npm run audit:all
+npm run audit:rust
 npm run test:browser
 npm run test:database-health
+npm run scan:secrets
 git diff --check
 ```
 

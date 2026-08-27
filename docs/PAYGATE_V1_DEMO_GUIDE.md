@@ -1,9 +1,11 @@
 # PayGate V1 Demo Guide
 
-Date: 2026-06-04
-Branch: `codex/paygate-v1`
+Updated: 2026-08-27
+Current hardening branch: `codex/paygate-v1-hardening`
 
 This guide is the replay script for the PayGate V1 demo.
+
+Before a deployed replay, `npm run beta:preflight` must report zero failures. See `docs/evidence/PAYGATE_V1_BETA_READINESS.md` for the current external configuration blockers.
 
 Use it when Wildan or another agent needs to prove the product story:
 
@@ -57,14 +59,18 @@ SUPABASE_SERVICE_ROLE_KEY=
 API_SECRET_ENCRYPTION_KEY=
 SESSION_SECRET=
 MPP_SECRET_KEY=
+CRON_SECRET=
 ESCROW_CONTRACT_ID=
 PAYGATE_OPERATOR_SECRET=
 PAYGATE_DEMO_UPSTREAM_SECRET=
+PAYGATE_PUBLIC_ORIGIN=https://your-paygate-domain.example
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 STELLAR_NETWORK=stellar:testnet
 STELLAR_RPC_URL=https://soroban-testnet.stellar.org
 ```
 
-Do not set `PAYGATE_AUTH_CHALLENGE_STORE=memory` on Vercel. Memory auth challenge storage is only for local smoke tests; deployed beta auth uses Supabase `auth_challenges`.
+Do not enable memory stores or mock MPP/escrow modes on Vercel. Deployed beta auth and registry data use Supabase, and shared rate limits use Upstash Redis.
 
 Local agent/client env:
 
@@ -317,7 +323,10 @@ Run from repo root:
 ```bash
 npm run test:beta
 npm run audit:prod
+npm run audit:all
+npm run audit:rust
 npm run test:browser
+npm run scan:secrets
 ```
 
 Expanded command list:
@@ -329,6 +338,7 @@ npm run test:auth:supabase    # optional; skips when Supabase env is absent
 npm run test:registry
 npm run test:upstream
 npm run test:proxy-unpaid
+npm run test:payment-id
 npm run test:proxy-paid
 npm run test:dashboard
 npm run test:withdrawal
@@ -336,10 +346,10 @@ npm --prefix frontend run build
 cd contracts && cargo test
 cd ..
 git diff --check
-npm audit --omit=dev
-npm --prefix frontend audit --omit=dev
-npm --prefix backend audit --omit=dev
-npm --prefix examples/express-paid-api audit --omit=dev
+npm run audit:prod
+npm run audit:all
+npm run audit:rust
+npm run scan:secrets
 ```
 
 Evidence run setup:

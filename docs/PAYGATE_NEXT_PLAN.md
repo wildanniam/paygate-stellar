@@ -14,7 +14,7 @@ tags:
   - instawards
 status: active
 created: 2026-04-26
-updated: 2026-06-11
+updated: 2026-08-27
 owner: Wildan
 grant_status: accepted
 grant_amount: 5000 USD in XLM
@@ -23,7 +23,7 @@ grant_program: SCF Instawards
 
 # PayGate Next Plan
 
-> Current V1 note, 2026-06-06: this file is now a historical planning notebook plus grant/SOW memory. The current `codex/paygate-v1` beta source of truth is `docs/README.md`, `docs/PAYGATE_V1_DEMO_GUIDE.md`, `docs/evidence/PAYGATE_V1_BETA_READINESS.md`, and `openspec/changes/build-paygate-v1-gateway/tasks.md`. Older unchecked V0/SOW checklist items below should be read as historical unless they are repeated in those current V1 files.
+> Current V1 note, 2026-08-27: this file is now a historical planning notebook plus grant/SOW memory. The current V1 beta source of truth is `docs/README.md`, `docs/PAYGATE_V1_DEMO_GUIDE.md`, `docs/evidence/PAYGATE_V1_BETA_READINESS.md`, and `openspec/changes/build-paygate-v1-gateway/tasks.md`. Older unchecked V0/SOW checklist items below should be read as historical unless they are repeated in those current V1 files.
 
 > [!abstract] Tujuan Dokumen
 > Dokumen ini adalah handoff Obsidian untuk kamu dan agent berikutnya. Isinya menjelaskan konteks bisnis PayGate berdasarkan SOW dan status grant SCF Instawards, status produk saat ini, gap terhadap target SOW, prioritas next session, dan skenario testing detail yang harus dilakukan untuk membuktikan produk benar-benar siap demo.
@@ -71,6 +71,12 @@ Current evidence:
 - `docs/evidence/ui/PHASE5_API_LIFECYCLE_UX.md`
 - `docs/evidence/ui/PHASE6_NAVBAR_ACTIVE_STATE.md`
 - `docs/evidence/PAYGATE_V1_PHASE7_FULL_DEMO_FLOW_PROOF.md`
+
+### 1.0.2 Production-Beta Security Update - 2026-08-27
+
+The current hardening branch adds React Router 7 route regression coverage, independent JavaScript and Rust dependency gates, stricter upstream setup verification, fail-closed shared rate limiting, defensive session parsing, aligned withdrawal expiry windows, and 120-bit Soroban-compatible payment IDs.
+
+The full local beta suite, browser route matrix, JavaScript audits, contract tests, and secret scan pass. Deployment remains blocked until `npm run beta:preflight` reaches zero failures; the current external blockers are listed in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`. A fresh post-hardening Vercel replay and demo video are still manual evidence work, not missing local implementation.
 
 PayGate saat ini sudah berada di fase **accepted grant / functional alpha / POC foundation**.
 

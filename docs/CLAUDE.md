@@ -18,9 +18,9 @@ Read these in order before making code changes:
 
 If any file conflicts with `TECHNICAL_SPEC.md`, follow `TECHNICAL_SPEC.md` for V0/SOW work. For the V1 branch, follow `PAYGATE_V1_PRODUCT_SPEC.md` where it intentionally conflicts with the old stateless generator scope.
 
-## V1 Branch Direction
+## V1 Product Direction
 
-Wildan has approved the V1 pivot on `codex/paygate-v1`.
+Wildan approved the V1 gateway pivot on the original `codex/paygate-v1` branch. The V1 gateway is now the current product direction; do not infer product scope from an old branch name.
 
 PayGate V1 is a **pay-per-call gateway for APIs**:
 
@@ -101,7 +101,7 @@ These were the original V0/SOW boundaries. The user has explicitly changed scope
 
 The final architecture from `TECHNICAL_SPEC.md` is:
 
-- `frontend/`: React 18 + Vite 5 + Tailwind CSS + React Router v6 + lucide-react.
+- Historical V0 spec baseline: React 18 + Vite 5 + Tailwind CSS + React Router v6 + lucide-react. These are not the current installed version pins.
 - `backend/`: Node.js 20 ES modules + Express 4 + Zod + CORS + express-rate-limit.
 - Deployment target: VPS with Nginx serving frontend static assets and proxying `/api/*` to backend on port `3001`.
 - Process manager: PM2 via root `ecosystem.config.cjs`.
@@ -111,14 +111,16 @@ When implementing, preserve the existing landing page look unless the user asks 
 
 ## Current Repository State
 
-As of June 4, 2026:
+As of August 27, 2026:
+
+- Current V1 frontend runtime is React 18, React Router 7, Tailwind CSS 3, Vite 7, GSAP, and lucide-react. Root Vercel Functions use Node.js 22+ and Express 5 where applicable; the legacy generator backend remains on Express 4.
 
 - `frontend/src/App.jsx` is now the React Router root.
 - The original landing page has moved to `frontend/src/pages/Landing.jsx`.
 - `frontend/src/pages/Generate.jsx`, `Result.jsx`, and `Dashboard.jsx` exist.
 - Shared frontend files exist at `frontend/src/colors.js`, `components/AppNavbar.jsx`, and `components/CodeBlock.jsx`.
 - `backend/` exists with Express, Zod validation, generator route, and code templates.
-- React Router is installed in `frontend/package.json`.
+- React Router 7 is installed, and browser smoke coverage includes logged-out and authenticated route states across desktop and mobile viewports.
 - `frontend/vite.config.js` proxies `/api` to `localhost:3001`.
 - `ecosystem.config.cjs` exists for PM2 deployment.
 - `../frontend/CLAUDE.md` is legacy guidance from the landing-page-only phase.
@@ -148,6 +150,12 @@ As of June 4, 2026:
 - Full internal V1 demo proof is covered by `npm run test:demo-flow`: register API -> pending setup -> verify setup -> unpaid `402` -> paid `200` -> dashboard update -> archive/delete reset -> re-register archived endpoint. Evidence: `docs/evidence/PAYGATE_V1_PHASE7_FULL_DEMO_FLOW_PROOF.md`.
 - `frontend/node_modules` and `frontend/dist` are ignored and should remain untracked. Use `npm run build` to regenerate build output locally.
 - `npm run test:beta` is the consolidated local beta smoke command.
+- Production rate limiting fails closed when Upstash storage is missing; memory rate limits remain local-smoke-only.
+- Upstream setup verification uses a fresh unpredictable invalid secret and distinguishes a confirmed guard rejection from unrelated upstream errors.
+- Session parsing rejects malformed, oversized, future-issued, and overlong tokens without breaking a neighboring valid cookie.
+- New payment IDs contain 120 bits of cryptographic randomness while remaining compatible with MPP wire formats and the escrow contract's Soroban `Symbol` key.
+- `npm run audit:prod`, `npm run audit:all`, `npm run audit:rust`, and the pinned GitHub Actions security workflow are the current dependency gates.
+- A deployment is not beta-ready until `npm run beta:preflight` reports zero failures. The August 27 local preflight still requires external environment and Supabase project fixes documented in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`.
 
 Update this section when major milestones land, so future agents inherit accurate context.
 

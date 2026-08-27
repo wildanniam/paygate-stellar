@@ -12,7 +12,7 @@
 
 - [x] Scaffold `contracts/` workspace.
 - [x] Replace sample contract with `paygate-escrow` skeleton.
-- [x] Run contract unit tests (`cargo test`, 4 passed).
+- [x] Run contract unit tests (`cargo test`, currently 5 passed).
 - [x] Build contract WASM (`stellar contract build`, hash `b17921b9446d6155d38d7cf9c842082f92c0d01027a59aadc6802a4c9d74d751`).
 - [x] Deploy escrow contract on Soroban testnet.
 - [x] Confirm USDC testnet token contract address.
@@ -100,3 +100,17 @@
 - [x] Rewrite the monitoring dashboard spec from Horizon wallet lookup to the current authenticated PayGate workspace.
 - [x] Rewrite the website frontend spec to cover the current marketing landing page, `/apis/new`, `/apis/:apiId`, and dashboard subroutes.
 - [x] Mark generator and generated middleware specs as legacy V0/SOW compatibility capabilities.
+
+## 12. Production-Beta Security Hardening
+
+- [x] Migrate the app to React Router 7 and broaden authenticated/unauthenticated route smoke coverage.
+- [x] Make JavaScript package audits independent and add RustSec auditing in CI.
+- [x] Pin GitHub Actions dependencies to immutable commit SHAs.
+- [x] Reject weak or ambiguous upstream guard verification results.
+- [x] Fail closed when shared deployment rate-limit storage is unavailable.
+- [x] Reject malformed, future-issued, oversized, or overlong session tokens safely.
+- [x] Keep withdrawal preparation expiry inside the Stellar transaction validity window.
+- [x] Increase new payment IDs to 120 bits of entropy and prove MPP/Soroban compatibility.
+- [x] Expand deployment preflight checks for the canonical origin, Upstash, cron authentication, and mock modes.
+- [x] Record current local verification, dependency warnings, and deployment blockers in beta readiness evidence.
+- [ ] Replay the hardened branch on Vercel with zero preflight failures and capture fresh screenshots, tx hashes, and video.
