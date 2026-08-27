@@ -113,6 +113,7 @@ try {
   });
   assert(retryPrepareResponse.status === 200, `retry prepare expected 200, got ${retryPrepareResponse.status}`);
   const retryPrepared = await retryPrepareResponse.json();
+  const signedTransactionXdr = `mock-signed:${retryPrepared.transactionXdr}`;
 
   const submittedResponse = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
     method: 'POST',
@@ -122,7 +123,7 @@ try {
     },
     body: JSON.stringify({
       preparationId: retryPrepared.preparationId,
-      signedTransactionXdr: `mock-signed:${retryPrepared.transactionXdr}`,
+      signedTransactionXdr,
     }),
   });
   assert(submittedResponse.status === 200, `submit expected 200, got ${submittedResponse.status}`);
@@ -130,6 +131,48 @@ try {
   assert(submitted.amountUsdc === '0.0180000', 'submit amount mismatch');
   assert(submitted.withdrawal.status === 'succeeded', 'withdrawal status mismatch');
   assert(submitted.withdrawal.tx_hash === submitted.txHash, 'withdrawal tx hash mismatch');
+
+  await store.updateWithdrawal(submitted.withdrawal.id, {
+    status: 'failed',
+    completed_at: new Date().toISOString(),
+  });
+  await store.updateWithdrawalPreparation(retryPrepared.preparationId, ownerWallet, {
+    status: 'failed',
+    submitted_tx_hash: null,
+    completed_at: new Date().toISOString(),
+  });
+
+  const recoveredResponse = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      preparationId: retryPrepared.preparationId,
+      signedTransactionXdr,
+    }),
+  });
+  assert(recoveredResponse.status === 200, `recovery submit expected 200, got ${recoveredResponse.status}`);
+  const recovered = await recoveredResponse.json();
+  assert(recovered.recovered === true, 'chain-confirmed withdrawal should be marked as recovered');
+  assert(recovered.txHash === submitted.txHash, 'recovered withdrawal hash mismatch');
+
+  const idempotentResponse = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      preparationId: retryPrepared.preparationId,
+      signedTransactionXdr,
+    }),
+  });
+  assert(idempotentResponse.status === 200, `idempotent submit expected 200, got ${idempotentResponse.status}`);
+  const idempotent = await idempotentResponse.json();
+  assert(idempotent.recovered === false, 'already-succeeded withdrawal should not be marked as recovered');
+  assert(idempotent.txHash === submitted.txHash, 'idempotent withdrawal hash mismatch');
 
   const withdrawals = getRawWithdrawalsForTest();
   assert(withdrawals.length === 1, 'withdrawal row was not recorded');

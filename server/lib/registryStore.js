@@ -309,6 +309,11 @@ function createMemoryRegistry() {
         .slice(0, limit)
         .map(publicWithdrawalFields);
     },
+    async getWithdrawal(withdrawalId, walletAddress) {
+      const row = state.withdrawals.get(withdrawalId);
+      if (!row || row.wallet_address !== walletAddress) return null;
+      return publicWithdrawalFields(row);
+    },
     async createWithdrawal(record) {
       const row = {
         ...record,
@@ -623,6 +628,16 @@ function createSupabaseRegistry() {
         .limit(limit);
       if (error) throw error;
       return data ?? [];
+    },
+    async getWithdrawal(withdrawalId, walletAddress) {
+      const { data, error } = await client
+        .from('withdrawals')
+        .select('*')
+        .eq('id', withdrawalId)
+        .eq('wallet_address', walletAddress)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
     },
     async createWithdrawal(record) {
       const { data, error } = await client

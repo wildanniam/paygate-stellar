@@ -59,8 +59,10 @@ function getMockWithdrawState() {
     globalThis.__PAYGATE_ESCROW_WITHDRAW_MEMORY = {
       developerBalanceBaseUnits: process.env.PAYGATE_MOCK_DEVELOPER_BALANCE_BASE_UNITS || '0',
       platformFeeBalanceBaseUnits: process.env.PAYGATE_MOCK_PLATFORM_FEE_BALANCE_BASE_UNITS || '0',
+      withdrawals: new Map(),
     };
   }
+  globalThis.__PAYGATE_ESCROW_WITHDRAW_MEMORY.withdrawals ??= new Map();
   return globalThis.__PAYGATE_ESCROW_WITHDRAW_MEMORY;
 }
 
@@ -70,16 +72,27 @@ export function hasEscrowCreditConfig() {
 }
 
 async function waitForSuccessfulTransaction(server, hash, label = 'Escrow transaction') {
+  let lastError = null;
+
   for (let attempt = 0; attempt < DEFAULT_POLL_ATTEMPTS; attempt += 1) {
-    const tx = await server.getTransaction(hash);
-    if (tx.status === 'SUCCESS') return tx;
-    if (tx.status === 'FAILED') {
-      throw new Error(`${label} failed: ${hash}`);
+    try {
+      const tx = await server.getTransaction(hash);
+      if (tx.status === 'SUCCESS') return tx;
+      if (tx.status === 'FAILED') {
+        throw new Error(`${label} failed: ${hash}`);
+      }
+      lastError = null;
+    } catch (error) {
+      if (error instanceof Error && error.message === `${label} failed: ${hash}`) throw error;
+      lastError = error;
     }
     await delay(DEFAULT_POLL_DELAY_MS);
   }
 
-  throw new Error(`${label} did not confirm in time: ${hash}`);
+  const error = new Error(`${label} did not confirm in time: ${hash}`);
+  error.code = 'ESCROW_CONFIRMATION_UNCERTAIN';
+  if (lastError) error.cause = lastError;
+  throw error;
 }
 
 async function simulateEscrowCall(method, args = []) {
@@ -303,19 +316,68 @@ export function validateEscrowWithdrawalTransaction(signedTransactionXdr, expect
   };
 }
 
+function withdrawalResultFromTransaction(txHash, transaction) {
+  const amountBaseUnits = transaction.returnValue
+    ? BigInt(scValToNative(transaction.returnValue)).toString()
+    : '0';
+
+  return {
+    mode: 'contract',
+    status: 'succeeded',
+    txHash,
+    amountBaseUnits,
+    amountUsdc: fromBaseUnits(amountBaseUnits, 7),
+  };
+}
+
+export async function readEscrowWithdrawalTransaction(txHash) {
+  if (isMockEscrowWithdrawMode()) {
+    requireSafeMockWithdrawMode();
+    const result = getMockWithdrawState().withdrawals.get(txHash);
+    return result ?? {
+      mode: 'memory',
+      status: 'not_found',
+      txHash,
+    };
+  }
+
+  const server = new rpc.Server(getRpcUrl());
+  const transaction = await server.getTransaction(txHash);
+  if (transaction.status === 'SUCCESS') return withdrawalResultFromTransaction(txHash, transaction);
+  if (transaction.status === 'FAILED') {
+    return {
+      mode: 'contract',
+      status: 'failed',
+      txHash,
+    };
+  }
+
+  return {
+    mode: 'contract',
+    status: transaction.status === 'NOT_FOUND' ? 'not_found' : 'pending',
+    txHash,
+  };
+}
+
 export async function submitEscrowWithdrawal(signedTransactionXdr, expectedDeveloperWallet, options = {}) {
   const validation = validateEscrowWithdrawalTransaction(signedTransactionXdr, expectedDeveloperWallet, options);
 
   if (isMockEscrowWithdrawMode()) {
     const state = getMockWithdrawState();
+    const existing = state.withdrawals.get(validation.txHash);
+    if (existing) return existing;
+
     const amountBaseUnits = state.developerBalanceBaseUnits;
     state.developerBalanceBaseUnits = '0';
-    return {
+    const result = {
       mode: 'memory',
-      txHash: `mock-withdraw-submit-${expectedDeveloperWallet.slice(0, 8).toLowerCase()}`,
+      status: 'succeeded',
+      txHash: validation.txHash,
       amountBaseUnits,
       amountUsdc: fromBaseUnits(amountBaseUnits, 7),
     };
+    state.withdrawals.set(validation.txHash, result);
+    return result;
   }
 
   const tx = TransactionBuilder.fromXDR(signedTransactionXdr, getNetworkPassphrase());
@@ -323,20 +385,27 @@ export async function submitEscrowWithdrawal(signedTransactionXdr, expectedDevel
   const server = new rpc.Server(getRpcUrl());
   const txHash = validation.txHash;
 
-  const submitted = await server.sendTransaction(tx);
-  if (submitted.status !== 'PENDING') {
-    throw new Error(`Escrow withdrawal submission failed with status ${submitted.status}`);
+  let existing = null;
+  try {
+    existing = await readEscrowWithdrawalTransaction(txHash);
+  } catch {
+    // A duplicate submission is safe because the signed transaction hash is stable.
+  }
+
+  if (existing?.status === 'succeeded') return existing;
+  if (existing?.status === 'failed') {
+    throw new Error(`Escrow withdrawal transaction failed: ${txHash}`);
+  }
+
+  if (existing?.status !== 'pending') {
+    const submitted = await server.sendTransaction(tx);
+    if (!['PENDING', 'DUPLICATE'].includes(submitted.status)) {
+      throw new Error(`Escrow withdrawal submission failed with status ${submitted.status}`);
+    }
   }
 
   const confirmed = await waitForSuccessfulTransaction(server, txHash, 'Escrow withdrawal transaction');
-  const amountBaseUnits = confirmed.returnValue ? BigInt(scValToNative(confirmed.returnValue)).toString() : '0';
-
-  return {
-    mode: 'contract',
-    txHash,
-    amountBaseUnits,
-    amountUsdc: fromBaseUnits(amountBaseUnits, 7),
-  };
+  return withdrawalResultFromTransaction(txHash, confirmed);
 }
 
 export async function withdrawPlatformFees() {
