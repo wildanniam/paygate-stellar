@@ -28,6 +28,8 @@ PayGate SHALL expose a paid proxy URL for each active registered API.
 
 PayGate SHALL return HTTP 402 Payment Required for active paid proxy requests without payment credentials.
 
+New PayGate payment IDs SHALL contain 120 bits of cryptographically secure randomness while remaining valid Soroban `Symbol` values. Previously issued shorter IDs SHALL remain usable for in-flight retries.
+
 #### Scenario: Unpaid request
 
 - GIVEN an active API exists
@@ -37,6 +39,13 @@ PayGate SHALL return HTTP 402 Payment Required for active paid proxy requests wi
 - AND returns HTTP 402
 - AND includes MPP challenge data
 - AND includes `X-PayGate-Request-Id` and `X-PayGate-Payment-Id`
+
+#### Scenario: Payment id protocol compatibility
+
+- GIVEN PayGate creates a new payment id
+- WHEN the id is carried through the MPP challenge, credential, and receipt
+- THEN the same opaque id is preserved at every step
+- AND the id can be encoded as the escrow contract's Soroban `Symbol` payment key
 
 ### Requirement: Verify MPP payment credentials
 

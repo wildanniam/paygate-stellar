@@ -33,6 +33,8 @@ PayGate SHALL credit a valid payment into escrow after payment verification.
 
 The escrow contract SHALL reject duplicate payment IDs.
 
+The payment ID used as the contract key SHALL fit Soroban's 32-character `Symbol` limit.
+
 #### Scenario: Duplicate payment id
 
 - GIVEN payment id `pay1` was already credited

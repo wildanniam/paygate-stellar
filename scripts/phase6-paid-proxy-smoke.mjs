@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { Challenge, Credential, Receipt } from 'mppx';
 import { USDC_SAC_TESTNET } from '@stellar/mpp';
 import { encryptApiSecret } from '../server/lib/apiSecret.js';
+import { PAYMENT_ID_LENGTH, PAYMENT_ID_PATTERN } from '../server/lib/paymentId.js';
 import {
   clearRegistryForTest,
   getRawPaymentsForTest,
@@ -118,6 +119,8 @@ try {
   const paymentId = unpaid.headers.get('x-paygate-payment-id');
   assert(requestId, 'missing unpaid X-PayGate-Request-Id');
   assert(paymentId, 'missing unpaid X-PayGate-Payment-Id');
+  assert(paymentId.length === PAYMENT_ID_LENGTH, 'payment id length is not contract-compatible');
+  assert(PAYMENT_ID_PATTERN.test(paymentId), 'payment id does not contain 120 bits of hex entropy');
 
   const challenge = Challenge.fromResponse(unpaid);
   assert(challenge.request.externalId === paymentId, 'challenge externalId must equal PayGate payment id');

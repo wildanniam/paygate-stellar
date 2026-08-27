@@ -5,7 +5,7 @@ use soroban_sdk::{
     symbol_short,
     testutils::Address as _,
     token::{StellarAssetClient, TokenClient},
-    Address, Env,
+    Address, Env, Symbol,
 };
 
 fn setup() -> (Env, Address, Address, Address, Address, Address) {
@@ -54,6 +54,19 @@ fn rejects_duplicate_payment_ids() {
         .unwrap_err()
         .unwrap();
     assert_eq!(error, EscrowError::PaymentAlreadyProcessed);
+}
+
+#[test]
+fn accepts_current_payment_id_format() {
+    let (env, escrow, _token_address, _admin, developer, _token_admin) = setup();
+    let client = PayGateEscrowClient::new(&env, &escrow);
+    let payment_id = "p0123456789abcdef0123456789abcd";
+
+    assert_eq!(payment_id.len(), 31);
+    let payment_id = Symbol::new(&env, payment_id);
+    client.credit_payment(&payment_id, &developer, &1_000);
+
+    assert!(client.processed(&payment_id));
 }
 
 #[test]
