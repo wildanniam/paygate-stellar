@@ -11,6 +11,7 @@ const REQUIRED_ENV = [
   'SESSION_SECRET',
   'API_SECRET_ENCRYPTION_KEY',
   'MPP_SECRET_KEY',
+  'CRON_SECRET',
   'ESCROW_CONTRACT_ID',
   'PAYGATE_OPERATOR_SECRET',
   'PAYGATE_DEMO_UPSTREAM_SECRET',
@@ -63,17 +64,57 @@ function isUrl(value) {
   }
 }
 
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 function publicOriginError(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:') return 'PAYGATE_PUBLIC_ORIGIN must use https.';
     if (url.username || url.password) return 'PAYGATE_PUBLIC_ORIGIN must not include credentials.';
+    const hostname = url.hostname.toLowerCase();
+    if (
+      hostname === 'localhost'
+      || hostname === '127.0.0.1'
+      || hostname === '::1'
+      || hostname === '[::1]'
+      || hostname.endsWith('.localhost')
+      || hostname.endsWith('.example')
+    ) {
+      return 'PAYGATE_PUBLIC_ORIGIN must be the real deployed hostname.';
+    }
     if (url.pathname !== '/' || url.search || url.hash) {
       return 'PAYGATE_PUBLIC_ORIGIN must be an origin only, for example https://trypaygate.com.';
     }
     return '';
   } catch {
     return 'PAYGATE_PUBLIC_ORIGIN must be a valid URL.';
+  }
+}
+
+async function checkUpstash() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token || !isHttpsUrl(url)) return;
+
+  try {
+    const response = await fetch(new URL('/ping', url), {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) {
+      fail('Upstash Redis is reachable', `PING returned HTTP ${response.status}.`);
+      return;
+    }
+    pass('Upstash Redis is reachable and authenticated');
+  } catch (error) {
+    const cause = error.cause?.code || error.cause?.name || error.name;
+    fail('Upstash Redis is reachable', cause || 'Network request failed.');
   }
 }
 
@@ -106,14 +147,22 @@ function checkEnvSemantics() {
     pass('PAYGATE_RATE_LIMIT_STORE is deployment-safe', 'Unset means Upstash when its environment is configured.');
   }
 
+  if (process.env.PAYGATE_MPP_VERIFY_MODE === 'mock') {
+    fail('PAYGATE_MPP_VERIFY_MODE is not mock', 'Mock MPP verification is only for local smoke tests.');
+  } else {
+    pass('PAYGATE_MPP_VERIFY_MODE is deployment-safe', 'Unset means real MPP verification.');
+  }
+
   for (const name of ['PAYGATE_ESCROW_CREDIT_MODE', 'PAYGATE_ESCROW_WITHDRAW_MODE']) {
     if (process.env[name] === 'memory') {
       fail(`${name} is not memory`, 'Mock escrow mode is local-test only.');
     }
   }
 
-  if (process.env.SUPABASE_URL && !isUrl(process.env.SUPABASE_URL)) {
-    fail('SUPABASE_URL is a valid URL');
+  if (process.env.SUPABASE_URL && !isHttpsUrl(process.env.SUPABASE_URL)) {
+    fail('SUPABASE_URL is a valid HTTPS URL');
+  } else if (process.env.SUPABASE_URL) {
+    pass('SUPABASE_URL is a valid HTTPS URL');
   }
 
   if (!isMissing(process.env.PAYGATE_PUBLIC_ORIGIN)) {
@@ -125,10 +174,10 @@ function checkEnvSemantics() {
     }
   }
 
-  if (process.env.UPSTASH_REDIS_REST_URL && !isUrl(process.env.UPSTASH_REDIS_REST_URL)) {
-    fail('UPSTASH_REDIS_REST_URL is a valid URL');
+  if (process.env.UPSTASH_REDIS_REST_URL && !isHttpsUrl(process.env.UPSTASH_REDIS_REST_URL)) {
+    fail('UPSTASH_REDIS_REST_URL is a valid HTTPS URL');
   } else if (process.env.UPSTASH_REDIS_REST_URL) {
-    pass('UPSTASH_REDIS_REST_URL is a valid URL');
+    pass('UPSTASH_REDIS_REST_URL is a valid HTTPS URL');
   }
 
   if (!isMissing(process.env.UPSTASH_REDIS_REST_TOKEN) && process.env.UPSTASH_REDIS_REST_TOKEN.length < 16) {
@@ -147,6 +196,24 @@ function checkEnvSemantics() {
     fail('API_SECRET_ENCRYPTION_KEY is at least 32 characters', 'Use a stable random secret or 32-byte key material.');
   } else if (!isMissing(process.env.API_SECRET_ENCRYPTION_KEY)) {
     pass('API_SECRET_ENCRYPTION_KEY length is acceptable');
+  }
+
+  if (!isMissing(process.env.MPP_SECRET_KEY) && process.env.MPP_SECRET_KEY.length < 32) {
+    fail('MPP_SECRET_KEY is at least 32 characters', 'Use a stable random secret for MPP challenge signing.');
+  } else if (!isMissing(process.env.MPP_SECRET_KEY)) {
+    pass('MPP_SECRET_KEY length is acceptable');
+  }
+
+  if (!isMissing(process.env.PAYGATE_DEMO_UPSTREAM_SECRET) && process.env.PAYGATE_DEMO_UPSTREAM_SECRET.length < 16) {
+    fail('PAYGATE_DEMO_UPSTREAM_SECRET is at least 16 characters', 'Use a stable random upstream guard secret.');
+  } else if (!isMissing(process.env.PAYGATE_DEMO_UPSTREAM_SECRET)) {
+    pass('PAYGATE_DEMO_UPSTREAM_SECRET length is acceptable');
+  }
+
+  if (!isMissing(process.env.CRON_SECRET) && process.env.CRON_SECRET.length < 16) {
+    fail('CRON_SECRET is at least 16 characters', 'Use a stable random secret for the Vercel cron route.');
+  } else if (!isMissing(process.env.CRON_SECRET)) {
+    pass('CRON_SECRET length is acceptable');
   }
 
   if (process.env.STELLAR_NETWORK && process.env.STELLAR_NETWORK !== 'stellar:testnet') {
@@ -214,6 +281,21 @@ async function checkSupabaseTables() {
     return;
   }
 
+  try {
+    await fetch(new URL('/rest/v1/', url), {
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+      signal: AbortSignal.timeout(10_000),
+    });
+    pass('Supabase REST endpoint is reachable');
+  } catch (error) {
+    const cause = error.cause?.code || error.cause?.name || error.name;
+    fail('Supabase REST endpoint is reachable', cause || 'Network request failed.');
+    return;
+  }
+
   const client = createClient(url, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
@@ -235,6 +317,7 @@ checkRequiredEnv();
 checkEnvSemantics();
 await checkVercelRewrites();
 checkGeneratedArtifactsUntracked();
+await checkUpstash();
 await checkSupabaseTables();
 
 for (const check of checks) {
