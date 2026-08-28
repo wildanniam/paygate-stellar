@@ -14,7 +14,7 @@ tags:
   - instawards
 status: active
 created: 2026-04-26
-updated: 2026-08-27
+updated: 2026-08-28
 owner: Wildan
 grant_status: accepted
 grant_amount: 5000 USD in XLM
@@ -24,6 +24,8 @@ grant_program: SCF Instawards
 # PayGate Next Plan
 
 > Current V1 note, 2026-08-27: this file is now a historical planning notebook plus grant/SOW memory. The current V1 beta source of truth is `docs/README.md`, `docs/PAYGATE_V1_DEMO_GUIDE.md`, `docs/evidence/PAYGATE_V1_BETA_READINESS.md`, and `openspec/changes/build-paygate-v1-gateway/tasks.md`. Older unchecked V0/SOW checklist items below should be read as historical unless they are repeated in those current V1 files.
+
+> Current proof update, 2026-08-28: the V1 hosted gateway has now completed a deployed isolated-staging replay through real MPP payment, crash-safe contract credit, exact dashboard reporting, and signed withdrawal. The old 65-75% and "real payment proof pending" statements below describe the historical V0/SOW path, not current V1. Production is still gated by its paused Supabase project, applying the distributed-state migration, deploying the TTL-aware contract, and capturing the final production screenshots/video.
 
 > [!abstract] Tujuan Dokumen
 > Dokumen ini adalah handoff Obsidian untuk kamu dan agent berikutnya. Isinya menjelaskan konteks bisnis PayGate berdasarkan SOW dan status grant SCF Instawards, status produk saat ini, gap terhadap target SOW, prioritas next session, dan skenario testing detail yang harus dilakukan untuk membuktikan produk benar-benar siap demo.
@@ -77,6 +79,12 @@ Current evidence:
 The current hardening branch adds React Router 7 route regression coverage, independent JavaScript and Rust dependency gates, stricter upstream setup verification, fail-closed shared rate limiting, defensive session parsing, aligned withdrawal expiry windows, and 120-bit Soroban-compatible payment IDs.
 
 The full local beta suite, browser route matrix, JavaScript audits, contract tests, and secret scan pass. Deployment remains blocked until `npm run beta:preflight` reaches zero failures; the current external blockers are listed in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`. A fresh post-hardening Vercel replay and demo video are still manual evidence work, not missing local implementation.
+
+### 1.0.3 Distributed-State Proof Update - 2026-08-28
+
+The hardening branch now covers the PayGate-specific distributed risks identified during review: complete Redis credential pairs, expiring verified-only endpoint ownership, withdrawal tx uniqueness, atomic upstream forwarding, persisted/recoverable escrow-credit XDR, an operator sequence lease, exact credited-only dashboard aggregates, and Soroban TTL renewal. Dependency review, CodeQL, and Dependabot configuration are included.
+
+The migration and a fresh TTL-aware escrow contract were deployed only to isolated staging. `npm run test:staging:live-replay` then proved the deployed `401 -> 402 -> paid 200 -> credit -> dashboard -> withdrawal` path with real testnet transactions and cleaned its temporary database fixtures. Production remains untouched until the explicit release sequence in `docs/evidence/PAYGATE_V1_BETA_READINESS.md` is followed.
 
 PayGate saat ini sudah berada di fase **accepted grant / functional alpha / POC foundation**.
 

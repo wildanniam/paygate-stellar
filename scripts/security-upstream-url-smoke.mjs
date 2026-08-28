@@ -138,6 +138,27 @@ const marketplaceConfig = getRateLimitRedisConfig({
 });
 assert(marketplaceConfig.urlEnvName === 'UPSTASH_REDIS_REST_KV_REST_API_URL', 'marketplace Upstash URL alias should be supported');
 assert(marketplaceConfig.tokenEnvName === 'UPSTASH_REDIS_REST_KV_REST_API_TOKEN', 'marketplace Upstash token alias should be supported');
+const mixedAliasConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_URL: 'https://stale-direct-upstash.example',
+  UPSTASH_REDIS_REST_KV_REST_API_TOKEN: 'smoke-marketplace-token-at-least-16-characters',
+});
+assert(mixedAliasConfig.error, 'a URL and token from different aliases must be rejected');
+assert(!mixedAliasConfig.url && !mixedAliasConfig.token, 'mismatched aliases must not produce usable credentials');
+const conflictingAliasConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_URL: 'https://direct-upstash.example',
+  UPSTASH_REDIS_REST_TOKEN: 'smoke-direct-token-at-least-16-characters',
+  UPSTASH_REDIS_REST_KV_REST_API_URL: 'https://marketplace-upstash.example',
+  UPSTASH_REDIS_REST_KV_REST_API_TOKEN: 'smoke-marketplace-token-at-least-16-characters',
+});
+assert(conflictingAliasConfig.error, 'conflicting complete Upstash pairs must be rejected');
+const duplicateAliasConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_URL: 'https://shared-upstash.example',
+  UPSTASH_REDIS_REST_TOKEN: 'smoke-shared-token-at-least-16-characters',
+  KV_REST_API_URL: 'https://shared-upstash.example',
+  KV_REST_API_TOKEN: 'smoke-shared-token-at-least-16-characters',
+});
+assert(!duplicateAliasConfig.error, 'duplicate aliases for the same Upstash database should remain valid');
+assert(duplicateAliasConfig.urlEnvName === 'UPSTASH_REDIS_REST_URL', 'the first complete matching pair should win');
 assert(
   getRateLimitNamespace({ PAYGATE_PUBLIC_ORIGIN: 'https://staging.example' })
     !== getRateLimitNamespace({ PAYGATE_PUBLIC_ORIGIN: 'https://production.example' }),

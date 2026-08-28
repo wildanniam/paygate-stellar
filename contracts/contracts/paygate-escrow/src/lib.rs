@@ -6,6 +6,9 @@ use soroban_sdk::{
 
 const FEE_BPS: i128 = 1_000;
 const BPS_DENOMINATOR: i128 = 10_000;
+const LEDGERS_PER_DAY: u32 = 17_280;
+const TTL_BUMP_THRESHOLD: u32 = 29 * LEDGERS_PER_DAY;
+const TTL_EXTEND_TO: u32 = 30 * LEDGERS_PER_DAY;
 
 #[contract]
 pub struct PayGateEscrow;
@@ -70,8 +73,10 @@ impl PayGateEscrow {
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Token, &token);
         env.storage()
-            .instance()
+            .persistent()
             .set(&DataKey::PlatformFeeBalance, &0_i128);
+        bump_instance_ttl(&env);
+        bump_persistent_ttl(&env, &DataKey::PlatformFeeBalance);
 
         Ok(())
     }
@@ -90,6 +95,7 @@ impl PayGateEscrow {
 
         let payment_key = DataKey::ProcessedPayment(payment_id.clone());
         if env.storage().persistent().has(&payment_key) {
+            bump_persistent_ttl(&env, &payment_key);
             return Err(EscrowError::PaymentAlreadyProcessed);
         }
 
@@ -97,26 +103,21 @@ impl PayGateEscrow {
         let developer_amount = gross_amount - fee;
 
         let developer_key = DataKey::DeveloperBalance(developer.clone());
-        let current_developer_balance: i128 = env
-            .storage()
-            .persistent()
-            .get(&developer_key)
-            .unwrap_or(0_i128);
+        let current_developer_balance = read_persistent_i128(&env, &developer_key);
         env.storage().persistent().set(
             &developer_key,
             &(current_developer_balance + developer_amount),
         );
+        bump_persistent_ttl(&env, &developer_key);
 
-        let current_fee_balance: i128 = env
-            .storage()
-            .persistent()
-            .get(&DataKey::PlatformFeeBalance)
-            .unwrap_or(0_i128);
+        let current_fee_balance = read_persistent_i128(&env, &DataKey::PlatformFeeBalance);
         env.storage()
             .persistent()
             .set(&DataKey::PlatformFeeBalance, &(current_fee_balance + fee));
+        bump_persistent_ttl(&env, &DataKey::PlatformFeeBalance);
 
         env.storage().persistent().set(&payment_key, &true);
+        bump_persistent_ttl(&env, &payment_key);
         PaymentCredited {
             developer,
             payment_id,
@@ -130,19 +131,17 @@ impl PayGateEscrow {
     }
 
     pub fn withdraw(env: Env, developer: Address) -> Result<i128, EscrowError> {
+        bump_instance_ttl(&env);
         developer.require_auth();
 
         let developer_key = DataKey::DeveloperBalance(developer.clone());
-        let balance: i128 = env
-            .storage()
-            .persistent()
-            .get(&developer_key)
-            .unwrap_or(0_i128);
+        let balance = read_persistent_i128(&env, &developer_key);
         if balance <= 0 {
             return Err(EscrowError::NoBalance);
         }
 
         env.storage().persistent().set(&developer_key, &0_i128);
+        bump_persistent_ttl(&env, &developer_key);
         transfer_from_contract(&env, &developer, balance)?;
         DeveloperWithdrawn {
             developer,
@@ -156,11 +155,7 @@ impl PayGateEscrow {
     pub fn withdraw_platform_fee(env: Env) -> Result<i128, EscrowError> {
         let admin = require_admin(&env)?;
 
-        let balance: i128 = env
-            .storage()
-            .persistent()
-            .get(&DataKey::PlatformFeeBalance)
-            .unwrap_or(0_i128);
+        let balance = read_persistent_i128(&env, &DataKey::PlatformFeeBalance);
         if balance <= 0 {
             return Err(EscrowError::NoBalance);
         }
@@ -168,6 +163,7 @@ impl PayGateEscrow {
         env.storage()
             .persistent()
             .set(&DataKey::PlatformFeeBalance, &0_i128);
+        bump_persistent_ttl(&env, &DataKey::PlatformFeeBalance);
         transfer_from_contract(&env, &admin, balance)?;
         PlatformFeeWithdrawn {
             admin,
@@ -179,28 +175,48 @@ impl PayGateEscrow {
     }
 
     pub fn balance(env: Env, developer: Address) -> i128 {
-        env.storage()
-            .persistent()
-            .get(&DataKey::DeveloperBalance(developer))
-            .unwrap_or(0_i128)
+        bump_instance_ttl(&env);
+        read_persistent_i128(&env, &DataKey::DeveloperBalance(developer))
     }
 
     pub fn platform_fee_balance(env: Env) -> i128 {
-        env.storage()
-            .persistent()
-            .get(&DataKey::PlatformFeeBalance)
-            .unwrap_or(0_i128)
+        bump_instance_ttl(&env);
+        read_persistent_i128(&env, &DataKey::PlatformFeeBalance)
     }
 
     pub fn processed(env: Env, payment_id: Symbol) -> bool {
-        env.storage()
-            .persistent()
-            .get(&DataKey::ProcessedPayment(payment_id))
-            .unwrap_or(false)
+        bump_instance_ttl(&env);
+        let key = DataKey::ProcessedPayment(payment_id);
+        let processed = env.storage().persistent().get(&key).unwrap_or(false);
+        if processed {
+            bump_persistent_ttl(&env, &key);
+        }
+        processed
     }
 }
 
+fn bump_instance_ttl(env: &Env) {
+    env.storage()
+        .instance()
+        .extend_ttl(TTL_BUMP_THRESHOLD, TTL_EXTEND_TO);
+}
+
+fn bump_persistent_ttl(env: &Env, key: &DataKey) {
+    env.storage()
+        .persistent()
+        .extend_ttl(key, TTL_BUMP_THRESHOLD, TTL_EXTEND_TO);
+}
+
+fn read_persistent_i128(env: &Env, key: &DataKey) -> i128 {
+    let value = env.storage().persistent().get(key);
+    if value.is_some() {
+        bump_persistent_ttl(env, key);
+    }
+    value.unwrap_or(0_i128)
+}
+
 fn require_admin(env: &Env) -> Result<Address, EscrowError> {
+    bump_instance_ttl(env);
     let admin: Address = env
         .storage()
         .instance()
@@ -211,6 +227,7 @@ fn require_admin(env: &Env) -> Result<Address, EscrowError> {
 }
 
 fn transfer_from_contract(env: &Env, to: &Address, amount: i128) -> Result<(), EscrowError> {
+    bump_instance_ttl(env);
     let token_address: Address = env
         .storage()
         .instance()

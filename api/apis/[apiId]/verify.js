@@ -15,6 +15,22 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function isExpiredPendingSetup(api, status = resolveApiStatus(api)) {
+  return (
+    status === 'pending_setup'
+    && api.setup_expires_at
+    && Date.parse(api.setup_expires_at) <= Date.now()
+  );
+}
+
+async function archiveExpiredSetup(store, apiId, walletAddress) {
+  await store.updateApi(apiId, walletAddress, {
+    status: 'archived',
+    active: false,
+    archived_at: nowIso(),
+  });
+}
+
 function getApiId(req) {
   if (req.query?.apiId) return String(req.query.apiId);
   const parts = (req.url || '').split('?')[0].split('/').filter(Boolean);
@@ -139,6 +155,13 @@ export default async function handler(req, res) {
         code: 'api_archived',
       });
     }
+    if (isExpiredPendingSetup(api, status)) {
+      await archiveExpiredSetup(store, apiId, session.walletAddress);
+      return res.status(409).json({
+        error: 'This setup link has expired. Register the endpoint again to start a new setup flow.',
+        code: 'setup_expired',
+      });
+    }
 
     let verification;
     try {
@@ -188,13 +211,37 @@ export default async function handler(req, res) {
       });
     }
 
-    await store.updateApi(apiId, session.walletAddress, {
-      status: 'active',
-      active: true,
-      verified_at: nowIso(),
-      archived_at: null,
-    });
-    const updated = await store.getApi(apiId, session.walletAddress);
+    let updated;
+    try {
+      const activated = await store.activatePendingApi(apiId, session.walletAddress, nowIso());
+      if (activated) updated = await store.getApi(apiId, session.walletAddress);
+    } catch (error) {
+      if (error?.code !== '23505') throw error;
+      await store.updateApi(apiId, session.walletAddress, {
+        status: 'archived',
+        active: false,
+        archived_at: nowIso(),
+      });
+      return res.status(409).json({
+        error: 'Another wallet verified this upstream endpoint first.',
+        code: 'endpoint_claimed',
+      });
+    }
+
+    if (!updated) {
+      const latest = await store.getApi(apiId, session.walletAddress);
+      if (latest && resolveApiStatus(latest) === 'active') {
+        updated = latest;
+      } else {
+        if (latest && resolveApiStatus(latest) === 'pending_setup') {
+          await archiveExpiredSetup(store, apiId, session.walletAddress);
+        }
+        return res.status(409).json({
+          error: 'This setup expired or changed while verification was running. Register the endpoint again.',
+          code: 'setup_expired',
+        });
+      }
+    }
 
     return res.status(200).json({
       api: apiDetailResponse(req, updated),

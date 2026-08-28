@@ -3,7 +3,7 @@
 use super::*;
 use soroban_sdk::{
     symbol_short,
-    testutils::Address as _,
+    testutils::{storage::Instance as _, storage::Persistent as _, Address as _, Ledger as _},
     token::{StellarAssetClient, TokenClient},
     Address, Env, Symbol,
 };
@@ -103,4 +103,54 @@ fn admin_can_withdraw_platform_fee() {
     assert_eq!(client.platform_fee_balance(), 0);
     assert_eq!(token_client.balance(&admin), 100);
     assert_eq!(token_client.balance(&escrow), 900);
+}
+
+#[test]
+fn renews_instance_balances_and_payment_marker_ttls() {
+    let (env, escrow, _token_address, _admin, developer, _token_admin) = setup();
+    let client = PayGateEscrowClient::new(&env, &escrow);
+    let payment_id = symbol_short!("pay1");
+
+    client.credit_payment(&payment_id, &developer, &1_000);
+
+    let developer_key = DataKey::DeveloperBalance(developer.clone());
+    let fee_key = DataKey::PlatformFeeBalance;
+    let payment_key = DataKey::ProcessedPayment(payment_id.clone());
+    let initial_ttls = env.as_contract(&escrow, || {
+        (
+            env.storage().instance().get_ttl(),
+            env.storage().persistent().get_ttl(&developer_key),
+            env.storage().persistent().get_ttl(&fee_key),
+            env.storage().persistent().get_ttl(&payment_key),
+        )
+    });
+    assert!(initial_ttls.0 >= TTL_EXTEND_TO - 1);
+    assert!(initial_ttls.1 >= TTL_EXTEND_TO - 1);
+    assert!(initial_ttls.2 >= TTL_EXTEND_TO - 1);
+    assert!(initial_ttls.3 >= TTL_EXTEND_TO - 1);
+
+    env.ledger().with_mut(|ledger| {
+        ledger.sequence_number += TTL_EXTEND_TO - TTL_BUMP_THRESHOLD + 2;
+    });
+    let before_renewal = env.as_contract(&escrow, || {
+        env.storage().persistent().get_ttl(&developer_key)
+    });
+    assert!(before_renewal < TTL_BUMP_THRESHOLD);
+
+    assert_eq!(client.balance(&developer), 900);
+    assert_eq!(client.platform_fee_balance(), 100);
+    assert!(client.processed(&payment_id));
+
+    let renewed_ttls = env.as_contract(&escrow, || {
+        (
+            env.storage().instance().get_ttl(),
+            env.storage().persistent().get_ttl(&developer_key),
+            env.storage().persistent().get_ttl(&fee_key),
+            env.storage().persistent().get_ttl(&payment_key),
+        )
+    });
+    assert!(renewed_ttls.0 >= TTL_EXTEND_TO - 1);
+    assert!(renewed_ttls.1 >= TTL_EXTEND_TO - 1);
+    assert!(renewed_ttls.2 >= TTL_EXTEND_TO - 1);
+    assert!(renewed_ttls.3 >= TTL_EXTEND_TO - 1);
 }

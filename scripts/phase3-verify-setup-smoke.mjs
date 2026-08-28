@@ -14,6 +14,10 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function setupExpiresAt() {
+  return new Date(Date.now() + 60_000).toISOString();
+}
+
 function makeReq({ method = 'POST', cookie, url } = {}) {
   return {
     method,
@@ -109,7 +113,7 @@ async function startUpstream() {
       return;
     }
 
-    if (req.url?.startsWith('/v1/market-signal')) {
+    if (req.url?.startsWith('/v1/market-signal') || req.url?.startsWith('/v1/race-signal')) {
       if (suppliedSecret !== expectedSecret) {
         rejectedSecrets.push(suppliedSecret);
         res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -156,6 +160,7 @@ try {
     price_usdc: 0.01,
     status: 'pending_setup',
     active: false,
+    setup_expires_at: setupExpiresAt(),
     ...encryptApiSecret(upstreamSecret),
   });
 
@@ -187,6 +192,75 @@ try {
   const afterPublic = await store.getPublicApi(api.id);
   assert(afterPublic?.id === api.id, 'active verified API should become public');
 
+  const raceOwnerA = Keypair.random().publicKey();
+  const raceOwnerB = Keypair.random().publicKey();
+  await store.upsertDeveloper(raceOwnerA);
+  await store.upsertDeveloper(raceOwnerB);
+  const raceApiA = await store.createApi({
+    owner_wallet: raceOwnerA,
+    name: 'Race Claim A',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/race-signal',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    setup_expires_at: setupExpiresAt(),
+    ...encryptApiSecret(upstreamSecret),
+  });
+  const raceApiB = await store.createApi({
+    owner_wallet: raceOwnerB,
+    name: 'Race Claim B',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/race-signal',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    setup_expires_at: setupExpiresAt(),
+    ...encryptApiSecret(upstreamSecret),
+  });
+  const raceWinner = await call(
+    verifyHandler,
+    makeReq({
+      cookie: `${SESSION_COOKIE}=${encodeURIComponent(createSessionToken(raceOwnerA))}`,
+      url: `/api/apis/${raceApiA.id}/verify`,
+    }),
+  );
+  assert(raceWinner.statusCode === 200, 'first verified endpoint claim should activate');
+  const raceLoser = await call(
+    verifyHandler,
+    makeReq({
+      cookie: `${SESSION_COOKIE}=${encodeURIComponent(createSessionToken(raceOwnerB))}`,
+      url: `/api/apis/${raceApiB.id}/verify`,
+    }),
+  );
+  assert(raceLoser.statusCode === 409, 'second verified endpoint claim should lose atomically');
+  assert(raceLoser.body.code === 'endpoint_claimed', 'activation race should expose endpoint_claimed');
+  const archivedRaceLoser = await store.getApi(raceApiB.id, raceOwnerB);
+  assert(archivedRaceLoser.status === 'archived', 'losing endpoint claim should be archived');
+
+  const expiredApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Expired Setup API',
+    upstream_base_url: upstream.baseUrl,
+    path: '/v1/expired',
+    method: 'GET',
+    price_usdc: 0.01,
+    status: 'pending_setup',
+    active: false,
+    setup_expires_at: new Date(Date.now() - 1_000).toISOString(),
+    ...encryptApiSecret(upstreamSecret),
+  });
+  const expiredVerify = await call(
+    verifyHandler,
+    makeReq({ cookie, url: `/api/apis/${expiredApi.id}/verify` }),
+  );
+  assert(expiredVerify.statusCode === 409, 'expired setup verification should return 409');
+  assert(expiredVerify.body.code === 'setup_expired', 'expired setup should expose setup_expired');
+  const archivedExpired = await store.getApi(expiredApi.id, ownerWallet);
+  assert(archivedExpired.status === 'archived', 'expired setup should be archived');
+
   const archived = await store.createApi({
     owner_wallet: ownerWallet,
     name: 'Archived API',
@@ -214,6 +288,7 @@ try {
     price_usdc: 0.01,
     status: 'pending_setup',
     active: false,
+    setup_expires_at: setupExpiresAt(),
     ...encryptApiSecret('open-secret'),
   });
   const openVerify = await call(
@@ -232,6 +307,7 @@ try {
     price_usdc: 0.01,
     status: 'pending_setup',
     active: false,
+    setup_expires_at: setupExpiresAt(),
     ...encryptApiSecret('old-probe-secret'),
   });
   const oldProbeBypassVerify = await call(
@@ -250,6 +326,7 @@ try {
     price_usdc: 0.01,
     status: 'pending_setup',
     active: false,
+    setup_expires_at: setupExpiresAt(),
     ...encryptApiSecret(upstreamSecret),
   });
   const errorOnInvalidVerify = await call(
@@ -271,6 +348,7 @@ try {
     price_usdc: 0.01,
     status: 'pending_setup',
     active: false,
+    setup_expires_at: setupExpiresAt(),
     ...encryptApiSecret(upstreamSecret),
   });
   const nonJsonVerify = await call(
@@ -289,6 +367,7 @@ try {
     price_usdc: 0.01,
     status: 'pending_setup',
     active: false,
+    setup_expires_at: setupExpiresAt(),
     ...encryptApiSecret(upstreamSecret),
   });
   const malformedJsonVerify = await call(

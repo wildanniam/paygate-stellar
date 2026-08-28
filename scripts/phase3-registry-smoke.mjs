@@ -125,7 +125,7 @@ assert(sameOwnerDuplicate.statusCode === 409, 'same owner duplicate should retur
 assert(sameOwnerDuplicate.body.code === 'duplicate_api', 'same owner duplicate should expose duplicate_api code');
 assert(sameOwnerDuplicate.body.existingApiId === created.body.api.id, 'same owner duplicate should return existing API id');
 
-const otherOwnerDuplicate = await call(
+const otherOwnerPending = await call(
   apisHandler,
   makeReq({
     method: 'POST',
@@ -138,8 +138,8 @@ const otherOwnerDuplicate = await call(
     },
   }),
 );
-assert(otherOwnerDuplicate.statusCode === 409, 'other owner duplicate should return 409');
-assert(otherOwnerDuplicate.body.code === 'endpoint_claimed', 'other owner duplicate should expose endpoint_claimed code');
+assert(otherOwnerPending.statusCode === 201, 'another wallet may complete an independent pending setup');
+assert(otherOwnerPending.body.api.status === 'pending_setup', 'competing setup should remain pending until verified');
 
 const ownerList = await call(apisHandler, makeReq({ method: 'GET', cookie: ownerCookie }));
 assert(ownerList.statusCode === 200, 'owner list should return 200');
@@ -147,7 +147,90 @@ assert(ownerList.body.apis.length === 1, 'owner should see one API');
 
 const otherList = await call(apisHandler, makeReq({ method: 'GET', cookie: otherCookie }));
 assert(otherList.statusCode === 200, 'other list should return 200');
-assert(otherList.body.apis.length === 0, 'other wallet should not see owner API');
+assert(otherList.body.apis.length === 1, 'other wallet should see its own pending setup');
+
+const claimOwner = await call(
+  apisHandler,
+  makeReq({
+    method: 'POST',
+    cookie: ownerCookie,
+    body: {
+      name: 'Verified Claim API',
+      upstreamBaseUrl: 'https://example.com',
+      path: '/v1/verified-claim',
+      priceUsdc: '0.01',
+    },
+  }),
+);
+const claimCompetitor = await call(
+  apisHandler,
+  makeReq({
+    method: 'POST',
+    cookie: otherCookie,
+    body: {
+      name: 'Competing Claim API',
+      upstreamBaseUrl: 'https://example.com',
+      path: '/v1/verified-claim',
+      priceUsdc: '0.01',
+    },
+  }),
+);
+assert(claimOwner.statusCode === 201 && claimCompetitor.statusCode === 201, 'competing pending claims should be allowed');
+await store.activatePendingApi(claimOwner.body.api.id, owner);
+
+let activationConflict;
+try {
+  await store.activatePendingApi(claimCompetitor.body.api.id, other);
+} catch (error) {
+  activationConflict = error;
+}
+assert(activationConflict?.code === '23505', 'only one competing setup may activate');
+
+const third = Keypair.random().publicKey();
+const activeClaimed = await call(
+  apisHandler,
+  makeReq({
+    method: 'POST',
+    cookie: makeCookie(third),
+    body: {
+      name: 'Late Claim API',
+      upstreamBaseUrl: 'https://example.com',
+      path: '/v1/verified-claim',
+      priceUsdc: '0.01',
+    },
+  }),
+);
+assert(activeClaimed.statusCode === 409, 'verified active endpoint should reject new setup claims');
+assert(activeClaimed.body.code === 'endpoint_claimed', 'verified endpoint conflict should expose endpoint_claimed');
+
+const expired = await store.createApi({
+  owner_wallet: owner,
+  name: 'Expired Setup API',
+  upstream_base_url: 'https://example.com',
+  path: '/v1/expired-setup',
+  method: 'GET',
+  price_usdc: 0.01,
+  status: 'pending_setup',
+  active: false,
+  setup_expires_at: new Date(Date.now() - 1_000).toISOString(),
+  ...encryptApiSecret('expired-secret'),
+});
+const replacement = await call(
+  apisHandler,
+  makeReq({
+    method: 'POST',
+    cookie: ownerCookie,
+    body: {
+      name: 'Replacement Setup API',
+      upstreamBaseUrl: 'https://example.com',
+      path: '/v1/expired-setup',
+      priceUsdc: '0.01',
+    },
+  }),
+);
+assert(replacement.statusCode === 201, 'expired pending setup should release its owner claim');
+const archivedExpired = await store.getApi(expired.id, owner);
+assert(archivedExpired.status === 'archived', 'expired setup should be archived during registration cleanup');
 
 await store.createApi({
   owner_wallet: other,

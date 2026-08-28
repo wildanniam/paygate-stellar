@@ -1,10 +1,12 @@
+import crypto from 'node:crypto';
 import { Challenge, Credential, Receipt } from 'mppx';
 import { Mppx, stellar } from '@stellar/mpp/charge/server';
 import { USDC_SAC_TESTNET, fromBaseUnits, toBaseUnits } from '@stellar/mpp';
 import { getOrigin } from '../../server/lib/auth.js';
 import { decryptApiSecret } from '../../server/lib/apiSecret.js';
-import { creditEscrowPayment, getEscrowContractId, hasEscrowCreditConfig } from '../../server/lib/escrowContract.js';
+import { getEscrowContractId, hasEscrowCreditConfig } from '../../server/lib/escrowContract.js';
 import { createMppReplayStore } from '../../server/lib/mppReplayStore.js';
+import { ensureEscrowCredit } from '../../server/lib/paymentCredit.js';
 import { createPaymentId } from '../../server/lib/paymentId.js';
 import { getRegistryStore } from '../../server/lib/registryStore.js';
 import { enforceRateLimit, getClientIp } from '../../server/lib/rateLimit.js';
@@ -16,6 +18,7 @@ import {
 } from '../../server/lib/upstreamSecurity.js';
 
 const mppxByConfig = new Map();
+const FORWARDING_STALE_MS = 2 * 60 * 1000;
 
 function nowIso() {
   return new Date().toISOString();
@@ -275,7 +278,7 @@ function buildUpstreamUrl(req, api) {
   return upstream;
 }
 
-async function forwardToUpstream(req, api) {
+async function forwardToUpstream(req, api, proxyRequest) {
   const upstreamUrl = buildUpstreamUrl(req, api);
   await assertSafeUpstreamUrl(upstreamUrl);
   const secret = decryptApiSecret(api);
@@ -284,6 +287,9 @@ async function forwardToUpstream(req, api) {
     headers: {
       Accept: req.headers.accept || 'application/json',
       'X-PayGate-Secret': secret,
+      'X-PayGate-Request-Id': proxyRequest.id,
+      'X-PayGate-Payment-Id': proxyRequest.payment_id,
+      'Idempotency-Key': `paygate:${proxyRequest.id}`,
     },
   }));
 }
@@ -401,10 +407,13 @@ export default async function handler(req, res) {
       }
     }
 
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: recordedPayment ? 'payment_verified' : 'payment_submitted',
-      error_message: null,
-    });
+    if (!recordedPayment) {
+      await store.transitionProxyRequest(
+        proxyRequest.id,
+        ['challenge_sent', 'payment_failed', 'payment_submitted'],
+        { status: 'payment_submitted', error_message: null },
+      );
+    }
   } else {
     paymentId = createPaymentId();
     proxyRequest = await store.createProxyRequest({
@@ -440,40 +449,57 @@ export default async function handler(req, res) {
 
   if (recordedPayment) {
     verified = createRecordedPaymentResult(recordedPayment, paymentId);
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: recordedPayment.credit_tx_hash ? 'credited' : 'payment_verified',
-      payer_wallet: proxyRequest.payer_wallet || payerWallet,
-      tx_hash: recordedPayment.tx_hash,
-      paid_at: proxyRequest.paid_at || recordedPayment.verified_at || nowIso(),
-      error_message: null,
-    });
+    const paymentWasCredited = recordedPayment.credit_status === 'credited' && recordedPayment.credit_tx_hash;
+    await store.transitionProxyRequest(
+      proxyRequest.id,
+      ['challenge_sent', 'payment_submitted', 'payment_failed', 'payment_verified', 'credit_pending', 'credited', 'upstream_failed'],
+      {
+        status: paymentWasCredited ? 'credited' : 'payment_verified',
+        payer_wallet: proxyRequest.payer_wallet || payerWallet,
+        tx_hash: recordedPayment.tx_hash,
+        paid_at: proxyRequest.paid_at || recordedPayment.verified_at || nowIso(),
+        error_message: null,
+      },
+    );
   } else {
     try {
       verified = await verifyPayment({ api, credential, mppx, paymentId, req });
     } catch (error) {
-      await store.updateProxyRequest(proxyRequest.id, {
-        status: 'payment_failed',
-        error_message: error instanceof Error ? error.message : 'Payment verification failed',
-      });
+      await store.transitionProxyRequest(
+        proxyRequest.id,
+        ['challenge_sent', 'payment_submitted', 'payment_failed'],
+        {
+          status: 'payment_failed',
+          error_message: error instanceof Error ? error.message : 'Payment verification failed',
+        },
+      );
       return sendJson(res, 402, { error: 'Payment verification failed' });
     }
 
     if (verified.challengeResponse) {
-      await store.updateProxyRequest(proxyRequest.id, {
-        status: 'payment_failed',
-        error_message: 'Payment verification returned a new challenge',
-      });
+      await store.transitionProxyRequest(
+        proxyRequest.id,
+        ['challenge_sent', 'payment_submitted', 'payment_failed'],
+        {
+          status: 'payment_failed',
+          error_message: 'Payment verification returned a new challenge',
+        },
+      );
       return sendResponse(res, verified.challengeResponse);
     }
 
     const receipt = verified.receipt;
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'payment_verified',
-      payer_wallet: payerWallet,
-      tx_hash: receipt.reference,
-      paid_at: nowIso(),
-      error_message: null,
-    });
+    await store.transitionProxyRequest(
+      proxyRequest.id,
+      ['challenge_sent', 'payment_submitted', 'payment_failed', 'payment_verified'],
+      {
+        status: 'payment_verified',
+        payer_wallet: payerWallet,
+        tx_hash: receipt.reference,
+        paid_at: nowIso(),
+        error_message: null,
+      },
+    );
   }
 
   const amounts = paymentAmounts(grossBaseUnits);
@@ -497,52 +523,100 @@ export default async function handler(req, res) {
       if (existingPayment && existingPayment.tx_hash === verified.receipt.reference) {
         recordedPayment = existingPayment;
       } else {
-        await store.updateProxyRequest(proxyRequest.id, {
-          status: 'duplicate_payment',
-          error_message: 'Payment was already recorded',
-        });
+        await store.transitionProxyRequest(
+          proxyRequest.id,
+          ['challenge_sent', 'payment_submitted', 'payment_failed', 'payment_verified'],
+          {
+            status: 'duplicate_payment',
+            error_message: 'Payment was already recorded',
+          },
+        );
         return sendJson(res, 409, { error: 'Payment was already recorded' });
       }
     }
   }
 
-  if (!recordedPayment.credit_tx_hash) {
-    await store.updateProxyRequest(proxyRequest.id, { status: 'credit_pending' });
-    let credit;
-    try {
-      credit = await creditEscrowPayment({
-        paymentId,
-        developerWallet: api.owner_wallet,
-        grossAmountBaseUnits: grossBaseUnits,
-      });
-    } catch (error) {
-      await store.updateProxyRequest(proxyRequest.id, {
+  if (recordedPayment.credit_status !== 'credited' || !recordedPayment.credit_tx_hash) {
+    await store.transitionProxyRequest(
+      proxyRequest.id,
+      ['challenge_sent', 'payment_submitted', 'payment_failed', 'payment_verified', 'credit_pending'],
+      { status: 'credit_pending', error_message: null },
+    );
+  }
+
+  try {
+    const credit = await ensureEscrowCredit({
+      store,
+      paymentId,
+      developerWallet: api.owner_wallet,
+      grossAmountBaseUnits: grossBaseUnits,
+    });
+    recordedPayment = credit.payment;
+  } catch (error) {
+    await store.transitionProxyRequest(
+      proxyRequest.id,
+      ['challenge_sent', 'payment_submitted', 'payment_failed', 'payment_verified', 'credit_pending'],
+      {
         status: 'credit_pending',
         error_message: error instanceof Error ? error.message : 'Escrow credit failed',
-      });
-      return sendJson(
-        res,
-        502,
-        { error: 'Escrow credit failed', retryable: true, paymentId },
-        paymentHeaders({ receiptHeader: verified.receiptHeader, paymentId, retryable: true }),
-      );
-    }
-
-    recordedPayment = await store.updatePayment(paymentId, {
-      credit_tx_hash: credit.txHash,
-      credited_at: nowIso(),
-    });
+      },
+    );
+    return sendJson(
+      res,
+      502,
+      {
+        error: 'Escrow credit failed',
+        code: error?.code || 'ESCROW_CREDIT_FAILED',
+        retryable: true,
+        paymentId,
+      },
+      paymentHeaders({ receiptHeader: verified.receiptHeader, paymentId, retryable: true }),
+    );
   }
-  await store.updateProxyRequest(proxyRequest.id, { status: 'credited' });
+
+  await store.transitionProxyRequest(
+    proxyRequest.id,
+    ['payment_verified', 'credit_pending', 'credited', 'upstream_failed'],
+    { status: 'credited', error_message: null },
+  );
+
+  const forwardingAttemptId = crypto.randomUUID();
+  const forwardingClaim = await store.claimProxyRequestForwarding(
+    proxyRequest.id,
+    forwardingAttemptId,
+    new Date(Date.now() - FORWARDING_STALE_MS).toISOString(),
+  );
+  if (!forwardingClaim) {
+    const latestRequest = await store.getProxyRequestByPaymentId(paymentId);
+    if (latestRequest?.status === 'forwarded') {
+      return sendJson(res, 409, { error: 'Payment credential was already used' });
+    }
+    return sendJson(
+      res,
+      409,
+      {
+        error: 'Paid request delivery is already in progress',
+        code: 'delivery_in_progress',
+        retryable: true,
+        paymentId,
+      },
+      paymentHeaders({ receiptHeader: verified.receiptHeader, paymentId, retryable: true }),
+    );
+  }
 
   let upstreamResponse;
   try {
-    upstreamResponse = await forwardToUpstream(req, api);
+    upstreamResponse = await forwardToUpstream(req, api, forwardingClaim);
   } catch (error) {
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'upstream_failed',
-      error_message: error instanceof Error ? error.message : 'Upstream request failed',
-    });
+    await store.transitionProxyRequest(
+      proxyRequest.id,
+      ['forwarding'],
+      {
+        status: 'upstream_failed',
+        error_message: error instanceof Error ? error.message : 'Upstream request failed',
+      },
+      forwardingAttemptId,
+    );
     return sendJson(
       res,
       502,
@@ -556,11 +630,16 @@ export default async function handler(req, res) {
     responseText = await readLimitedResponseText(upstreamResponse);
   } catch (error) {
     if (!isUpstreamResponseTooLarge(error)) throw error;
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'upstream_failed',
-      upstream_status: upstreamResponse.status,
-      error_message: error.message,
-    });
+    await store.transitionProxyRequest(
+      proxyRequest.id,
+      ['forwarding'],
+      {
+        status: 'upstream_failed',
+        upstream_status: upstreamResponse.status,
+        error_message: error.message,
+      },
+      forwardingAttemptId,
+    );
     return sendJson(
       res,
       502,
@@ -572,11 +651,16 @@ export default async function handler(req, res) {
   if (!upstreamResponse.ok) {
     if (isRedirectStatus(upstreamResponse.status)) {
       const message = 'Upstream redirected; update the endpoint upstream URL to its canonical HTTPS URL';
-      await store.updateProxyRequest(proxyRequest.id, {
-        status: 'upstream_failed',
-        upstream_status: upstreamResponse.status,
-        error_message: message,
-      });
+      await store.transitionProxyRequest(
+        proxyRequest.id,
+        ['forwarding'],
+        {
+          status: 'upstream_failed',
+          upstream_status: upstreamResponse.status,
+          error_message: message,
+        },
+        forwardingAttemptId,
+      );
       return sendJson(
         res,
         502,
@@ -590,11 +674,16 @@ export default async function handler(req, res) {
       );
     }
 
-    await store.updateProxyRequest(proxyRequest.id, {
-      status: 'upstream_failed',
-      upstream_status: upstreamResponse.status,
-      error_message: responseText.slice(0, 500),
-    });
+    await store.transitionProxyRequest(
+      proxyRequest.id,
+      ['forwarding'],
+      {
+        status: 'upstream_failed',
+        upstream_status: upstreamResponse.status,
+        error_message: responseText.slice(0, 500),
+      },
+      forwardingAttemptId,
+    );
     res.setHeader('Payment-Receipt', verified.receiptHeader);
     res.setHeader('X-PayGate-Payment-Id', paymentId);
     res.setHeader('X-PayGate-Retryable', 'true');
@@ -603,11 +692,17 @@ export default async function handler(req, res) {
     return res.end(responseText);
   }
 
-  await store.updateProxyRequest(proxyRequest.id, {
-    status: 'forwarded',
-    upstream_status: upstreamResponse.status,
-    forwarded_at: nowIso(),
-  });
+  await store.transitionProxyRequest(
+    proxyRequest.id,
+    ['forwarding'],
+    {
+      status: 'forwarded',
+      upstream_status: upstreamResponse.status,
+      forwarded_at: nowIso(),
+      error_message: null,
+    },
+    forwardingAttemptId,
+  );
 
   res.statusCode = upstreamResponse.status;
   res.setHeader('Payment-Receipt', verified.receiptHeader);

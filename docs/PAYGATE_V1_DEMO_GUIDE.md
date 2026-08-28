@@ -335,6 +335,7 @@ Expanded command list:
 npm run beta:preflight        # deployed env only; requires real secrets
 npm run test:auth
 npm run test:auth:supabase    # optional; skips when Supabase env is absent
+npm run test:distributed-state:supabase
 npm run test:registry
 npm run test:upstream
 npm run test:proxy-unpaid
@@ -351,6 +352,14 @@ npm run audit:all
 npm run audit:rust
 npm run scan:secrets
 ```
+
+For a deployed staging replay, set `PAYGATE_SMOKE_TARGET=staging`, the expected Supabase project ref, and both the staging/expected origin to the same canonical HTTPS origin. Then run:
+
+```bash
+npm run test:staging:live-replay
+```
+
+The script refuses production-like ambiguity: it requires Stellar testnet, Supabase storage, real MPP/escrow modes, an exact project-ref match, and an exact origin match. It creates a temporary `0.0010000 USDC` staging endpoint, proves `401 -> 402 -> paid 200 -> credited dashboard -> signed withdrawal`, and cleans its database/replay fixtures. It spends testnet USDC and must never be pointed at mainnet or an unreviewed project.
 
 Evidence run setup:
 
@@ -378,5 +387,7 @@ npm run admin:withdraw-fees
 - No external user beta yet.
 - No fiat checkout.
 - No refund flow if upstream fails after payment.
+- Paid forwarding is atomically claimed and carries a stable `Idempotency-Key`; an upstream must honor that key to guarantee side-effect deduplication across a crash after upstream commit.
+- Escrow storage renews on use to approximately 30 days. Fully inactive deployments need maintenance/restore planning.
 - Admin/operator secret must stay server-side.
 - V1 is demo/POC quality, not mainnet billing infrastructure.

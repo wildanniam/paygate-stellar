@@ -54,6 +54,24 @@ async function retryStoreWrite(operation, attempts = 3) {
   throw lastError;
 }
 
+async function getOrCreateWithdrawal({ store, walletAddress, amountUsdc, txHash }) {
+  const existing = await store.getWithdrawalByTxHash(txHash, walletAddress);
+  if (existing) return existing;
+
+  try {
+    return await store.createWithdrawal({
+      wallet_address: walletAddress,
+      amount_usdc: amountUsdc,
+      tx_hash: txHash,
+      status: 'pending',
+    });
+  } catch (error) {
+    const recovered = await retryStoreWrite(() => store.getWithdrawalByTxHash(txHash, walletAddress));
+    if (recovered) return recovered;
+    throw error;
+  }
+}
+
 function resolvedWithdrawalAmount(submitted, preparation, withdrawal) {
   if (Number(submitted?.amountUsdc || 0) > 0) return submitted.amountUsdc;
   return String(withdrawal?.amount_usdc ?? preparation.amount_usdc);
@@ -65,12 +83,12 @@ async function completeWithdrawal({ store, preparation, withdrawal, submitted, w
     currentWithdrawal = await store.getWithdrawal(preparation.withdrawal_id, walletAddress);
   }
   if (!currentWithdrawal) {
-    currentWithdrawal = await retryStoreWrite(() => store.createWithdrawal({
-      wallet_address: walletAddress,
-      amount_usdc: preparation.amount_usdc,
-      tx_hash: preparation.tx_hash,
-      status: 'pending',
-    }));
+    currentWithdrawal = await getOrCreateWithdrawal({
+      store,
+      walletAddress,
+      amountUsdc: preparation.amount_usdc,
+      txHash: preparation.tx_hash,
+    });
   }
 
   const txHash = submitted.txHash || preparation.tx_hash;
@@ -257,11 +275,11 @@ export async function handleSubmit(req, res) {
         return res.status(409).json({ error: 'Withdrawal preparation was already used or expired' });
       }
 
-      withdrawal = await store.createWithdrawal({
-        wallet_address: session.walletAddress,
-        amount_usdc: before.developerBalance.usdc,
-        tx_hash: claimedPreparation.tx_hash,
-        status: 'pending',
+      withdrawal = await getOrCreateWithdrawal({
+        store,
+        walletAddress: session.walletAddress,
+        amountUsdc: before.developerBalance.usdc,
+        txHash: claimedPreparation.tx_hash,
       });
       claimedPreparation = await store.updateWithdrawalPreparation(claimedPreparation.id, session.walletAddress, {
         withdrawal_id: withdrawal.id,
@@ -271,11 +289,11 @@ export async function handleSubmit(req, res) {
     }
 
     if (!withdrawal) {
-      withdrawal = await store.createWithdrawal({
-        wallet_address: session.walletAddress,
-        amount_usdc: preparation.amount_usdc,
-        tx_hash: preparation.tx_hash,
-        status: 'pending',
+      withdrawal = await getOrCreateWithdrawal({
+        store,
+        walletAddress: session.walletAddress,
+        amountUsdc: preparation.amount_usdc,
+        txHash: preparation.tx_hash,
       });
       claimedPreparation = await store.updateWithdrawalPreparation(preparation.id, session.walletAddress, {
         status: 'submitted',

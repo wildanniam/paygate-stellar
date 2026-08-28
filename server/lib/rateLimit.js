@@ -17,7 +17,8 @@ function shouldUseMemoryStore() {
 
 function getRedisClient() {
   if (redisClient) return redisClient;
-  const { url, token } = getRateLimitRedisConfig();
+  const { url, token, error } = getRateLimitRedisConfig();
+  if (error) throw new Error(error);
   if (!url || !token) return null;
   redisClient = new Redis({ url, token });
   return redisClient;

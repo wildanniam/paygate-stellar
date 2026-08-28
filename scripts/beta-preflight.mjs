@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { createClient } from '@supabase/supabase-js';
 import { StrKey } from '@stellar/stellar-sdk';
@@ -24,12 +25,13 @@ const REQUIRED_ENV = [
 const TABLE_CHECKS = [
   ['developers', 'id,wallet_address,created_at,last_login_at'],
   ['auth_challenges', 'id,wallet_address,nonce,message,expires_at,used_at,created_at'],
-  ['apis', 'id,owner_wallet,name,upstream_base_url,path,method,price_usdc,active,created_at,updated_at'],
-  ['proxy_requests', 'id,api_id,owner_wallet,payment_id,status,price_usdc,tx_hash,created_at'],
-  ['payments', 'id,request_id,api_id,payment_id,tx_hash,credit_tx_hash,gross_amount_usdc,created_at'],
+  ['apis', 'id,owner_wallet,name,upstream_base_url,path,method,price_usdc,status,active,setup_expires_at,created_at,updated_at'],
+  ['proxy_requests', 'id,api_id,owner_wallet,payment_id,status,price_usdc,tx_hash,forwarding_started_at,forwarding_attempt_id,created_at'],
+  ['payments', 'id,request_id,api_id,payment_id,tx_hash,credit_tx_hash,credit_status,credit_transaction_xdr,credit_attempt_id,credit_started_at,credit_submitted_at,credit_error,gross_amount_usdc,created_at'],
   ['withdrawals', 'id,wallet_address,amount_usdc,tx_hash,status,created_at,completed_at'],
   ['withdrawal_preparations', 'id,wallet_address,withdrawal_id,tx_hash,amount_usdc,status,expires_at,created_at'],
   ['mpp_store', 'key,value,created_at,updated_at'],
+  ['operator_submission_locks', 'lock_name,lease_token,lease_expires_at,updated_at'],
 ];
 
 const checks = [];
@@ -97,7 +99,8 @@ function publicOriginError(value) {
 }
 
 async function checkUpstash() {
-  const { url, token } = getRateLimitRedisConfig();
+  const { url, token, error } = getRateLimitRedisConfig();
+  if (error) return;
   if (!url || !token || !isHttpsUrl(url)) return;
 
   try {
@@ -126,6 +129,10 @@ function checkRequiredEnv() {
   }
 
   const upstash = getRateLimitRedisConfig();
+  if (upstash.error) {
+    fail('Upstash Redis credentials resolve as one complete pair', upstash.error);
+    return;
+  }
   if (!upstash.url) {
     fail('Upstash Redis REST URL is set', 'Use UPSTASH_REDIS_REST_URL or the Vercel Marketplace KV_REST_API_URL alias.');
   } else {
@@ -321,6 +328,38 @@ async function checkSupabaseTables() {
     } else {
       pass(`Supabase table ${table} is queryable`);
     }
+  }
+
+  const { error: analyticsError } = await client.rpc('get_paygate_dashboard_analytics', {
+    p_owner_wallet: 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+    p_since: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  });
+  if (analyticsError) {
+    fail('Supabase dashboard aggregation function is callable', analyticsError.message);
+  } else {
+    pass('Supabase dashboard aggregation function is callable');
+  }
+
+  const lockName = `beta_preflight_${crypto.randomUUID()}`;
+  const leaseToken = crypto.randomUUID();
+  const { data: claimed, error: claimError } = await client.rpc('claim_operator_submission_lock', {
+    p_lock_name: lockName,
+    p_lease_token: leaseToken,
+    p_lease_seconds: 5,
+  });
+  const { data: released, error: releaseError } = claimError
+    ? { data: false, error: claimError }
+    : await client.rpc('release_operator_submission_lock', {
+      p_lock_name: lockName,
+      p_lease_token: leaseToken,
+    });
+  if (claimError || releaseError || claimed !== true || released !== true) {
+    fail(
+      'Supabase operator submission lease is atomic',
+      claimError?.message || releaseError?.message || 'Lease claim/release returned an unexpected result.',
+    );
+  } else {
+    pass('Supabase operator submission lease is atomic');
   }
 }
 

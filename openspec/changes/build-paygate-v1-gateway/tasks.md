@@ -12,7 +12,7 @@
 
 - [x] Scaffold `contracts/` workspace.
 - [x] Replace sample contract with `paygate-escrow` skeleton.
-- [x] Run contract unit tests (`cargo test`, currently 5 passed).
+- [x] Run contract unit tests (`cargo test`, currently 6 passed).
 - [x] Build contract WASM (`stellar contract build`, hash `b17921b9446d6155d38d7cf9c842082f92c0d01027a59aadc6802a4c9d74d751`).
 - [x] Deploy escrow contract on Soroban testnet.
 - [x] Confirm USDC testnet token contract address.
@@ -113,4 +113,14 @@
 - [x] Increase new payment IDs to 120 bits of entropy and prove MPP/Soroban compatibility.
 - [x] Expand deployment preflight checks for the canonical origin, Upstash, cron authentication, and mock modes.
 - [x] Record current local verification, dependency warnings, and deployment blockers in beta readiness evidence.
-- [ ] Replay the hardened branch on Vercel with zero preflight failures and capture fresh screenshots, tx hashes, and video.
+- [x] Resolve Redis aliases as complete credential pairs and reject partial/conflicting configuration.
+- [x] Make pending ownership expiring and active ownership verified-only with atomic activation.
+- [x] Make withdrawal accounting unique and recoverable by transaction hash.
+- [x] Add atomic upstream forwarding claims and a stable request idempotency key.
+- [x] Persist and reconcile exact escrow-credit XDR while serializing the operator source account.
+- [x] Renew Soroban instance, balance, fee, and processed-payment TTL during use.
+- [x] Move dashboard totals to exact credited-only Supabase aggregates.
+- [x] Add dependency review, CodeQL, and Dependabot configuration.
+- [x] Apply the hardening migration and replay real payment/credit/dashboard/withdrawal in isolated staging.
+- [ ] Apply the reviewed migration/contract rollout to production after its Supabase project resumes.
+- [ ] Capture final production screenshots and demo video.

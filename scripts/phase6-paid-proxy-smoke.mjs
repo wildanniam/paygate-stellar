@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { Challenge, Credential, Receipt } from 'mppx';
 import { USDC_SAC_TESTNET } from '@stellar/mpp';
 import { encryptApiSecret } from '../server/lib/apiSecret.js';
+import { getMockEscrowCreditSubmissionCountForTest } from '../server/lib/escrowContract.js';
 import { PAYMENT_ID_LENGTH, PAYMENT_ID_PATTERN } from '../server/lib/paymentId.js';
 import {
   clearRegistryForTest,
@@ -24,7 +25,12 @@ const PAYER_WALLET = 'GBGXIGC36FD6COHDTBOA6KU4BW3U7UBVABMHKNRB4CRUHCIKH42IILLW';
 const PAYMENT_TX_HASH = 'a'.repeat(64);
 const RETRY_PAYMENT_TX_HASH = 'b'.repeat(64);
 const REDIRECT_PAYMENT_TX_HASH = 'c'.repeat(64);
+const CONCURRENT_PAYMENT_TX_HASH = 'd'.repeat(64);
+const RECOVERY_PAYMENT_TX_HASH = 'e'.repeat(64);
 let flakyFailuresRemaining = 1;
+let concurrentUpstreamCalls = 0;
+let recoveryUpstreamCalls = 0;
+const concurrentDeliveryHeaders = [];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -46,6 +52,8 @@ async function startServer() {
       req.url?.startsWith('/upstream/market-signal')
       || req.url?.startsWith('/upstream/flaky-signal')
       || req.url?.startsWith('/upstream/redirect-signal')
+      || req.url?.startsWith('/upstream/concurrent-signal')
+      || req.url?.startsWith('/upstream/recovery-signal')
     ) {
       if (req.headers['x-paygate-secret'] !== UPSTREAM_SECRET) {
         res.statusCode = 401;
@@ -70,15 +78,31 @@ async function startServer() {
         return;
       }
 
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.end(
-        JSON.stringify({
-          signal: 'bullish',
-          confidence: 0.82,
-          source: 'PayGate demo upstream API',
-        }),
-      );
+      const respond = () => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(
+          JSON.stringify({
+            signal: 'bullish',
+            confidence: 0.82,
+            source: 'PayGate demo upstream API',
+          }),
+        );
+      };
+      if (req.url?.startsWith('/upstream/concurrent-signal')) {
+        concurrentUpstreamCalls += 1;
+        concurrentDeliveryHeaders.push({
+          requestId: req.headers['x-paygate-request-id'],
+          paymentId: req.headers['x-paygate-payment-id'],
+          idempotencyKey: req.headers['idempotency-key'],
+        });
+        setTimeout(respond, 150);
+        return;
+      }
+      if (req.url?.startsWith('/upstream/recovery-signal')) {
+        recoveryUpstreamCalls += 1;
+      }
+      respond();
       return;
     }
 
@@ -162,6 +186,9 @@ try {
   assert(payments[0].payment_id === paymentId, 'payment row payment id mismatch');
   assert(payments[0].tx_hash === PAYMENT_TX_HASH, 'payment row tx hash mismatch');
   assert(payments[0].credit_tx_hash === `mock-credit-${paymentId}`, 'payment credit tx hash mismatch');
+  assert(payments[0].credit_status === 'credited', 'payment credit state should be finalized');
+  assert(payments[0].credit_transaction_xdr?.includes(paymentId), 'signed credit transaction should be persisted');
+  assert(getMockEscrowCreditSubmissionCountForTest(paymentId) === 1, 'escrow credit should submit once');
   assert(payments[0].gross_amount_usdc === '0.0200000', 'gross amount mismatch');
   assert(payments[0].developer_amount_usdc === '0.0180000', 'developer amount mismatch');
   assert(payments[0].platform_fee_usdc === '0.0020000', 'platform fee mismatch');
@@ -178,7 +205,7 @@ try {
     owner_wallet: ownerWallet,
     name: 'Wrong API',
     upstream_base_url: server.baseUrl,
-    path: '/upstream/market-signal',
+    path: '/upstream/wrong-signal',
     method: 'GET',
     price_usdc: 0.02,
     active: true,
@@ -256,6 +283,97 @@ try {
     },
   });
   assert(flakyDuplicate.status === 409, `flaky duplicate after success expected 409, got ${flakyDuplicate.status}`);
+
+  const concurrentApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Concurrent Paid Proxy API',
+    upstream_base_url: server.baseUrl,
+    path: '/upstream/concurrent-signal',
+    method: 'GET',
+    price_usdc: 0.02,
+    active: true,
+    ...encrypted,
+  });
+  const concurrentUnpaid = await fetch(`${server.baseUrl}/api/pay/${concurrentApi.id}`);
+  const concurrentRequestId = concurrentUnpaid.headers.get('x-paygate-request-id');
+  const concurrentPaymentId = concurrentUnpaid.headers.get('x-paygate-payment-id');
+  const concurrentCredential = Credential.serialize({
+    challenge: Challenge.fromResponse(concurrentUnpaid),
+    payload: { type: 'hash', hash: CONCURRENT_PAYMENT_TX_HASH },
+    source: `did:pkh:stellar:testnet:${PAYER_WALLET}`,
+  });
+  const concurrentResponses = await Promise.all([
+    fetch(`${server.baseUrl}/api/pay/${concurrentApi.id}`, {
+      headers: { Authorization: concurrentCredential },
+    }),
+    fetch(`${server.baseUrl}/api/pay/${concurrentApi.id}`, {
+      headers: { Authorization: concurrentCredential },
+    }),
+  ]);
+  const concurrentStatuses = concurrentResponses.map((response) => response.status).sort();
+  assert(
+    concurrentStatuses[0] === 200 && concurrentStatuses[1] === 409,
+    `concurrent paid requests expected 200/409, got ${concurrentStatuses.join('/')}`,
+  );
+  assert(concurrentUpstreamCalls === 1, 'concurrent credential use must forward upstream exactly once');
+  assert(concurrentDeliveryHeaders.length === 1, 'only the claimed delivery should reach upstream');
+  assert(concurrentDeliveryHeaders[0].requestId === concurrentRequestId, 'upstream request id should be stable');
+  assert(concurrentDeliveryHeaders[0].paymentId === concurrentPaymentId, 'upstream payment id should be stable');
+  assert(
+    concurrentDeliveryHeaders[0].idempotencyKey === `paygate:${concurrentRequestId}`,
+    'upstream idempotency key should be stable across recovery',
+  );
+  assert(
+    getMockEscrowCreditSubmissionCountForTest(concurrentPaymentId) === 1,
+    'concurrent payment handling must submit one escrow credit transaction',
+  );
+  const concurrentRequest = getRawProxyRequestsForTest().find((row) => row.payment_id === concurrentPaymentId);
+  assert(concurrentRequest.status === 'forwarded', 'claimed concurrent delivery should finalize as forwarded');
+
+  const recoveryApi = await store.createApi({
+    owner_wallet: ownerWallet,
+    name: 'Crash Recovery Paid Proxy API',
+    upstream_base_url: server.baseUrl,
+    path: '/upstream/recovery-signal',
+    method: 'GET',
+    price_usdc: 0.02,
+    active: true,
+    ...encrypted,
+  });
+  const recoveryUnpaid = await fetch(`${server.baseUrl}/api/pay/${recoveryApi.id}`);
+  const recoveryPaymentId = recoveryUnpaid.headers.get('x-paygate-payment-id');
+  const recoveryCredential = Credential.serialize({
+    challenge: Challenge.fromResponse(recoveryUnpaid),
+    payload: { type: 'hash', hash: RECOVERY_PAYMENT_TX_HASH },
+    source: `did:pkh:stellar:testnet:${PAYER_WALLET}`,
+  });
+  process.env.PAYGATE_MOCK_ESCROW_CREDIT_UNCERTAIN_ONCE = recoveryPaymentId;
+  const uncertainCredit = await fetch(`${server.baseUrl}/api/pay/${recoveryApi.id}`, {
+    headers: { Authorization: recoveryCredential },
+  });
+  delete process.env.PAYGATE_MOCK_ESCROW_CREDIT_UNCERTAIN_ONCE;
+  assert(uncertainCredit.status === 502, `uncertain credit expected 502, got ${uncertainCredit.status}`);
+  const uncertainPayment = getRawPaymentsForTest().find((row) => row.payment_id === recoveryPaymentId);
+  assert(uncertainPayment.credit_status === 'uncertain', 'ambiguous confirmation should remain recoverable');
+  assert(uncertainPayment.credit_tx_hash === `mock-credit-${recoveryPaymentId}`, 'uncertain credit hash should persist');
+  assert(uncertainPayment.credit_transaction_xdr?.includes(recoveryPaymentId), 'uncertain signed XDR should persist');
+  assert(recoveryUpstreamCalls === 0, 'upstream must not run before escrow credit is confirmed');
+
+  const recoveredCredit = await fetch(`${server.baseUrl}/api/pay/${recoveryApi.id}`, {
+    headers: { Authorization: recoveryCredential },
+  });
+  assert(recoveredCredit.status === 200, `recovered credit expected 200, got ${recoveredCredit.status}`);
+  const recoveredPayment = getRawPaymentsForTest().find((row) => row.payment_id === recoveryPaymentId);
+  assert(recoveredPayment.credit_status === 'credited', 'replayed signed credit should finalize');
+  assert(
+    recoveredPayment.credit_transaction_xdr === uncertainPayment.credit_transaction_xdr,
+    'credit recovery must reuse the exact signed transaction XDR',
+  );
+  assert(
+    getMockEscrowCreditSubmissionCountForTest(recoveryPaymentId) === 1,
+    'credit recovery must not submit a second transaction',
+  );
+  assert(recoveryUpstreamCalls === 1, 'recovered credit should forward upstream once');
 
   const redirectApi = await store.createApi({
     owner_wallet: ownerWallet,

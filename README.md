@@ -101,7 +101,7 @@ PayGate V1 currently supports the full testnet beta loop locally and in deploy-r
 | API registry | Done |
 | API lifecycle: pending setup -> active -> archived | Done |
 | Upstream ownership verification | Done |
-| Duplicate live endpoint prevention | Done |
+| Verified-only endpoint ownership with expiring pending setup | Done |
 | API delete/archive for demo reset | Done |
 | API secret encryption | Done |
 | Paid proxy `/api/pay/:apiId` | Done |
@@ -112,7 +112,9 @@ PayGate V1 currently supports the full testnet beta loop locally and in deploy-r
 | Dashboard summary | Done |
 | Developer withdrawal | Done |
 | Platform fee withdrawal command | Done |
-| Beta evidence package | Done |
+| Distributed state and crash recovery hardening | Done |
+| Isolated Vercel/Supabase staging replay | Done, real testnet payment/credit/withdrawal captured |
+| Beta evidence package | Done, except final screenshots/video |
 | Production live replay | Pending |
 | Demo video | Pending |
 
@@ -412,6 +414,7 @@ supabase/migrations/20260604000001_paygate_v1_paid_proxy.sql
 supabase/migrations/20260611000000_paygate_api_lifecycle_status.sql
 supabase/migrations/20260611000001_paygate_api_unique_live_endpoint.sql
 supabase/migrations/20260628050000_paygate_withdrawal_preparations.sql
+supabase/migrations/20260828000000_paygate_distributed_state_hardening.sql
 ```
 
 They create the V1 storage layer:
@@ -425,7 +428,10 @@ payments
 withdrawals
 withdrawal_preparations
 mpp_store
+operator_submission_locks
 ```
+
+The final hardening migration also adds expiring pending setup claims, active-only endpoint ownership, withdrawal transaction uniqueness, atomic forwarding/credit state, service-role operator leases, and exact dashboard analytics. Apply it before deploying code from the hardening branch.
 
 Use the Supabase service role key only on the server side.
 
@@ -499,6 +505,15 @@ npm run beta:preflight
 npm run test:auth:supabase
 ```
 
+The isolated staging replay is deliberately mutation-gated. Supply the expected staging project ref and origin, then run:
+
+```bash
+npm run test:distributed-state:supabase
+npm run test:staging:live-replay
+```
+
+`test:staging:live-replay` proves the deployed `401 -> 402 -> paid 200 -> escrow credit -> dashboard -> signed withdrawal` path and cleans its temporary database fixtures. It refuses memory/mock modes, non-testnet networks, mismatched Supabase refs, and unexpected origins.
+
 Quick API checks:
 
 ```bash
@@ -530,6 +545,7 @@ Existing testnet evidence is tracked under `docs/evidence/`.
 | Paid proxy `200` and escrow credit | [Phase 6 paid proxy proof](docs/evidence/PAYGATE_V1_PHASE6_PAID_PROXY_PROOF.md) |
 | Dashboard | [Phase 7 dashboard proof](docs/evidence/PAYGATE_V1_PHASE7_DASHBOARD_PROOF.md) |
 | Withdrawal | [Phase 8 withdrawal proof](docs/evidence/PAYGATE_V1_PHASE8_WITHDRAWAL_PROOF.md) |
+| Hardened staging replay and rollout status | [V1 beta readiness](docs/evidence/PAYGATE_V1_BETA_READINESS.md) |
 
 Important testnet tx hashes already captured:
 
@@ -539,6 +555,9 @@ Important testnet tx hashes already captured:
 | PayGate credits escrow ledger | `db5e1e1c6d9e6b9d24887ac96cb18a227fd7866d044da6d0db8ccc45c8708ee1` |
 | Developer withdraw proof | `8f0647f5595020a394df833b1545e2d4c0e192af960db2b1e3c68dfd679d50d7` |
 | Platform fee withdraw proof | `0bf30b3fd0b5385f933dd9b22de39a6c8167e2c6405ac075a2bd13466a26d04b` |
+| Hardened staging MPP payment | `379d490016bd7820365c84d3df3c61a9f2cec81e1e5c74b7010997be03f12ebb` |
+| Hardened staging escrow credit | `eeff9ab24fe12bddc7930f74b44a715654e13b65d84aaa235dc3e935ec86d469` |
+| Hardened staging developer withdrawal | `ee985b7936912308a253e2ca6c8911be76b5fecea40d0e259a884b762283268a` |
 
 Create a new replay folder:
 
@@ -576,13 +595,16 @@ paygate/
 - No buyer account system yet.
 - No prepaid balance yet.
 - No refund flow if upstream fails after payment.
+- PayGate sends a stable `Idempotency-Key` and atomically claims forwarding, but an upstream that ignores idempotency can still duplicate a side effect if the process dies after the upstream commits and before PayGate records the response.
+- Contract storage renews on use to approximately 30 days. A completely inactive contract still needs scheduled traffic/maintenance or a restore procedure before archived state expires.
 - No mainnet, fiat checkout, compliance workflow, or production incident response yet.
 
 ---
 
 ## Roadmap
 
-- Complete deployed Vercel replay with real env and screenshots.
+- Apply the hardening migration and deploy/init the TTL-aware contract for production testnet.
+- Replay the reviewed commit on production and capture screenshots.
 - Record a concise demo video.
 - Add POST/body forwarding.
 - Add refund or pending-credit handling for upstream failure.

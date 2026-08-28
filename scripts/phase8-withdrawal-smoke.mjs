@@ -177,6 +177,21 @@ try {
   const withdrawals = getRawWithdrawalsForTest();
   assert(withdrawals.length === 1, 'withdrawal row was not recorded');
   assert(withdrawals[0].wallet_address === ownerWallet, 'withdrawal wallet mismatch');
+  const withdrawalByHash = await store.getWithdrawalByTxHash(submitted.txHash, ownerWallet);
+  assert(withdrawalByHash?.id === submitted.withdrawal.id, 'withdrawal should be recoverable by transaction hash');
+  let duplicateWithdrawalError;
+  try {
+    await store.createWithdrawal({
+      wallet_address: ownerWallet,
+      amount_usdc: submitted.amountUsdc,
+      tx_hash: submitted.txHash,
+      status: 'pending',
+    });
+  } catch (error) {
+    duplicateWithdrawalError = error;
+  }
+  assert(duplicateWithdrawalError?.code === '23505', 'duplicate withdrawal transaction hash should be rejected');
+  assert(getRawWithdrawalsForTest().length === 1, 'duplicate withdrawal attempt must not add a row');
   const preparations = getRawWithdrawalPreparationsForTest();
   assert(preparations.length === 2, 'withdrawal preparations should be recorded');
   assert(preparations.some((row) => row.status === 'prepared'), 'tampered preparation should remain reusable');

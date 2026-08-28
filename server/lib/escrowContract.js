@@ -79,11 +79,14 @@ async function waitForSuccessfulTransaction(server, hash, label = 'Escrow transa
       const tx = await server.getTransaction(hash);
       if (tx.status === 'SUCCESS') return tx;
       if (tx.status === 'FAILED') {
-        throw new Error(`${label} failed: ${hash}`);
+        const error = new Error(`${label} failed: ${hash}`);
+        error.code = 'ESCROW_TRANSACTION_FAILED';
+        error.txHash = hash;
+        throw error;
       }
       lastError = null;
     } catch (error) {
-      if (error instanceof Error && error.message === `${label} failed: ${hash}`) throw error;
+      if (error?.code === 'ESCROW_TRANSACTION_FAILED') throw error;
       lastError = error;
     }
     await delay(DEFAULT_POLL_DELAY_MS);
@@ -91,8 +94,38 @@ async function waitForSuccessfulTransaction(server, hash, label = 'Escrow transa
 
   const error = new Error(`${label} did not confirm in time: ${hash}`);
   error.code = 'ESCROW_CONFIRMATION_UNCERTAIN';
+  error.txHash = hash;
   if (lastError) error.cause = lastError;
   throw error;
+}
+
+function escrowTransactionError(message, code, txHash, cause = null) {
+  const error = new Error(message);
+  error.code = code;
+  error.txHash = txHash;
+  if (cause) error.cause = cause;
+  return error;
+}
+
+function getMockCreditState() {
+  if (!globalThis.__PAYGATE_ESCROW_CREDIT_MEMORY) {
+    globalThis.__PAYGATE_ESCROW_CREDIT_MEMORY = {
+      credits: new Map(),
+      submissions: new Map(),
+      uncertainOnce: new Set(),
+    };
+  }
+  return globalThis.__PAYGATE_ESCROW_CREDIT_MEMORY;
+}
+
+function shouldSimulateMockCreditUncertainty(paymentId, state) {
+  const configured = process.env.PAYGATE_MOCK_ESCROW_CREDIT_UNCERTAIN_ONCE;
+  if (!configured || state.uncertainOnce.has(paymentId)) return false;
+  return configured === 'true' || configured === '1' || configured === paymentId;
+}
+
+export function getMockEscrowCreditSubmissionCountForTest(paymentId) {
+  return getMockCreditState().submissions.get(paymentId) ?? 0;
 }
 
 async function simulateEscrowCall(method, args = []) {
@@ -163,7 +196,15 @@ export async function readEscrowBalances(developerWallet) {
   };
 }
 
-export async function creditEscrowPayment({ paymentId, developerWallet, grossAmountBaseUnits }) {
+export async function creditEscrowPayment({
+  paymentId,
+  developerWallet,
+  grossAmountBaseUnits,
+  transactionXdr = null,
+  expectedTxHash = null,
+  onPrepared = null,
+  onSubmitted = null,
+}) {
   if (isMockEscrowCreditMode()) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Mock escrow credit mode is not allowed in production');
@@ -171,10 +212,48 @@ export async function creditEscrowPayment({ paymentId, developerWallet, grossAmo
     if (process.env.PAYGATE_REGISTRY_STORE !== 'memory') {
       throw new Error('Mock escrow credit mode is only allowed with the memory registry store');
     }
-    return {
+    const state = getMockCreditState();
+    const txHash = `mock-credit-${paymentId}`;
+    const signedTransactionXdr = transactionXdr || `mock-credit-xdr:${paymentId}:${developerWallet}:${grossAmountBaseUnits}`;
+    if (expectedTxHash && expectedTxHash !== txHash) {
+      throw escrowTransactionError(
+        'Persisted mock escrow credit transaction hash does not match its payment',
+        'ESCROW_TRANSACTION_MISMATCH',
+        txHash,
+      );
+    }
+    if (onPrepared) await onPrepared({ txHash, transactionXdr: signedTransactionXdr });
+
+    const result = state.credits.get(paymentId) ?? {
       mode: 'memory',
-      txHash: `mock-credit-${paymentId}`,
+      txHash,
+      transactionXdr: signedTransactionXdr,
     };
+    if (!state.credits.has(paymentId)) {
+      state.credits.set(paymentId, result);
+      state.submissions.set(paymentId, (state.submissions.get(paymentId) ?? 0) + 1);
+    }
+
+    try {
+      if (onSubmitted) await onSubmitted({ txHash });
+    } catch (cause) {
+      throw escrowTransactionError(
+        `Escrow credit submission state could not be persisted: ${txHash}`,
+        'ESCROW_CONFIRMATION_UNCERTAIN',
+        txHash,
+        cause,
+      );
+    }
+
+    if (shouldSimulateMockCreditUncertainty(paymentId, state)) {
+      state.uncertainOnce.add(paymentId);
+      throw escrowTransactionError(
+        `Escrow credit confirmation became uncertain: ${txHash}`,
+        'ESCROW_CONFIRMATION_UNCERTAIN',
+        txHash,
+      );
+    }
+    return result;
   }
 
   const contractId = getEscrowContractId();
@@ -185,36 +264,98 @@ export async function creditEscrowPayment({ paymentId, developerWallet, grossAmo
 
   const operator = Keypair.fromSecret(operatorSecret);
   const server = new rpc.Server(getRpcUrl());
-  const sourceAccount = await server.getAccount(operator.publicKey());
-  const contract = new Contract(contractId);
+  const networkPassphrase = getNetworkPassphrase();
+  let prepared;
 
-  const tx = new TransactionBuilder(sourceAccount, {
-    fee: BASE_FEE,
-    networkPassphrase: getNetworkPassphrase(),
-  })
-    .addOperation(
-      contract.call(
-        'credit_payment',
-        nativeToScVal(paymentId, { type: 'symbol' }),
-        new Address(developerWallet).toScVal(),
-        nativeToScVal(BigInt(grossAmountBaseUnits), { type: 'i128' }),
-      ),
-    )
-    .setTimeout(60)
-    .build();
+  if (transactionXdr) {
+    prepared = TransactionBuilder.fromXDR(transactionXdr, networkPassphrase);
+  } else {
+    const sourceAccount = await server.getAccount(operator.publicKey());
+    const contract = new Contract(contractId);
+    const tx = new TransactionBuilder(sourceAccount, {
+      fee: BASE_FEE,
+      networkPassphrase,
+    })
+      .addOperation(
+        contract.call(
+          'credit_payment',
+          nativeToScVal(paymentId, { type: 'symbol' }),
+          new Address(developerWallet).toScVal(),
+          nativeToScVal(BigInt(grossAmountBaseUnits), { type: 'i128' }),
+        ),
+      )
+      .setTimeout(60)
+      .build();
 
-  const prepared = await server.prepareTransaction(tx);
-  prepared.sign(operator);
-
-  const submitted = await server.sendTransaction(prepared);
-  if (submitted.status !== 'PENDING') {
-    throw new Error(`Escrow credit submission failed with status ${submitted.status}`);
+    prepared = await server.prepareTransaction(tx);
+    prepared.sign(operator);
   }
 
-  await waitForSuccessfulTransaction(server, submitted.hash, 'Escrow credit transaction');
+  const txHash = prepared.hash().toString('hex');
+  if (expectedTxHash && expectedTxHash !== txHash) {
+    throw escrowTransactionError(
+      'Persisted escrow credit transaction hash does not match its signed XDR',
+      'ESCROW_TRANSACTION_MISMATCH',
+      txHash,
+    );
+  }
+
+  const signedTransactionXdr = prepared.toXDR();
+  if (onPrepared) await onPrepared({ txHash, transactionXdr: signedTransactionXdr });
+
+  let existing;
+  try {
+    existing = await server.getTransaction(txHash);
+  } catch (cause) {
+    throw escrowTransactionError(
+      `Escrow credit transaction state is uncertain: ${txHash}`,
+      'ESCROW_CONFIRMATION_UNCERTAIN',
+      txHash,
+      cause,
+    );
+  }
+
+  if (existing.status === 'SUCCESS') {
+    return { mode: 'contract', txHash, transactionXdr: signedTransactionXdr };
+  }
+  if (existing.status === 'FAILED') {
+    throw escrowTransactionError(
+      `Escrow credit transaction failed: ${txHash}`,
+      'ESCROW_TRANSACTION_FAILED',
+      txHash,
+    );
+  }
+
+  if (existing.status === 'NOT_FOUND') {
+    const submitted = await server.sendTransaction(prepared);
+    if (!['PENDING', 'DUPLICATE'].includes(submitted.status)) {
+      const code = submitted.status === 'ERROR'
+        ? 'ESCROW_TRANSACTION_FAILED'
+        : 'ESCROW_CONFIRMATION_UNCERTAIN';
+      throw escrowTransactionError(
+        `Escrow credit submission failed with status ${submitted.status}: ${txHash}`,
+        code,
+        txHash,
+      );
+    }
+  }
+
+  try {
+    if (onSubmitted) await onSubmitted({ txHash });
+  } catch (cause) {
+    throw escrowTransactionError(
+      `Escrow credit submission state could not be persisted: ${txHash}`,
+      'ESCROW_CONFIRMATION_UNCERTAIN',
+      txHash,
+      cause,
+    );
+  }
+
+  await waitForSuccessfulTransaction(server, txHash, 'Escrow credit transaction');
   return {
     mode: 'contract',
-    txHash: submitted.hash,
+    txHash,
+    transactionXdr: signedTransactionXdr,
   };
 }
 
