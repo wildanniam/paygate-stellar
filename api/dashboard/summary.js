@@ -2,47 +2,52 @@ import { toApiResponse, requireRegistryConfig, requireRegistrySession } from '..
 import { readEscrowBalances } from '../../server/lib/escrowContract.js';
 import { publicErrorMessage } from '../../server/lib/errors.js';
 
-function sumUsdc(rows, field) {
-  return rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
-}
-
 function formatUsdc(value) {
   return Number(value || 0).toFixed(7);
 }
 
-function isSuccessfulStatus(status) {
-  return status === 'forwarded';
-}
-
-function isFailedStatus(status) {
-  return ['payment_failed', 'duplicate_payment', 'upstream_failed'].includes(status);
-}
-
-function latestDate(rows, field) {
-  return rows
-    .map((row) => row[field])
-    .filter(Boolean)
-    .sort()
-    .at(-1) ?? null;
-}
-
-function buildApiStats(req, apis, proxyRequests, payments) {
+function buildApiStats(req, apis, analytics) {
+  const perApi = new Map((analytics?.per_api || []).map((row) => [row.api_id, row]));
   return apis.map((api) => {
-    const apiRequests = proxyRequests.filter((request) => request.api_id === api.id);
-    const apiPayments = payments.filter((payment) => payment.api_id === api.id);
+    const stats = perApi.get(api.id) || {};
 
     return {
       ...toApiResponse(req, api),
-      calls: apiRequests.length,
-      successfulCalls: apiRequests.filter((request) => isSuccessfulStatus(request.status)).length,
-      failedCalls: apiRequests.filter((request) => isFailedStatus(request.status)).length,
-      grossRevenueUsdc: formatUsdc(sumUsdc(apiPayments, 'gross_amount_usdc')),
-      developerRevenueUsdc: formatUsdc(sumUsdc(apiPayments, 'developer_amount_usdc')),
-      platformFeeUsdc: formatUsdc(sumUsdc(apiPayments, 'platform_fee_usdc')),
-      lastRequestAt: latestDate(apiRequests, 'created_at'),
-      lastPaymentAt: latestDate(apiPayments, 'created_at'),
+      calls: Number(stats.total_calls || 0),
+      successfulCalls: Number(stats.successful_calls || 0),
+      failedCalls: Number(stats.failed_calls || 0),
+      grossRevenueUsdc: formatUsdc(stats.gross_revenue_usdc),
+      developerRevenueUsdc: formatUsdc(stats.developer_revenue_usdc),
+      platformFeeUsdc: formatUsdc(stats.platform_fee_usdc),
+      lastRequestAt: stats.last_request_at || null,
+      lastPaymentAt: stats.last_payment_at || null,
     };
   });
+}
+
+function serializeAnalyticsAggregate(row = {}) {
+  return {
+    apiId: row.api_id || null,
+    date: row.bucket_date || null,
+    totalCalls: Number(row.total_calls || 0),
+    successfulCalls: Number(row.successful_calls || 0),
+    failedCalls: Number(row.failed_calls || 0),
+    paymentRequiredCalls: Number(row.payment_required_calls || 0),
+    grossRevenueUsdc: Number(row.gross_revenue_usdc || 0),
+    developerRevenueUsdc: Number(row.developer_revenue_usdc || 0),
+    platformFeeUsdc: Number(row.platform_fee_usdc || 0),
+    lastRequestAt: row.last_request_at || null,
+    lastPaymentAt: row.last_payment_at || null,
+  };
+}
+
+function serializeAnalytics(analytics, since) {
+  return {
+    since,
+    allTime: serializeAnalyticsAggregate(analytics?.all_time),
+    perApi: (analytics?.per_api || []).map(serializeAnalyticsAggregate),
+    daily: (analytics?.daily || []).map(serializeAnalyticsAggregate),
+  };
 }
 
 function apiNameById(apis) {
@@ -80,6 +85,7 @@ function serializePayment(row, names) {
     developerAmountUsdc: Number(row.developer_amount_usdc),
     platformFeeUsdc: Number(row.platform_fee_usdc),
     recipientMode: row.recipient_mode,
+    creditStatus: row.credit_status,
     verifiedAt: row.verified_at,
     creditedAt: row.credited_at,
     createdAt: row.created_at,
@@ -124,33 +130,35 @@ export default async function handler(req, res) {
   if (!store) return undefined;
 
   try {
-    const [apis, proxyRequests, payments, withdrawals, escrow] = await Promise.all([
+    const analyticsSince = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const [apis, proxyRequests, payments, withdrawals, escrow, analytics] = await Promise.all([
       store.listApis(session.walletAddress),
       store.listProxyRequests(session.walletAddress, 100),
       store.listPaymentsForOwner(session.walletAddress, 100),
       store.listWithdrawals(session.walletAddress, 50),
       readBalances(session.walletAddress),
+      store.getDashboardAnalytics(session.walletAddress, analyticsSince),
     ]);
 
     const names = apiNameById(apis);
-    const successfulCalls = proxyRequests.filter((request) => isSuccessfulStatus(request.status)).length;
-    const failedCalls = proxyRequests.filter((request) => isFailedStatus(request.status)).length;
+    const allTime = analytics?.all_time || {};
 
     return res.status(200).json({
       walletAddress: session.walletAddress,
       summary: {
         totalApis: apis.length,
         activeApis: apis.filter((api) => api.active).length,
-        totalCalls: proxyRequests.length,
-        successfulCalls,
-        failedCalls,
-        grossRevenueUsdc: formatUsdc(sumUsdc(payments, 'gross_amount_usdc')),
-        developerRevenueUsdc: formatUsdc(sumUsdc(payments, 'developer_amount_usdc')),
-        platformFeeUsdc: formatUsdc(sumUsdc(payments, 'platform_fee_usdc')),
-        lastPaymentAt: latestDate(payments, 'created_at'),
+        totalCalls: Number(allTime.total_calls || 0),
+        successfulCalls: Number(allTime.successful_calls || 0),
+        failedCalls: Number(allTime.failed_calls || 0),
+        grossRevenueUsdc: formatUsdc(allTime.gross_revenue_usdc),
+        developerRevenueUsdc: formatUsdc(allTime.developer_revenue_usdc),
+        platformFeeUsdc: formatUsdc(allTime.platform_fee_usdc),
+        lastPaymentAt: allTime.last_payment_at || null,
       },
       escrow,
-      apis: buildApiStats(req, apis, proxyRequests, payments),
+      analytics: serializeAnalytics(analytics, analyticsSince),
+      apis: buildApiStats(req, apis, analytics),
       requests: proxyRequests.map((row) => serializeRequest(row, names)),
       payments: payments.map((row) => serializePayment(row, names)),
       withdrawals: withdrawals.map(serializeWithdrawal),

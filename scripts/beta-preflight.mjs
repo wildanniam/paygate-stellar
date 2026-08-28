@@ -1,7 +1,9 @@
 import { execFileSync } from 'node:child_process';
+import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { createClient } from '@supabase/supabase-js';
 import { StrKey } from '@stellar/stellar-sdk';
+import { getRateLimitRedisConfig } from '../server/lib/rateLimitConfig.js';
 
 const EXPECTED_TESTNET_RPC = 'https://soroban-testnet.stellar.org';
 
@@ -11,12 +13,11 @@ const REQUIRED_ENV = [
   'SESSION_SECRET',
   'API_SECRET_ENCRYPTION_KEY',
   'MPP_SECRET_KEY',
+  'CRON_SECRET',
   'ESCROW_CONTRACT_ID',
   'PAYGATE_OPERATOR_SECRET',
   'PAYGATE_DEMO_UPSTREAM_SECRET',
   'PAYGATE_PUBLIC_ORIGIN',
-  'UPSTASH_REDIS_REST_URL',
-  'UPSTASH_REDIS_REST_TOKEN',
   'STELLAR_NETWORK',
   'STELLAR_RPC_URL',
 ];
@@ -24,12 +25,13 @@ const REQUIRED_ENV = [
 const TABLE_CHECKS = [
   ['developers', 'id,wallet_address,created_at,last_login_at'],
   ['auth_challenges', 'id,wallet_address,nonce,message,expires_at,used_at,created_at'],
-  ['apis', 'id,owner_wallet,name,upstream_base_url,path,method,price_usdc,active,created_at,updated_at'],
-  ['proxy_requests', 'id,api_id,owner_wallet,payment_id,status,price_usdc,tx_hash,created_at'],
-  ['payments', 'id,request_id,api_id,payment_id,tx_hash,credit_tx_hash,gross_amount_usdc,created_at'],
+  ['apis', 'id,owner_wallet,name,upstream_base_url,path,method,price_usdc,status,active,setup_expires_at,created_at,updated_at'],
+  ['proxy_requests', 'id,api_id,owner_wallet,payment_id,status,price_usdc,tx_hash,forwarding_started_at,forwarding_attempt_id,created_at'],
+  ['payments', 'id,request_id,api_id,payment_id,tx_hash,credit_tx_hash,credit_status,credit_transaction_xdr,credit_attempt_id,credit_started_at,credit_submitted_at,credit_error,gross_amount_usdc,created_at'],
   ['withdrawals', 'id,wallet_address,amount_usdc,tx_hash,status,created_at,completed_at'],
   ['withdrawal_preparations', 'id,wallet_address,withdrawal_id,tx_hash,amount_usdc,status,expires_at,created_at'],
   ['mpp_store', 'key,value,created_at,updated_at'],
+  ['operator_submission_locks', 'lock_name,lease_token,lease_expires_at,updated_at'],
 ];
 
 const checks = [];
@@ -63,17 +65,57 @@ function isUrl(value) {
   }
 }
 
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 function publicOriginError(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:') return 'PAYGATE_PUBLIC_ORIGIN must use https.';
     if (url.username || url.password) return 'PAYGATE_PUBLIC_ORIGIN must not include credentials.';
+    const hostname = url.hostname.toLowerCase();
+    if (
+      hostname === 'localhost'
+      || hostname === '127.0.0.1'
+      || hostname === '::1'
+      || hostname === '[::1]'
+      || hostname.endsWith('.localhost')
+      || hostname.endsWith('.example')
+    ) {
+      return 'PAYGATE_PUBLIC_ORIGIN must be the real deployed hostname.';
+    }
     if (url.pathname !== '/' || url.search || url.hash) {
       return 'PAYGATE_PUBLIC_ORIGIN must be an origin only, for example https://trypaygate.com.';
     }
     return '';
   } catch {
     return 'PAYGATE_PUBLIC_ORIGIN must be a valid URL.';
+  }
+}
+
+async function checkUpstash() {
+  const { url, token, error } = getRateLimitRedisConfig();
+  if (error) return;
+  if (!url || !token || !isHttpsUrl(url)) return;
+
+  try {
+    const response = await fetch(new URL('/ping', url), {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) {
+      fail('Upstash Redis is reachable', `PING returned HTTP ${response.status}.`);
+      return;
+    }
+    pass('Upstash Redis is reachable and authenticated');
+  } catch (error) {
+    const cause = error.cause?.code || error.cause?.name || error.name;
+    fail('Upstash Redis is reachable', cause || 'Network request failed.');
   }
 }
 
@@ -84,6 +126,22 @@ function checkRequiredEnv() {
     } else {
       pass(`${name} is set`);
     }
+  }
+
+  const upstash = getRateLimitRedisConfig();
+  if (upstash.error) {
+    fail('Upstash Redis credentials resolve as one complete pair', upstash.error);
+    return;
+  }
+  if (!upstash.url) {
+    fail('Upstash Redis REST URL is set', 'Use UPSTASH_REDIS_REST_URL or the Vercel Marketplace KV_REST_API_URL alias.');
+  } else {
+    pass('Upstash Redis REST URL is set', `Resolved from ${upstash.urlEnvName}.`);
+  }
+  if (!upstash.token) {
+    fail('Upstash Redis REST token is set', 'Use UPSTASH_REDIS_REST_TOKEN or the Vercel Marketplace KV_REST_API_TOKEN alias.');
+  } else {
+    pass('Upstash Redis REST token is set', `Resolved from ${upstash.tokenEnvName}.`);
   }
 }
 
@@ -100,14 +158,28 @@ function checkEnvSemantics() {
     pass('PAYGATE_REGISTRY_STORE is deployment-safe', 'Unset means Supabase when env is configured.');
   }
 
+  if (process.env.PAYGATE_RATE_LIMIT_STORE === 'memory') {
+    fail('PAYGATE_RATE_LIMIT_STORE is not memory', 'The deployed rate limiter must use Upstash Redis.');
+  } else {
+    pass('PAYGATE_RATE_LIMIT_STORE is deployment-safe', 'Unset means Upstash when its environment is configured.');
+  }
+
+  if (process.env.PAYGATE_MPP_VERIFY_MODE === 'mock') {
+    fail('PAYGATE_MPP_VERIFY_MODE is not mock', 'Mock MPP verification is only for local smoke tests.');
+  } else {
+    pass('PAYGATE_MPP_VERIFY_MODE is deployment-safe', 'Unset means real MPP verification.');
+  }
+
   for (const name of ['PAYGATE_ESCROW_CREDIT_MODE', 'PAYGATE_ESCROW_WITHDRAW_MODE']) {
     if (process.env[name] === 'memory') {
       fail(`${name} is not memory`, 'Mock escrow mode is local-test only.');
     }
   }
 
-  if (process.env.SUPABASE_URL && !isUrl(process.env.SUPABASE_URL)) {
-    fail('SUPABASE_URL is a valid URL');
+  if (process.env.SUPABASE_URL && !isHttpsUrl(process.env.SUPABASE_URL)) {
+    fail('SUPABASE_URL is a valid HTTPS URL');
+  } else if (process.env.SUPABASE_URL) {
+    pass('SUPABASE_URL is a valid HTTPS URL');
   }
 
   if (!isMissing(process.env.PAYGATE_PUBLIC_ORIGIN)) {
@@ -119,16 +191,17 @@ function checkEnvSemantics() {
     }
   }
 
-  if (process.env.UPSTASH_REDIS_REST_URL && !isUrl(process.env.UPSTASH_REDIS_REST_URL)) {
-    fail('UPSTASH_REDIS_REST_URL is a valid URL');
-  } else if (process.env.UPSTASH_REDIS_REST_URL) {
-    pass('UPSTASH_REDIS_REST_URL is a valid URL');
+  const upstash = getRateLimitRedisConfig();
+  if (upstash.url && !isHttpsUrl(upstash.url)) {
+    fail('Upstash Redis REST URL is a valid HTTPS URL');
+  } else if (upstash.url) {
+    pass('Upstash Redis REST URL is a valid HTTPS URL');
   }
 
-  if (!isMissing(process.env.UPSTASH_REDIS_REST_TOKEN) && process.env.UPSTASH_REDIS_REST_TOKEN.length < 16) {
-    fail('UPSTASH_REDIS_REST_TOKEN length is plausible', 'Use the token generated by Upstash.');
-  } else if (!isMissing(process.env.UPSTASH_REDIS_REST_TOKEN)) {
-    pass('UPSTASH_REDIS_REST_TOKEN length is plausible');
+  if (upstash.token && upstash.token.length < 16) {
+    fail('Upstash Redis REST token length is plausible', 'Use the token generated by Upstash.');
+  } else if (upstash.token) {
+    pass('Upstash Redis REST token length is plausible');
   }
 
   if (!isMissing(process.env.SESSION_SECRET) && process.env.SESSION_SECRET.length < 32) {
@@ -141,6 +214,24 @@ function checkEnvSemantics() {
     fail('API_SECRET_ENCRYPTION_KEY is at least 32 characters', 'Use a stable random secret or 32-byte key material.');
   } else if (!isMissing(process.env.API_SECRET_ENCRYPTION_KEY)) {
     pass('API_SECRET_ENCRYPTION_KEY length is acceptable');
+  }
+
+  if (!isMissing(process.env.MPP_SECRET_KEY) && process.env.MPP_SECRET_KEY.length < 32) {
+    fail('MPP_SECRET_KEY is at least 32 characters', 'Use a stable random secret for MPP challenge signing.');
+  } else if (!isMissing(process.env.MPP_SECRET_KEY)) {
+    pass('MPP_SECRET_KEY length is acceptable');
+  }
+
+  if (!isMissing(process.env.PAYGATE_DEMO_UPSTREAM_SECRET) && process.env.PAYGATE_DEMO_UPSTREAM_SECRET.length < 16) {
+    fail('PAYGATE_DEMO_UPSTREAM_SECRET is at least 16 characters', 'Use a stable random upstream guard secret.');
+  } else if (!isMissing(process.env.PAYGATE_DEMO_UPSTREAM_SECRET)) {
+    pass('PAYGATE_DEMO_UPSTREAM_SECRET length is acceptable');
+  }
+
+  if (!isMissing(process.env.CRON_SECRET) && process.env.CRON_SECRET.length < 16) {
+    fail('CRON_SECRET is at least 16 characters', 'Use a stable random secret for the Vercel cron route.');
+  } else if (!isMissing(process.env.CRON_SECRET)) {
+    pass('CRON_SECRET length is acceptable');
   }
 
   if (process.env.STELLAR_NETWORK && process.env.STELLAR_NETWORK !== 'stellar:testnet') {
@@ -208,6 +299,21 @@ async function checkSupabaseTables() {
     return;
   }
 
+  try {
+    await fetch(new URL('/rest/v1/', url), {
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+      signal: AbortSignal.timeout(10_000),
+    });
+    pass('Supabase REST endpoint is reachable');
+  } catch (error) {
+    const cause = error.cause?.code || error.cause?.name || error.name;
+    fail('Supabase REST endpoint is reachable', cause || 'Network request failed.');
+    return;
+  }
+
   const client = createClient(url, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
@@ -223,12 +329,45 @@ async function checkSupabaseTables() {
       pass(`Supabase table ${table} is queryable`);
     }
   }
+
+  const { error: analyticsError } = await client.rpc('get_paygate_dashboard_analytics', {
+    p_owner_wallet: 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+    p_since: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  });
+  if (analyticsError) {
+    fail('Supabase dashboard aggregation function is callable', analyticsError.message);
+  } else {
+    pass('Supabase dashboard aggregation function is callable');
+  }
+
+  const lockName = `beta_preflight_${crypto.randomUUID()}`;
+  const leaseToken = crypto.randomUUID();
+  const { data: claimed, error: claimError } = await client.rpc('claim_operator_submission_lock', {
+    p_lock_name: lockName,
+    p_lease_token: leaseToken,
+    p_lease_seconds: 5,
+  });
+  const { data: released, error: releaseError } = claimError
+    ? { data: false, error: claimError }
+    : await client.rpc('release_operator_submission_lock', {
+      p_lock_name: lockName,
+      p_lease_token: leaseToken,
+    });
+  if (claimError || releaseError || claimed !== true || released !== true) {
+    fail(
+      'Supabase operator submission lease is atomic',
+      claimError?.message || releaseError?.message || 'Lease claim/release returned an unexpected result.',
+    );
+  } else {
+    pass('Supabase operator submission lease is atomic');
+  }
 }
 
 checkRequiredEnv();
 checkEnvSemantics();
 await checkVercelRewrites();
 checkGeneratedArtifactsUntracked();
+await checkUpstash();
 await checkSupabaseTables();
 
 for (const check of checks) {

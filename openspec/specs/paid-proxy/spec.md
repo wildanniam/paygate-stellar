@@ -28,6 +28,8 @@ PayGate SHALL expose a paid proxy URL for each active registered API.
 
 PayGate SHALL return HTTP 402 Payment Required for active paid proxy requests without payment credentials.
 
+New PayGate payment IDs SHALL contain 120 bits of cryptographically secure randomness while remaining valid Soroban `Symbol` values. Previously issued shorter IDs SHALL remain usable for in-flight retries.
+
 #### Scenario: Unpaid request
 
 - GIVEN an active API exists
@@ -37,6 +39,13 @@ PayGate SHALL return HTTP 402 Payment Required for active paid proxy requests wi
 - AND returns HTTP 402
 - AND includes MPP challenge data
 - AND includes `X-PayGate-Request-Id` and `X-PayGate-Payment-Id`
+
+#### Scenario: Payment id protocol compatibility
+
+- GIVEN PayGate creates a new payment id
+- WHEN the id is carried through the MPP challenge, credential, and receipt
+- THEN the same opaque id is preserved at every step
+- AND the id can be encoded as the escrow contract's Soroban `Symbol` payment key
 
 ### Requirement: Verify MPP payment credentials
 
@@ -84,6 +93,20 @@ PayGate SHALL credit the Soroban escrow balance after valid payment verification
 - AND includes the MPP payment receipt when available
 - AND does not forward upstream
 
+#### Scenario: Escrow credit submission is ambiguous
+
+- GIVEN PayGate has prepared a fixed-purpose credit transaction
+- WHEN the signed transaction XDR is persisted and Stellar submission or confirmation becomes ambiguous
+- THEN PayGate retains the exact XDR and deterministic transaction hash
+- AND a retry reconciles the hash or resubmits the same XDR rather than building a second credit
+
+#### Scenario: Shared operator source sequence
+
+- GIVEN multiple paid requests need escrow credit concurrently
+- WHEN they use the same operator source account
+- THEN a database-backed lease serializes transaction preparation/submission
+- AND stale leases can expire for recovery
+
 ### Requirement: Forward paid requests with upstream secret
 
 PayGate SHALL forward paid requests to the original API with `X-PayGate-Secret`.
@@ -103,6 +126,14 @@ PayGate SHALL forward paid requests to the original API with `X-PayGate-Secret`.
 - THEN PayGate marks the proxy request `forwarded`
 - AND returns the upstream status, content type, body, and `Payment-Receipt` header
 
+#### Scenario: Concurrent paid retries
+
+- GIVEN a payment is credited or recovering from an upstream failure
+- WHEN multiple serverless retries attempt delivery together
+- THEN only one retry atomically claims the request for forwarding
+- AND PayGate sends a stable `Idempotency-Key` derived from the request id
+- AND other retries do not execute the upstream concurrently
+
 #### Scenario: Upstream failure
 
 - GIVEN the upstream API returns an error or fails
@@ -116,4 +147,5 @@ PayGate SHALL forward paid requests to the original API with `X-PayGate-Secret`.
 - V1 paid proxy supports `GET` only.
 - V1 forwards request bodies/uploads/streaming out of scope.
 - V1 credits before forwarding; refunds or delayed settlement are future work.
+- PayGate's stable idempotency key can only prevent duplicate upstream side effects when the registered upstream honors it. A crash after an upstream commit but before PayGate stores the response remains an at-least-once boundary for non-idempotent upstreams.
 - V1 uses Stellar testnet USDC MPP Charge only.

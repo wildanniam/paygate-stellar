@@ -6,17 +6,17 @@ import { enforceRateLimit } from '../../server/lib/rateLimit.js';
 import {
   prepareEscrowWithdrawal,
   readEscrowBalances,
+  readEscrowWithdrawalTransaction,
   submitEscrowWithdrawal,
   validateEscrowWithdrawalTransaction,
 } from '../../server/lib/escrowContract.js';
 import { publicErrorMessage } from '../../server/lib/errors.js';
+import { WITHDRAWAL_PREPARATION_TTL_MS } from '../../server/lib/withdrawalTiming.js';
 
 const submitSchema = z.object({
   preparationId: z.string().uuid(),
   signedTransactionXdr: z.string().min(20),
 });
-
-const WITHDRAWAL_PREPARATION_TTL_MS = 2 * 60 * 1000;
 
 function nowIso() {
   return new Date().toISOString();
@@ -37,6 +37,81 @@ function getAction(req) {
 
   const parts = (req.url || '').split('?')[0].split('/').filter(Boolean);
   return parts[parts.length - 1] || '';
+}
+
+async function retryStoreWrite(operation, attempts = 3) {
+  let lastError;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
+async function getOrCreateWithdrawal({ store, walletAddress, amountUsdc, txHash }) {
+  const existing = await store.getWithdrawalByTxHash(txHash, walletAddress);
+  if (existing) return existing;
+
+  try {
+    return await store.createWithdrawal({
+      wallet_address: walletAddress,
+      amount_usdc: amountUsdc,
+      tx_hash: txHash,
+      status: 'pending',
+    });
+  } catch (error) {
+    const recovered = await retryStoreWrite(() => store.getWithdrawalByTxHash(txHash, walletAddress));
+    if (recovered) return recovered;
+    throw error;
+  }
+}
+
+function resolvedWithdrawalAmount(submitted, preparation, withdrawal) {
+  if (Number(submitted?.amountUsdc || 0) > 0) return submitted.amountUsdc;
+  return String(withdrawal?.amount_usdc ?? preparation.amount_usdc);
+}
+
+async function completeWithdrawal({ store, preparation, withdrawal, submitted, walletAddress }) {
+  let currentWithdrawal = withdrawal;
+  if (!currentWithdrawal && preparation.withdrawal_id) {
+    currentWithdrawal = await store.getWithdrawal(preparation.withdrawal_id, walletAddress);
+  }
+  if (!currentWithdrawal) {
+    currentWithdrawal = await getOrCreateWithdrawal({
+      store,
+      walletAddress,
+      amountUsdc: preparation.amount_usdc,
+      txHash: preparation.tx_hash,
+    });
+  }
+
+  const txHash = submitted.txHash || preparation.tx_hash;
+  const amountUsdc = resolvedWithdrawalAmount(submitted, preparation, currentWithdrawal);
+  const completed = await retryStoreWrite(() => store.updateWithdrawal(currentWithdrawal.id, {
+    amount_usdc: amountUsdc,
+    tx_hash: txHash,
+    status: 'succeeded',
+    completed_at: nowIso(),
+  }));
+  await retryStoreWrite(() => store.updateWithdrawalPreparation(preparation.id, walletAddress, {
+    status: 'succeeded',
+    withdrawal_id: currentWithdrawal.id,
+    submitted_tx_hash: txHash,
+    completed_at: nowIso(),
+  }));
+
+  return {
+    withdrawal: completed,
+    txHash,
+    amountUsdc,
+    amountBaseUnits: submitted.amountBaseUnits || preparation.amount_base_units,
+  };
 }
 
 export async function handlePrepare(req, res) {
@@ -129,17 +204,20 @@ export async function handleSubmit(req, res) {
     });
   }
 
+  let preparation = null;
   let withdrawal = null;
   let claimedPreparation = null;
   try {
-    const preparation = await store.getWithdrawalPreparation(parsed.data.preparationId, session.walletAddress);
+    preparation = await store.getWithdrawalPreparation(parsed.data.preparationId, session.walletAddress);
     if (!preparation) {
       return res.status(400).json({ error: 'Withdrawal preparation not found' });
     }
-    if (preparation.status !== 'prepared') {
-      return res.status(409).json({ error: 'Withdrawal preparation was already used' });
-    }
-    if (isExpired(preparation)) {
+
+    validateEscrowWithdrawalTransaction(parsed.data.signedTransactionXdr, session.walletAddress, {
+      expectedTxHash: preparation.tx_hash,
+    });
+
+    if (preparation.status === 'expired' || (preparation.status === 'prepared' && isExpired(preparation))) {
       await store.updateWithdrawalPreparation(preparation.id, session.walletAddress, {
         status: 'expired',
         completed_at: nowIso(),
@@ -147,65 +225,140 @@ export async function handleSubmit(req, res) {
       return res.status(400).json({ error: 'Withdrawal preparation expired. Please prepare a new withdrawal.' });
     }
 
-    validateEscrowWithdrawalTransaction(parsed.data.signedTransactionXdr, session.walletAddress, {
-      expectedTxHash: preparation.tx_hash,
-    });
-
-    const before = await readEscrowBalances(session.walletAddress);
-    const amountUsdc = before.developerBalance.usdc;
-    if (BigInt(before.developerBalance.baseUnits) <= 0n) {
-      return res.status(400).json({ error: 'No withdrawable balance' });
+    if (preparation.withdrawal_id) {
+      withdrawal = await store.getWithdrawal(preparation.withdrawal_id, session.walletAddress);
     }
 
-    claimedPreparation = await store.claimWithdrawalPreparation(preparation.id, session.walletAddress);
-    if (!claimedPreparation) {
-      return res.status(409).json({ error: 'Withdrawal preparation was already used or expired' });
+    if (['submitted', 'succeeded', 'failed'].includes(preparation.status)) {
+      claimedPreparation = preparation;
+      const existing = await readEscrowWithdrawalTransaction(preparation.tx_hash);
+      if (existing.status === 'succeeded') {
+        const completed = await completeWithdrawal({
+          store,
+          preparation,
+          withdrawal,
+          submitted: existing,
+          walletAddress: session.walletAddress,
+        });
+        return res.status(200).json({ ...completed, recovered: preparation.status !== 'succeeded' });
+      }
+      if (preparation.status === 'succeeded') {
+        return res.status(409).json({
+          error: 'Withdrawal is marked succeeded but could not be confirmed on Stellar. Please contact support.',
+        });
+      }
+      if (existing.status === 'failed') {
+        return res.status(409).json({
+          error: 'The prepared withdrawal failed on Stellar. Please prepare a new withdrawal.',
+        });
+      }
+
+      claimedPreparation = await store.updateWithdrawalPreparation(preparation.id, session.walletAddress, {
+        status: 'submitted',
+        completed_at: null,
+      });
+      if (withdrawal) {
+        withdrawal = await store.updateWithdrawal(withdrawal.id, {
+          tx_hash: preparation.tx_hash,
+          status: 'pending',
+          completed_at: null,
+        });
+      }
+    } else if (preparation.status === 'prepared') {
+      const before = await readEscrowBalances(session.walletAddress);
+      if (BigInt(before.developerBalance.baseUnits) <= 0n) {
+        return res.status(400).json({ error: 'No withdrawable balance' });
+      }
+
+      claimedPreparation = await store.claimWithdrawalPreparation(preparation.id, session.walletAddress);
+      if (!claimedPreparation) {
+        return res.status(409).json({ error: 'Withdrawal preparation was already used or expired' });
+      }
+
+      withdrawal = await getOrCreateWithdrawal({
+        store,
+        walletAddress: session.walletAddress,
+        amountUsdc: before.developerBalance.usdc,
+        txHash: claimedPreparation.tx_hash,
+      });
+      claimedPreparation = await store.updateWithdrawalPreparation(claimedPreparation.id, session.walletAddress, {
+        withdrawal_id: withdrawal.id,
+      });
+    } else {
+      return res.status(409).json({ error: 'Withdrawal preparation cannot be submitted in its current state' });
     }
 
-    withdrawal = await store.createWithdrawal({
-      wallet_address: session.walletAddress,
-      amount_usdc: amountUsdc,
-      status: 'pending',
-    });
-    await store.updateWithdrawalPreparation(claimedPreparation.id, session.walletAddress, {
-      withdrawal_id: withdrawal.id,
-    });
+    if (!withdrawal) {
+      withdrawal = await getOrCreateWithdrawal({
+        store,
+        walletAddress: session.walletAddress,
+        amountUsdc: preparation.amount_usdc,
+        txHash: preparation.tx_hash,
+      });
+      claimedPreparation = await store.updateWithdrawalPreparation(preparation.id, session.walletAddress, {
+        status: 'submitted',
+        withdrawal_id: withdrawal.id,
+        completed_at: null,
+      });
+    }
 
     const submitted = await submitEscrowWithdrawal(parsed.data.signedTransactionXdr, session.walletAddress, {
-      expectedTxHash: claimedPreparation.tx_hash,
+      expectedTxHash: preparation.tx_hash,
     });
-    const completed = await store.updateWithdrawal(withdrawal.id, {
-      amount_usdc: submitted.amountUsdc || amountUsdc,
-      tx_hash: submitted.txHash,
-      status: 'succeeded',
-      completed_at: nowIso(),
-    });
-    await store.updateWithdrawalPreparation(claimedPreparation.id, session.walletAddress, {
-      status: 'succeeded',
-      withdrawal_id: withdrawal.id,
-      submitted_tx_hash: submitted.txHash,
-      completed_at: nowIso(),
+    const completed = await completeWithdrawal({
+      store,
+      preparation: { ...preparation, withdrawal_id: withdrawal.id },
+      withdrawal,
+      submitted,
+      walletAddress: session.walletAddress,
     });
 
-    return res.status(200).json({
-      withdrawal: completed,
-      txHash: submitted.txHash,
-      amountUsdc: submitted.amountUsdc,
-      amountBaseUnits: submitted.amountBaseUnits,
-    });
+    return res.status(200).json(completed);
   } catch (err) {
-    if (withdrawal) {
-      await store.updateWithdrawal(withdrawal.id, {
-        status: 'failed',
-        completed_at: nowIso(),
-      });
-    }
-    if (claimedPreparation) {
-      await store.updateWithdrawalPreparation(claimedPreparation.id, session.walletAddress, {
-        status: 'failed',
-        withdrawal_id: withdrawal?.id ?? claimedPreparation.withdrawal_id,
-        completed_at: nowIso(),
-      });
+    if (claimedPreparation && preparation) {
+      try {
+        const existing = await readEscrowWithdrawalTransaction(preparation.tx_hash);
+        if (existing.status === 'succeeded') {
+          const completed = await completeWithdrawal({
+            store,
+            preparation: { ...preparation, withdrawal_id: withdrawal?.id ?? preparation.withdrawal_id },
+            withdrawal,
+            submitted: existing,
+            walletAddress: session.walletAddress,
+          });
+          return res.status(200).json({ ...completed, recovered: true });
+        }
+
+        if (existing.status === 'failed') {
+          if (withdrawal) {
+            await retryStoreWrite(() => store.updateWithdrawal(withdrawal.id, {
+              tx_hash: preparation.tx_hash,
+              status: 'failed',
+              completed_at: nowIso(),
+            }));
+          }
+          await retryStoreWrite(() => store.updateWithdrawalPreparation(preparation.id, session.walletAddress, {
+            status: 'failed',
+            withdrawal_id: withdrawal?.id ?? preparation.withdrawal_id,
+            completed_at: nowIso(),
+          }));
+        } else {
+          if (withdrawal) {
+            await retryStoreWrite(() => store.updateWithdrawal(withdrawal.id, {
+              tx_hash: preparation.tx_hash,
+              status: 'pending',
+              completed_at: null,
+            }));
+          }
+          await retryStoreWrite(() => store.updateWithdrawalPreparation(preparation.id, session.walletAddress, {
+            status: 'submitted',
+            withdrawal_id: withdrawal?.id ?? preparation.withdrawal_id,
+            completed_at: null,
+          }));
+        }
+      } catch (reconciliationError) {
+        console.error('Withdrawal reconciliation error:', reconciliationError);
+      }
     }
 
     if (err.message?.includes('not configured')) {
@@ -222,8 +375,11 @@ export async function handleSubmit(req, res) {
         error: 'Signed withdrawal transaction does not match the prepared withdrawal.',
       });
     }
-    return res.status(500).json({
+    return res.status(claimedPreparation ? 503 : 500).json({
       error: publicErrorMessage(err, 'PayGate could not submit the withdrawal. Please try again in a moment.'),
+      retryable: Boolean(claimedPreparation),
+      preparationId: claimedPreparation?.id,
+      txHash: claimedPreparation?.tx_hash,
     });
   }
 }

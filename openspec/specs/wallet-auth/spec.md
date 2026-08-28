@@ -72,6 +72,14 @@ PayGate SHALL let the frontend check whether a wallet session exists.
 - WHEN `GET /api/auth/me` is called
 - THEN the response includes `authenticated: false`
 
+#### Scenario: Malformed or structurally invalid session
+
+- GIVEN a session cookie has malformed encoding, extra token segments, invalid timestamps, or an excessive lifetime
+- WHEN `GET /api/auth/me` is called
+- THEN PayGate treats the request as unauthenticated
+- AND other valid cookies can still be parsed
+- AND the route does not fail with a server error
+
 ### Requirement: Logout clears session
 
 PayGate SHALL clear the wallet session on logout.

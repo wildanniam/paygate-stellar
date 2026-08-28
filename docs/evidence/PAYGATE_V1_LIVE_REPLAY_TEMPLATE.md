@@ -27,11 +27,14 @@ Secrets must not be pasted into this file.
 | Direct upstream without secret returns `401` | `TBD` | `screenshots/upstream-401.png` |
 | Paid proxy without payment returns `402` | `TBD` | `screenshots/proxy-402.png` |
 | Agent paid request returns `200` JSON | `TBD` | `screenshots/agent-200.png` |
+| Payment row reaches `credit_status=credited` | `TBD` | Credit tx: `TBD` |
 | Dashboard shows call and revenue | `TBD` | `screenshots/dashboard-paid.png` |
+| Dashboard totals exceed recent-feed caps accurately | `TBD` | `transcripts/dashboard-summary.json` |
 | Dashboard shows payment tx hash | `TBD` | Payment tx: `TBD` |
 | Dashboard shows credit tx hash | `TBD` | Credit tx: `TBD` |
 | Dashboard shows escrow balance | `TBD` | `screenshots/dashboard-escrow.png` |
 | Developer withdrawal succeeds through Freighter | `TBD` | Withdrawal tx: `TBD` |
+| Temporary replay fixtures cleaned | `TBD` | `transcripts/cleanup.txt` |
 | Demo video recorded | `TBD` | Video link: `TBD` |
 
 ## Transaction Hashes
@@ -48,6 +51,8 @@ Secrets must not be pasted into this file.
 - GET-only registered APIs.
 - No refunds, fiat checkout, marketplace, buyer accounts, mainnet, POST APIs, or compliance claims.
 - Upstream failures after payment are logged, but no automated refund flow exists in V1.
+- Stable upstream idempotency is advisory unless the registered upstream honors `Idempotency-Key`.
+- Active contract state renews to approximately 30 days; fully inactive deployments require maintenance/restore planning.
 
 ## Notes
 

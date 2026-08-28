@@ -52,16 +52,36 @@ PayGate SHALL encrypt per-API secret headers at rest.
 - AND the stored value is encrypted
 - AND the decrypted value is available only to authenticated detail/setup flows and paid forwarding
 
-### Requirement: Prevent duplicate live endpoint registrations
+### Requirement: Reserve endpoints only after verification
 
-PayGate SHALL prevent duplicate live registrations for the same normalized method, upstream base URL, and path.
+PayGate SHALL allow unverified developers to attempt setup without globally reserving an endpoint. Only one active API may own the same normalized method, upstream base URL, and path. One wallet may have only one non-expired pending claim for the same endpoint.
 
-#### Scenario: Duplicate endpoint
+#### Scenario: Pending claim by another wallet
 
-- GIVEN an active or pending API already exists for a normalized endpoint
-- WHEN a developer registers the same endpoint again
-- THEN PayGate returns HTTP 409
-- AND indicates whether the duplicate belongs to the same wallet when possible
+- GIVEN wallet A has a pending setup claim for an endpoint
+- WHEN wallet B registers the same endpoint before either claim is verified
+- THEN wallet B receives its own pending setup record
+- AND neither pending record is public through the paid proxy
+
+#### Scenario: Same owner duplicate pending claim
+
+- GIVEN a wallet has a non-expired pending claim for an endpoint
+- WHEN the same wallet registers the endpoint again
+- THEN PayGate returns HTTP 409 with the existing API id
+
+#### Scenario: Atomic active ownership
+
+- GIVEN multiple wallets have pending claims for the same endpoint
+- WHEN setup verification races
+- THEN at most one record transitions atomically to `active`
+- AND later activation attempts return a conflict without displacing the verified owner
+
+#### Scenario: Pending claim expiry
+
+- GIVEN a pending setup claim has passed its seven-day expiry
+- WHEN registry cleanup or a later registration runs
+- THEN the expired claim is archived
+- AND it no longer blocks the same wallet from starting setup again
 
 ### Requirement: Track API lifecycle states
 
@@ -77,13 +97,15 @@ PayGate SHALL expose registered APIs as `pending_setup`, `active`, or `archived`
 #### Scenario: Setup verification activates API
 
 - GIVEN a pending API has the upstream guard installed
-- WHEN `POST /api/apis/:apiId/verify` reaches the upstream API with `X-PayGate-Secret`
+- WHEN `POST /api/apis/:apiId/verify` sends a fresh unpredictable invalid `X-PayGate-Secret`
+- AND the upstream deliberately rejects it with HTTP 401 or 403
+- AND the upstream accepts the registered secret with a successful valid JSON response
 - THEN PayGate marks the API as `active`
 - AND the paid proxy can return MPP payment challenges
 
 #### Scenario: Setup verification fails
 
-- GIVEN the upstream API is unreachable or rejects the secret
+- GIVEN the upstream API is unreachable, accepts an invalid secret, returns an unrelated error for an invalid secret, rejects the registered secret, or returns an invalid or non-JSON success response
 - WHEN `POST /api/apis/:apiId/verify` runs
 - THEN PayGate keeps the API pending
 - AND returns an actionable setup error

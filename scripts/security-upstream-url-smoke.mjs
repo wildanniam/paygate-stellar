@@ -6,9 +6,18 @@ import {
 import { getOrigin, requireSameOrigin } from '../server/lib/auth.js';
 import { isRequestBodyTooLarge, readJsonBody } from '../server/lib/body.js';
 import { clearRateLimitsForTest, enforceRateLimit } from '../server/lib/rateLimit.js';
+import { getRateLimitNamespace, getRateLimitRedisConfig } from '../server/lib/rateLimitConfig.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+function restoreEnv(name, value) {
+  if (value === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = value;
+  }
 }
 
 async function rejects(url) {
@@ -53,6 +62,8 @@ const originalRegistryStore = process.env.PAYGATE_REGISTRY_STORE;
 const originalAllowPrivate = process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
 const originalPublicOrigin = process.env.PAYGATE_PUBLIC_ORIGIN;
 const originalRateLimitStore = process.env.PAYGATE_RATE_LIMIT_STORE;
+const originalUpstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+const originalUpstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 delete process.env.PAYGATE_REGISTRY_STORE;
 delete process.env.PAYGATE_ALLOW_PRIVATE_UPSTREAMS;
@@ -121,6 +132,70 @@ try {
   assert(isUpstreamResponseTooLarge(error), 'oversized upstream response should throw UpstreamResponseTooLargeError');
 }
 
+const marketplaceConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_KV_REST_API_URL: 'https://marketplace-upstash.example',
+  UPSTASH_REDIS_REST_KV_REST_API_TOKEN: 'smoke-marketplace-token-at-least-16-characters',
+});
+assert(marketplaceConfig.urlEnvName === 'UPSTASH_REDIS_REST_KV_REST_API_URL', 'marketplace Upstash URL alias should be supported');
+assert(marketplaceConfig.tokenEnvName === 'UPSTASH_REDIS_REST_KV_REST_API_TOKEN', 'marketplace Upstash token alias should be supported');
+const mixedAliasConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_URL: 'https://stale-direct-upstash.example',
+  UPSTASH_REDIS_REST_KV_REST_API_TOKEN: 'smoke-marketplace-token-at-least-16-characters',
+});
+assert(mixedAliasConfig.error, 'a URL and token from different aliases must be rejected');
+assert(!mixedAliasConfig.url && !mixedAliasConfig.token, 'mismatched aliases must not produce usable credentials');
+const conflictingAliasConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_URL: 'https://direct-upstash.example',
+  UPSTASH_REDIS_REST_TOKEN: 'smoke-direct-token-at-least-16-characters',
+  UPSTASH_REDIS_REST_KV_REST_API_URL: 'https://marketplace-upstash.example',
+  UPSTASH_REDIS_REST_KV_REST_API_TOKEN: 'smoke-marketplace-token-at-least-16-characters',
+});
+assert(conflictingAliasConfig.error, 'conflicting complete Upstash pairs must be rejected');
+const duplicateAliasConfig = getRateLimitRedisConfig({
+  UPSTASH_REDIS_REST_URL: 'https://shared-upstash.example',
+  UPSTASH_REDIS_REST_TOKEN: 'smoke-shared-token-at-least-16-characters',
+  KV_REST_API_URL: 'https://shared-upstash.example',
+  KV_REST_API_TOKEN: 'smoke-shared-token-at-least-16-characters',
+});
+assert(!duplicateAliasConfig.error, 'duplicate aliases for the same Upstash database should remain valid');
+assert(duplicateAliasConfig.urlEnvName === 'UPSTASH_REDIS_REST_URL', 'the first complete matching pair should win');
+assert(
+  getRateLimitNamespace({ PAYGATE_PUBLIC_ORIGIN: 'https://staging.example' })
+    !== getRateLimitNamespace({ PAYGATE_PUBLIC_ORIGIN: 'https://production.example' }),
+  'different deployment origins should use isolated rate-limit namespaces',
+);
+
+delete process.env.PAYGATE_RATE_LIMIT_STORE;
+delete process.env.UPSTASH_REDIS_REST_URL;
+delete process.env.UPSTASH_REDIS_REST_TOKEN;
+const unavailableRateLimitRes = makeRes();
+const unavailableRateLimitAllowed = await enforceRateLimit(
+  { headers: {} },
+  unavailableRateLimitRes,
+  {
+    label: 'security_missing_store',
+    keyParts: ['missing-store'],
+    limit: 1,
+    windowSeconds: 60,
+  },
+);
+assert(!unavailableRateLimitAllowed, 'missing rate-limit store should fail closed by default');
+assert(unavailableRateLimitRes.statusCode === 503, 'missing rate-limit store should return 503');
+assert(unavailableRateLimitRes.body.code === 'rate_limiter_unavailable', 'missing rate-limit store should expose a stable code');
+
+const failOpenRateLimitAllowed = await enforceRateLimit(
+  { headers: {} },
+  makeRes(),
+  {
+    label: 'security_missing_store_fail_open',
+    keyParts: ['missing-store'],
+    limit: 1,
+    windowSeconds: 60,
+    failOpen: true,
+  },
+);
+assert(failOpenRateLimitAllowed, 'explicit fail-open rate limits should preserve availability without a store');
+
 process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
 clearRateLimitsForTest();
 const rateReq = {
@@ -176,5 +251,11 @@ if (originalRateLimitStore === undefined) {
 } else {
   process.env.PAYGATE_RATE_LIMIT_STORE = originalRateLimitStore;
 }
+if (originalUpstashUrl === undefined) {
+  delete process.env.UPSTASH_REDIS_REST_URL;
+} else {
+  process.env.UPSTASH_REDIS_REST_URL = originalUpstashUrl;
+}
+restoreEnv('UPSTASH_REDIS_REST_TOKEN', originalUpstashToken);
 
 console.log('Security upstream URL smoke test passed');

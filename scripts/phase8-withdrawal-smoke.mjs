@@ -9,8 +9,15 @@ import {
 import dashboardHandler from '../api/dashboard/summary.js';
 import { handlePrepare as prepareHandler, handleSubmit as submitHandler } from '../api/withdraw/[action].js';
 import { withdrawPlatformFees } from '../server/lib/escrowContract.js';
+import {
+  WITHDRAWAL_PREPARATION_TTL_MS,
+  WITHDRAWAL_PREPARATION_TTL_SECONDS,
+  WITHDRAWAL_SUBMISSION_BUFFER_SECONDS,
+  WITHDRAWAL_TRANSACTION_TIMEOUT_SECONDS,
+} from '../server/lib/withdrawalTiming.js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
+process.env.PAYGATE_RATE_LIMIT_STORE = 'memory';
 process.env.API_SECRET_ENCRYPTION_KEY = process.env.API_SECRET_ENCRYPTION_KEY || 'paygate-phase8-smoke-api-secret-key-32';
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'paygate-phase8-smoke-session-secret-32';
 process.env.PAYGATE_ESCROW_WITHDRAW_MODE = 'memory';
@@ -60,9 +67,16 @@ const authHeaders = {
 const server = await startServer();
 
 try {
+  assert(
+    WITHDRAWAL_TRANSACTION_TIMEOUT_SECONDS - WITHDRAWAL_PREPARATION_TTL_SECONDS
+      >= WITHDRAWAL_SUBMISSION_BUFFER_SECONDS,
+    'withdrawal transaction must outlive the server preparation window by the submission buffer',
+  );
+
   const unauthenticated = await fetch(`${server.baseUrl}/api/withdraw/prepare`, { method: 'POST' });
   assert(unauthenticated.status === 401, `unauthenticated prepare expected 401, got ${unauthenticated.status}`);
 
+  const prepareStartedAt = Date.now();
   const preparedResponse = await fetch(`${server.baseUrl}/api/withdraw/prepare`, {
     method: 'POST',
     headers: authHeaders,
@@ -72,6 +86,12 @@ try {
   assert(prepared.amountUsdc === '0.0180000', 'prepare amount mismatch');
   assert(prepared.preparationId, 'prepare should return a preparation id');
   assert(prepared.transactionXdr.includes(ownerWallet), 'prepare should bind tx to developer wallet');
+  const preparationLifetimeMs = Date.parse(prepared.expiresAt) - prepareStartedAt;
+  assert(
+    preparationLifetimeMs >= WITHDRAWAL_PREPARATION_TTL_MS - 5_000
+      && preparationLifetimeMs <= WITHDRAWAL_PREPARATION_TTL_MS + 5_000,
+    'prepare response should use the shared withdrawal TTL',
+  );
 
   const tamperedSubmit = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
     method: 'POST',
@@ -93,6 +113,7 @@ try {
   });
   assert(retryPrepareResponse.status === 200, `retry prepare expected 200, got ${retryPrepareResponse.status}`);
   const retryPrepared = await retryPrepareResponse.json();
+  const signedTransactionXdr = `mock-signed:${retryPrepared.transactionXdr}`;
 
   const submittedResponse = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
     method: 'POST',
@@ -102,7 +123,7 @@ try {
     },
     body: JSON.stringify({
       preparationId: retryPrepared.preparationId,
-      signedTransactionXdr: `mock-signed:${retryPrepared.transactionXdr}`,
+      signedTransactionXdr,
     }),
   });
   assert(submittedResponse.status === 200, `submit expected 200, got ${submittedResponse.status}`);
@@ -111,9 +132,66 @@ try {
   assert(submitted.withdrawal.status === 'succeeded', 'withdrawal status mismatch');
   assert(submitted.withdrawal.tx_hash === submitted.txHash, 'withdrawal tx hash mismatch');
 
+  await store.updateWithdrawal(submitted.withdrawal.id, {
+    status: 'failed',
+    completed_at: new Date().toISOString(),
+  });
+  await store.updateWithdrawalPreparation(retryPrepared.preparationId, ownerWallet, {
+    status: 'failed',
+    submitted_tx_hash: null,
+    completed_at: new Date().toISOString(),
+  });
+
+  const recoveredResponse = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      preparationId: retryPrepared.preparationId,
+      signedTransactionXdr,
+    }),
+  });
+  assert(recoveredResponse.status === 200, `recovery submit expected 200, got ${recoveredResponse.status}`);
+  const recovered = await recoveredResponse.json();
+  assert(recovered.recovered === true, 'chain-confirmed withdrawal should be marked as recovered');
+  assert(recovered.txHash === submitted.txHash, 'recovered withdrawal hash mismatch');
+
+  const idempotentResponse = await fetch(`${server.baseUrl}/api/withdraw/submit`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      preparationId: retryPrepared.preparationId,
+      signedTransactionXdr,
+    }),
+  });
+  assert(idempotentResponse.status === 200, `idempotent submit expected 200, got ${idempotentResponse.status}`);
+  const idempotent = await idempotentResponse.json();
+  assert(idempotent.recovered === false, 'already-succeeded withdrawal should not be marked as recovered');
+  assert(idempotent.txHash === submitted.txHash, 'idempotent withdrawal hash mismatch');
+
   const withdrawals = getRawWithdrawalsForTest();
   assert(withdrawals.length === 1, 'withdrawal row was not recorded');
   assert(withdrawals[0].wallet_address === ownerWallet, 'withdrawal wallet mismatch');
+  const withdrawalByHash = await store.getWithdrawalByTxHash(submitted.txHash, ownerWallet);
+  assert(withdrawalByHash?.id === submitted.withdrawal.id, 'withdrawal should be recoverable by transaction hash');
+  let duplicateWithdrawalError;
+  try {
+    await store.createWithdrawal({
+      wallet_address: ownerWallet,
+      amount_usdc: submitted.amountUsdc,
+      tx_hash: submitted.txHash,
+      status: 'pending',
+    });
+  } catch (error) {
+    duplicateWithdrawalError = error;
+  }
+  assert(duplicateWithdrawalError?.code === '23505', 'duplicate withdrawal transaction hash should be rejected');
+  assert(getRawWithdrawalsForTest().length === 1, 'duplicate withdrawal attempt must not add a row');
   const preparations = getRawWithdrawalPreparationsForTest();
   assert(preparations.length === 2, 'withdrawal preparations should be recorded');
   assert(preparations.some((row) => row.status === 'prepared'), 'tampered preparation should remain reusable');

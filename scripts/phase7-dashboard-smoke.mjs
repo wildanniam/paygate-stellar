@@ -3,6 +3,7 @@ import { encryptApiSecret } from '../server/lib/apiSecret.js';
 import { createSessionToken, SESSION_COOKIE } from '../server/lib/auth.js';
 import { clearRegistryForTest, getRegistryStore } from '../server/lib/registryStore.js';
 import dashboardHandler from '../api/dashboard/summary.js';
+import { buildDashboardModel } from '../frontend/src/lib/dashboardViewModel.js';
 
 process.env.PAYGATE_REGISTRY_STORE = 'memory';
 process.env.API_SECRET_ENCRYPTION_KEY = process.env.API_SECRET_ENCRYPTION_KEY || 'paygate-phase7-smoke-api-secret-key-32';
@@ -119,6 +120,17 @@ await store.createPayment({
   verified_at: new Date().toISOString(),
   credited_at: new Date().toISOString(),
 });
+await store.createPayment({
+  request_id: '00000000-0000-0000-0000-000000000001',
+  api_id: ownerApi.id,
+  payment_id: 'pownerpending',
+  tx_hash: 'f'.repeat(64),
+  gross_amount_usdc: '9.9900000',
+  developer_amount_usdc: '8.9910000',
+  platform_fee_usdc: '0.9990000',
+  recipient_mode: 'contract',
+  verified_at: new Date().toISOString(),
+});
 
 const server = await startServer();
 
@@ -143,9 +155,54 @@ try {
   assert(body.summary.grossRevenueUsdc === '0.0200000', 'dashboard gross revenue mismatch');
   assert(body.summary.platformFeeUsdc === '0.0020000', 'dashboard fee revenue mismatch');
   assert(body.apis.length === 1 && body.apis[0].id === ownerApi.id, 'dashboard leaked another owner API');
-  assert(body.payments.length === 1 && body.payments[0].txHash === 'b'.repeat(64), 'dashboard payment rows mismatch');
+  assert(body.payments.length === 2, 'dashboard payment rows mismatch');
+  assert(
+    body.payments.some((payment) => payment.txHash === 'b'.repeat(64) && payment.creditStatus === 'credited'),
+    'dashboard should identify credited payments',
+  );
+  assert(
+    body.payments.some((payment) => payment.txHash === 'f'.repeat(64) && payment.creditStatus === 'unsubmitted'),
+    'dashboard should identify payments awaiting escrow credit',
+  );
   assert(body.requests.length === 2, 'dashboard request rows mismatch');
   assert(body.escrow && typeof body.escrow.developerBalance?.baseUnits === 'string', 'dashboard escrow balance missing');
+
+  for (let index = 0; index < 105; index += 1) {
+    await store.createProxyRequest({
+      api_id: ownerApi.id,
+      owner_wallet: ownerWallet,
+      payment_id: `pcapped${String(index).padStart(3, '0')}`,
+      status: 'challenge_sent',
+      price_usdc: 0.02,
+    });
+  }
+  const cappedResponse = await fetch(`${server.baseUrl}/api/dashboard/summary`, {
+    headers: {
+      Cookie: `${SESSION_COOKIE}=${createSessionToken(ownerWallet)}`,
+    },
+  });
+  assert(cappedResponse.status === 200, 'dashboard cap verification request should succeed');
+  const capped = await cappedResponse.json();
+  assert(capped.requests.length === 100, 'dashboard activity feed should remain capped at 100 rows');
+  assert(capped.summary.totalCalls === 107, 'all-time dashboard total must include rows beyond the activity cap');
+  assert(capped.apis[0].calls === 107, 'per-API total must include rows beyond the activity cap');
+  assert(
+    capped.analytics.daily.reduce((sum, row) => sum + row.totalCalls, 0) === 107,
+    'daily analytics should preserve exact request totals',
+  );
+  const model = buildDashboardModel(capped, 30, new Date());
+  assert(model.summary.totalCalls === 107, 'frontend range metrics should use aggregate rows, not the recent feed');
+  assert(
+    Math.abs(model.summary.developerRevenueUsdc - 0.018) < 0.0000001,
+    'frontend revenue must exclude payments that have not reached escrow credit',
+  );
+  const pendingCredit = model.activityRows.find((row) => row.paymentId === 'pownerpending');
+  assert(pendingCredit?.result === 'credit pending', 'pending escrow credit should be visible in activity');
+  assert(pendingCredit?.revenue === '0 USDC', 'pending escrow credit must not display earned revenue');
+  assert(
+    Math.abs(model.revenueTrend.reduce((sum, value) => sum + value, 0) - 0.018) < 0.0000001,
+    'chronological revenue trend should preserve credited developer revenue',
+  );
 } finally {
   await server.close();
 }

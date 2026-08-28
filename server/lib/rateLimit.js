@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { Redis } from '@upstash/redis';
+import { getRateLimitNamespace, getRateLimitRedisConfig } from './rateLimitConfig.js';
 
-const NAMESPACE = 'paygate:ratelimit:v1';
 let redisClient = null;
 
 function getMemoryStore() {
@@ -17,8 +17,8 @@ function shouldUseMemoryStore() {
 
 function getRedisClient() {
   if (redisClient) return redisClient;
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const { url, token, error } = getRateLimitRedisConfig();
+  if (error) throw new Error(error);
   if (!url || !token) return null;
   redisClient = new Redis({ url, token });
   return redisClient;
@@ -62,7 +62,7 @@ export function rateLimitKey(label, parts) {
 
 async function checkMemoryLimit({ key, limit, windowSeconds }) {
   const { resetAt } = currentWindow(windowSeconds);
-  const storeKey = `${NAMESPACE}:${key}:${resetAt}`;
+  const storeKey = `${getRateLimitNamespace()}:${key}:${resetAt}`;
   const store = getMemoryStore();
   const current = store.get(storeKey);
   const next = {
@@ -89,7 +89,7 @@ async function checkRedisLimit({ key, limit, windowSeconds }) {
   if (!redis) return null;
 
   const { windowId, resetAt } = currentWindow(windowSeconds);
-  const redisKey = `${NAMESPACE}:${key}:${windowId}`;
+  const redisKey = `${getRateLimitNamespace()}:${key}:${windowId}`;
   const count = await redis.incr(redisKey);
   if (count === 1) await redis.expire(redisKey, windowSeconds + 5);
 
@@ -128,7 +128,18 @@ export async function enforceRateLimit(req, res, {
     return false;
   }
 
-  if (!result) return true;
+  if (!result) {
+    if (failOpen) return true;
+    res.status(503).json({
+      error: 'Rate limiter unavailable',
+      code: 'rate_limiter_unavailable',
+      requiredEnv: [
+        'UPSTASH_REDIS_REST_URL or KV_REST_API_URL',
+        'UPSTASH_REDIS_REST_TOKEN or KV_REST_API_TOKEN',
+      ],
+    });
+    return false;
+  }
 
   res.setHeader('X-RateLimit-Limit', result.limit);
   res.setHeader('X-RateLimit-Remaining', result.remaining);

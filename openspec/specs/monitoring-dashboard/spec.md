@@ -67,6 +67,20 @@ The dashboard SHALL summarize the connected developer wallet's API and revenue s
 - WHEN the dashboard maps the response
 - THEN it can show total APIs, active APIs, total calls, successful calls, failed calls, gross revenue, developer revenue, platform fee, last payment time, and escrow balances
 
+#### Scenario: History exceeds recent-feed limits
+
+- GIVEN a wallet has more requests or payments than the recent activity payload cap
+- WHEN `GET /api/dashboard/summary` loads
+- THEN all-time and per-API totals come from exact database aggregates
+- AND recent request/payment arrays may remain capped for payload size
+
+#### Scenario: Credit is not final
+
+- GIVEN a verified payment is still unsubmitted, preparing, submitted, uncertain, or failed for escrow credit
+- WHEN dashboard revenue is calculated
+- THEN that payment is not counted as revenue
+- AND the UI identifies its credit as pending or failed rather than earned
+
 ### Requirement: Support client-side range filters
 
 The dashboard SHALL let users compare 7D, 30D, and 90D ranges using loaded summary data.
@@ -148,3 +162,4 @@ Dashboard views SHALL clearly show loading, empty, and recoverable error states.
 - Analytics are derived from PayGate registry/payment/request rows plus escrow balance reads.
 - V1 supports testnet USDC and GET endpoints only.
 - Dashboard filters are client-side over the currently loaded summary payload.
+- Daily revenue buckets are database-derived, chronological, and credited-only.

@@ -288,11 +288,7 @@ function LoggedOutWorkspace({ authStatus, authError, onConnectWallet }) {
 }
 
 function RevenueTrendCard({ model }) {
-  const payments = model.rangePayments || [];
-  const buckets = Array.from({ length: 8 }, (_, index) => {
-    const bucketPayments = payments.filter((_, paymentIndex) => paymentIndex % 8 === index);
-    return bucketPayments.reduce((sum, payment) => sum + Number(payment.developerAmountUsdc || 0), 0);
-  });
+  const buckets = model.revenueTrend || Array.from({ length: 8 }, () => 0);
   const max = Math.max(...buckets, 0.0001);
 
   return (

@@ -33,11 +33,24 @@ PayGate SHALL credit a valid payment into escrow after payment verification.
 
 The escrow contract SHALL reject duplicate payment IDs.
 
+The payment ID used as the contract key SHALL fit Soroban's 32-character `Symbol` limit.
+
 #### Scenario: Duplicate payment id
 
 - GIVEN payment id `pay1` was already credited
 - WHEN `creditPayment(pay1, ...)` is called again
 - THEN the contract rejects the call
+
+### Requirement: Renew active contract storage
+
+The escrow contract SHALL renew instance configuration and active persistent financial/replay entries before their TTL approaches archival expiry.
+
+#### Scenario: Active state crosses the renewal threshold
+
+- GIVEN contract instance state, a developer balance, platform fee balance, and processed-payment marker exist
+- WHEN normal contract operations access them around the configured renewal threshold
+- THEN their TTL extends to approximately 30 days
+- AND the balances and duplicate-payment marker remain readable after the original expiry window
 
 ### Requirement: Read escrow balances for dashboard
 
@@ -59,7 +72,8 @@ PayGate SHALL prepare a Freighter-signable withdrawal transaction for the authen
 
 - GIVEN a developer has a positive escrow balance
 - WHEN `POST /api/withdraw/prepare` succeeds
-- THEN PayGate returns transaction XDR and balance metadata
+- THEN PayGate returns transaction XDR, balance metadata, and the preparation expiry
+- AND the transaction remains valid beyond the preparation expiry long enough for server submission
 
 #### Scenario: No withdrawable balance
 
@@ -96,3 +110,4 @@ PayGate admin SHALL be able to withdraw accumulated platform fees through the op
 - Testnet only for V1.
 - Mock escrow credit/withdraw modes are allowed only for memory-store local smoke tests.
 - Automatic refunds are not part of V1.
+- TTL renewal is activity-based. A fully inactive contract still requires maintenance traffic or a restore procedure before archived entries expire.

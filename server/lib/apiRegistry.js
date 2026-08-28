@@ -10,6 +10,8 @@ export const API_STATUSES = {
   ARCHIVED: 'archived',
 };
 
+export const API_SETUP_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
 const upstreamBaseUrlSchema = z.string().trim().url().superRefine((value, ctx) => {
   const validation = validateUpstreamBaseUrlSyntax(value);
   if (!validation.ok) {
@@ -142,12 +144,14 @@ export function toApiResponse(req, api, extra = {}) {
     updatedAt: api.updated_at,
     verifiedAt: api.verified_at,
     archivedAt: api.archived_at,
+    setupExpiresAt: api.setup_expires_at,
     ...extra,
   };
 }
 
 export async function createRegisteredApi({ req, store, walletAddress, input }) {
   await store.upsertDeveloper(walletAddress);
+  await store.archiveExpiredPendingApis();
 
   const fingerprint = normalizeApiFingerprint({
     upstreamBaseUrl: input.upstreamBaseUrl,
@@ -164,9 +168,9 @@ export async function createRegisteredApi({ req, store, walletAddress, input }) 
   }
   await assertUpstreamDoesNotRedirect(fingerprint);
 
-  const existing = await store.findLiveApiByEndpoint(fingerprint);
-  if (existing) {
-    const sameOwner = existing.owner_wallet === walletAddress;
+  const activeApi = await store.findActiveApiByEndpoint(fingerprint);
+  if (activeApi) {
+    const sameOwner = activeApi.owner_wallet === walletAddress;
     throw new RegistryApiError(
       409,
       sameOwner
@@ -174,26 +178,59 @@ export async function createRegisteredApi({ req, store, walletAddress, input }) 
         : 'This upstream API is already registered by another wallet.',
       {
         code: sameOwner ? 'duplicate_api' : 'endpoint_claimed',
-        existingApiId: sameOwner ? existing.id : undefined,
+        existingApiId: sameOwner ? activeApi.id : undefined,
+      },
+    );
+  }
+
+  const pendingApi = await store.findPendingApiByEndpointForOwner({
+    ...fingerprint,
+    ownerWallet: walletAddress,
+  });
+  if (pendingApi) {
+    throw new RegistryApiError(
+      409,
+      'This API already has an unfinished setup in your wallet.',
+      {
+        code: 'duplicate_api',
+        existingApiId: pendingApi.id,
       },
     );
   }
 
   const secret = generateApiSecret();
   const encrypted = encryptApiSecret(secret);
-  const api = await store.createApi({
-    owner_wallet: walletAddress,
-    name: input.name,
-    upstream_base_url: fingerprint.upstreamBaseUrl,
-    path: fingerprint.path,
-    method: fingerprint.method,
-    price_usdc: input.priceUsdc,
-    status: API_STATUSES.PENDING_SETUP,
-    active: false,
-    verified_at: null,
-    archived_at: null,
-    ...encrypted,
-  });
+  let api;
+  try {
+    api = await store.createApi({
+      owner_wallet: walletAddress,
+      name: input.name,
+      upstream_base_url: fingerprint.upstreamBaseUrl,
+      path: fingerprint.path,
+      method: fingerprint.method,
+      price_usdc: input.priceUsdc,
+      status: API_STATUSES.PENDING_SETUP,
+      active: false,
+      verified_at: null,
+      archived_at: null,
+      setup_expires_at: new Date(Date.now() + API_SETUP_TTL_MS).toISOString(),
+      ...encrypted,
+    });
+  } catch (error) {
+    if (error?.code !== '23505') throw error;
+    const racedPendingApi = await store.findPendingApiByEndpointForOwner({
+      ...fingerprint,
+      ownerWallet: walletAddress,
+    });
+    if (racedPendingApi) {
+      throw new RegistryApiError(
+        409,
+        'This API already has an unfinished setup in your wallet.',
+        { code: 'duplicate_api', existingApiId: racedPendingApi.id },
+      );
+    }
+    throw error;
+  }
 
   return toApiResponse(req, api, { secret });
 }

@@ -18,9 +18,9 @@ Before editing code, read:
 
 `README.md` may be stale. For V0/SOW generator work, `TECHNICAL_SPEC.md` wins. For the V1 branch, `PAYGATE_V1_PRODUCT_SPEC.md` wins where it intentionally conflicts with V0 constraints.
 
-## V1 Branch Direction
+## V1 Product Direction
 
-Wildan has approved a V1 pivot on the `codex/paygate-v1` branch.
+Wildan approved the V1 gateway pivot on the original `codex/paygate-v1` branch. The V1 gateway is now the current product direction; do not infer product scope from an old branch name.
 
 PayGate V1 is a **pay-per-call gateway for APIs**, not only a code generator. The locked V1 flow is:
 
@@ -97,7 +97,7 @@ These were non-goals for the original V0/SOW sprint. Wildan has now explicitly a
 
 These guardrails describe the original V0/SOW generator architecture. For V1 gateway work, use `PAYGATE_V1_DEVELOPMENT_PLAN.md` once locked.
 
-- Frontend: React 18, React Router v6, Tailwind CSS v3, Vite 5, lucide-react.
+- Historical V0 spec baseline: React 18, React Router v6, Tailwind CSS v3, Vite 5, and lucide-react. These are not the current installed version pins.
 - Backend: Node.js 20 ES modules, Express 4, Zod, CORS, express-rate-limit.
 - V0 backend should remain a pure generator service: no persistence, no auth, no wallet secrets.
 - Frontend calls backend with relative `/api/generate`.
@@ -106,14 +106,16 @@ These guardrails describe the original V0/SOW generator architecture. For V1 gat
 
 ## Current State Snapshot
 
-As of June 4, 2026:
+As of August 27, 2026:
+
+- Current V1 frontend runtime is React 18, React Router 7, Tailwind CSS 3, Vite 7, GSAP, and lucide-react. Root Vercel Functions use Node.js 22+ and Express 5 where applicable; the legacy generator backend remains on Express 4.
 
 - `frontend/src/App.jsx` is now the React Router root.
 - The polished landing page has moved to `frontend/src/pages/Landing.jsx`.
 - `/generate`, `/result`, and `/dashboard` pages exist.
 - Shared `colors`, `AppNavbar`, and `CodeBlock` frontend modules exist.
 - `backend/` exists with Express, Zod validation, generator route, and templates.
-- React Router is installed.
+- React Router 7 is installed, and browser smoke coverage includes logged-out and authenticated route states across desktop and mobile viewports.
 - Vite proxy for `/api` is configured.
 - PM2 `ecosystem.config.cjs` exists.
 - `../frontend/CLAUDE.md` is legacy guidance from the landing-page-only phase.
@@ -133,15 +135,26 @@ As of June 4, 2026:
 - Phase 8 escrow withdrawal flow is implemented. Dashboard can prepare a withdrawal, Freighter signs the transaction XDR, `/api/withdraw/submit` submits it to Soroban RPC, and withdrawal rows are recorded. Admin fee withdrawal is available through `npm run admin:withdraw-fees`. Evidence: `docs/evidence/PAYGATE_V1_PHASE8_WITHDRAWAL_PROOF.md`.
 - Live admin fee withdrawal still requires `PAYGATE_OPERATOR_SECRET` in the operator environment; do not expose that secret to the frontend.
 - Phase 9 demo guide is documented in `docs/PAYGATE_V1_DEMO_GUIDE.md`. Testnet beta readiness evidence is tracked in `docs/evidence/PAYGATE_V1_BETA_READINESS.md`. Demo video is still not recorded in this repository.
-- Beta hardening utilities now exist: `npm run beta:preflight` for deployed env/Supabase/rewrite checks, `npm run test:auth:supabase` for optional Supabase auth challenge regression, `npm run test:browser` for local desktop/mobile SPA route smoke, and `npm run evidence:init` for timestamped live replay evidence folders.
+- Beta hardening utilities include `npm run beta:preflight`, `npm run test:auth:supabase`, `npm run test:distributed-state:supabase`, the guarded real `npm run test:staging:live-replay`, `npm run test:browser`, and `npm run evidence:init`.
 - Vercel SPA rewrites include `/apis/new` and `/apis/:apiId`, so direct refreshes of V1 app routes should resolve to the React app after deployment.
 - API lifecycle hardening is implemented as of June 11, 2026. New registered APIs start as `pending_setup`; they become `active` only after `/api/apis/:apiId/verify` confirms the upstream responds with the generated `X-PayGate-Secret`; used APIs can be archived and unused APIs can be deleted.
-- Live duplicate registrations are blocked by normalized upstream base URL + method + path. Archived APIs are intentionally reusable so Wildan can repeat demos with the same demo upstream.
+- Only a verified active API globally reserves a normalized endpoint. Different wallets may create seven-day pending claims without squatting it; one wallet gets one pending claim per endpoint, and atomic verification chooses one active winner. Archived APIs remain reusable.
 - Direct PATCH activation is blocked. `PATCH /api/apis/:apiId` is for safe metadata updates such as name; activation must go through Verify setup.
 - Dashboard/API detail UX now exposes lifecycle badges, setup guidance, `Verify setup`, and delete/archive reset controls. Navbar active states were fixed so `Dashboard` and `Register API` are not ambiguous. Evidence: `docs/evidence/ui/PHASE5_API_LIFECYCLE_UX.md` and `docs/evidence/ui/PHASE6_NAVBAR_ACTIVE_STATE.md`.
 - Full internal V1 demo proof is covered by `npm run test:demo-flow`: register API -> pending setup -> verify setup -> unpaid `402` -> paid `200` -> dashboard update -> archive/delete reset -> re-register archived endpoint. Evidence: `docs/evidence/PAYGATE_V1_PHASE7_FULL_DEMO_FLOW_PROOF.md`.
 - `frontend/node_modules` and `frontend/dist` are ignored and should remain untracked. Use `npm run build` to regenerate build output locally.
 - `npm run test:beta` is the consolidated local beta smoke command.
+- Production rate limiting fails closed when Upstash storage is missing; memory rate limits remain local-smoke-only.
+- Upstream setup verification uses a fresh unpredictable invalid secret and distinguishes a confirmed guard rejection from unrelated upstream errors.
+- Session parsing rejects malformed, oversized, future-issued, and overlong tokens without breaking a neighboring valid cookie.
+- New payment IDs contain 120 bits of cryptographic randomness while remaining compatible with MPP wire formats and the escrow contract's Soroban `Symbol` key.
+- Paid forwarding is conditionally claimed in Supabase and carries a stable request-scoped `Idempotency-Key`. Escrow credit persists signed XDR before submission, reconciles ambiguous outcomes by tx hash, and leases the operator source account to avoid Stellar sequence contention.
+- Withdrawal accounting is unique by tx hash. Dashboard totals use an exact Supabase RPC, recent feeds remain capped for payload size, and only credited payments count as revenue.
+- The escrow contract renews instance and active persistent storage around a 29-day threshold to approximately 30 days; fully inactive state still needs maintenance or restore planning.
+- GitHub security coverage includes pinned audit workflows, PR dependency review, CodeQL, and Dependabot. Enable branch protection after the PR establishes the final required check names.
+- On 2026-08-28, isolated staging completed a real deployed MPP payment, escrow credit, dashboard read, and signed withdrawal against the fresh TTL-aware contract. Production Vercel, Supabase, and contract state were not changed.
+- `npm run audit:prod`, `npm run audit:all`, `npm run audit:rust`, and the pinned GitHub Actions security workflow are the current dependency gates.
+- A deployment is not beta-ready until its own preflight, migration, contract, and live replay gates pass. Staging passes; production remains externally gated and must follow `docs/evidence/PAYGATE_V1_BETA_READINESS.md`.
 
 Update this snapshot when the project materially changes.
 
@@ -193,4 +206,4 @@ Use this framing:
 
 Avoid leading with file names, implementation details, or code references unless Wildan explicitly asks for technical detail. A good short report says:
 
-> PayGate is a functional alpha. Users can open the app, generate Express middleware, copy the code, and open the dashboard. However, it is not yet fully usable for real API monetization because the generated middleware has not been proven in a sample API with a real Stellar testnet MPP payment and dashboard transaction evidence.
+> PayGate V1 is a testnet beta candidate. Its hosted gateway loop is proven in isolated staging from guarded API through real MPP payment, escrow credit, dashboard evidence, and withdrawal. Production release is still gated by production Supabase recovery, the hardening migration/contract rollout, and final screenshots/video; mainnet and refund guarantees remain out of scope.

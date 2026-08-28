@@ -5,6 +5,20 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function duplicateConstraintError(message = 'duplicate key value violates unique constraint') {
+  const error = new Error(message);
+  error.code = '23505';
+  return error;
+}
+
+function sameApiEndpoint(left, right) {
+  return (
+    left.method.toLowerCase() === right.method.toLowerCase()
+    && left.upstream_base_url.toLowerCase() === right.upstream_base_url.toLowerCase()
+    && left.path === right.path
+  );
+}
+
 function resolveApiStatus(record) {
   if (['pending_setup', 'active', 'archived'].includes(record.status)) return record.status;
   if (record.archived_at) return 'archived';
@@ -43,11 +57,13 @@ function getMemoryState() {
       mppStore: new Map(),
       payments: new Map(),
       proxyRequests: new Map(),
+      operatorLocks: new Map(),
       withdrawalPreparations: new Map(),
       withdrawals: new Map(),
     };
   }
   globalThis.__PAYGATE_REGISTRY_MEMORY.withdrawalPreparations ??= new Map();
+  globalThis.__PAYGATE_REGISTRY_MEMORY.operatorLocks ??= new Map();
   return globalThis.__PAYGATE_REGISTRY_MEMORY;
 }
 
@@ -65,6 +81,7 @@ function publicApiFields(record) {
     active: normalized.active,
     verified_at: normalized.verified_at,
     archived_at: normalized.archived_at,
+    setup_expires_at: normalized.setup_expires_at ?? null,
     created_at: normalized.created_at,
     updated_at: normalized.updated_at,
   };
@@ -85,6 +102,8 @@ function publicProxyRequestFields(record) {
     created_at: record.created_at,
     paid_at: record.paid_at,
     forwarded_at: record.forwarded_at,
+    forwarding_started_at: record.forwarding_started_at ?? null,
+    forwarding_attempt_id: record.forwarding_attempt_id ?? null,
   };
 }
 
@@ -102,6 +121,12 @@ function publicPaymentFields(record) {
     recipient_mode: record.recipient_mode,
     verified_at: record.verified_at,
     credited_at: record.credited_at,
+    credit_status: record.credit_status ?? (record.credited_at && record.credit_tx_hash ? 'credited' : 'unsubmitted'),
+    credit_transaction_xdr: record.credit_transaction_xdr ?? null,
+    credit_attempt_id: record.credit_attempt_id ?? null,
+    credit_started_at: record.credit_started_at ?? null,
+    credit_submitted_at: record.credit_submitted_at ?? null,
+    credit_error: record.credit_error ?? null,
     created_at: record.created_at,
   };
 }
@@ -139,8 +164,97 @@ const PAYMENT_RECONCILIATION_STATUSES = [
   'payment_verified',
   'credit_pending',
   'credited',
+  'forwarding',
   'upstream_failed',
 ];
+
+function emptyDashboardAggregate(apiId = null) {
+  return {
+    ...(apiId ? { api_id: apiId } : {}),
+    total_calls: 0,
+    successful_calls: 0,
+    failed_calls: 0,
+    payment_required_calls: 0,
+    gross_revenue_usdc: 0,
+    developer_revenue_usdc: 0,
+    platform_fee_usdc: 0,
+    last_request_at: null,
+    last_payment_at: null,
+  };
+}
+
+function laterIso(current, candidate) {
+  if (!candidate) return current;
+  return !current || candidate > current ? candidate : current;
+}
+
+function updateRequestAggregate(aggregate, request) {
+  aggregate.total_calls += 1;
+  if (request.status === 'forwarded') aggregate.successful_calls += 1;
+  if (['payment_failed', 'duplicate_payment', 'upstream_failed'].includes(request.status)) {
+    aggregate.failed_calls += 1;
+  }
+  if (request.status === 'challenge_sent') aggregate.payment_required_calls += 1;
+  aggregate.last_request_at = laterIso(aggregate.last_request_at, request.created_at);
+}
+
+function updatePaymentAggregate(aggregate, payment) {
+  aggregate.last_payment_at = laterIso(aggregate.last_payment_at, payment.created_at);
+  const credited = payment.credit_status === 'credited'
+    || (!payment.credit_status && payment.credited_at && payment.credit_tx_hash);
+  if (!credited) return;
+  aggregate.gross_revenue_usdc += Number(payment.gross_amount_usdc || 0);
+  aggregate.developer_revenue_usdc += Number(payment.developer_amount_usdc || 0);
+  aggregate.platform_fee_usdc += Number(payment.platform_fee_usdc || 0);
+}
+
+function memoryDashboardAnalytics(state, ownerWallet, sinceIso) {
+  const apiIds = new Set(
+    [...state.apis.values()]
+      .filter((api) => api.owner_wallet === ownerWallet)
+      .map((api) => api.id),
+  );
+  const allTime = emptyDashboardAggregate();
+  const perApi = new Map([...apiIds].map((apiId) => [apiId, emptyDashboardAggregate(apiId)]));
+  const daily = new Map();
+
+  function dailyAggregate(apiId, createdAt) {
+    if (!createdAt || createdAt < sinceIso) return null;
+    const bucketDate = new Date(createdAt).toISOString().slice(0, 10);
+    const key = `${apiId}:${bucketDate}`;
+    if (!daily.has(key)) {
+      daily.set(key, { ...emptyDashboardAggregate(apiId), bucket_date: bucketDate });
+    }
+    return daily.get(key);
+  }
+
+  for (const request of state.proxyRequests.values()) {
+    if (!apiIds.has(request.api_id)) continue;
+    updateRequestAggregate(allTime, request);
+    updateRequestAggregate(perApi.get(request.api_id), request);
+    const aggregate = dailyAggregate(request.api_id, request.created_at);
+    if (aggregate) updateRequestAggregate(aggregate, request);
+  }
+  for (const payment of state.payments.values()) {
+    if (!apiIds.has(payment.api_id)) continue;
+    updatePaymentAggregate(allTime, payment);
+    updatePaymentAggregate(perApi.get(payment.api_id), payment);
+    const credited = payment.credit_status === 'credited'
+      || (!payment.credit_status && payment.credited_at && payment.credit_tx_hash);
+    const aggregate = credited
+      ? dailyAggregate(payment.api_id, payment.credited_at || payment.created_at)
+      : null;
+    if (aggregate) updatePaymentAggregate(aggregate, payment);
+  }
+
+  return {
+    all_time: allTime,
+    per_api: [...perApi.values()],
+    daily: [...daily.values()].sort((left, right) => (
+      left.bucket_date.localeCompare(right.bucket_date) || left.api_id.localeCompare(right.api_id)
+    )),
+  };
+}
 
 function shouldUseMemoryStore() {
   return process.env.PAYGATE_REGISTRY_STORE === 'memory';
@@ -169,8 +283,21 @@ function createMemoryRegistry() {
         .map(publicApiFields);
     },
     async createApi(record) {
+      const normalizedRecord = normalizeApiRecord(record);
+      const duplicate = [...state.apis.values()].find((candidate) => {
+        const normalizedCandidate = normalizeApiRecord(candidate);
+        if (!sameApiEndpoint(normalizedCandidate, normalizedRecord)) return false;
+        if (normalizedRecord.status === 'active') return normalizedCandidate.status === 'active';
+        return (
+          normalizedRecord.status === 'pending_setup'
+          && normalizedCandidate.status === 'pending_setup'
+          && normalizedCandidate.owner_wallet === normalizedRecord.owner_wallet
+        );
+      });
+      if (duplicate) throw duplicateConstraintError();
+
       const row = {
-        ...normalizeApiRecord(record),
+        ...normalizedRecord,
         id: crypto.randomUUID(),
         created_at: nowIso(),
         updated_at: nowIso(),
@@ -178,11 +305,46 @@ function createMemoryRegistry() {
       state.apis.set(row.id, row);
       return publicApiFields(row);
     },
-    async findLiveApiByEndpoint({ method, upstreamBaseUrl, path }) {
+    async archiveExpiredPendingApis(expiredBefore = nowIso()) {
+      const archived = [];
+      for (const [id, record] of state.apis.entries()) {
+        const normalized = normalizeApiRecord(record);
+        if (
+          normalized.status === 'pending_setup'
+          && normalized.setup_expires_at
+          && normalized.setup_expires_at <= expiredBefore
+        ) {
+          const next = {
+            ...normalized,
+            status: 'archived',
+            active: false,
+            archived_at: expiredBefore,
+            updated_at: expiredBefore,
+          };
+          state.apis.set(id, next);
+          archived.push(publicApiFields(next));
+        }
+      }
+      return archived;
+    },
+    async findActiveApiByEndpoint({ method, upstreamBaseUrl, path }) {
       const row = [...state.apis.values()].find((record) => {
         const normalized = normalizeApiRecord(record);
         return (
-          ['pending_setup', 'active'].includes(normalized.status)
+          normalized.status === 'active'
+          && normalized.method === method
+          && normalized.upstream_base_url.toLowerCase() === upstreamBaseUrl.toLowerCase()
+          && normalized.path === path
+        );
+      });
+      return row ? publicApiFields(row) : null;
+    },
+    async findPendingApiByEndpointForOwner({ method, upstreamBaseUrl, path, ownerWallet }) {
+      const row = [...state.apis.values()].find((record) => {
+        const normalized = normalizeApiRecord(record);
+        return (
+          normalized.status === 'pending_setup'
+          && normalized.owner_wallet === ownerWallet
           && normalized.method === method
           && normalized.upstream_base_url.toLowerCase() === upstreamBaseUrl.toLowerCase()
           && normalized.path === path
@@ -202,6 +364,41 @@ function createMemoryRegistry() {
         ...normalizeApiRecord({ ...row, ...normalizeApiUpdates(updates) }),
         updated_at: nowIso(),
       };
+      if (next.status === 'active') {
+        const duplicate = [...state.apis.values()].find((candidate) => (
+          candidate.id !== apiId
+          && resolveApiStatus(candidate) === 'active'
+          && sameApiEndpoint(candidate, next)
+        ));
+        if (duplicate) throw duplicateConstraintError();
+      }
+      state.apis.set(apiId, next);
+      return publicApiFields(next);
+    },
+    async activatePendingApi(apiId, ownerWallet, verifiedAt = nowIso()) {
+      const row = state.apis.get(apiId);
+      if (!row || row.owner_wallet !== ownerWallet) return null;
+      const normalized = normalizeApiRecord(row);
+      if (
+        normalized.status !== 'pending_setup'
+        || !normalized.setup_expires_at
+        || normalized.setup_expires_at <= verifiedAt
+      ) return null;
+
+      const next = normalizeApiRecord({
+        ...normalized,
+        status: 'active',
+        active: true,
+        verified_at: verifiedAt,
+        archived_at: null,
+        updated_at: verifiedAt,
+      });
+      const duplicate = [...state.apis.values()].find((candidate) => (
+        candidate.id !== apiId
+        && resolveApiStatus(candidate) === 'active'
+        && sameApiEndpoint(candidate, next)
+      ));
+      if (duplicate) throw duplicateConstraintError();
       state.apis.set(apiId, next);
       return publicApiFields(next);
     },
@@ -235,6 +432,9 @@ function createMemoryRegistry() {
         .slice(0, limit)
         .map(publicProxyRequestFields);
     },
+    async getDashboardAnalytics(ownerWallet, sinceIso) {
+      return memoryDashboardAnalytics(state, ownerWallet, sinceIso);
+    },
     async createProxyRequest(record) {
       const row = {
         ...record,
@@ -245,6 +445,8 @@ function createMemoryRegistry() {
         error_message: record.error_message ?? null,
         paid_at: record.paid_at ?? null,
         forwarded_at: record.forwarded_at ?? null,
+        forwarding_started_at: record.forwarding_started_at ?? null,
+        forwarding_attempt_id: record.forwarding_attempt_id ?? null,
         created_at: nowIso(),
       };
       state.proxyRequests.set(row.id, row);
@@ -259,6 +461,33 @@ function createMemoryRegistry() {
       const next = {
         ...row,
         ...updates,
+      };
+      state.proxyRequests.set(proxyRequestId, next);
+      return publicProxyRequestFields(next);
+    },
+    async transitionProxyRequest(proxyRequestId, fromStatuses, updates, attemptId = null) {
+      const row = state.proxyRequests.get(proxyRequestId);
+      if (!row || !fromStatuses.includes(row.status)) return null;
+      if (attemptId && row.forwarding_attempt_id !== attemptId) return null;
+      const next = { ...row, ...updates };
+      state.proxyRequests.set(proxyRequestId, next);
+      return publicProxyRequestFields(next);
+    },
+    async claimProxyRequestForwarding(proxyRequestId, attemptId, staleBefore = null) {
+      const row = state.proxyRequests.get(proxyRequestId);
+      const staleForwarding = (
+        staleBefore
+        && row?.status === 'forwarding'
+        && row.forwarding_started_at
+        && row.forwarding_started_at < staleBefore
+      );
+      if (!row || (!['credited', 'upstream_failed'].includes(row.status) && !staleForwarding)) return null;
+      const next = {
+        ...row,
+        status: 'forwarding',
+        forwarding_attempt_id: attemptId,
+        forwarding_started_at: nowIso(),
+        error_message: null,
       };
       state.proxyRequests.set(proxyRequestId, next);
       return publicProxyRequestFields(next);
@@ -295,12 +524,47 @@ function createMemoryRegistry() {
         ...record,
         id: crypto.randomUUID(),
         credit_tx_hash: record.credit_tx_hash ?? null,
+        credit_status: record.credit_status ?? (
+          record.credited_at && record.credit_tx_hash ? 'credited' : 'unsubmitted'
+        ),
+        credit_transaction_xdr: record.credit_transaction_xdr ?? null,
+        credit_attempt_id: record.credit_attempt_id ?? null,
+        credit_started_at: record.credit_started_at ?? null,
+        credit_submitted_at: record.credit_submitted_at ?? null,
+        credit_error: record.credit_error ?? null,
         verified_at: record.verified_at ?? null,
         credited_at: record.credited_at ?? null,
         created_at: nowIso(),
       };
       state.payments.set(row.id, row);
       return publicPaymentFields(row);
+    },
+    async claimPaymentCredit(paymentId, attemptId, staleBefore) {
+      const row = [...state.payments.values()].find((payment) => payment.payment_id === paymentId);
+      if (!row) return null;
+      const stalePreparation = (
+        row.credit_status === 'preparing'
+        && row.credit_started_at
+        && row.credit_started_at < staleBefore
+      );
+      if (!['unsubmitted', 'failed'].includes(row.credit_status) && !stalePreparation) return null;
+      const next = {
+        ...row,
+        credit_status: 'preparing',
+        credit_attempt_id: attemptId,
+        credit_started_at: nowIso(),
+        credit_error: null,
+      };
+      state.payments.set(row.id, next);
+      return publicPaymentFields(next);
+    },
+    async transitionPaymentCredit(paymentId, fromStatuses, updates, attemptId = null) {
+      const row = [...state.payments.values()].find((payment) => payment.payment_id === paymentId);
+      if (!row || !fromStatuses.includes(row.credit_status)) return null;
+      if (attemptId && row.credit_attempt_id !== attemptId) return null;
+      const next = { ...row, ...updates };
+      state.payments.set(row.id, next);
+      return publicPaymentFields(next);
     },
     async listWithdrawals(walletAddress, limit = 50) {
       return [...state.withdrawals.values()]
@@ -309,7 +573,24 @@ function createMemoryRegistry() {
         .slice(0, limit)
         .map(publicWithdrawalFields);
     },
+    async getWithdrawal(withdrawalId, walletAddress) {
+      const row = state.withdrawals.get(withdrawalId);
+      if (!row || row.wallet_address !== walletAddress) return null;
+      return publicWithdrawalFields(row);
+    },
+    async getWithdrawalByTxHash(txHash, walletAddress) {
+      const row = [...state.withdrawals.values()].find((withdrawal) => (
+        withdrawal.tx_hash === txHash && withdrawal.wallet_address === walletAddress
+      ));
+      return row ? publicWithdrawalFields(row) : null;
+    },
     async createWithdrawal(record) {
+      if (record.tx_hash) {
+        const duplicate = [...state.withdrawals.values()].find(
+          (withdrawal) => withdrawal.tx_hash === record.tx_hash,
+        );
+        if (duplicate) throw duplicateConstraintError();
+      }
       const row = {
         ...record,
         id: crypto.randomUUID(),
@@ -390,6 +671,21 @@ function createMemoryRegistry() {
       state.payments.set(row.id, next);
       return publicPaymentFields(next);
     },
+    async claimOperatorSubmissionLock(lockName, leaseToken, leaseSeconds) {
+      const current = state.operatorLocks.get(lockName);
+      if (current && current.leaseExpiresAt > Date.now()) return false;
+      state.operatorLocks.set(lockName, {
+        leaseToken,
+        leaseExpiresAt: Date.now() + leaseSeconds * 1000,
+      });
+      return true;
+    },
+    async releaseOperatorSubmissionLock(lockName, leaseToken) {
+      const current = state.operatorLocks.get(lockName);
+      if (!current || current.leaseToken !== leaseToken) return false;
+      state.operatorLocks.delete(lockName);
+      return true;
+    },
     async getMppStoreValue(key) {
       const raw = state.mppStore.get(key);
       return raw === undefined ? null : JSON.parse(raw);
@@ -438,7 +734,7 @@ function createSupabaseRegistry() {
     async listApis(ownerWallet) {
       const { data, error } = await client
         .from('apis')
-        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, setup_expires_at, created_at, updated_at')
         .eq('owner_wallet', ownerWallet)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -448,19 +744,49 @@ function createSupabaseRegistry() {
       const { data, error } = await client
         .from('apis')
         .insert(normalizeApiRecord(record))
-        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, setup_expires_at, created_at, updated_at')
         .single();
       if (error) throw error;
       return publicApiFields(data);
     },
-    async findLiveApiByEndpoint({ method, upstreamBaseUrl, path }) {
+    async archiveExpiredPendingApis(expiredBefore = nowIso()) {
       const { data, error } = await client
         .from('apis')
-        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
+        .update({
+          status: 'archived',
+          active: false,
+          archived_at: expiredBefore,
+        })
+        .eq('status', 'pending_setup')
+        .not('setup_expires_at', 'is', null)
+        .lte('setup_expires_at', expiredBefore)
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, setup_expires_at, created_at, updated_at');
+      if (error) throw error;
+      return (data ?? []).map(publicApiFields);
+    },
+    async findActiveApiByEndpoint({ method, upstreamBaseUrl, path }) {
+      const { data, error } = await client
+        .from('apis')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, setup_expires_at, created_at, updated_at')
         .eq('method', method)
         .eq('upstream_base_url', upstreamBaseUrl)
         .eq('path', path)
-        .in('status', ['pending_setup', 'active'])
+        .eq('status', 'active')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? publicApiFields(data) : null;
+    },
+    async findPendingApiByEndpointForOwner({ method, upstreamBaseUrl, path, ownerWallet }) {
+      const { data, error } = await client
+        .from('apis')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, setup_expires_at, created_at, updated_at')
+        .eq('owner_wallet', ownerWallet)
+        .eq('method', method)
+        .eq('upstream_base_url', upstreamBaseUrl)
+        .eq('path', path)
+        .eq('status', 'pending_setup')
         .order('created_at', { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -483,7 +809,25 @@ function createSupabaseRegistry() {
         .update(normalizeApiUpdates(updates))
         .eq('id', apiId)
         .eq('owner_wallet', ownerWallet)
-        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, created_at, updated_at')
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, setup_expires_at, created_at, updated_at')
+        .maybeSingle();
+      if (error) throw error;
+      return data ? publicApiFields(data) : null;
+    },
+    async activatePendingApi(apiId, ownerWallet, verifiedAt = nowIso()) {
+      const { data, error } = await client
+        .from('apis')
+        .update({
+          status: 'active',
+          active: true,
+          verified_at: verifiedAt,
+          archived_at: null,
+        })
+        .eq('id', apiId)
+        .eq('owner_wallet', ownerWallet)
+        .eq('status', 'pending_setup')
+        .gt('setup_expires_at', verifiedAt)
+        .select('id, owner_wallet, name, upstream_base_url, path, method, price_usdc, status, active, verified_at, archived_at, setup_expires_at, created_at, updated_at')
         .maybeSingle();
       if (error) throw error;
       return data ? publicApiFields(data) : null;
@@ -576,6 +920,46 @@ function createSupabaseRegistry() {
       if (error) throw error;
       return data;
     },
+    async transitionProxyRequest(proxyRequestId, fromStatuses, updates, attemptId = null) {
+      let query = client
+        .from('proxy_requests')
+        .update(updates)
+        .eq('id', proxyRequestId)
+        .in('status', fromStatuses);
+      if (attemptId) query = query.eq('forwarding_attempt_id', attemptId);
+
+      const { data, error } = await query.select('*').maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async claimProxyRequestForwarding(proxyRequestId, attemptId, staleBefore = null) {
+      const claimUpdates = {
+        status: 'forwarding',
+        forwarding_attempt_id: attemptId,
+        forwarding_started_at: nowIso(),
+        error_message: null,
+      };
+      const initial = await client
+        .from('proxy_requests')
+        .update(claimUpdates)
+        .eq('id', proxyRequestId)
+        .in('status', ['credited', 'upstream_failed'])
+        .select('*')
+        .maybeSingle();
+      if (initial.error) throw initial.error;
+      if (initial.data || !staleBefore) return initial.data;
+
+      const stale = await client
+        .from('proxy_requests')
+        .update(claimUpdates)
+        .eq('id', proxyRequestId)
+        .eq('status', 'forwarding')
+        .lt('forwarding_started_at', staleBefore)
+        .select('*')
+        .maybeSingle();
+      if (stale.error) throw stale.error;
+      return stale.data;
+    },
     async getPaymentByPaymentId(paymentId) {
       const { data, error } = await client
         .from('payments')
@@ -606,11 +990,57 @@ function createSupabaseRegistry() {
       return data ?? [];
     },
     async createPayment(record) {
+      const normalizedRecord = {
+        ...record,
+        credit_status: record.credit_status ?? (
+          record.credited_at && record.credit_tx_hash ? 'credited' : 'unsubmitted'
+        ),
+      };
       const { data, error } = await client
         .from('payments')
-        .insert(record)
+        .insert(normalizedRecord)
         .select('*')
         .single();
+      if (error) throw error;
+      return data;
+    },
+    async claimPaymentCredit(paymentId, attemptId, staleBefore) {
+      const claimUpdates = {
+        credit_status: 'preparing',
+        credit_attempt_id: attemptId,
+        credit_started_at: nowIso(),
+        credit_error: null,
+      };
+      const initial = await client
+        .from('payments')
+        .update(claimUpdates)
+        .eq('payment_id', paymentId)
+        .in('credit_status', ['unsubmitted', 'failed'])
+        .select('*')
+        .maybeSingle();
+      if (initial.error) throw initial.error;
+      if (initial.data) return initial.data;
+
+      const stale = await client
+        .from('payments')
+        .update(claimUpdates)
+        .eq('payment_id', paymentId)
+        .eq('credit_status', 'preparing')
+        .lt('credit_started_at', staleBefore)
+        .select('*')
+        .maybeSingle();
+      if (stale.error) throw stale.error;
+      return stale.data;
+    },
+    async transitionPaymentCredit(paymentId, fromStatuses, updates, attemptId = null) {
+      let query = client
+        .from('payments')
+        .update(updates)
+        .eq('payment_id', paymentId)
+        .in('credit_status', fromStatuses);
+      if (attemptId) query = query.eq('credit_attempt_id', attemptId);
+
+      const { data, error } = await query.select('*').maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -623,6 +1053,34 @@ function createSupabaseRegistry() {
         .limit(limit);
       if (error) throw error;
       return data ?? [];
+    },
+    async getDashboardAnalytics(ownerWallet, sinceIso) {
+      const { data, error } = await client.rpc('get_paygate_dashboard_analytics', {
+        p_owner_wallet: ownerWallet,
+        p_since: sinceIso,
+      });
+      if (error) throw error;
+      return data;
+    },
+    async getWithdrawal(withdrawalId, walletAddress) {
+      const { data, error } = await client
+        .from('withdrawals')
+        .select('*')
+        .eq('id', withdrawalId)
+        .eq('wallet_address', walletAddress)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async getWithdrawalByTxHash(txHash, walletAddress) {
+      const { data, error } = await client
+        .from('withdrawals')
+        .select('*')
+        .eq('tx_hash', txHash)
+        .eq('wallet_address', walletAddress)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
     },
     async createWithdrawal(record) {
       const { data, error } = await client
@@ -712,6 +1170,23 @@ function createSupabaseRegistry() {
       if (error) throw error;
       return data;
     },
+    async claimOperatorSubmissionLock(lockName, leaseToken, leaseSeconds) {
+      const { data, error } = await client.rpc('claim_operator_submission_lock', {
+        p_lock_name: lockName,
+        p_lease_token: leaseToken,
+        p_lease_seconds: leaseSeconds,
+      });
+      if (error) throw error;
+      return data === true;
+    },
+    async releaseOperatorSubmissionLock(lockName, leaseToken) {
+      const { data, error } = await client.rpc('release_operator_submission_lock', {
+        p_lock_name: lockName,
+        p_lease_token: leaseToken,
+      });
+      if (error) throw error;
+      return data === true;
+    },
     async getMppStoreValue(key) {
       const { data, error } = await client
         .from('mpp_store')
@@ -751,6 +1226,7 @@ export function clearRegistryForTest() {
   state.apis.clear();
   state.developers.clear();
   state.mppStore?.clear();
+  state.operatorLocks?.clear();
   state.payments?.clear();
   state.proxyRequests?.clear();
   state.withdrawalPreparations?.clear();

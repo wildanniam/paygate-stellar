@@ -44,4 +44,4 @@ When adding a feature or changing behavior:
 
 Keep this lightweight. For V0 work, document behavior that matters for the SOW, official Instawards review, and demo evidence. For V1 work, document the product behavior that makes PayGate a pay-per-call gateway rather than only a code generator.
 
-Last canonical alignment pass: 2026-06-27.
+Last canonical alignment pass: 2026-08-27.

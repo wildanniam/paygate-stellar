@@ -54,7 +54,7 @@ Developer onboarding guide:
 
 ## Project Status
 
-> **V1 testnet beta candidate.** The original generator is preserved, and the `codex/paygate-v1` branch now implements the stronger gateway story: wallet login, API registry, paid proxy, MPP payment verification, Soroban escrow crediting, dashboard, withdrawal flow, Supabase-backed auth challenges, and deployment-safe SPA routes. Use `PAYGATE_V1_DEMO_GUIDE.md` as the current demo replay guide.
+> **V1 testnet beta candidate.** The original generator is preserved, and the current codebase implements the stronger gateway story: wallet login, API registry, paid proxy, MPP payment verification, Soroban escrow crediting, dashboard, withdrawal flow, Supabase-backed auth challenges, and deployment-safe SPA routes. The local regression gates pass; the deployment environment still has the blockers recorded in `evidence/PAYGATE_V1_BETA_READINESS.md`.
 
 | Component | Status |
 |---|---|
@@ -78,6 +78,7 @@ Developer onboarding guide:
 | Vercel SPA deep links | Done |
 | Beta readiness evidence package | Done; deployment slots pending live replay |
 | Beta preflight and browser smoke tooling | Done |
+| Deployment environment preflight | Blocked; 5 external configuration failures remain |
 | Demo video | Not recorded yet |
 
 ---
@@ -169,7 +170,10 @@ Run from the repo root:
 ```bash
 npm run test:beta       # local smokes, frontend build, contract tests, diff check
 npm run audit:prod      # production dependency audit gates
+npm run audit:all       # full dependency audit gates, including dev tooling
+npm run audit:rust      # RustSec audit for the contract lockfile
 npm run test:browser    # desktop/mobile SPA route smoke
+npm run scan:secrets    # tracked-file credential scan
 npm run evidence:init   # create a timestamped live replay evidence folder
 ```
 
@@ -226,6 +230,9 @@ Set these variables for **Development** first, then add the same set to Preview/
 | `ESCROW_CONTRACT_ID` | Soroban escrow contract recipient | Testnet contract id, `C...` |
 | `PAYGATE_OPERATOR_SECRET` | Operator/admin signer for escrow credit and platform fee withdrawal | Stellar testnet secret seed, `S...` |
 | `PAYGATE_DEMO_UPSTREAM_SECRET` | Secret expected by the demo upstream endpoint | Generated API secret during demo setup |
+| `PAYGATE_PUBLIC_ORIGIN` | Canonical HTTPS origin used in wallet-login challenges | Deployed PayGate origin only, without a path |
+| `UPSTASH_REDIS_REST_URL` | Shared serverless rate-limit storage | Upstash Redis REST API |
+| `UPSTASH_REDIS_REST_TOKEN` | Authenticates shared rate-limit operations | Upstash Redis REST token |
 | `STELLAR_NETWORK` | Network selector | `stellar:testnet` |
 | `STELLAR_RPC_URL` | Soroban RPC endpoint | `https://soroban-testnet.stellar.org` |
 
@@ -235,7 +242,7 @@ Generate local random secrets:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Do not set `STELLAR_SECRET` in Vercel. The payer secret belongs only in the local agent/client `.env`. Do not set `PAYGATE_AUTH_CHALLENGE_STORE=memory` or `PAYGATE_REGISTRY_STORE=memory` in Vercel; memory mode is only for deterministic local smoke tests.
+Do not set `STELLAR_SECRET` in Vercel. The payer secret belongs only in the local agent/client `.env`. Do not enable memory stores or mock MPP/escrow modes in Vercel; those modes are only for deterministic local smoke tests.
 
 The Vercel Hobby deployment runs `/api/cron/database-health` once per day. The
 route requires `CRON_SECRET` and performs three read-only Supabase queries to
@@ -262,6 +269,9 @@ Run the migrations in Supabase SQL Editor:
 ```text
 supabase/migrations/20260604000000_paygate_v1_registry.sql
 supabase/migrations/20260604000001_paygate_v1_paid_proxy.sql
+supabase/migrations/20260611000000_paygate_api_lifecycle_status.sql
+supabase/migrations/20260611000001_paygate_api_unique_live_endpoint.sql
+supabase/migrations/20260628050000_paygate_withdrawal_preparations.sql
 ```
 
 The V1 API registry depends on these tables:
@@ -273,6 +283,7 @@ apis
 proxy_requests
 payments
 withdrawals
+withdrawal_preparations
 mpp_store
 ```
 
@@ -379,8 +390,8 @@ Expected result: `200 OK` with:
 | Styling | Tailwind CSS v3 |
 | Icons | lucide-react |
 | Fonts | Inter + JetBrains Mono (Google Fonts) |
-| Build | Vite 5 |
-| Routing | React Router v6 |
+| Build | Vite 7 |
+| Routing | React Router v7 |
 
 ### Backend And Demo
 | | |

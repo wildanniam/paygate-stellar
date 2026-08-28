@@ -3,6 +3,7 @@ import { Keypair, StrKey } from '@stellar/stellar-sdk';
 
 export const SESSION_COOKIE = 'paygate_session';
 export const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
+const SESSION_CLOCK_SKEW_SECONDS = 60;
 const SIGN_MESSAGE_PREFIX = 'Stellar Signed Message:\n';
 
 function firstHeaderValue(value) {
@@ -123,14 +124,22 @@ export function createSessionToken(walletAddress) {
 
 export function verifySessionToken(token) {
   if (!token || typeof token !== 'string' || !hasSessionSecret()) return null;
+  if (token.length > 2048) return null;
 
-  const [encoded, signature] = token.split('.');
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const [encoded, signature] = parts;
+  if (!/^[A-Za-z0-9_-]+$/.test(encoded) || !/^[A-Za-z0-9_-]+$/.test(signature)) return null;
   if (!encoded || !signature || !safeEqual(signature, sign(encoded))) return null;
 
   try {
     const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+    const now = Math.floor(Date.now() / 1000);
     if (!isValidWalletAddress(payload.walletAddress)) return null;
-    if (!payload.exp || payload.exp <= Math.floor(Date.now() / 1000)) return null;
+    if (!Number.isInteger(payload.iat) || !Number.isInteger(payload.exp)) return null;
+    if (payload.iat > now + SESSION_CLOCK_SKEW_SECONDS) return null;
+    if (payload.exp <= now || payload.exp <= payload.iat) return null;
+    if (payload.exp - payload.iat > SESSION_TTL_SECONDS) return null;
     return payload;
   } catch {
     return null;
@@ -139,17 +148,23 @@ export function verifySessionToken(token) {
 
 export function parseCookies(req) {
   const header = req.headers.cookie || '';
-  return Object.fromEntries(
-    header
-      .split(';')
-      .map((part) => part.trim())
-      .filter(Boolean)
-      .map((part) => {
-        const index = part.indexOf('=');
-        if (index === -1) return [part, ''];
-        return [part.slice(0, index), decodeURIComponent(part.slice(index + 1))];
-      }),
-  );
+  const cookies = {};
+
+  for (const rawPart of header.split(';')) {
+    const part = rawPart.trim();
+    if (!part) continue;
+    const index = part.indexOf('=');
+    const name = index === -1 ? part : part.slice(0, index);
+    const rawValue = index === -1 ? '' : part.slice(index + 1);
+
+    try {
+      cookies[name] = decodeURIComponent(rawValue);
+    } catch {
+      // Ignore malformed cookie values while preserving other valid cookies.
+    }
+  }
+
+  return cookies;
 }
 
 export function getSession(req) {
