@@ -120,6 +120,44 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
   assert(initial.scrollWidth <= initial.viewportWidth + 1, `Landing overflows horizontally at ${viewport.width}px`);
   assert(initial.workspace?.width > 0 && initial.surface?.height > 0, 'Hero workspace geometry is missing');
 
+  const assetDensity = await page.evaluate(async () => {
+    const inspectRaster = async (selector, sourceAttribute) => {
+      const element = document.querySelector(selector);
+      if (!element) return { selector, missing: true };
+
+      const source = element.getAttribute(sourceAttribute);
+      const rect = element.getBoundingClientRect();
+      const visible = getComputedStyle(element).display !== 'none' && rect.width > 0 && rect.height > 0;
+      const image = new Image();
+      image.src = new URL(source, window.location.href).href;
+      await image.decode();
+
+      return {
+        selector,
+        source,
+        visible,
+        naturalWidth: image.naturalWidth,
+        naturalHeight: image.naturalHeight,
+        renderedWidth: Math.round(rect.width),
+        renderedHeight: Math.round(rect.height),
+        densityX: rect.width ? image.naturalWidth / rect.width : null,
+        densityY: rect.height ? image.naturalHeight / rect.height : null,
+      };
+    };
+
+    return Promise.all([
+      inspectRaster('.paygate-workspace-shell-image.is-dark', 'href'),
+      inspectRaster('.paygate-gate-reference-art', 'src'),
+    ]);
+  });
+  assert(assetDensity.every(({ missing }) => !missing), `Landing showcase assets are missing: ${JSON.stringify(assetDensity)}`);
+  assert(
+    assetDensity
+      .filter(({ visible }) => visible)
+      .every(({ densityX, densityY }) => densityX >= 0.98 && densityY >= 0.98),
+    `A landing showcase raster is enlarged beyond its native dimensions: ${JSON.stringify(assetDensity)}`,
+  );
+
   const landingMaterialState = await page.evaluate(() => {
     const selectors = [
       '.paygate-protected-section',
@@ -263,9 +301,9 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
   const activePoint = page.locator('.paygate-workspace-chart circle').first();
   await activePoint.focus();
   assert(await activePoint.evaluate((element) => document.activeElement === element), 'Chart point did not receive keyboard focus');
-  await activePoint.click({ force: true });
+  await activePoint.press('Enter');
   await page.waitForTimeout(120);
-  assert(await activePoint.evaluate((element) => element.classList.contains('is-active')), 'Chart point selection did not work after keyboard focus');
+  assert(await activePoint.evaluate((element) => element.classList.contains('is-active')), `Chart point keyboard selection did not work at ${viewport.name}`);
 
   assert(await page.locator('.paygate-workspace-footer').evaluate((element) => getComputedStyle(element).display === 'none'), 'Workspace footer should stay hidden in the concept composition');
 
@@ -285,6 +323,130 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
     flowPlaying: document.querySelector('.paygate-concept-flow')?.dataset.flowPlaying,
     theme: document.querySelector('.paygate-landing')?.dataset.theme,
   }));
+
+  const anchorNavigation = [];
+  if (viewport.width > 640) {
+    const anchors = [
+      { name: 'how-it-works', href: '#how-it-works', heading: '#paygate-transform-title' },
+      { name: 'security', href: '#protected-calls', heading: '#paygate-protected-title' },
+      { name: 'product', href: '#workspace', heading: '#paygate-ops-title' },
+    ];
+
+    for (const anchor of anchors) {
+      await page.locator(`.paygate-nav-center a[href="${anchor.href}"]`).click();
+      await page.waitForTimeout(900);
+
+      const geometry = await page.evaluate(({ href, headingSelector }) => {
+        const nav = document.querySelector('.paygate-nav')?.getBoundingClientRect();
+        const section = document.querySelector(href)?.getBoundingClientRect();
+        const heading = document.querySelector(headingSelector)?.getBoundingClientRect();
+        const activeLink = document.querySelector(`.paygate-nav-center a[href="${href}"]`);
+        const compact = (rect) => rect ? {
+          top: Math.round(rect.top),
+          bottom: Math.round(rect.bottom),
+          height: Math.round(rect.height),
+        } : null;
+
+        return {
+          hash: window.location.hash,
+          nav: compact(nav),
+          section: compact(section),
+          heading: compact(heading),
+          active: activeLink?.getAttribute('data-active'),
+        };
+      }, { href: anchor.href, headingSelector: anchor.heading });
+
+      assert(geometry.hash === anchor.href, `${anchor.name} navigation did not update the URL hash`);
+      assert(geometry.nav && geometry.section && geometry.heading, `${anchor.name} navigation geometry is incomplete`);
+      assert(
+        geometry.section.bottom > geometry.nav.bottom,
+        `${anchor.name} section is hidden behind the sticky navigation: ${JSON.stringify(geometry)}`,
+      );
+      assert(
+        geometry.heading.top >= geometry.nav.bottom + 16,
+        `${anchor.name} heading is obscured by the sticky navigation: ${JSON.stringify(geometry)}`,
+      );
+      assert(geometry.active === 'true', `${anchor.name} navigation link did not become active`);
+
+      if (viewport.name === 'desktop-1280x720') {
+        const filename = `${theme}-anchor-${anchor.name}-1280x720.png`;
+        await page.screenshot({ path: join(evidencePath, filename) });
+        geometry.screenshot = filename;
+      }
+
+      anchorNavigation.push({ name: anchor.name, ...geometry });
+    }
+  }
+
+  const footer = page.locator('.paygate-footer');
+  assert(await footer.count() === 1, 'Expected one landing footer');
+  await footer.evaluate((element) => element.scrollIntoView({ block: 'end', behavior: 'instant' }));
+  await page.waitForTimeout(320);
+  const chromeFit = await page.evaluate(() => {
+    const inspect = (rootSelector) => {
+      const root = document.querySelector(rootSelector);
+      if (!root) return { rootSelector, missing: true };
+
+      const controls = Array.from(root.querySelectorAll('a, button'))
+        .filter((element) => {
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+        })
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          const textRects = [];
+          const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+          let textNode = walker.nextNode();
+
+          while (textNode) {
+            const parent = textNode.parentElement;
+            const value = textNode.textContent.trim();
+            if (value && parent && getComputedStyle(parent).display !== 'none' && getComputedStyle(parent).visibility !== 'hidden') {
+              const range = document.createRange();
+              range.selectNodeContents(textNode);
+              const textRect = range.getBoundingClientRect();
+              if (textRect.width > 0 && textRect.height > 0) {
+                textRects.push({ left: textRect.left, right: textRect.right });
+              }
+            }
+            textNode = walker.nextNode();
+          }
+
+          return {
+            label: element.getAttribute('aria-label') || element.textContent.trim(),
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+            clipped: textRects.some(({ left, right }) => left < rect.left - 1 || right > rect.right + 1),
+          };
+        });
+
+      return {
+        rootSelector,
+        controls,
+        horizontallyClipped: root.scrollWidth > root.clientWidth + 1,
+      };
+    };
+
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      nav: inspect('.paygate-nav'),
+      footer: inspect('.paygate-footer'),
+    };
+  });
+
+  for (const region of [chromeFit.nav, chromeFit.footer]) {
+    assert(!region.missing, `${region.rootSelector} is missing`);
+    assert(!region.horizontallyClipped, `${region.rootSelector} has clipped horizontal content`);
+    assert(
+      region.controls.every(({ left, right }) => left >= -1 && right <= chromeFit.viewportWidth + 1),
+      `${region.rootSelector} has a control outside the viewport: ${JSON.stringify(region.controls)}`,
+    );
+    assert(
+      region.controls.every(({ clipped }) => !clipped),
+      `${region.rootSelector} has a clipped control label: ${JSON.stringify(region.controls)}`,
+    );
+  }
 
   const sectionScreenshots = [];
   if (viewport.width >= 1491 || (theme === 'light' && viewport.width === 390)) {
@@ -318,9 +480,12 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
     sectionScreenshots,
     initial,
     landingMaterialState,
+    assetDensity,
     pointerState,
     resetState,
     afterInteractions,
+    anchorNavigation,
+    chromeFit,
     errors,
   };
 }
@@ -330,6 +495,7 @@ const baseUrl = process.env.PAYGATE_LANDING_AUDIT_URL || `http://127.0.0.1:${por
 const shouldStartServer = !process.env.PAYGATE_LANDING_AUDIT_URL;
 const viewports = [
   { name: 'desktop-1491x1055', width: 1491, height: 1055 },
+  { name: 'desktop-1280x720', width: 1280, height: 720 },
   { name: 'mobile-390x844', width: 390, height: 844 },
   { name: 'mobile-320x844', width: 320, height: 844 },
 ];
