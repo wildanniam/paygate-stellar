@@ -152,6 +152,62 @@ def make_motion_sheet(frames):
     return sheet
 
 
+def evaluate_thresholds(report, args):
+    thresholds = {
+        "maxMeanAbs": args.max_mean_abs,
+        "maxChangedPixelRatio": args.max_changed_pixel_ratio,
+        "maxRegionMeanAbs": args.max_region_mean_abs,
+        "maxRegionChangedPixelRatio": args.max_region_changed_pixel_ratio,
+        "minMotionMedian": args.min_motion_median,
+        "maxMotionP95": args.max_motion_p95,
+    }
+    metrics = report["metrics"]
+    motion = report["motion"]
+    violations = []
+
+    if args.max_mean_abs is not None and metrics["meanAbs"] > args.max_mean_abs:
+        violations.append(f"meanAbs {metrics['meanAbs']:.3f} exceeds {args.max_mean_abs:.3f}")
+    if args.max_changed_pixel_ratio is not None and metrics["changedPixelRatio"] > args.max_changed_pixel_ratio:
+        violations.append(
+            f"changedPixelRatio {metrics['changedPixelRatio']:.5f} exceeds {args.max_changed_pixel_ratio:.5f}"
+        )
+
+    for region in report["regions"]:
+        region_metrics = region["metrics"]
+        if args.max_region_mean_abs is not None and region_metrics["meanAbs"] > args.max_region_mean_abs:
+            violations.append(
+                f"region {region['id']} meanAbs {region_metrics['meanAbs']:.3f} exceeds {args.max_region_mean_abs:.3f}"
+            )
+        if (
+            args.max_region_changed_pixel_ratio is not None
+            and region_metrics["changedPixelRatio"] > args.max_region_changed_pixel_ratio
+        ):
+            violations.append(
+                f"region {region['id']} changedPixelRatio {region_metrics['changedPixelRatio']:.5f} "
+                f"exceeds {args.max_region_changed_pixel_ratio:.5f}"
+            )
+
+    if args.min_motion_median is not None:
+        if motion is None:
+            violations.append("motion frames are required for the minimum motion threshold")
+        elif motion["medianEnergy"] < args.min_motion_median:
+            violations.append(
+                f"motion median {motion['medianEnergy']:.5f} is below {args.min_motion_median:.5f}"
+            )
+    if args.max_motion_p95 is not None:
+        if motion is None:
+            violations.append("motion frames are required for the maximum motion threshold")
+        elif motion["p95Energy"] > args.max_motion_p95:
+            violations.append(f"motion p95 {motion['p95Energy']:.5f} exceeds {args.max_motion_p95:.5f}")
+
+    return {
+        "status": "fail" if violations else "pass",
+        "thresholds": thresholds,
+        "violations": violations,
+        "scope": "Local deterministic Chromium guard; human review remains required for intentional design changes.",
+    }
+
+
 def compare(reference_path: Path, actual_path: Path, output_dir: Path, prefix: str, regions_path: Path | None, frames_dir: Path | None):
     output_dir.mkdir(parents=True, exist_ok=True)
     reference = Image.open(reference_path).convert("RGB")
@@ -221,6 +277,12 @@ def main():
     parser.add_argument("--prefix", default="dark-desktop")
     parser.add_argument("--regions", default="docs/evidence/landing-reference/paygate-dark-regions.json")
     parser.add_argument("--frames-dir", default=None)
+    parser.add_argument("--max-mean-abs", type=float, default=None)
+    parser.add_argument("--max-changed-pixel-ratio", type=float, default=None)
+    parser.add_argument("--max-region-mean-abs", type=float, default=None)
+    parser.add_argument("--max-region-changed-pixel-ratio", type=float, default=None)
+    parser.add_argument("--min-motion-median", type=float, default=None)
+    parser.add_argument("--max-motion-p95", type=float, default=None)
     args = parser.parse_args()
 
     report = compare(
@@ -231,6 +293,9 @@ def main():
         Path(args.regions) if args.regions else None,
         Path(args.frames_dir) if args.frames_dir else None,
     )
+    acceptance = evaluate_thresholds(report, args)
+    report["acceptance"] = acceptance
+    Path(report["artifacts"]["report"]).write_text(json.dumps(report, indent=2), encoding="utf-8")
     metrics = report["metrics"]
     print(f"reference={report['reference']}")
     print(f"actual={report['actual']}")
@@ -241,6 +306,11 @@ def main():
         print(f"build_motion_p95={report['motion']['p95Energy']:.5f}")
     for key, value in report["artifacts"].items():
         print(f"{key}={value}")
+    print(f"acceptance={acceptance['status']}")
+    if acceptance["violations"]:
+        for violation in acceptance["violations"]:
+            print(f"violation={violation}")
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
