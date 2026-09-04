@@ -129,12 +129,16 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
       const rect = element.getBoundingClientRect();
       const visible = getComputedStyle(element).display !== 'none' && rect.width > 0 && rect.height > 0;
       const image = new Image();
-      image.src = new URL(source, window.location.href).href;
+      const selectedSource = element instanceof HTMLImageElement && element.currentSrc
+        ? element.currentSrc
+        : new URL(source, window.location.href).href;
+      image.src = selectedSource;
       await image.decode();
 
       return {
         selector,
         source,
+        selectedSource,
         visible,
         naturalWidth: image.naturalWidth,
         naturalHeight: image.naturalHeight,
@@ -151,6 +155,11 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
     ]);
   });
   assert(assetDensity.every(({ missing }) => !missing), `Landing showcase assets are missing: ${JSON.stringify(assetDensity)}`);
+  const gateAsset = assetDensity.find(({ selector }) => selector === '.paygate-gate-reference-art');
+  assert(
+    !gateAsset.visible || gateAsset.selectedSource.endsWith('/brand/paygate-gate-reference-transparent.png'),
+    `DPR 1 did not keep the accepted gate source: ${JSON.stringify(gateAsset)}`,
+  );
   assert(
     assetDensity
       .filter(({ visible }) => visible)
@@ -490,6 +499,84 @@ async function captureLanding({ browser, baseUrl, theme, viewport, suffix }) {
   };
 }
 
+async function auditRetinaGate({ browser, baseUrl }) {
+  const viewport = { width: 1280, height: 720 };
+  const context = await browser.newContext({
+    viewport,
+    deviceScaleFactor: 2,
+    colorScheme: 'dark',
+    reducedMotion: 'no-preference',
+  });
+  const errors = [];
+
+  try {
+    const page = await context.newPage();
+    page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+    });
+    await context.addInitScript(() => {
+      window.localStorage.setItem('paygate-theme', 'dark');
+    });
+    await page.route('**/api/**', (route) => route.fulfill({
+      status: route.request().url().endsWith('/api/auth/me') ? 200 : 500,
+      contentType: 'application/json',
+      body: JSON.stringify(route.request().url().endsWith('/api/auth/me') ? { authenticated: false } : { error: 'Unexpected API call during landing audit' }),
+    }));
+
+    await page.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+    await page.waitForSelector('.paygate-gate-reference-art', { state: 'attached', timeout: 10_000 });
+    await page.evaluate(() => document.fonts?.ready);
+    await page.locator('.paygate-transform-section').evaluate((element) => {
+      element.scrollIntoView({ block: 'center', behavior: 'instant' });
+    });
+    await page.waitForTimeout(620);
+
+    const gate = await page.evaluate(async () => {
+      const element = document.querySelector('.paygate-gate-reference-art');
+      if (!(element instanceof HTMLImageElement)) return null;
+      await element.decode();
+
+      const source = new Image();
+      source.src = element.currentSrc;
+      await source.decode();
+      const rect = element.getBoundingClientRect();
+
+      return {
+        currentSrc: element.currentSrc,
+        sourceNaturalWidth: source.naturalWidth,
+        sourceNaturalHeight: source.naturalHeight,
+        intrinsicWidth: element.naturalWidth,
+        intrinsicHeight: element.naturalHeight,
+        renderedWidth: Math.round(rect.width),
+        renderedHeight: Math.round(rect.height),
+        devicePixelRatio: window.devicePixelRatio,
+        densityX: source.naturalWidth / (rect.width * window.devicePixelRatio),
+        densityY: source.naturalHeight / (rect.height * window.devicePixelRatio),
+        scrollWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+      };
+    });
+
+    assert(gate, 'Retina gate artwork is missing');
+    assert(gate.currentSrc.includes('paygate-gate-reference-transparent-2x.png'), `DPR 2 did not select the Retina gate: ${gate.currentSrc}`);
+    assert(gate.sourceNaturalWidth === 506 && gate.sourceNaturalHeight === 948, `Unexpected Retina gate source dimensions: ${JSON.stringify(gate)}`);
+    assert(gate.renderedWidth === 253 && gate.renderedHeight === 474, `Retina gate changed layout geometry: ${JSON.stringify(gate)}`);
+    assert(gate.devicePixelRatio === 2, `Expected DPR 2, got ${gate.devicePixelRatio}`);
+    assert(gate.densityX >= 0.98 && gate.densityY >= 0.98, `Retina gate is undersampled: ${JSON.stringify(gate)}`);
+    assert(gate.scrollWidth <= gate.viewportWidth + 1, `Retina landing overflows horizontally: ${JSON.stringify(gate)}`);
+
+    const screenshot = 'dark-retina-gate-253x474@2x.png';
+    await page.locator('.paygate-gate-reference-art').screenshot({
+      path: join(evidencePath, screenshot),
+    });
+
+    return { viewport, screenshot, gate, errors };
+  } finally {
+    await context.close();
+  }
+}
+
 const port = Number(process.env.PAYGATE_LANDING_AUDIT_PORT || 0) || await getFreePort();
 const baseUrl = process.env.PAYGATE_LANDING_AUDIT_URL || `http://127.0.0.1:${port}`;
 const shouldStartServer = !process.env.PAYGATE_LANDING_AUDIT_URL;
@@ -527,10 +614,11 @@ try {
     }));
   }
 
-  await writeFile(join(evidencePath, 'landing-audit.json'), `${JSON.stringify({ baseUrl, results }, null, 2)}\n`, 'utf8');
-  const errors = results.flatMap((result) => result.errors);
+  const retinaGate = await auditRetinaGate({ browser, baseUrl });
+  await writeFile(join(evidencePath, 'landing-audit.json'), `${JSON.stringify({ baseUrl, results, retinaGate }, null, 2)}\n`, 'utf8');
+  const errors = [...results.flatMap((result) => result.errors), ...retinaGate.errors];
   assert(errors.length === 0, `Landing browser errors: ${errors.join('; ')}`);
-  console.log(`Landing visual audit passed for ${results.length} theme/viewport combinations`);
+  console.log(`Landing visual audit passed for ${results.length} theme/viewport combinations plus DPR 2 gate coverage`);
   console.log(`Evidence: ${evidencePath}`);
 } catch (error) {
   if (String(error.message || '').includes('Executable doesn\'t exist')) {

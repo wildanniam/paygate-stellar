@@ -296,6 +296,7 @@ export default function HowItWorksDiagram({ sourceUrl, proxyUrl }) {
           <img
             className="paygate-gate-reference-art"
             src="/brand/paygate-gate-reference-transparent.png"
+            srcSet="/brand/paygate-gate-reference-transparent.png 1x, /brand/paygate-gate-reference-transparent-2x.png 2x"
             alt=""
             aria-hidden="true"
             decoding="async"
