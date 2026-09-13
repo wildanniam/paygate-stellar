@@ -154,6 +154,23 @@ Long URLs, secrets, request ids, payment ids, and tx hashes SHALL be copyable an
 - AND copy controls remain visible
 - AND no content overflows the card boundary
 
+### Requirement: Isolated landing design preview
+
+The `/design-preview` route SHALL provide a two-section design pilot without replacing `/`. Its asset and interaction scope is recorded in `../../changes/pilot-higgsfield-landing/proposal.md`.
+
+#### Scenario: Visitor tries the sample
+
+- GIVEN the visitor opens `/design-preview`
+- WHEN they send the sample request
+- THEN the page displays a simulated 402 and waits for an explicit simulated-payment action
+- AND labels the example as a simulation with no payment sent
+- WHEN they simulate payment and retry
+- THEN verification and escrow credit precede forwarding and the example JSON response
+- AND no real payment, wallet or upstream API call is made
+- AND media failure or disabled motion does not prevent the example from completing
+- WHEN they reset
+- THEN old callbacks cannot change the new example state
+
 ## Known Limitations
 
 - The V1 app is optimized for PayGate's testnet demo and early beta.

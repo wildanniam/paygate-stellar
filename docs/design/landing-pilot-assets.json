@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-13",
+  "issue": "https://github.com/wildanniam/paygate-stellar/issues/5",
+  "scope": "Two-section pilot: selected two-panel hero and one weather API example. Alternate hero, other specimens and later sections deferred.",
+  "credits_used": 18.5,
+  "credits_evidence": "Balance delta agrees with four still submissions at 2 credits and one film at 10.5 credits.",
+  "generation_jobs": [
+    {
+      "index": 0,
+      "role": "master",
+      "id": "40e17cef-1624-4090-b863-e9b3a546830f",
+      "requested_model": "nano_banana_pro",
+      "reported_model": "nano_banana_2",
+      "status": "selected",
+      "prompt": "[FORMAT]\nWide 16:9 cinematic website hero artwork. One continuous scene, no typography.\n\n[FOCAL SUBJECT]\nOne lightweight abstract access sculpture, positioned on the right third at roughly 69 percent of frame width, occupying approximately 34 percent of the image width. Exactly two thin upright complementary panels, taller than wide, with clearly slim side edges. Their mating seam has exactly one shallow horizontal offset slightly above the midpoint. Closed state: a fine but clearly visible seam. The full silhouette fits inside x=49–87%, y=13–88%, with outer room for later horizontal opening. A metaphor for software access, not a physical electronic product.\n\n[COMPOSITION]\nBoth panels stand on one continuous deep graphite studio floor, no pedestal, with a grounded soft contact shadow. Camera in a restrained three-quarter view. Strong horizontal depth. The leftward environment continues naturally into subdued tonal depth for native website copy; it remains the same textured studio, never a separate empty band. No extra foreground objects.\n\n[ATMOSPHERE]\nQuiet architectural still life, precise geometric staging, sculptural light, restrained dramatic depth. Clean air without smoke or particles. Lightweight surfaces and fine edges rather than a massive monolith.\n\n[LIGHTING]\nA large gridded stripbox at 45 degrees upper camera-left, 5200K neutral light. Narrow neutral rear-right rim. Deep shadow side with selective fill, gentle grounded contact shadows. Controlled grazing edge highlights; subtle tonal separation from the environment.\n\n[LENS & CAMERA]\n50mm, f/8, camera slightly above panel center, restrained three-quarter angle. Deep focus over both panels, parallel upright edges, no wide-angle distortion.\n\n[COLOR PALETTE]\nSatin graphite faces with extremely fine vertical brushing. Neutral titanium edge highlights. Restrained violet reflection only on inward-facing seam edges. Near-black graphite environment with visible shadow detail. No overall violet wash.\n\n[STYLE REFERENCE]\nGeometric minimal still-life discipline, deliberate sculptural composition, classical museum-like staging and controlled dramatic editorial light. Physically grounded, tactile brushed material, coherent environment.\n\n[QUALITY MARKERS]\nTack-sharp commercial surface detail, editorial commercial standard, ultra-realistic textures and materials, readable asymmetrical seam at small size, crisp thin edges.\n\n[AVOID]\nNo text, labels, numbers, logo, watermark, signatures, fake words or embedded UI. No AI artifacts, plastic look, waxy surfaces, cartoon rendering, melted geometry, doubled subjects, extra panel parts, additional seams, chunky slabs, heavy machinery or pedestal. No circular portal, ring, orb, spaceship, doorframe, server appliance, ports, screws, cables, coins, banknotes, crypto symbols or holographic interface. No people, limbs, smoke, particles, lens flare, oversaturated HDR, halos, oversharpening, flat fluorescent light, on-camera flash, invisible black edges or clipped highlights. No stale stock aesthetic, generic staging, clipart, artificial empty rectangles, disconnected color bands, dull pasted gradients or composited-looking backgrounds. The calm left area remains part of the same continuous environment.\n\nresolution: 2k"
+    },
+    {
+      "index": 1,
+      "role": "open frame first pass",
+      "id": "721144fd-ed23-43a1-9f20-cfc7c30df4bb",
+      "requested_model": "nano_banana_pro",
+      "reported_model": "nano_banana_2",
+      "status": "rejected: left panel moved too far and changed scale",
+      "prompt": "Refine the supplied hero image into its matching open end frame. Keep camera, composition, overall panel identity, material, brush texture, light exposure, full floor, background, and all passing qualities IDENTICAL.\n\n[FORMAT]\n16:9 end frame for a locked-camera film.\n\n[FOCAL SUBJECT / COMPOSITION]\nThe same exactly two thin rigid upright metal panels with the same single shallow offset in their mating seam. Only change: translate the entire left panel slightly left and the entire right panel slightly right by equal distances, creating a clear open gap about one-tenth of the combined panel width. No rotation, bending, thickening, scaling, shape change, added frame or change of camera. Keep both panels fully in frame. The resulting gap must read as physically empty, revealing the same dark backdrop. All edges retain the reference shape.\n\n[LIGHTING / MATERIAL]\nPreserve the reference 5200K upper-left gridded stripbox, neutral rim, satin graphite/brushed metal and exposure. Update grounded contact shadows only as required by horizontal translation. Restrained violet reflected on inward edges, no broad bloom.\n\n[LENS & CAMERA]\nIdentical locked 50mm f/8 three-quarter camera. Deep focus, precise thin edges.\n\n[QUALITY MARKERS]\nFrame-matched editorial commercial standard, stable geometry and tactile surface detail.\n\n[AVOID]\nNo text, logo, watermark, fake words, AI artifacts, melted geometry, doubled panels, plastic sheen, waxy surfaces, extra parts, fingers, limbs, people, HDR halos, oversharpening, flat fluorescent light, flash, particles, haze, flare, circular portal, hardware, coins, floating panels, camera movement, altered crop, artificial bands or composited-looking background. Do not replace the offset seam with straight rectangles. No closing. Preserve the environment.\n\nresolution: 2k"
+    },
+    {
+      "index": 1,
+      "role": "open frame refinement",
+      "id": "07d87f1d-e3fa-4519-a032-b04e10c0a7d9",
+      "requested_model": "nano_banana_pro",
+      "reported_model": "nano_banana_2",
+      "status": "rejected: separation and geometry still inconsistent; stopped image refinement",
+      "prompt": "Refine the supplied open-state image. Keep the right panel, camera, background, floor, overall lighting, material and exposure IDENTICAL.\n\nOnly fix the LEFT PANEL position and scale. It is currently much too far left and too small. Move the entire left panel toward the right panel, keeping a narrow empty gap of about 3 percent of the full image width (roughly one-sixth of one panel width), not the huge gap shown. Restore the left panel to the same upright height as the right panel, with its base aligned on the same floor line, accounting only for the existing mild perspective. The two panels should again read as one near-adjacent paired sculpture on the RIGHT third. Both original complementary shallow offset cuts remain unchanged. Do not move the right panel. Preserve thin rigid edges and neutral brushed material.\n\nThe resulting combined silhouette must stay entirely in the right half of the frame. Left panel approximately x=53–67 percent, right panel remains approximately x=69–82 percent. Preserve the existing 50mm f/8 three-quarter camera and 5200K gridded upper-left studio key. Update the left contact shadow coherently. Gap reveals dark background, no light wall, no extra object.\n\n[QUALITY]\nFrame-consistent editorial commercial still, tactile graphite, narrow precise edge highlights, fine violet only on inner cut.\n\n[AVOID]\nNo additional panels, frame, hardware, morphing, bending, thickening, changed right panel, changed camera, bloom, particles, fog, text, watermark, AI artifacts, waxy plastic, HDR halos, oversharpening or composited-looking backgrounds. No giant opening, no distant left panel, no panels at different depth.\n\nresolution: 2k"
+    },
+    {
+      "index": 2,
+      "role": "weather specimen",
+      "id": "8903d5b9-623d-4eb8-8742-d0f4cc9d873a",
+      "requested_model": "nano_banana_pro",
+      "reported_model": "nano_banana_2",
+      "status": "selected",
+      "prompt": "[FORMAT]\nWide 3:2 editorial still for an API example section.\n\n[FOCAL SUBJECT]\nOne lightweight low graphite terrain relief with five nested pressure-like contours and an elongated asymmetric footprint. One distinct solid sculptural specimen, a metaphor for weather measurements. Not a real map or actual forecast. Low stepped contour levels, precise thin edges, visibly different from the two upright panels in the reference.\n\n[STYLE REFERENCE ONLY]\nUse the supplied hero image only for tactile satin brushed graphite, neutral metal highlights, restrained violet bounce, dark studio and controlled lighting. Do not reproduce its panels, gate or seam geometry.\n\n[COMPOSITION / ATMOSPHERE]\nThe relief rests on the same kind of continuous dark studio floor, occupying about 66 percent of the frame width, slightly right of center. Elevated three-quarter view reveals readable contour hierarchy. Calm, geometrically disciplined still life with real depth and grounded contact, no pedestal, no additional props.\n\n[LIGHTING / COLOR]\nLarge gridded 5200K stripbox from 45 degrees upper camera-left; restrained neutral rim, selective shadow fill. Graphite, neutral titanium-like edge highlights, minimal violet reflected in one inner contour. Soft contact shadows; no overall purple tint.\n\n[LENS & CAMERA]\n85mm, f/11, elevated three-quarter camera, deep focus across all five contour levels, compressed perspective.\n\n[STYLE / QUALITY MARKERS]\nDeliberate geometric still-life composition, classical sculptural staging, controlled dramatic editorial light, tactile brushed material, tack-sharp commercial surface detail.\n\n[AVOID]\nNo text, numbers, axes, labels, logos, watermarks, actual map, real forecast, grid, upright panels, gate, circular portal, orb, coins, cables, holograms, fog, particles, floating parts, melted geometry, duplicate subjects, waxy plastic, oversaturated HDR, halos, oversharpening, fluorescent flat light, flash, clipart, stock-photo staging, fake empty bands or composited-looking background. No people, fingers or limbs. Keep the relief light in visual weight and physically grounded.\n\nresolution: 2k"
+    },
+    {
+      "index": 3,
+      "role": "hero film",
+      "id": "2bf546e5-900e-4bfa-8e4f-5bf7363fd69d",
+      "requested_model": "kling3_0",
+      "reported_model": "kling3_0",
+      "status": "selected with timing edit",
+      "prompt": "A six-second silent architectural product film from the supplied image. One completely locked camera. Preserve the exact original two thin upright brushed graphite panels, their complementary single shallow offset cuts, lighting, floor, material and all background details.\n\nAt 0–0.4 seconds, hold the original image still. At 0.4–2.2 seconds, SLIDE BOTH RIGID PANELS HORIZONTALLY APART a very small distance: left panel translates left by about 3 percent of the full frame width and right panel translates right by the same amount. Their scale, height, angle, shape and depth never change. Create a narrow physically empty dark opening between the complementary cuts. Keep the complete paired object within the right half of the image. The floor-contact shadows follow the subtle translations naturally. At 2.2–6 seconds, hold the resulting open state perfectly still.\n\nThe gate is a restrained metaphor for paid software access. Neutral 5200K upper-left soft gridded studio key, tactile satin brushing, narrow titanium edge highlights, very restrained violet only on the inward-facing edges. No additional light source. Same camera perspective, focus and exposure throughout.\n\nNo camera movement, zoom, dolly, orbit, camera shake, rotation, depth movement, bending, morphing, thickening, scaling, dissolving, extra seams, new objects, wide opening, doors swinging, particles, text, interface, coins, fog, flares, flicker, exposure shift or audio. One gentle physical translation only, then a static hold. Do not close or reverse."
+    }
+  ],
+  "model_note": "Image submissions requested nano_banana_pro. The completion API labels them nano_banana_2; the provider alias relationship was not independently verified. No automatic model substitution was requested.",
+  "processing": {
+    "film": "Take the first 3 seconds of the generated 6.042-second film, retime to 2.2 seconds, then hold its last frame through 6 seconds. Silent H.264, 1600x892, 24 fps, CRF22, faststart. No further generation.",
+    "posters": "Extracted from the edited film at 0 and 5.9 seconds, encoded WebP quality88.",
+    "weather": "Resized to 1200x805, WebP quality86."
+  },
+  "files": [
+    {
+      "name": "hero-closed.webp",
+      "bytes": 21818,
+      "source": "first frame of edited film"
+    },
+    {
+      "name": "hero-open.webp",
+      "bytes": 24918,
+      "source": "last held frame of edited film"
+    },
+    {
+      "name": "hero-opening.mp4",
+      "bytes": 311308,
+      "source": "edited Higgsfield film"
+    },
+    {
+      "name": "weather-relief.webp",
+      "bytes": 44452,
+      "source": "Higgsfield weather specimen"
+    }
+  ],
+  "limitations": "Creative pilot awaiting owner feedback; this is not approval of all later assets or measured conversion. Browser checks and build are tracked in landing-pilot.md."
+}

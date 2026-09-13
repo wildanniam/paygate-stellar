@@ -18,6 +18,10 @@ Read these in order before making code changes:
 
 If any file conflicts with `TECHNICAL_SPEC.md`, follow `TECHNICAL_SPEC.md` for V0/SOW work. For the V1 branch, follow `PAYGATE_V1_PRODUCT_SPEC.md` where it intentionally conflicts with the old stateless generator scope.
 
+## Two-Section Design Pilot — 2026-09-13
+
+Issue #5 adds a separate, lazy `/design-preview` route for owner feedback. Its accepted scope is a dark Higgsfield-led hero plus one weather API example. Read `../frontend/DESIGN.md` and `design/landing-pilot.md` for this route; the old landing visual brief is historical for the pilot. The current `/` route and all payment, wallet and dashboard behavior remain intact. The sample is a browser-only simulation: payment verification and escrow credit precede forwarding. Media must never determine financial state. Do not generate the remaining asset family or replace the live landing until Wildan gives feedback and authorizes continuation.
+
 ## V1 Branch Direction
 
 Wildan has approved the V1 pivot on `codex/paygate-v1`.
