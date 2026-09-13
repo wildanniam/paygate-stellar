@@ -18,11 +18,11 @@ Read these in order before making code changes:
 
 If any file conflicts with `TECHNICAL_SPEC.md`, follow `TECHNICAL_SPEC.md` for V0/SOW work. For the V1 branch, follow `PAYGATE_V1_PRODUCT_SPEC.md` where it intentionally conflicts with the old stateless generator scope.
 
-## Hero Design Preview — 2026-09-13 revision
+## Landing Design Preview — 2026-09-13 revision
 
-Issue #5 / draft PR #6 provide the lazy `/design-preview` route for owner feedback. Wildan rejected the earlier metal/monochrome pilot and now authorizes **hero only**, retaining PayGate's dark/purple tokens, with Higgsfield artwork and ambient motion from entry. The old generation cap is superseded by explicit quality-led credit authorization. Read `../frontend/DESIGN.md` and `design/hero-violet.md`; `design/landing-pilot.md` and its asset ledger are historical. A native request console is integrated into the hero. The sample is browser-only: explicit simulated payment, then escrow credit before forwarding; media never determines payment state. `/`, backend, wallet and dashboard behavior remain unchanged. Later sections, production replacement and merging still require owner direction.
+Issue #5 / draft PR #6 provide the isolated lazy `/design-preview` route. The owner accepts the violet hero, buttons and native transaction visualization. Latest feedback rejects **sections 2 and 3** as plain and text-heavy, superseding earlier capabilities acceptance. The replacement uses original Higgsfield weather/access/path artwork, two ambient loops, an interactive price/split visual and a spatial connect → protect → publish scene. Both revised sections await owner feedback. Read `../frontend/DESIGN.md`, `design/visual-story-revision.md` and `design/visual-story-assets.json`; earlier pilot/section notes preserve superseded history.
 
-Owner feedback, later on 13 September: the violet background/concept is accepted for continued iteration. Buttons and the debug-style console were rejected. The revised `TransactionJourney` uses native client/gateway/API nodes, state-driven packets, persistent settlement, a returning-response state, and optional JSON. Mobile is vertical. Existing Higgsfield media is reused; component acceptance remains pending. See the current revision at the top of `design/hero-violet.md`.
+Keep the original dark/purple tokens. Quality-led Higgsfield credit use is authorized. Illustrations never run wallet/API/payment operations. Hero settlement remains credit-before-forwarding and separate from delivery. Media is decorative, lazy, pausable and independent of product state. No further section, homepage replacement, backend/dependency change, release or merge is authorized by this preview work.
 
 ## V1 Branch Direction
 
@@ -235,4 +235,4 @@ Preferred short verdict:
 
 ## Landing preview scope — 13 September 2026
 
-The owner has accepted the violet hero, revised buttons, transaction journey and API capabilities section. The latest instruction authorizes exactly one next setup section: register → guard → verify/share, with a native interactive workspace. Only that new setup section awaits visual feedback. Keep accepted sections and the dark/purple palette; do not add further sections or replace `/` without another instruction. Current authority: `frontend/DESIGN.md`; evidence: `docs/design/setup-journey.md` and the earlier hero/capabilities notes. Existing issue #5 / draft PR #6 track the incremental preview. Setup checks are explicitly local illustrations, not live API or wallet operations.
+Current authority is the visual revision described at the top of this file and in `frontend/DESIGN.md`. The previous capabilities acceptance and setup workspace are superseded by explicit owner criticism. The hero remains accepted; revised capabilities/setup await feedback on draft PR #6. Preserve actual product prerequisites and distinguish illustrations from real operations.

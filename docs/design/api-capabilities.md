@@ -1,3 +1,5 @@
+> **Superseded by owner feedback later on 13 September 2026.** The owner rejected sections 2 and 3 as too plain and text-heavy. See [Visual storytelling revision](visual-story-revision.md) for the replacement, assets and current verification. Earlier acceptance/proposals below are historical. The new revision awaits feedback.
+
 # API capabilities section — 13 September 2026
 
 Owner accepts the revised violet hero/buttons/transaction journey and authorizes **one next section**. Implemented on `/design-preview`, issue #5 / draft PR #6. Latest owner feedback accepts this capabilities section and authorizes one next [setup section](setup-journey.md). No homepage replacement or release.

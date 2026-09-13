@@ -1,0 +1,144 @@
+{
+  "date": "2026-09-13",
+  "scope": "Owner-requested visual revision of capabilities and setup; accepted hero preserved.",
+  "balance": {
+    "before": 563.5,
+    "after": 516,
+    "observedCreditsSpent": 47.5
+  },
+  "styleReference": {
+    "jobId": "bc4bc922-0905-4550-8360-fb034c0e7f2f",
+    "role": "Approved violet hero style only"
+  },
+  "images": [
+    {
+      "name": "weather",
+      "jobId": "d28cb791-8d64-47d7-bf84-7e62aa137e2f",
+      "model": "gpt_image_2",
+      "prompt": "Create an original premium art-directed web illustration for PayGate, a pay-per-call API product. Match the attached reference only in its deep ink black, luminous violet #735CFA, pale lavender #9A90FF, fine optical filaments and rare cool cyan highlights. Contemporary high-end motion design, exquisite clean lighting, dimensional and alive, not a screenshot or website mockup. No writing, letters, numbers, logo, watermark, interface, labels, border or frame. No metal, chrome, concrete, machinery, coins or cyberpunk city. Background is almost black #080612 with delicate purple atmospheric light, not a grey photographic studio. SUBJECT: a weather forecast made tangible as data. One beautifully formed soft translucent lavender cloud, luminous sun disk half visible behind it, a few delicate glass raindrop shapes descending below; the recognisable weather symbol is built from thousands of extremely fine luminous strands and softly frosted translucent volume, not a toy or clip-art icon. A precise thin elliptical ring of tiny data points orbits the cloud horizontally. Fine pale violet data streams curl into the bottom of the cloud. Large object at x=53%, y=48%, occupies 60% width and 62% height, generous dark space around all edges. Floating weightlessly in an infinite dark violet environment with no ground or pedestal. Colorful violet light on the cloud, tiny near-white highlights, cyan only 3% of the image. Lighting is warm lavender in front and deeper purple behind, cinematic volumetric depth but crisp silhouette. 4:3 landscape. Quiet top 18% and bottom 15% for native HTML overlays added later.",
+      "aspectRatio": "4:3",
+      "resolution": "2k",
+      "quality": "high",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260913_154744_d28cb791-8d64-47d7-bf84-7e62aa137e2f.png",
+      "width": 2336,
+      "height": 1744
+    },
+    {
+      "name": "access",
+      "jobId": "a7ff34c3-dba1-4cc3-a06f-7750d205d8e6",
+      "model": "gpt_image_2",
+      "prompt": "Create an original premium art-directed web illustration for PayGate, a pay-per-call API product. Match the attached reference only in its deep ink black, luminous violet #735CFA, pale lavender #9A90FF, fine optical filaments and rare cool cyan highlights. Contemporary high-end motion design, exquisite clean lighting, dimensional and alive, not a screenshot or website mockup. No writing, letters, numbers, logo, watermark, interface, labels, border or frame. No metal, chrome, concrete, machinery, coins or cyberpunk city. Background is almost black #080612 with delicate purple atmospheric light, not a grey photographic studio. SUBJECT: verified access as an optical shield. A single elegant, upright, translucent violet shield outline woven from hundreds of very fine optical strands; dark transparent interior, no checkmark, keyhole or padlock. Shield is slightly angled in perspective, main silhouette centered at x=60% y=48%, 55% image height. Three precise bundles of luminous data filaments travel horizontally from the left, pass through the shield membrane and exit right as a smooth, beautifully aligned bright ribbon. Sparse square light particles along paths, no explosion. Concentrated lavender rim light on shield contour and tiny cyan edge refraction. This must read immediately as protected flowing data, not a sculpture in a room. Entire composition occupies middle 65% height with black breathing room above and below. Cinematic 16:9 image with striking precision and subtle atmospheric violet depth.",
+      "aspectRatio": "16:9",
+      "resolution": "2k",
+      "quality": "high",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260913_154745_a7ff34c3-dba1-4cc3-a06f-7750d205d8e6.png",
+      "width": 2688,
+      "height": 1520
+    },
+    {
+      "name": "path",
+      "jobId": "38ff31e2-a048-4b9f-b9a7-ad9e87a52034",
+      "model": "gpt_image_2",
+      "prompt": "Create an original premium art-directed web illustration for PayGate, a pay-per-call API product. Match the attached reference only in its deep ink black, luminous violet #735CFA, pale lavender #9A90FF, fine optical filaments and rare cool cyan highlights. Contemporary high-end motion design, exquisite clean lighting, dimensional and alive, not a screenshot or website mockup. No writing, letters, numbers, logo, watermark, interface, labels, border or frame. No metal, chrome, concrete, machinery, coins or cyberpunk city. Background is almost black #080612 with delicate purple atmospheric light, not a grey photographic studio. SUBJECT: a panoramic data journey, designed as the environmental ground for three native interface objects which will be placed at x=20%, 50%, 80%, y=46%. The artwork itself contains NO OBJECTS, no cards, no shields, no doors or stations. A beautiful flowing river of hair-fine luminous lavender optical strands traverses the frame from left at y=68%, gently dipping at center y=76%, rising at right y=58%. The bundle separates into three broad shallow pools of light under the three anchor positions. Perspective sweeps diagonally into depth with fine luminous particles suspended just over the currents. Lower half rich in intricate filament texture, upper half deep almost-black negative space, especially the region y=20-55% must be dark and quiet for readable overlay. Image should feel like a richly dimensional moving light installation, editorial motion design, no neon rainbow, no large glowing blob, no grid horizon, no wires or metal. 16:9 panoramic composition. Light remains violet; highest brightness lower middle. This is an abstract illustration of API data connecting, never a real landscape.",
+      "aspectRatio": "16:9",
+      "resolution": "2k",
+      "quality": "high",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260913_154744_38ff31e2-a048-4b9f-b9a7-ad9e87a52034.png",
+      "width": 2688,
+      "height": 1520
+    }
+  ],
+  "videos": [
+    {
+      "name": "weather",
+      "jobId": "fdec64fa-4776-4f89-b564-93ff502c914f",
+      "model": "kling3_0",
+      "prompt": "Animate this exact luminous violet weather-data artwork. Locked-off camera, identical composition, no camera travel, zoom or cut. The cloud retains its readable silhouette and center position. Fine filaments gently stream through the cloud from lower left to right; the dotted elliptical data orbit progresses slowly around it; a few light raindrops drift down a short distance and dissolve. The sun softly radiates, never flashes. Subtle 1-2% buoyancy only, no dramatic morph, no explosion or new objects. Preserve black negative space, violet/lavender palette and fine texture. Premium slow motion-graphics loop designed behind native website text. Start and end match. Silent.",
+      "durationRequested": 8,
+      "mode": "pro",
+      "sound": "off",
+      "startAndEndReference": "d28cb791-8d64-47d7-bf84-7e62aa137e2f",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260913_155240_fdec64fa-4776-4f89-b564-93ff502c914f.mp4"
+    },
+    {
+      "name": "path",
+      "jobId": "f24c8529-4b7c-480d-b189-4b2c34b8f5a9",
+      "model": "kling3_0",
+      "prompt": "Animate this exact panoramic violet data-river environment with a fixed camera and absolutely stable framing. Thousands of hair-fine optical filaments flow steadily from left to right along their existing curved tracks. Three shallow light pools gently breathe sequentially left, center, right; occasional tiny light particles advance with the streams. Keep the upper half nearly black and quiet for interface overlay. Motion is visible but smooth and restrained; no large wave swelling into the upper half, no zoom, cut, horizon shift, objects, writing, or UI. Preserve dark ink/violet/lavender palette. Elegant continuous 8 second atmospheric loop; start and end match. Silent.",
+      "durationRequested": 8,
+      "mode": "pro",
+      "sound": "off",
+      "startAndEndReference": "38ff31e2-a048-4b9f-b9a7-ad9e87a52034",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260913_155240_f24c8529-4b7c-480d-b189-4b2c34b8f5a9.mp4"
+    }
+  ],
+  "processedPosters": [
+    {
+      "filename": "weather.webp",
+      "mediaId": "f15425fc-2070-4fb3-9e7a-4b2e809b2ccb",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/f15425fc-2070-4fb3-9e7a-4b2e809b2ccb.webp"
+    },
+    {
+      "filename": "weather-small.webp",
+      "mediaId": "772122ea-7866-4306-be18-3be7ce00bd6b",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/772122ea-7866-4306-be18-3be7ce00bd6b.webp"
+    },
+    {
+      "filename": "access.webp",
+      "mediaId": "46f46b27-db5b-4555-8ea5-fb357f8c0235",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/46f46b27-db5b-4555-8ea5-fb357f8c0235.webp"
+    },
+    {
+      "filename": "access-small.webp",
+      "mediaId": "b32a5b42-f4e7-463e-8091-16565722861f",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/b32a5b42-f4e7-463e-8091-16565722861f.webp"
+    },
+    {
+      "filename": "path.webp",
+      "mediaId": "800a4227-20f1-4044-94da-f97d557c23a4",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/800a4227-20f1-4044-94da-f97d557c23a4.webp"
+    },
+    {
+      "filename": "path-small.webp",
+      "mediaId": "2df2f42a-4324-4e86-92ef-ede5e1ce405e",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/2df2f42a-4324-4e86-92ef-ede5e1ce405e.webp"
+    }
+  ],
+  "processedVideoAndFrames": [
+    {
+      "filename": "weather.mp4",
+      "mediaId": "8a04e2be-0f5c-42e5-ae68-7a9e0e4af398",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/8a04e2be-0f5c-42e5-ae68-7a9e0e4af398.mp4"
+    },
+    {
+      "filename": "path.mp4",
+      "mediaId": "8d0a634c-95c4-45ea-a94a-3cb250d3063f",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/8d0a634c-95c4-45ea-a94a-3cb250d3063f.mp4"
+    },
+    {
+      "filename": "weather-frames.jpg",
+      "mediaId": "ce249726-76a0-4fcd-b14f-8191929ef10d",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/ce249726-76a0-4fcd-b14f-8191929ef10d.jpg"
+    },
+    {
+      "filename": "path-frames.jpg",
+      "mediaId": "eb5709cb-8c70-4bd5-b8bc-c58fb566465e",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/eb5709cb-8c70-4bd5-b8bc-c58fb566465e.jpg"
+    }
+  ],
+  "processing": {
+    "environment": "Higgsfield sandbox",
+    "images": "Pillow Lanczos WebP quality 88, weather 1400px / access and path 1600px; mobile 800px; no compositing.",
+    "video": "FFmpeg 24fps H.264 CRF23 fast preset, faststart, no audio. 0.4s wrap crossfade (main source 0.4–8.0s plus source head 0–0.4s at offset7.2). Weather1200px, path1600px.",
+    "videoBytes": {
+      "weather": 401790,
+      "path": 2109401
+    },
+    "nativeLayer": "All copy, monetary amounts, controls, graph bars, source/guard/endpoint objects and setup state are HTML/CSS/SVG. Video is decorative, not product state."
+  },
+  "review": {
+    "imageMastersInspected": true,
+    "contactSheetsInspected": true,
+    "ownerApproval": "Pending; engineering verification is not visual acceptance."
+  }
+}

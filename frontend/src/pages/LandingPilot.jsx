@@ -70,8 +70,8 @@ export default function LandingPilot() {
       </div>
       <div className="lp-stage-footer"><span>Built on Stellar MPP</span><button type="button" onClick={toggleMotion} aria-pressed={motion} aria-label={motion ? 'Pause background motion' : 'Resume background motion'}>{motion ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}<span>Motion {motion ? 'on' : 'off'}</span></button></div>
     </section>
-    <ApiCapabilities />
-    <SetupJourney />
+    <ApiCapabilities motion={motion} />
+    <SetupJourney motion={motion} />
     </main>
     <footer className="lp-preview-footer"><span>Landing design preview</span><Link to="/">View current site <ArrowUpRight size={13} /></Link></footer>
   </div>;

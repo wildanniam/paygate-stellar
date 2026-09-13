@@ -1,3 +1,5 @@
+> **Superseded by owner feedback later on 13 September 2026.** The owner rejected sections 2 and 3 as too plain and text-heavy. See [Visual storytelling revision](visual-story-revision.md) for the replacement, assets and current verification. Earlier acceptance/proposals below are historical. The new revision awaits feedback.
+
 # Setup journey — 13 September 2026
 
 The owner accepted the API capabilities section (`98375fb`) and authorized exactly one next section. `/design-preview` now adds “From URL to paid endpoint.” Hero and capabilities are accepted; **this setup section awaits its own visual feedback**. Issue #5 / draft PR #6 track the incremental work. No homepage replacement, production release or backend change.

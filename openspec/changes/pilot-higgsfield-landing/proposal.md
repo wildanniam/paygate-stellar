@@ -1,3 +1,11 @@
+# PayGate preview: visual revision of capabilities and setup
+
+Latest owner feedback, later on 13 September 2026: sections 2 and 3 are too plain and text-heavy. Replace their configuration/receipt/code/checklist presentation with original Higgsfield artwork, two ambient loops, concise interactive price/split visuals and a connected setup scene. Keep the accepted hero and original dark/purple palette. Native controls retain keyboard/touch support; media is decorative, lazy and pausable. Actual API/secret/verification requirements stay truthful. See `frontend/DESIGN.md`, `docs/design/visual-story-revision.md` and `docs/design/visual-story-assets.json`.
+
+The new sections await owner feedback. No further section, homepage replacement, backend/wallet/contract change or merge. Prior acceptance and proposals below are chronological history and are superseded where they conflict with this feedback.
+
+---
+
 # PayGate preview: accepted hero/capabilities and one setup section
 
 Latest scope, 13 September 2026: owner accepts the capabilities section and requests exactly one next section. Add a three-step setup journey: register → guard → verify/share. Native selectable steps control one workspace preview; local example checks have cancellable timers, keyboard access, replay, motion-off and mobile layouts. No live API/wallet operation, dependency or new media generation. See `frontend/DESIGN.md` and `docs/design/setup-journey.md`. New setup section awaits feedback; further sections and release remain outside scope.
