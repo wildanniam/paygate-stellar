@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Pause, Play } from 'lucide-react';
 import HeroMedia from '../components/landing-pilot/HeroMedia.jsx';
 import TransactionJourney from '../components/landing-pilot/TransactionJourney.jsx';
+import ApiCapabilities from '../components/landing-pilot/ApiCapabilities.jsx';
 import { createLandingPilotSimulation, INITIAL_SAMPLE } from '../lib/landingPilotSimulation.js';
 import '../styles/landing-pilot.css';
 
@@ -31,7 +32,7 @@ export default function LandingPilot() {
     const instance = createLandingPilotSimulation(setSample);
     simulation.current = instance;
     const previous = document.title;
-    document.title = 'PayGate — Hero preview';
+    document.title = 'PayGate — Design preview';
     return () => { instance.dispose(); document.title = previous; };
   }, []);
 
@@ -43,6 +44,7 @@ export default function LandingPilot() {
 
   return <div className="lp" data-motion={motion ? 'on' : 'off'}>
     <a className="lp-skip" href="#pilot-main">Skip to content</a>
+    <main id="pilot-main">
     <section className="lp-stage" ref={stageRef} aria-labelledby="pilot-title" data-credited={sample.credited}>
       <HeroMedia motion={motion} stageRef={stageRef} />
       <header className="lp-nav">
@@ -50,7 +52,7 @@ export default function LandingPilot() {
         <nav aria-label="Main navigation"><button type="button" onClick={explore}>How it works</button><a href={GUIDE} target="_blank" rel="noreferrer">Docs <ArrowUpRight size={13} /></a></nav>
         <Link to="/dashboard" className="lp-dashboard">Dashboard <ArrowUpRight size={15} /></Link>
       </header>
-      <main id="pilot-main" className="lp-main">
+      <div className="lp-main">
         <div className="lp-hero-copy">
           <p className="lp-category"><span className="lp-category-symbol" aria-hidden="true"><i /><i /><i /></span>Payments for API builders</p>
           <h1 id="pilot-title">Your API.<br /><span>Paid per request.</span></h1>
@@ -64,9 +66,11 @@ export default function LandingPilot() {
         <div className="lp-product-preview">
           <TransactionJourney sample={sample} simulation={simulation} consoleRef={consoleRef} />
         </div>
-      </main>
+      </div>
       <div className="lp-stage-footer"><span>Built on Stellar MPP</span><button type="button" onClick={toggleMotion} aria-pressed={motion} aria-label={motion ? 'Pause background motion' : 'Resume background motion'}>{motion ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}<span>Motion {motion ? 'on' : 'off'}</span></button></div>
     </section>
-    <footer className="lp-preview-footer"><span>Hero design preview</span><Link to="/">View current site <ArrowUpRight size={13} /></Link></footer>
+    <ApiCapabilities />
+    </main>
+    <footer className="lp-preview-footer"><span>Landing design preview</span><Link to="/">View current site <ArrowUpRight size={13} /></Link></footer>
   </div>;
 }

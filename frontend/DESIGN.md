@@ -1,45 +1,50 @@
-# PayGate hero preview — reference reset, 13 September 2026
+# PayGate landing preview — 13 September 2026
 
 ## Current authority and scope
 
-Owner feedback, 13 September: the violet background/concept is accepted for continued iteration. Buttons and the transaction console are rejected. Replace the debug-panel presentation with a visual client → PayGate → API journey; retain hero-only scope and the existing artwork.
+Latest owner instruction: “Okey aku suka, sekarang lanjut ke section berikutnya … Kita lanjut develop satu section.” The revised violet hero, buttons and transaction journey are accepted. Build exactly one next section for a new feedback round. The new capabilities treatment is an implementation proposal, not yet owner-approved. `/design-preview` stays isolated; the live homepage and production release are outside this work. Reuse issue #5 / draft PR #6.
 
-Transaction revision: one diagram stage with a compact client request, a prominent branded gateway, and a weather response that opens after delivery. Directed request/payment/response packets follow state transitions; show the 402 pause and explicit simulated payment. A persistent settlement strip distinguishes credited funds from the returned response. Raw JSON is an optional disclosure. Desktop uses a horizontal path; mobile uses a compact vertical path. Keep reset available during processing, stable action focus, a concise live status, and a static equivalent when motion is off. Use native DOM/CSS for this semantic interaction, reusing the Higgsfield environment. Buttons use a continuous violet surface and a quieter play action, with coherent focus/press/disabled treatments. No new media or dependency is needed for this revision.
+The metal/monochrome two-section pilot was rejected. The earlier hero-only iteration is now complete and superseded only in scope by hero plus one capabilities section. Further sections still need another feedback round. Higgsfield credit use is authorized for quality; asset generation is not a quota.
 
-Wildan rejected the metal/monochrome two-section pilot and approved building **the hero only** for another visual feedback round. The existing PayGate dark/purple color system must stay. He explicitly allows Higgsfield credits to be used for quality; the earlier 16.5-credit target and generation stop no longer apply to this revision. Later sections and production release remain outside scope. Issue #5 / draft PR #6 track this work.
+## Register, audience and path
 
-The old two-panel direction is superseded. Its implementation and asset ledger remain in Git history and `docs/design/landing-pilot-assets.json`, not as guidance for new imagery.
+Brand UI with native, illustrative product interactions. API owners should understand paid machine access, then register an API at `/apis/new`. Public Stellar Testnet beta is prominent. Examples never create an API, contact a wallet or send a payment.
 
-## Register, audience, path
+## References and interpretation
 
-Brand UI with a small native product demonstration. API owners should understand paid machine access, then register an API. The main CTA goes to `/apis/new`; an optional sample shows the request/payment/response path without a wallet or network transaction. Public Stellar Testnet beta stays visible.
+- [Circular](https://rbp-saas-template.vercel.app/): a dominant feature panel with smaller supporting panels, changes in tone and scale after an immersive hero. Adapt composition, not its lime palette, phone mockups or invented customer figures.
+- [Cloudlight](https://rbp-cloudlight-template.vercel.app/#capabilities): each capability is demonstrated by a relevant product visual; calm surrounding space makes the story readable.
+- [Agentframe](https://rbp-agentframe-template.vercel.app/#quickstart): concise copy connected to native, inspectable examples.
+- [Koderea](https://www.koderea.id/): simple reading order with ambient motion from entry; already reflected in the accepted hero.
 
-## Visual target
+Browser-rendered sections were inspected, not inferred solely from home screenshots. No purchased template source or reference artwork is used.
 
-- Primary: https://rbp-saas-template.vercel.app/ — integrated frame/navigation, centered bold headline, rich full-field artwork, product preview emerging below.
-- https://www.koderea.id/ — simple reading order with ambient motion from entry.
-- https://rbp-cloudlight-template.vercel.app/ — dark product preview anchored in the hero environment.
-- https://rbp-agentframe-template.vercel.app/ — deliberate texture and clear identity.
-- Reference principles only; no purchased template source, copied imagery or borrowed customer claims.
+## Visual vocabulary
 
-## Visual system
+Preserve the existing ink/dark/purple system from `src/styles/tokens.css`: #050609, #735CFA and #9A90FF, with existing blue/green/amber semantic colors. DM Sans for typography; JetBrains Mono for code/data. Keep the colored PayGate mark. Pale lavender product surfaces provide local contrast inside the dark landing; they do not change the global theme.
 
-Preserve `src/styles/tokens.css`: ink #050609, purple #735CFA, lavender #9A90FF, existing blue/green/amber semantic colors. DM Sans for expressive, bold centered typography; JetBrains Mono for code and data. The existing colored PayGate mark stays.
+The accepted hero uses a rounded full-width violet filament environment, centered headline, continuous purple CTA and quiet play action. Native client → PayGate → API graphics show the transaction. Its composition and artwork remain unchanged.
 
-Artwork is an immersive violet optical current: thousands of fine light filaments flowing into a broad concave horizon, with dark upper-middle atmosphere, luminous peripheral ridges and fine photographic texture. No doors, metal, hardware, studio floor or unrelated sculpture. Artwork supplies atmosphere; readable native HTML supplies product meaning.
+## One new section: API capabilities
 
-One rounded full-width stage, compact floating navigation, centered two-line headline, concise supporting copy, purple primary CTA and a quieter sample CTA. A single wide native sample console emerges from the lower light field, within the hero. No second section or repeated card grid.
+Heading: “Your API. Ready for business.” Supporting copy: “You build the API. PayGate handles paid access and payment records.” One register link, then an asymmetric grid:
 
-Desktop: typography and actions centered with generous horizontal space; sample console has request and response columns. Mobile: narrower headline, compact navigation, vertically stacked console, retained artwork crop and touch-friendly targets. No fixed-height text crop.
+1. Dominant left panel: “A price for every call.” A crisp example configuration sits over a crop of the existing Higgsfield filament artwork. Three native price buttons update the visible request price and the receipt. Example endpoint and register → guard → verify setup copy make this a product illustration, not a false published endpoint.
+2. Upper right: “Your API. Your access rules.” The provider must add a secret-header check. A restrained native shield mark and verified-payment → secret-header path show what PayGate adds to a paid upstream call. Do not imply that a URL alone makes the upstream private.
+3. Lower right: “Every payment. On record.” A pale lavender panel holds a native receipt with gross amount, 90% provider share and 10% fee. Payment and delivery are explicitly separate.
 
-## Motion and state contract
+Examples: 0.010 / 0.050 / 0.100 testnet USDC. Splits: 0.009+0.001, 0.045+0.005, 0.090+0.010. These are browser-only illustrations, not new billing logic. The hero simulation remains independent.
 
-Silent ambient film starts automatically with motion enabled, independently of the sample. A poster shows immediately. Pointer movement adds a bounded depth shift and local light response; no custom cursor or scroll hijack. Subtle flowing SVG traces reinforce the product path. Motion pauses offscreen/hidden and via a visible control. OS reduced motion defaults to still artwork and no pointer/entrance movement. Failed autoplay/media retain the poster and working UI.
+Use a calm dark background and varied panel scale after the rich hero. Do not repeat another request animation, create a second full-screen video, or add unrelated sculpture. Existing Higgsfield poster is lazy-loaded and reused; no new generation or dependency for this section.
 
-Sample: idle → requesting → 402 → explicitly simulate payment → verifying → escrow credited → forwarding → response. Gross 0.010, provider 0.009 and fee 0.001 testnet USDC. Credit precedes delivery; decorative media never determines financial state. Reset cancels stale callbacks. The sample is visibly labelled and sends no payment or API request.
+Responsive: two columns above 760px; below that, price → access → receipt in one column. On phones, show immediate split feedback alongside the price controls so the result does not require scrolling. Targets are at least 44px. The smallest access path becomes vertical. Keep readable text, no fixed-height text clipping, and no horizontal overflow.
 
-Controls: distinct hover/focus/active/disabled states, keyboard access, 44px minimum targets. State updates use a concise live region; avoid announcing ambient animation. Native code stays crisp and selectable.
+## State and motion contract
 
-## Verification and creative gate
+Capabilities: deterministic local selection; pressed state, hover, keyboard focus and active feedback. A concise polite live region announces the split. No loading or error UI is required because no request runs. Illustrative status and testnet units remain visible. Section motion is limited to button/link microinteractions; existing motion-off and reduced-motion rules apply.
 
-Inspect actual artwork and film, then the assembled desktop and 390px hero. Verify motion from entry, pointer response, sample flow, reset, reduced-motion preference, playback fallback, no horizontal overflow, no broken media, build and meaningful simulation tests. Record prompts, selected/rejected generations, actual balance delta, media sizes and limitations. A build passing is not owner creative approval.
+Accepted hero: silent ambient video independent of the sample, responsive poster fallback, bounded pointer depth/light response, offscreen/hidden pause, visible pause control, and OS reduced-motion defaults. Simulation: idle → requesting → 402 → explicit simulated payment → verifying → credit → forwarding → returning → response. Reset invalidates pending callbacks. Credit is separate from delivery.
+
+## Verification
+
+Run frontend build and existing simulation tests. Inspect the assembled section at desktop, intermediate widths, 390px and 320px; exercise all prices, keyboard activation, focus, register destination, image loading, motion-off and a hero request smoke check. No live wallet/payment calls. Update `docs/design/api-capabilities.md` with actual results and limitations. Passing checks are not owner visual approval.

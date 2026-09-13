@@ -1,3 +1,11 @@
+# PayGate preview: accepted hero and one capabilities section
+
+Latest scope, 13 September 2026: owner accepts the revised hero/buttons/transaction journey and asks to develop exactly one next section. The new asymmetric capabilities section covers example pricing, upstream access and payment records. Local price selection updates an illustrative 90/10 split. It reuses the accepted Higgsfield poster, with native product UI and no new dependency or generation. See `frontend/DESIGN.md` and `docs/design/api-capabilities.md`. This new section awaits owner feedback; further sections and release remain outside scope.
+
+The text below preserves the preceding hero-only scope and feedback history; its pending hero acceptance and no-second-section limits are superseded by this latest instruction.
+
+---
+
 # Preview the revised PayGate hero
 
 Owner-authorized scope, 13 September 2026; tracked in [issue #5](https://github.com/wildanniam/paygate-stellar/issues/5) and draft PR #6.

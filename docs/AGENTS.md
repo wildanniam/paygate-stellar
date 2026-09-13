@@ -200,3 +200,7 @@ Use this framing:
 Avoid leading with file names, implementation details, or code references unless Wildan explicitly asks for technical detail. A good short report says:
 
 > PayGate is a functional alpha. Users can open the app, generate Express middleware, copy the code, and open the dashboard. However, it is not yet fully usable for real API monetization because the generated middleware has not been proven in a sample API with a real Stellar testnet MPP payment and dashboard transaction evidence.
+
+## Landing preview scope — 13 September 2026
+
+The owner accepted the violet hero, revised buttons and native transaction journey, then authorized exactly one next section. `/design-preview` now adds API capabilities: example pricing, guarded access and a payment receipt with local 90/10 price interaction. That section awaits visual feedback. Keep the accepted hero and dark/purple palette; do not add further sections or replace `/` without another instruction. Current design authority: `frontend/DESIGN.md`; evidence: `docs/design/api-capabilities.md`. Existing issue #5 / draft PR #6 track the incremental preview.

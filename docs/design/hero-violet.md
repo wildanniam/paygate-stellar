@@ -1,6 +1,6 @@
 # Violet hero preview — 13 September 2026
 
-Implemented for owner feedback at `/design-preview`, on `codex/5-higgsfield-landing-pilot`, issue #5 / draft PR #6. **Owner accepts the violet background/concept for continued iteration; revised buttons and transaction visualization await feedback.** This revision supersedes the rejected metal/monochrome pilot; it does not replace the live homepage.
+Implemented for owner feedback at `/design-preview`, on `codex/5-higgsfield-landing-pilot`, issue #5 / draft PR #6. **Latest owner feedback accepts the revised hero, buttons and transaction visualization. One next capabilities section is now authorized and documented in [API capabilities](api-capabilities.md); it awaits its own feedback.** This revision supersedes the rejected metal/monochrome pilot; it does not replace the live homepage.
 
 ## Transaction and button revision — owner feedback, 13 September
 

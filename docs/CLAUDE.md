@@ -232,3 +232,7 @@ Do not lead with code files, architecture, or implementation details unless Wild
 Preferred short verdict:
 
 > PayGate is a functional alpha. Users can try the generator and dashboard, but it is not yet fully ready for real API monetization until one end-to-end Stellar testnet payment is proven from generated middleware to dashboard evidence.
+
+## Landing preview scope — 13 September 2026
+
+The owner accepted the violet hero, revised buttons and native transaction journey, then authorized exactly one next section. `/design-preview` now adds API capabilities: example pricing, guarded access and a payment receipt with local 90/10 price interaction. That section awaits visual feedback. Keep the accepted hero and dark/purple palette; do not add further sections or replace `/` without another instruction. Current design authority: `frontend/DESIGN.md`; evidence: `docs/design/api-capabilities.md`. Existing issue #5 / draft PR #6 track the incremental preview.
