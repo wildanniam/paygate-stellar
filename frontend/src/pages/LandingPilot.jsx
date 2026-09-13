@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Pause, Play } from 'lucide-react';
+import PilotNav from '../components/landing-pilot/PilotNav.jsx';
 import HeroMedia from '../components/landing-pilot/HeroMedia.jsx';
 import TransactionJourney from '../components/landing-pilot/TransactionJourney.jsx';
 import ApiCapabilities from '../components/landing-pilot/ApiCapabilities.jsx';
@@ -8,7 +9,6 @@ import SetupJourney from '../components/landing-pilot/SetupJourney.jsx';
 import { createLandingPilotSimulation, INITIAL_SAMPLE } from '../lib/landingPilotSimulation.js';
 import '../styles/landing-pilot.css';
 
-const GUIDE = 'https://github.com/wildanniam/paygate-stellar/blob/main/docs/PAYGATE_V1_DEMO_GUIDE.md';
 function useMotion() {
   const [systemReduce, setSystemReduce] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [override, setOverride] = useState(null);
@@ -38,21 +38,17 @@ export default function LandingPilot() {
   }, []);
 
   function explore() {
-    consoleRef.current?.scrollIntoView({ behavior: motion ? 'smooth' : 'instant', block: 'center' });
+    consoleRef.current?.scrollIntoView({ behavior: motion ? 'smooth' : 'instant', block: 'start' });
     consoleRef.current?.focus({ preventScroll: true });
     simulation.current?.request();
   }
 
   return <div className="lp" data-motion={motion ? 'on' : 'off'}>
     <a className="lp-skip" href="#pilot-main">Skip to content</a>
-    <main id="pilot-main">
+    <PilotNav explore={explore} />
+    <main id="pilot-main" tabIndex={-1}>
     <section className="lp-stage" ref={stageRef} aria-labelledby="pilot-title" data-credited={sample.credited}>
       <HeroMedia motion={motion} stageRef={stageRef} />
-      <header className="lp-nav">
-        <Link to="/" className="lp-brand" aria-label="PayGate home"><img src="/brand/paygate-mark.svg" alt="" width="35" height="35" /><span>PayGate</span></Link>
-        <nav aria-label="Main navigation"><button type="button" onClick={explore}>How it works</button><a href={GUIDE} target="_blank" rel="noreferrer">Docs <ArrowUpRight size={13} /></a></nav>
-        <Link to="/dashboard" className="lp-dashboard">Dashboard <ArrowUpRight size={15} /></Link>
-      </header>
       <div className="lp-main">
         <div className="lp-hero-copy">
           <p className="lp-category"><span className="lp-category-symbol" aria-hidden="true"><i /><i /><i /></span>Payments for API builders</p>

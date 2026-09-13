@@ -43,7 +43,6 @@ export default function HeroMedia({ motion, stageRef }) {
       frame = null;
       field.style.setProperty('--field-x', '0px');
       field.style.setProperty('--field-y', '0px');
-      field.style.setProperty('--light-opacity', '0');
     }
     function move(event) {
       if (event.pointerType === 'touch' || !pointer.matches) return;
@@ -55,11 +54,8 @@ export default function HeroMedia({ motion, stageRef }) {
         if (!point) return;
         const x = Math.max(0, Math.min(1, (point.x - rect.left) / rect.width));
         const y = Math.max(0, Math.min(1, (point.y - rect.top) / rect.height));
-        field.style.setProperty('--field-x', `${(x - .5) * -54}px`);
-        field.style.setProperty('--field-y', `${(y - .5) * -28}px`);
-        field.style.setProperty('--light-x', `${x * 100}%`);
-        field.style.setProperty('--light-y', `${y * 100}%`);
-        field.style.setProperty('--light-opacity', '.55');
+        field.style.setProperty('--field-x', `${(x - .5) * -16}px`);
+        field.style.setProperty('--field-y', `${(y - .5) * -8}px`);
       });
     }
     if (motion && visible) {
@@ -75,6 +71,5 @@ export default function HeroMedia({ motion, stageRef }) {
       {source && <video ref={videoRef} src={`${BASE}field.mp4`} muted playsInline loop preload="auto" tabIndex={-1} className={playing && !failed ? 'is-playing' : ''} onPlaying={() => setPlaying(true)} onError={() => { setFailed(true); setPlaying(false); }} />}
     </div>
     <div className="lp-art-shade" />
-    <div className="lp-art-light" />
   </div>;
 }

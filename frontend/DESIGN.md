@@ -1,8 +1,16 @@
-# PayGate landing preview — visual revision, 13 September 2026
+# PayGate landing preview — hero integration, 13 September 2026
 
 ## Authority
 
-The owner now explicitly rejects sections 2 and 3: too plain, too much reading, insufficient visual explanation. This supersedes earlier acceptance of capabilities. The violet hero, buttons and transaction journey stay accepted. Revise capabilities and setup only on `/design-preview`, issue #5 / draft PR #6. No production replacement, backend change, fourth section or merge. This revision awaits owner feedback.
+The owner accepts the replacement artwork-led sections 2 and 3 in commit 8119964. Preserve them. The boxed transaction walkthrough is now rejected as visually out of place; hero effects need better integration and navigation must remain available while scrolling. This supersedes earlier acceptance of the transaction component. Revise the hero presentation and navigation only on `/design-preview`, issue #5 / draft PR #6. No production replacement, backend change, fourth section or merge. This hero revision awaits owner feedback.
+
+## Current hero revision
+
+Replace the large opaque walkthrough with an open client → PayGate → weather-data composition inside the hero environment. Small glass endpoint surfaces and a luminous brand core sit on the same field. Remove window chrome, repeated narrative paragraphs and the full-width settlement bar. One concise state caption, one primary simulation action and a compact persistent split explain the process. Raw payload remains optional. The 402 pause explicitly requires simulated payment; credited revenue remains visible before the API response arrives.
+
+Reuse the approved violet filament film and a small existing weather poster. Do not generate unrelated art. Reduce whole-field pointer displacement and remove the unrelated cursor spotlight; directional connector light and a local gateway halo respond to transaction state. A single graded atmosphere protects text and fades the hero into the page. Motion-off, reduced motion and poster fallback preserve the explanation.
+
+Navigation is fixed at page level, outside the clipped hero, with a translucent initial surface and a denser scrolled surface. Reserve its space in the hero. On phone, a labelled disclosure opens the same links, closes on selection/Escape/outside click, and restores keyboard focus on Escape. Anchor/focus destinations clear the persistent header. Avoid scroll hijacking or navigation that disappears on downward scroll.
 
 ## Visual target and story
 
@@ -14,7 +22,7 @@ Setup: a panoramic violet filament environment with three spatial anchors. Nativ
 
 ## Assets and motion
 
-Generate three original Higgsfield masters using the approved violet hero as a style reference: recognizable weather data/cloud, optical access shield, and panoramic connecting light field. Inspect before using, animate selected art only if motion retains clarity. Keep all exact text, values and controls native. No metal sculpture, literal doors, coins, fabricated UI or unrelated stock art.
+The accepted sections use three original Higgsfield masters with the violet hero as a style reference: recognizable weather data/cloud, optical access shield, and panoramic connecting light field. These assets are already produced; reuse them for this hero revision. Keep all exact text, values and controls native. No metal sculpture, literal doors, coins, fabricated UI or unrelated stock art.
 
 Media gets a poster fallback, lazy source attachment, offscreen/document-hidden pause, global motion-off and OS reduced-motion support. Native scene transitions use transform/opacity; never move surrounding layout. No scroll hijack, autoplay steps, fake live activity or shader dependency. Motion supports the diagram; it does not determine financial state.
 
@@ -30,4 +38,4 @@ Public Stellar Testnet beta; GET/JSON examples. Gross 0.010 / 0.050 / 0.100 test
 
 ## Verification
 
-Inspect actual generated art and assembled desktop/mobile views; test price changes, every setup stage, keyboard, reduced/pause behavior, fallback, errors and overflow. Run the frontend build and existing simulation tests. Record assets, exact prompts, jobs and measured cost; capture the owner's feedback separately from engineering checks. Prior implementations are historical in the linked design notes.
+Inspect the assembled hero on desktop, tablet and small phones. Check explicit 402/payment/delivery, cancellation on reset, payload visibility, motion-off and media playback. Verify fixed navigation beyond the hero, desktop/mobile anchor offsets, disclosure Escape/outside-click/selection and touch targets. Keep the accepted sections unchanged; check them as navigation destinations. Source-review fallback and reduced-motion behavior. Run the frontend build and existing simulation tests. Record assets, exact prompts, jobs and measured cost; capture the owner's feedback separately from engineering checks. Prior implementations are historical in the linked design notes.

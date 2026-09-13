@@ -1,3 +1,11 @@
+# PayGate preview: integrate hero journey and persistent navigation
+
+Latest owner feedback, 13 September 2026: the artwork-led sections 2–3 in 8119964 are accepted. The owner asks for a better concept for the boxed hero transaction walkthrough, more coherent background effects, and navigation available while scrolling. Replace the opaque walkthrough with an open scene, reuse approved violet/weather media, simplify visible copy, localize state lighting, reduce field parallax, and add a page-level fixed nav with a mobile disclosure. Preserve explicit sample payment, credit-before-delivery, cancellation, motion-off and truthful testnet labels. See `frontend/DESIGN.md` and `docs/design/hero-integration.md`.
+
+This hero revision awaits visual feedback. No new section, homepage replacement, backend/wallet/contract change, dependency or merge. The preceding scope records are chronological history, superseded where they conflict with this feedback.
+
+---
+
 # PayGate preview: visual revision of capabilities and setup
 
 Latest owner feedback, later on 13 September 2026: sections 2 and 3 are too plain and text-heavy. Replace their configuration/receipt/code/checklist presentation with original Higgsfield artwork, two ambient loops, concise interactive price/split visuals and a connected setup scene. Keep the accepted hero and original dark/purple palette. Native controls retain keyboard/touch support; media is decorative, lazy and pausable. Actual API/secret/verification requirements stay truthful. See `frontend/DESIGN.md`, `docs/design/visual-story-revision.md` and `docs/design/visual-story-assets.json`.
