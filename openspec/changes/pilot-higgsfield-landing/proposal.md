@@ -1,3 +1,11 @@
+# PayGate preview: accepted hero/capabilities and one setup section
+
+Latest scope, 13 September 2026: owner accepts the capabilities section and requests exactly one next section. Add a three-step setup journey: register → guard → verify/share. Native selectable steps control one workspace preview; local example checks have cancellable timers, keyboard access, replay, motion-off and mobile layouts. No live API/wallet operation, dependency or new media generation. See `frontend/DESIGN.md` and `docs/design/setup-journey.md`. New setup section awaits feedback; further sections and release remain outside scope.
+
+The previous scope records below are historical; capabilities acceptance and this one-section extension supersede their pending capabilities feedback and two-section boundary.
+
+---
+
 # PayGate preview: accepted hero and one capabilities section
 
 Latest scope, 13 September 2026: owner accepts the revised hero/buttons/transaction journey and asks to develop exactly one next section. The new asymmetric capabilities section covers example pricing, upstream access and payment records. Local price selection updates an illustrative 90/10 split. It reuses the accepted Higgsfield poster, with native product UI and no new dependency or generation. See `frontend/DESIGN.md` and `docs/design/api-capabilities.md`. This new section awaits owner feedback; further sections and release remain outside scope.

@@ -4,6 +4,7 @@ import { ArrowRight, ArrowUpRight, Pause, Play } from 'lucide-react';
 import HeroMedia from '../components/landing-pilot/HeroMedia.jsx';
 import TransactionJourney from '../components/landing-pilot/TransactionJourney.jsx';
 import ApiCapabilities from '../components/landing-pilot/ApiCapabilities.jsx';
+import SetupJourney from '../components/landing-pilot/SetupJourney.jsx';
 import { createLandingPilotSimulation, INITIAL_SAMPLE } from '../lib/landingPilotSimulation.js';
 import '../styles/landing-pilot.css';
 
@@ -70,6 +71,7 @@ export default function LandingPilot() {
       <div className="lp-stage-footer"><span>Built on Stellar MPP</span><button type="button" onClick={toggleMotion} aria-pressed={motion} aria-label={motion ? 'Pause background motion' : 'Resume background motion'}>{motion ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}<span>Motion {motion ? 'on' : 'off'}</span></button></div>
     </section>
     <ApiCapabilities />
+    <SetupJourney />
     </main>
     <footer className="lp-preview-footer"><span>Landing design preview</span><Link to="/">View current site <ArrowUpRight size={13} /></Link></footer>
   </div>;

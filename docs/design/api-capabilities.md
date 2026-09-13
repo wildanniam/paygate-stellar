@@ -1,6 +1,6 @@
 # API capabilities section — 13 September 2026
 
-Owner accepts the revised violet hero/buttons/transaction journey and authorizes **one next section**. Implemented on `/design-preview`, issue #5 / draft PR #6. New section awaits visual feedback; no homepage replacement or release.
+Owner accepts the revised violet hero/buttons/transaction journey and authorizes **one next section**. Implemented on `/design-preview`, issue #5 / draft PR #6. Latest owner feedback accepts this capabilities section and authorizes one next [setup section](setup-journey.md). No homepage replacement or release.
 
 ## Reference synthesis
 
@@ -32,4 +32,4 @@ Reuse `/brand/hero-violet/field.webp` (131,670 bytes, 1920×1072) as a lazy-load
 - One main landmark contains both sections. Final observed browser warnings are the two pre-existing React Router future notices; no runtime error was observed.
 - `git diff --check` passes; temporary viewport override reset. No physical-device performance benchmark claimed.
 
-New visual acceptance remains pending owner feedback. Build/interaction success does not imply approval of the new design.
+Capabilities visual acceptance was subsequently provided by the owner. The new setup section has its own pending feedback; acceptance does not extend to release.
