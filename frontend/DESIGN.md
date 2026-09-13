@@ -1,32 +1,41 @@
-# PayGate landing pilot
+# PayGate hero preview — reference reset, 13 September 2026
 
-Owner-approved scope, 13 September 2026: lock the dark, Higgsfield-led two-panel direction and implement only the hero and API example section for feedback. The earlier landing brief is historical for this route. The alternate hero and remaining asset family are deferred.
+## Current authority and scope
 
-## Register and intent
+Wildan rejected the metal/monochrome two-section pilot and approved building **the hero only** for another visual feedback round. The existing PayGate dark/purple color system must stay. He explicitly allows Higgsfield credits to be used for quality; the earlier 16.5-credit target and generation stop no longer apply to this revision. Later sections and production release remain outside scope. Issue #5 / draft PR #6 track this work.
 
-Brand UI with an interactive product explanation. An API builder should understand that they set a per-request price, that machine clients pay before access, and where to register. Public Stellar Testnet beta remains visible. The example never sends a payment or contacts an API.
+The old two-panel direction is superseded. Its implementation and asset ledger remain in Git history and `docs/design/landing-pilot-assets.json`, not as guidance for new imagery.
 
-## Visual direction
+## Register, audience, path
 
-- A continuous dark studio, tactile metal and one shallow offset seam. The Higgsfield artwork/video is the hero itself.
-- Native off-white typography; violet limited to the seam, selected controls and focus. Green/amber always paired with text.
-- Existing DM Sans and JetBrains Mono; regular/medium headings, mono only for code and data.
-- Desktop: copy on the left, panel silhouette on the right. Mobile: copy followed by a deliberately cropped media window, with controls below it.
-- Second section: one weather API example and its generated contour specimen. One useful JSON response; additional specimens deferred.
-- Controls use six-pixel radii, clear focus, at least 44-pixel targets. Avoid nested feature cards, glossy pill buttons, glows and invented business metrics.
+Brand UI with a small native product demonstration. API owners should understand paid machine access, then register an API. The main CTA goes to `/apis/new`; an optional sample shows the request/payment/response path without a wallet or network transaction. Public Stellar Testnet beta stays visible.
 
-## Interaction and states
+## Visual target
 
-Native sample request: idle → requesting → 402 → user-triggered simulated payment → verification → escrow credited → forwarding → 200 response. Example gross 0.010, provider 0.009, fee 0.001 testnet USDC. Video starts only after credit; response never depends on playback completion. Reset cancels old callbacks and does not create another credit.
+- Primary: https://rbp-saas-template.vercel.app/ — integrated frame/navigation, centered bold headline, rich full-field artwork, product preview emerging below.
+- https://www.koderea.id/ — simple reading order with ambient motion from entry.
+- https://rbp-cloudlight-template.vercel.app/ — dark product preview anchored in the hero environment.
+- https://rbp-agentframe-template.vercel.app/ — deliberate texture and clear identity.
+- Reference principles only; no purchased template source, copied imagery or borrowed customer claims.
 
-One silent opening film. No scroll scrubbing, reverse playback, orbit, physics or WebGL. Poster appears first. Video loads when the user starts the sample. Motion preference follows the OS unless the user overrides it. Reduced motion and rejected/error/stalled playback use stills and working native controls. Leaving the viewport finishes media through its still fallback. The sample remains readable.
+## Visual system
 
-Hover/focus, busy/disabled, error/fallback and completed states must be explicit. Buttons remain usable without imagery. Request/response tabs have keyboard navigation; reset returns the demonstration to its starting state. Example data is clearly labelled.
+Preserve `src/styles/tokens.css`: ink #050609, purple #735CFA, lavender #9A90FF, existing blue/green/amber semantic colors. DM Sans for expressive, bold centered typography; JetBrains Mono for code and data. The existing colored PayGate mark stays.
 
-## Scope and verification
+Artwork is an immersive violet optical current: thousands of fine light filaments flowing into a broad concave horizon, with dark upper-middle atmosphere, luminous peripheral ridges and fine photographic texture. No doors, metal, hardware, studio floor or unrelated sculpture. Artwork supplies atmosphere; readable native HTML supplies product meaning.
 
-Preview route: `/design-preview`, lazily loaded in the existing React app. No production route replacement, backend, wallet, contract or dependency changes. This is a two-section acceptance pilot.
+One rounded full-width stage, compact floating navigation, centered two-line headline, concise supporting copy, purple primary CTA and a quieter sample CTA. A single wide native sample console emerges from the lower light field, within the hero. No second section or repeated card grid.
 
-Initial asset budget: three stills and one six-second film, estimated 16.5 credits. Actual pilot usage: 18.5 credits (four still submissions, including two rejected end-frame attempts, and one film). Stop further generation: first/last posters were extracted from the edited film to preserve framing. The alternate hero and other specimens remain deferred. Master reused as start; mobile crop tested before any extra generation. No automatic broad batch or subjective regeneration. Record requested and reported model, actual cost and provenance in the asset ledger.
+Desktop: typography and actions centered with generous horizontal space; sample console has request and response columns. Mobile: narrower headline, compact navigation, vertically stacked console, retained artwork crop and touch-friendly targets. No fixed-height text crop.
 
-Check the actual assets in desktop and 390-pixel layouts, pointer/keyboard/touch paths, reduced motion, media failures, reset races, first/last-frame transitions, file sizes, build and simulation tests. Quality remains subject to owner feedback; a passed build is not creative approval.
+## Motion and state contract
+
+Silent ambient film starts automatically with motion enabled, independently of the sample. A poster shows immediately. Pointer movement adds a bounded depth shift and local light response; no custom cursor or scroll hijack. Subtle flowing SVG traces reinforce the product path. Motion pauses offscreen/hidden and via a visible control. OS reduced motion defaults to still artwork and no pointer/entrance movement. Failed autoplay/media retain the poster and working UI.
+
+Sample: idle → requesting → 402 → explicitly simulate payment → verifying → escrow credited → forwarding → response. Gross 0.010, provider 0.009 and fee 0.001 testnet USDC. Credit precedes delivery; decorative media never determines financial state. Reset cancels stale callbacks. The sample is visibly labelled and sends no payment or API request.
+
+Controls: distinct hover/focus/active/disabled states, keyboard access, 44px minimum targets. State updates use a concise live region; avoid announcing ambient animation. Native code stays crisp and selectable.
+
+## Verification and creative gate
+
+Inspect actual artwork and film, then the assembled desktop and 390px hero. Verify motion from entry, pointer response, sample flow, reset, reduced-motion preference, playback fallback, no horizontal overflow, no broken media, build and meaningful simulation tests. Record prompts, selected/rejected generations, actual balance delta, media sizes and limitations. A build passing is not owner creative approval.

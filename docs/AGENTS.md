@@ -18,9 +18,9 @@ Before editing code, read:
 
 `README.md` may be stale. For V0/SOW generator work, `TECHNICAL_SPEC.md` wins. For the V1 branch, `PAYGATE_V1_PRODUCT_SPEC.md` wins where it intentionally conflicts with V0 constraints.
 
-## Two-Section Design Pilot — 2026-09-13
+## Hero Design Preview — 2026-09-13 revision
 
-Issue #5 adds a separate, lazy `/design-preview` route for owner feedback. Its accepted scope is a dark Higgsfield-led hero plus one weather API example. Read `../frontend/DESIGN.md` and `design/landing-pilot.md` for this route; the old landing visual brief is historical for the pilot. The current `/` route and all payment, wallet and dashboard behavior remain intact. The sample is a browser-only simulation: payment verification and escrow credit precede forwarding. Media must never determine financial state. Do not generate the remaining asset family or replace the live landing until Wildan gives feedback and authorizes continuation.
+Issue #5 / draft PR #6 provide the lazy `/design-preview` route for owner feedback. Wildan rejected the earlier metal/monochrome pilot and now authorizes **hero only**, retaining PayGate's dark/purple tokens, with Higgsfield artwork and ambient motion from entry. The old generation cap is superseded by explicit quality-led credit authorization. Read `../frontend/DESIGN.md` and `design/hero-violet.md`; `design/landing-pilot.md` and its asset ledger are historical. A native request console is integrated into the hero. The sample is browser-only: explicit simulated payment, then escrow credit before forwarding; media never determines payment state. `/`, backend, wallet and dashboard behavior remain unchanged. Later sections, production replacement and merging still require owner direction.
 
 ## V1 Branch Direction
 

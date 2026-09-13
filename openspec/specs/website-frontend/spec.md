@@ -156,7 +156,7 @@ Long URLs, secrets, request ids, payment ids, and tx hashes SHALL be copyable an
 
 ### Requirement: Isolated landing design preview
 
-The `/design-preview` route SHALL provide a two-section design pilot without replacing `/`. Its asset and interaction scope is recorded in `../../changes/pilot-higgsfield-landing/proposal.md`.
+The `/design-preview` route SHALL provide a hero-only design preview without replacing `/`. It SHALL preserve the existing dark/purple color tokens. Its asset and interaction scope is recorded in `../../changes/pilot-higgsfield-landing/proposal.md`.
 
 #### Scenario: Visitor tries the sample
 
@@ -170,6 +170,16 @@ The `/design-preview` route SHALL provide a two-section design pilot without rep
 - AND media failure or disabled motion does not prevent the example from completing
 - WHEN they reset
 - THEN old callbacks cannot change the new example state
+
+#### Scenario: Ambient hero motion
+
+- GIVEN motion is enabled and the hero is visible
+- THEN its silent artwork film plays independently of sample actions
+- AND pointer movement adds a bounded visual response without moving readable copy
+- WHEN motion is disabled or the document is hidden
+- THEN the film pauses
+- AND a reduced-motion preference starts with still artwork
+- AND media failure retains the poster and working controls
 
 ## Known Limitations
 

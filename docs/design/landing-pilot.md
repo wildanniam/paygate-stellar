@@ -1,5 +1,7 @@
 # Two-section landing pilot
 
+> Historical experiment, rejected by Wildan for its metal/monochrome treatment and motion. The current owner-authorized hero revision is documented in [Violet hero preview](hero-violet.md). The figures and evidence below describe the earlier version only.
+
 Status: implemented for owner review, 13 September 2026. [Issue #5](https://github.com/wildanniam/paygate-stellar/issues/5). This is a standard frontend change; no payment implementation changes.
 
 ## Accepted scope

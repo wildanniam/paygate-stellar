@@ -1,9 +1,11 @@
-# Pilot the Higgsfield landing direction
+# Preview the revised PayGate hero
 
-Owner-approved scope, 13 September 2026; tracked in [issue #5](https://github.com/wildanniam/paygate-stellar/issues/5). The earlier eight-section concept requires a small acceptance pilot before further asset spend.
+Owner-authorized scope, 13 September 2026; tracked in [issue #5](https://github.com/wildanniam/paygate-stellar/issues/5) and draft PR #6.
 
-Add `/design-preview` with two sections: a dark two-panel hero and one weather API example. Preserve `/` and the existing application. Design, media limits and simulation behavior are recorded in `frontend/DESIGN.md`; implementation evidence and remaining review items are in `docs/design/landing-pilot.md`.
+The earlier two-section metal pilot was rejected. Wildan supplied Circular, Koderea, Cloudlight and Agentframe references, required the existing dark/purple identity, and approved implementing the hero first for feedback. He explicitly permits Higgsfield credit use for quality. Prior metal direction and budget limits are superseded.
 
-Spec delta: the preview SHALL be a separate lazy route. It SHALL show Public Stellar Testnet beta and label the sample as a simulation. The sample SHALL require an explicit second click to simulate payment, and credit SHALL precede forwarding. The sample SHALL NOT contact payment/API services. Reset SHALL invalidate prior callbacks. Playback SHALL NOT determine sample completion; reduced motion and media failure SHALL retain working controls and a still visual. Request/response tabs SHALL support keyboard input. The pilot SHALL NOT replace the current homepage or authorize further generation.
+`/design-preview` is a separate lazy route with one hero: original violet filament artwork, silent ambient film, centered typography, native navigation/CTAs, pointer depth/light response, and an integrated sample console. No new second section. `/` and existing application flows are unchanged.
 
-Implementation tasks: separate route, two-section UI, four shipped media files, cancellable simulation, media fallbacks, keyboard/copy states, responsive checks, build and state tests are complete. Owner creative review, remaining sections and live release are pending and outside this implementation.
+Spec delta: Public Stellar Testnet beta and a visible simulation label; explicit sample-payment action; credit before forwarding; no payment/API network calls; cancellable reset; media-independent sample state; pause, OS reduced-motion default and poster fallback. No backend/contract/wallet or dependency changes.
+
+The current design contract is `frontend/DESIGN.md`. Implementation evidence is `docs/design/hero-violet.md`, and new generation provenance is `docs/design/hero-violet-assets.json`. Previous pilot evidence remains historical. Owner visual acceptance, later sections and release are pending.
