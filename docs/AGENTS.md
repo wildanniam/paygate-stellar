@@ -22,6 +22,8 @@ Before editing code, read:
 
 Issue #5 / draft PR #6 provide the lazy `/design-preview` route for owner feedback. Wildan rejected the earlier metal/monochrome pilot and now authorizes **hero only**, retaining PayGate's dark/purple tokens, with Higgsfield artwork and ambient motion from entry. The old generation cap is superseded by explicit quality-led credit authorization. Read `../frontend/DESIGN.md` and `design/hero-violet.md`; `design/landing-pilot.md` and its asset ledger are historical. A native request console is integrated into the hero. The sample is browser-only: explicit simulated payment, then escrow credit before forwarding; media never determines payment state. `/`, backend, wallet and dashboard behavior remain unchanged. Later sections, production replacement and merging still require owner direction.
 
+Owner feedback, later on 13 September: the violet background/concept is accepted for continued iteration. Buttons and the debug-style console were rejected. The revised `TransactionJourney` uses native client/gateway/API nodes, state-driven packets, persistent settlement, a returning-response state, and optional JSON. Mobile is vertical. Existing Higgsfield media is reused; component acceptance remains pending. See the current revision at the top of `design/hero-violet.md`.
+
 ## V1 Branch Direction
 
 Wildan has approved a V1 pivot on the `codex/paygate-v1` branch.

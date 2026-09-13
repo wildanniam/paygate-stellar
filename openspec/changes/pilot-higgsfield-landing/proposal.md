@@ -9,3 +9,5 @@ The earlier two-section metal pilot was rejected. Wildan supplied Circular, Kode
 Spec delta: Public Stellar Testnet beta and a visible simulation label; explicit sample-payment action; credit before forwarding; no payment/API network calls; cancellable reset; media-independent sample state; pause, OS reduced-motion default and poster fallback. No backend/contract/wallet or dependency changes.
 
 The current design contract is `frontend/DESIGN.md`. Implementation evidence is `docs/design/hero-violet.md`, and new generation provenance is `docs/design/hero-violet-assets.json`. Previous pilot evidence remains historical. Owner visual acceptance, later sections and release are pending.
+
+Owner feedback revision: retain the accepted violet background/concept; replace the buttons and rejected debug-style console. The new native transaction journey displays client → gateway → API with state-driven packets, an explicit 402 pause, persistent settlement amounts, a returning-response state, and optional raw payload. Mobile uses a vertical path. Reuse existing Higgsfield media. Revised component acceptance is pending; scope remains hero only.

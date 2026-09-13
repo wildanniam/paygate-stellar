@@ -166,10 +166,20 @@ The `/design-preview` route SHALL provide a hero-only design preview without rep
 - AND labels the example as a simulation with no payment sent
 - WHEN they simulate payment and retry
 - THEN verification and escrow credit precede forwarding and the example JSON response
+- AND the native diagram distinguishes the API producing a response from the client receiving it
+- AND credited amounts remain visible after delivery; raw payload is available in an optional disclosure
 - AND no real payment, wallet or upstream API call is made
 - AND media failure or disabled motion does not prevent the example from completing
 - WHEN they reset
 - THEN old callbacks cannot change the new example state
+- AND the same applies when reset occurs while a response is returning
+
+#### Scenario: Responsive sample diagram
+
+- GIVEN the hero sample is visible
+- THEN desktop presents client, PayGate and API along a horizontal path
+- AND phone layouts present the same participants along a vertical path
+- AND turning motion off preserves readable states and a static active-path indicator
 
 #### Scenario: Ambient hero motion
 

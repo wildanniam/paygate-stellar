@@ -2,6 +2,10 @@
 
 ## Current authority and scope
 
+Owner feedback, 13 September: the violet background/concept is accepted for continued iteration. Buttons and the transaction console are rejected. Replace the debug-panel presentation with a visual client → PayGate → API journey; retain hero-only scope and the existing artwork.
+
+Transaction revision: one diagram stage with a compact client request, a prominent branded gateway, and a weather response that opens after delivery. Directed request/payment/response packets follow state transitions; show the 402 pause and explicit simulated payment. A persistent settlement strip distinguishes credited funds from the returned response. Raw JSON is an optional disclosure. Desktop uses a horizontal path; mobile uses a compact vertical path. Keep reset available during processing, stable action focus, a concise live status, and a static equivalent when motion is off. Use native DOM/CSS for this semantic interaction, reusing the Higgsfield environment. Buttons use a continuous violet surface and a quieter play action, with coherent focus/press/disabled treatments. No new media or dependency is needed for this revision.
+
 Wildan rejected the metal/monochrome two-section pilot and approved building **the hero only** for another visual feedback round. The existing PayGate dark/purple color system must stay. He explicitly allows Higgsfield credits to be used for quality; the earlier 16.5-credit target and generation stop no longer apply to this revision. Later sections and production release remain outside scope. Issue #5 / draft PR #6 track this work.
 
 The old two-panel direction is superseded. Its implementation and asset ledger remain in Git history and `docs/design/landing-pilot-assets.json`, not as guidance for new imagery.

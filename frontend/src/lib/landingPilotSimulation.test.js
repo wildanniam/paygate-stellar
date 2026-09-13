@@ -29,31 +29,33 @@ test('request waits at 402; duplicate input cannot credit twice; credit precedes
   s.pay(); assert.equal(s.state.step, 'idle');
   s.request(); s.request(); advance(10000);
   assert.equal(s.state.step, 'required'); assert.equal(s.state.credited, false);
-  s.pay(); s.pay(); advance(600);
+  s.pay(); s.pay(); advance(1200);
   assert.equal(s.state.step, 'credited'); assert.equal(s.state.credited, true);
-  advance(300); assert.equal(s.state.step, 'forwarding');
-  advance(2200); assert.equal(s.state.step, 'complete');
-  assert.deepEqual(states.map((x) => x.step), ['requesting', 'required', 'verifying', 'credited', 'forwarding', 'complete']);
+  advance(900); assert.equal(s.state.step, 'forwarding');
+  advance(1200); assert.equal(s.state.step, 'returning');
+  assert.equal(s.state.credited, true);
+  advance(1300); assert.equal(s.state.step, 'complete');
+  assert.deepEqual(states.map((x) => x.step), ['requesting', 'required', 'verifying', 'credited', 'forwarding', 'returning', 'complete']);
   s.pay(); s.request(); advance(20000);
-  assert.equal(states.length, 6);
+  assert.equal(states.length, 7);
 });
 
 test('reset during verification invalidates even an already queued callback', () => {
   const h = harness(); const s = h.simulation;
-  s.request(); h.advance(300); s.pay();
+  s.request(); h.advance(900); s.pay();
   const lateVerification = [...h.queue.values()][0].fn;
   s.reset(); lateVerification(); h.advance(10000);
   assert.deepEqual(s.state, { run: 1, step: 'idle', credited: false });
-  s.request(); h.advance(300); s.pay(); h.advance(3100);
+  s.request(); h.advance(900); s.pay(); h.advance(4600);
   assert.equal(s.state.step, 'complete');
   assert.equal(h.states.filter((state) => state.step === 'credited').length, 1);
 });
 
 test('reset after credit does not permit old forwarding or response to reach a new sample', () => {
   const h = harness(); const s = h.simulation;
-  s.request(); h.advance(300); s.pay(); h.advance(600);
+  s.request(); h.advance(900); s.pay(); h.advance(1200);
   const lateCallbacks = [...h.queue.values()].map((item) => item.fn);
-  s.reset(); s.request(); lateCallbacks.forEach((fn) => fn()); h.advance(300);
+  s.reset(); s.request(); lateCallbacks.forEach((fn) => fn()); h.advance(900);
   assert.deepEqual(s.state, { run: 1, step: 'required', credited: false });
 });
 
@@ -63,4 +65,16 @@ test('dispose cancels callbacks and ignores later input', () => {
   late(); s.pay(); s.reset(); h.advance(20000);
   assert.deepEqual(h.states.map((state) => state.step), ['requesting']);
   assert.equal(h.queue.size, 0);
+});
+
+test('reset while a response is returning prevents stale delivery in a new request', () => {
+  const h = harness(); const s = h.simulation;
+  s.request(); h.advance(900); s.pay(); h.advance(3300);
+  assert.equal(s.state.step, 'returning');
+  assert.equal(s.state.credited, true);
+  const oldDelivery = [...h.queue.values()][0].fn;
+  s.reset(); s.request(); oldDelivery(); h.advance(10000);
+  assert.equal(s.state.step, 'required');
+  assert.equal(s.state.credited, false);
+  assert.equal(h.states.some((state) => state.step === 'complete'), false);
 });

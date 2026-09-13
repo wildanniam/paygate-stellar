@@ -1,6 +1,26 @@
 # Violet hero preview — 13 September 2026
 
-Implemented for owner feedback at `/design-preview`, on `codex/5-higgsfield-landing-pilot`, issue #5 / draft PR #6. **Creative acceptance is pending.** This revision supersedes the rejected metal/monochrome pilot; it does not replace the live homepage.
+Implemented for owner feedback at `/design-preview`, on `codex/5-higgsfield-landing-pilot`, issue #5 / draft PR #6. **Owner accepts the violet background/concept for continued iteration; revised buttons and transaction visualization await feedback.** This revision supersedes the rejected metal/monochrome pilot; it does not replace the live homepage.
+
+## Transaction and button revision — owner feedback, 13 September
+
+The earlier console was text-heavy and visually inert: two panes of debug information did not show the journey of a paid request. The new `TransactionJourney` uses three recognizable participants: a client request window, the colored PayGate gateway, and a weather API response. Directed GET/payment/402/200 packets follow the simulation states. The API reveals weather data when it produces a response; the client confirms receipt only after the return journey. The settlement strip persists independently so credited revenue is not confused with successful delivery. Raw JSON is available through a native disclosure.
+
+Primary CTA: continuous violet pill with a subtle lit edge and an inline arrow. Secondary CTA: a quiet play control. The walkthrough action stays focusable during processing with `aria-disabled`; guarded handlers prevent duplicate actions. Reset is available during each in-flight state, and Try again starts a fresh request immediately.
+
+Desktop uses a horizontal diagram; screens at 700px and below use a vertical path. The phone artwork height is independent of the taller diagram, maintaining the accepted hero composition. Existing Higgsfield assets are reused: **zero additional generations or credits in this revision**. No new dependency.
+
+The browser-only illustration uses 900ms to request, 1200ms to verify, 900ms to hold credit, 1200ms for upstream work, then 1300ms for the returning response. These are storytelling durations, not claimed network performance. The 402 step always waits for explicit simulated payment. Animation is local CSS transform/opacity motion; static active-path labels remain when motion is disabled.
+
+Verified for this revision:
+
+- Production build and five simulation tests pass, including a new stale-response reset test.
+- Browser visual checks at 1440×900, 835×765, 710×900, 390×844 and 320×740. No horizontal overflow; the credited narrative fits the smallest viewport.
+- Explicit 402 gating, credit before API output, return/delivery, replay, keyboard focus retention, reset during verification, payload disclosure, and manual motion-off with a paused film and static path indicator were exercised.
+- Temporary viewport override was reset. Existing React Router future-flag notices remain. A React 18 image-attribute warning found during QA was corrected.
+- OS reduced-motion initialization is unchanged and remains code-reviewed rather than preference-emulated; no physical-device performance benchmark is claimed.
+
+The history below describes the initial violet hero implementation. Its console treatment is superseded by this revision; the artwork and its provenance remain current.
 
 ## What changed and why
 

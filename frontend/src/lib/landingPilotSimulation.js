@@ -30,16 +30,17 @@ export function createLandingPilotSimulation(onChange, clock = globalThis) {
     request() {
       if (disposed || state.step !== 'idle') return;
       emit('requesting');
-      later(() => emit('required'), 300);
+      later(() => emit('required'), 900);
     },
     pay() {
       if (disposed || state.step !== 'required') return;
       emit('verifying');
       later(() => {
         emit('credited', true);
-        later(() => emit('forwarding'), 300);
-        later(() => emit('complete'), 2500);
-      }, 600);
+        later(() => emit('forwarding'), 900);
+        later(() => emit('returning'), 2100);
+        later(() => emit('complete'), 3400);
+      }, 1200);
     },
     reset() {
       if (disposed) return;

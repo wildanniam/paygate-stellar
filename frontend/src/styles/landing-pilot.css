@@ -258,69 +258,41 @@
 
 .lp-primary {
   display: inline-flex;
+  justify-content: center;
   align-items: center;
-  min-height: 54px;
-  border-radius: 11px;
-  padding: 5px;
-  padding-left: 21px;
-  background: var(--pg-brand-purple);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 7px 30px rgba(115,92,250,.25);
+  gap: 18px;
+  min-height: 52px;
+  border-radius: 100px;
+  padding: 0 23px;
+  background: linear-gradient(180deg, #927fff -35%, var(--pg-brand-purple) 57%, #624cdb);
+  box-shadow: inset 0 1px 1px #d4caff88, inset 0 -2px 3px #42249c88, 0 0 0 4px #9a90ff0b, 0 7px 22px #39258266;
   font-size: 14px;
   font-weight: 600;
   color: white;
-  border: 1px solid rgba(154,144,255,.45);
-  transition: transform 180ms, background 180ms, box-shadow 180ms;
+  border: 1px solid #b5a2ff70;
+  transition: transform 180ms, box-shadow 180ms, filter 180ms;
 }
-
-.lp-primary-arrow {
-  display: grid;
-  place-items: center;
-  align-self: stretch;
-  width: 43px;
-  margin-left: 19px;
-  border-left: 1px solid rgba(255,255,255,.15);
-}
-
-.lp-primary svg {
-  transition: transform 200ms;
-}
-
-.lp-primary:hover {
-  background: var(--pg-brand-purple-hover);
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 38px rgba(115,92,250,.45);
-}
-
-.lp-primary:hover svg {
-  transform: translate(2px,-2px);
-}
-
-.lp-primary:active {
-  transform: translateY(0);
-}
-
+.lp-primary svg { transition: transform 200ms; }
+.lp-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: inset 0 1px 1px #d4caffaa, inset 0 -2px 3px #42249c88, 0 0 0 5px #9a90ff14, 0 9px 30px #6240bb66; }
+.lp-primary:hover svg { transform: translateX(3px); }
+.lp-primary:active { transform: translateY(1px); }
 .lp-secondary {
-  min-height: 54px;
-  display: flex;
+  min-height: 52px;
+  display: inline-flex;
   align-items: center;
-  gap: 11px;
-  padding: 0 20px;
-  border: 1px solid rgba(154,144,255,.28);
-  border-radius: 11px;
-  background: rgba(12,9,29,.68);
-  color: #ece8fb;
+  gap: 10px;
+  padding: 0 14px 0 4px;
+  border: 1px solid transparent;
+  border-radius: 100px;
+  background: transparent;
+  color: #eee9ff;
   font-size: 14px;
-  transition: border-color 180ms, background 180ms;
+  transition: color 180ms;
 }
-
-.lp-secondary:hover {
-  border-color: var(--pg-brand-purple-soft);
-  background: rgba(34,25,69,.9);
-}
-
-.lp-secondary svg {
-  color: var(--pg-brand-purple-soft);
-}
+.lp-play-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #b6a1ff40; border-radius: 50%; background: #18112a8f; box-shadow: inset 0 1px 0 #ffffff0d; transition: background 180ms, border-color 180ms, transform 180ms; }
+.lp-play-icon svg { margin-left: 2px; color: #c6b8ff; }
+.lp-secondary:hover .lp-play-icon { background: #735cfa50; border-color: #b5a2ff88; transform: scale(1.07); }
+.lp-secondary:active .lp-play-icon { transform: scale(.96); }
 
 .lp-beta {
   display: flex;
@@ -342,353 +314,6 @@
 .lp-product-preview {
   max-width: 980px;
   margin: 77px auto 0;
-}
-
-.lp-preview-intro {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: 12px;
-  color: #d5ceec;
-  margin-bottom: 18px;
-}
-
-.lp-console {
-  overflow: hidden;
-  border-radius: 16px;
-  border: 1px solid rgba(174,157,255,.44);
-  background: linear-gradient(120deg, rgba(18,14,34,.97), rgba(9,11,19,.97));
-  box-shadow: 0 -1px 25px rgba(145,113,255,.16), 0 24px 90px rgba(4,3,15,.55);
-  scroll-margin-top: 30px;
-}
-
-.lp-console:focus-visible {
-  outline: 2px solid var(--pg-brand-purple-soft);
-  outline-offset: 5px;
-}
-
-.lp-console-header {
-  min-height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 25px;
-  border-bottom: 1px solid rgba(154,144,255,.14);
-}
-
-.lp-console-name {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #ddd8ee;
-}
-
-.lp-console-name svg {
-  color: var(--pg-brand-purple-soft);
-}
-
-.lp-demo-tag {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #a79ebd;
-  font-size: 10px;
-}
-
-.lp-demo-tag > span {
-  height: 4px;
-  width: 4px;
-  border-radius: 50%;
-  background: var(--pg-brand-purple-soft);
-}
-
-.lp-flow {
-  max-width: 530px;
-  margin: 25px auto;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  color: #7f7797;
-  font-size: 12px;
-}
-
-.lp-flow > span:not(.lp-flow-line) {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  white-space: nowrap;
-  transition: color 220ms;
-}
-
-.lp-flow > span.is-active {
-  color: #dcd5f8;
-}
-
-.lp-flow-line {
-  flex: 1;
-  height: 1px;
-  background: rgba(154,144,255,.18);
-  position: relative;
-  overflow: hidden;
-  min-width: 24px;
-}
-
-.lp-flow-line i {
-  position: absolute;
-  width: 32%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--pg-brand-purple-soft));
-  left: -34%;
-  animation: lp-flow 3s linear infinite;
-}
-
-.lp-flow-line:nth-of-type(4) i {
-  animation-delay: 1.5s;
-}
-
-.lp-flow-line.is-active {
-  background: rgba(154,144,255,.65);
-}
-
-.lp-console-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 0 27px 27px;
-}
-
-.lp-request-pane {
-  padding-right: 28px;
-}
-
-.lp-response-pane {
-  padding-left: 28px;
-  border-left: 1px solid rgba(154,144,255,.14);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.lp-pane-label {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  color: #ccc4df;
-  font-size: 11px;
-  margin-bottom: 13px;
-}
-
-.lp-pane-label > span:last-child {
-  font-family: var(--pg-font-mono);
-  font-size: 10px;
-  color: var(--pg-brand-purple-soft);
-}
-
-.lp-pane-label small {
-  font-family: var(--pg-font-sans);
-  font-size: 9px;
-  color: #948aa9;
-}
-
-.lp-endpoint {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 12px 13px;
-  border: 1px solid rgba(154,144,255,.18);
-  border-radius: 7px;
-  background: rgba(154,144,255,.04);
-}
-
-.lp-endpoint > span {
-  font-family: var(--pg-font-mono);
-  color: var(--pg-flow-blue);
-  font-size: 10px;
-}
-
-.lp-endpoint code {
-  font-family: var(--pg-font-mono);
-  font-size: 11px;
-  color: #e3dff2;
-  white-space: nowrap;
-}
-
-.lp-endpoint svg {
-  margin-left: auto;
-  color: #827493;
-  flex-shrink: 0;
-}
-
-.lp-request-code {
-  font-family: var(--pg-font-mono);
-  font-size: 10px;
-  line-height: 1.9;
-  color: #bbb4ce;
-  margin-top: 15px;
-}
-
-.lp-code-muted {
-  color: #817792;
-}
-
-.lp-code-violet {
-  color: var(--pg-brand-purple-soft);
-}
-
-.lp-status {
-  display: flex;
-  gap: 10px;
-  min-height: 66px;
-  align-items: flex-start;
-  padding-top: 1px;
-}
-
-.lp-status-dot {
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--pg-brand-purple-soft);
-  margin-top: 6px;
-  box-shadow: 0 0 10px rgba(154,144,255,.3);
-}
-
-.lp-status strong {
-  color: #e4dff4;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.lp-status p {
-  color: #a39ab6;
-  font-size: 11px;
-  line-height: 1.6;
-  margin-top: 4px;
-  max-width: 305px;
-}
-
-.lp-console[data-step="required"] .lp-status-dot {
-  background: var(--pg-warning);
-}
-
-.lp-console[data-step="complete"] .lp-status-dot {
-  background: var(--pg-success);
-}
-
-.lp-status-dot.is-busy {
-  animation: lp-pulse 1.3s ease infinite;
-}
-
-.lp-receipt {
-  display: flex;
-  gap: 42px;
-  padding-top: 18px;
-  min-height: 77px;
-}
-
-.lp-receipt > div {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.lp-receipt span {
-  color: #948aa9;
-  font-size: 10px;
-}
-
-.lp-receipt strong {
-  color: #d1c5ee;
-  font-family: var(--pg-font-mono);
-  font-size: 17px;
-  font-weight: 400;
-}
-
-.lp-receipt small {
-  color: #827793;
-  font-size: 9px;
-}
-
-.lp-response-json {
-  color: #d1c5ee;
-  font-family: var(--pg-font-mono);
-  font-size: 10px;
-  line-height: 1.9;
-  min-height: 77px;
-  white-space: pre-wrap;
-  padding-top: 17px;
-}
-
-.lp-response-json span {
-  color: var(--pg-brand-purple-soft);
-}
-
-.lp-console-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 25px;
-  min-height: 73px;
-  border-top: 1px solid rgba(154,144,255,.14);
-  background: rgba(5,6,9,.22);
-}
-
-.lp-console-footer p {
-  font-size: 10px;
-  color: #948aa9;
-}
-
-.lp-console-footer > div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.lp-run {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  min-height: 44px;
-  min-width: 189px;
-  border: 1px solid rgba(154,144,255,.3);
-  border-radius: 7px;
-  padding: 0 14px;
-  color: #e5ddff;
-  background: rgba(115,92,250,.15);
-  font-size: 11px;
-  transition: background 180ms;
-}
-
-.lp-run:hover:not(:disabled) {
-  background: rgba(115,92,250,.35);
-}
-
-.lp-reset {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  background: transparent;
-  border: 0;
-  color: #a397bf;
-  border-radius: 7px;
-}
-
-.lp-reset:hover {
-  background: rgba(154,144,255,.1);
-  color: #e5ddff;
-}
-
-.lp-spinner {
-  width: 13px;
-  height: 13px;
-  border: 1px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: lp-spin 1s linear infinite;
 }
 
 .lp-stage-footer {
@@ -763,507 +388,73 @@
   }
 }
 
-@keyframes lp-flow {
-  to {
-    left: 104%;
-  }
-}
-
-@keyframes lp-pulse {
-  50% {
-    opacity: .4;
-  }
-}
-
-@keyframes lp-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (min-width: 1600px) {
-  .lp-main {
-    padding-top: 96px;
-  }
-  .lp-product-preview {
-    margin-top: 92px;
-  }
+  .lp-main { padding-top: 96px; }
+  .lp-product-preview { margin-top: 92px; }
 }
-
 @media (max-width: 1200px) {
-  .lp-nav {
-    margin-left: 28px;
-    margin-right: 28px;
-  }
-  .lp-stage-footer {
-    margin-left: 28px;
-    margin-right: 28px;
-  }
-  .lp-main {
-    padding-top: 65px;
-  }
-  .lp h1 {
-    font-size: 84px;
-  }
+  .lp-nav { margin-left: 28px; margin-right: 28px; }
+  .lp-stage-footer { margin-left: 28px; margin-right: 28px; }
+  .lp-main { padding-top: 65px; }
+  .lp h1 { font-size: 84px; }
 }
-
 @media (max-width: 800px) {
-  .lp {
-    padding: 10px;
-  }
-  .lp-stage {
-    border-radius: 22px;
-  }
-  .lp-nav {
-    margin: 16px 16px 0;
-    padding: 0 14px;
-    height: 63px;
-    border-radius: 13px;
-  }
-  .lp-nav nav {
-    gap: 20px;
-    padding-left: 0;
-  }
-  .lp-nav nav button {
-    display: none;
-  }
-  .lp-brand {
-    font-size: 21px;
-  }
-  .lp-dashboard {
-    gap: 12px;
-  }
-  .lp-main {
-    padding: 64px 20px 0;
-  }
-  .lp h1 {
-    font-size: clamp(54px, 8.75vw, 70px);
-  }
-  .lp-lead {
-    font-size: 17px;
-  }
-  .lp-product-preview {
-    margin-top: 70px;
-  }
-  .lp-console-body {
-    padding: 0 20px 23px;
-  }
-  .lp-request-pane {
-    padding-right: 20px;
-  }
-  .lp-response-pane {
-    padding-left: 20px;
-  }
-  .lp-endpoint {
-    padding: 11px 9px;
-    gap: 7px;
-  }
-  .lp-endpoint code {
-    font-size: 9px;
-  }
-  .lp-pane-label {
-    flex-direction: column;
-    gap: 4px;
-    min-height: 34px;
-  }
-  .lp-receipt {
-    gap: 30px;
-  }
-  .lp-art-field img, .lp-art-field video {
-    object-position: center 20%;
-  }
+  .lp { padding: 10px; }
+  .lp-stage { border-radius: 22px; }
+  .lp-nav { margin: 16px 16px 0; padding: 0 14px; height: 63px; border-radius: 13px; }
+  .lp-nav nav { gap: 20px; padding-left: 0; }
+  .lp-nav nav button { display: none; }
+  .lp-brand { font-size: 21px; }
+  .lp-dashboard { gap: 12px; }
+  .lp-main { padding: 64px 20px 0; }
+  .lp h1 { font-size: clamp(54px, 8.75vw, 70px); }
+  .lp-lead { font-size: 17px; }
+  .lp-product-preview { margin-top: 70px; }
+  .lp-art-field img, .lp-art-field video { object-position: center 20%; }
 }
-
 @media (max-width: 560px) {
-  .lp {
-    padding: 7px;
-  }
-  .lp-stage {
-    border-radius: 19px;
-  }
-  .lp-nav {
-    margin: 10px 10px 0;
-    height: 59px;
-    padding: 0 10px;
-    border-radius: 12px;
-  }
-  .lp-brand {
-    gap: 4px;
-    font-size: 20px;
-  }
-  .lp-brand img {
-    width: 31px;
-    height: 31px;
-  }
-  .lp-nav nav {
-    display: none;
-  }
-  .lp-dashboard {
-    font-size: 11px;
-    padding: 10px 11px;
-    gap: 11px;
-  }
-  .lp-main {
-    padding: 60px 16px 0;
-  }
-  .lp-category {
-    font-size: 10px;
-    padding: 6px 10px;
-  }
-  .lp h1 {
-    font-size: clamp(40px, 11.45vw, 63px);
-    letter-spacing: -.065em;
-    margin: 26px -5px 22px;
-    line-height: 1.075;
-  }
-  .lp-lead {
-    font-size: 14px;
-    line-height: 1.8;
-  }
-  .lp-desktop-break {
-    display: none;
-  }
-  .lp-mobile-break {
-    display: inline;
-  }
-  .lp-actions {
-    gap: 10px;
-    margin-top: 27px;
-  }
-  .lp-primary {
-    min-height: 51px;
-    padding-left: 13px;
-    font-size: 11px;
-    border-radius: 9px;
-  }
-  .lp-primary-arrow {
-    width: 28px;
-    margin-left: 10px;
-  }
-  .lp-primary svg {
-    width: 17px;
-  }
-  .lp-secondary {
-    min-height: 51px;
-    gap: 7px;
-    padding: 0 12px;
-    font-size: 11px;
-    border-radius: 9px;
-  }
-  .lp-secondary svg {
-    width: 11px;
-  }
-  .lp-beta {
-    font-size: 10px;
-    margin-top: 18px;
-  }
-  .lp-product-preview {
-    margin-top: 70px;
-  }
-  .lp-preview-intro {
-    font-size: 10px;
-    margin-bottom: 15px;
-  }
-  .lp-console {
-    border-radius: 12px;
-  }
-  .lp-console-header {
-    min-height: 53px;
-    padding: 0 16px;
-  }
-  .lp-console-name {
-    font-size: 11px;
-    gap: 8px;
-  }
-  .lp-demo-tag {
-    font-size: 0;
-    gap: 0;
-  }
-  .lp-demo-tag > span {
-    width: 5px;
-    height: 5px;
-  }
-  .lp-flow {
-    margin: 20px 16px;
-    gap: 11px;
-    font-size: 10px;
-  }
-  .lp-flow > span:not(.lp-flow-line) {
-    gap: 4px;
-  }
-  .lp-flow svg {
-    width: 13px;
-  }
-  .lp-flow img {
-    width: 20px;
-    height: 20px;
-  }
-  .lp-flow-line {
-    min-width: 14px;
-  }
-  .lp-console-body {
-    grid-template-columns: 1fr;
-    padding: 0 16px 18px;
-    gap: 22px;
-  }
-  .lp-request-pane {
-    padding-right: 0;
-  }
-  .lp-pane-label {
-    flex-direction: row;
-    min-height: 0;
-    font-size: 10px;
-  }
-  .lp-pane-label > span:last-child {
-    font-size: 9px;
-  }
-  .lp-pane-label small {
-    font-size: 8px;
-  }
-  .lp-endpoint {
-    padding: 12px;
-  }
-  .lp-endpoint code {
-    font-size: 10px;
-  }
-  .lp-request-code {
-    font-size: 9px;
-    margin-top: 13px;
-  }
-  .lp-response-pane {
-    border-left: 0;
-    border-top: 1px solid rgba(154,144,255,.14);
-    padding: 18px 0 0;
-  }
-  .lp-status {
-    min-height: 59px;
-  }
-  .lp-status strong {
-    font-size: 12px;
-  }
-  .lp-status p {
-    font-size: 10px;
-  }
-  .lp-receipt {
-    gap: 50px;
-    padding-top: 8px;
-    min-height: 60px;
-  }
-  .lp-response-json {
-    min-height: 60px;
-    padding-top: 8px;
-    font-size: 9px;
-  }
-  .lp-console-footer {
-    padding: 12px 14px;
-    gap: 11px;
-    flex-wrap: wrap;
-  }
-  .lp-console-footer p {
-    font-size: 9px;
-  }
-  .lp-console-footer > div {
-    justify-content: flex-end;
-    margin-left: auto;
-  }
-  .lp-run {
-    min-width: 170px;
-    font-size: 10px;
-  }
-  .lp-stage-footer {
-    margin: 18px 17px 10px;
-    font-size: 9px;
-  }
-  .lp-stage-footer button {
-    font-size: 9px;
-  }
-  .lp-preview-footer {
-    font-size: 9px;
-    padding: 13px 6px 4px;
-  }
-  .lp-art-field {
-    bottom: 300px;
-  }
-  .lp-art-field img, .lp-art-field video {
-    object-position: 50% 30%;
-  }
-  .lp-art-shade {
-    background: linear-gradient(180deg, rgba(5,6,9,.08), transparent 30%, rgba(5,6,9,.2) 58%, #050609 85%);
-  }
+  .lp { padding: 7px; }
+  .lp-stage { border-radius: 19px; }
+  .lp-nav { margin: 10px 10px 0; height: 59px; padding: 0 10px; border-radius: 12px; }
+  .lp-brand { gap: 4px; font-size: 20px; }
+  .lp-brand img { width: 31px; height: 31px; }
+  .lp-nav nav { display: none; }
+  .lp-dashboard { font-size: 11px; padding: 10px 11px; gap: 11px; }
+  .lp-main { padding: 60px 16px 0; }
+  .lp-category { font-size: 10px; padding: 6px 10px; }
+  .lp h1 { font-size: clamp(40px, 11.45vw, 63px); letter-spacing: -.065em; margin: 26px -5px 22px; line-height: 1.075; }
+  .lp-lead { font-size: 14px; line-height: 1.8; }
+  .lp-desktop-break { display: none; }
+  .lp-mobile-break { display: inline; }
+  .lp-actions { gap: 8px; margin-top: 27px; }
+  .lp-primary { min-height: 49px; padding: 0 15px; gap: 10px; font-size: 12px; }
+  .lp-primary svg { width: 15px; }
+  .lp-secondary { min-height: 49px; gap: 7px; padding: 0 3px; font-size: 12px; }
+  .lp-play-icon { width: 30px; height: 30px; }
+  .lp-play-icon svg { width: 10px; }
+  .lp-beta { font-size: 11px; margin-top: 18px; }
+  .lp-product-preview { margin: 61px -5px 0; }
+  .lp-stage-footer { margin: 18px 17px 10px; font-size: 10px; }
+  .lp-stage-footer button { font-size: 10px; }
+  .lp-preview-footer { font-size: 9px; padding: 13px 6px 4px; }
+  .lp-art-field { bottom: auto; height: 1000px; }
+  .lp-art-field img, .lp-art-field video { object-position: 50% 30%; }
+  .lp-art-shade { background: linear-gradient(180deg, rgba(5,6,9,.08), transparent 30%, rgba(5,6,9,.2) 58%, #050609 85%); }
 }
-
 @media (max-width: 360px) {
-  .lp-main {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-  .lp-actions {
-    gap: 7px;
-  }
-  .lp-primary {
-    font-size: 10px;
-    padding-left: 10px;
-  }
-  .lp-secondary {
-    font-size: 10px;
-    padding: 0 10px;
-  }
-  .lp-primary-arrow {
-    margin-left: 5px;
-    width: 24px;
-  }
-  .lp-flow {
-    gap: 7px;
-  }
-  .lp-console-header {
-    padding: 0 12px;
-  }
-  .lp-console-body {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-  .lp-pane-label small {
-    font-size: 7px;
-  }
+  .lp-main { padding-left: 12px; padding-right: 12px; }
+  .lp h1 { font-size: 38px; }
+  .lp-actions { gap: 5px; }
+  .lp-primary { font-size: 11px; padding: 0 12px; gap: 8px; }
+  .lp-secondary { font-size: 11px; }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .lp *, .lp *::before, .lp *::after {
-    animation: none !important;
-    transition-duration: 0s !important;
-  }
+  .lp *, .lp *::before, .lp *::after { animation: none !important; transition-duration: 0s !important; }
 }
-
-/* Keep the beta disclosure readable across the moving highlight. */
-
 .lp-beta {
-  width: max-content;
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 5px 10px;
-  border-radius: 6px;
-  background: rgba(8,7,20,.62);
-  color: #c4b9df;
+  width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; padding: 5px 10px; border-radius: 6px; background: rgba(8,7,20,.62); color: #c4b9df;
 }
-
-@media (max-width: 560px) {
-  .lp-primary, .lp-secondary {
-    font-size: 12px;
-  }
-  .lp-beta {
-    font-size: 11px;
-  }
-  .lp-art-field {
-    bottom: 230px;
-  }
-  .lp-preview-intro {
-    font-size: 11px;
-  }
-  .lp-console-name {
-    font-size: 12px;
-  }
-  .lp-flow {
-    font-size: 11px;
-    gap: 9px;
-  }
-  .lp-pane-label {
-    font-size: 11px;
-  }
-  .lp-pane-label > span:last-child {
-    font-size: 10px;
-  }
-  .lp-pane-label small {
-    font-size: 9px;
-  }
-  .lp-endpoint code, .lp-endpoint > span {
-    font-size: 11px;
-  }
-  .lp-request-code {
-    font-size: 10px;
-  }
-  .lp-status strong {
-    font-size: 14px;
-  }
-  .lp-status p, .lp-receipt span {
-    font-size: 12px;
-  }
-  .lp-receipt {
-    padding-top: 15px;
-  }
-  .lp-console-footer p {
-    font-size: 11px;
-  }
-  .lp-run {
-    font-size: 12px;
-  }
-  .lp-response-json {
-    font-size: 11px;
-  }
-  .lp-stage-footer, .lp-stage-footer button {
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 360px) {
-  .lp h1 {
-    font-size: 38px;
-  }
-  .lp-primary, .lp-secondary {
-    font-size: 11px;
-  }
-  .lp-pane-label > span:last-child {
-    font-size: 9px;
-  }
-  .lp-pane-label small {
-    font-size: 8px;
-  }
-  .lp-flow {
-    font-size: 10px;
-  }
-}
-
 @media (min-width: 801px) {
-  .lp-main {
-    padding-top: 62px;
-  }
-  .lp-product-preview {
-    margin-top: 58px;
-  }
-  .lp-console-name {
-    font-size: 14px;
-  }
-  .lp-flow {
-    font-size: 13px;
-  }
-  .lp-pane-label {
-    font-size: 12px;
-  }
-  .lp-pane-label > span:last-child {
-    font-size: 11px;
-  }
-  .lp-pane-label small {
-    font-size: 10px;
-  }
-  .lp-endpoint code, .lp-endpoint > span {
-    font-size: 12px;
-  }
-  .lp-request-code {
-    font-size: 11px;
-  }
-  .lp-status strong {
-    font-size: 14px;
-  }
-  .lp-status p, .lp-receipt span {
-    font-size: 12px;
-  }
-  .lp-status {
-    min-height: 78px;
-  }
-  .lp-response-json {
-    font-size: 11px;
-  }
-  .lp-console-footer p, .lp-run {
-    font-size: 12px;
-  }
+  .lp-main { padding-top: 62px; }
+  .lp-product-preview { margin-top: 66px; }
 }

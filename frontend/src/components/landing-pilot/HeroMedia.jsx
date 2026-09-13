@@ -71,7 +71,7 @@ export default function HeroMedia({ motion, stageRef }) {
 
   return <div className="lp-art" ref={fieldRef} aria-hidden="true" data-media-state={failed ? 'fallback' : playing ? 'video' : 'poster'}>
     <div className="lp-art-field">
-      <picture><source media="(max-width: 640px)" srcSet={`${BASE}field-mobile.webp`} /><img src={`${BASE}field.webp`} width="1920" height="1072" alt="" fetchPriority="high" /></picture>
+      <picture><source media="(max-width: 640px)" srcSet={`${BASE}field-mobile.webp`} /><img src={`${BASE}field.webp`} width="1920" height="1072" alt="" fetchpriority="high" /></picture>
       {source && <video ref={videoRef} src={`${BASE}field.mp4`} muted playsInline loop preload="auto" tabIndex={-1} className={playing && !failed ? 'is-playing' : ''} onPlaying={() => setPlaying(true)} onError={() => { setFailed(true); setPlaying(false); }} />}
     </div>
     <div className="lp-art-shade" />
