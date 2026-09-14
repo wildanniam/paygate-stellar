@@ -28,10 +28,11 @@
     "scan:secrets": "node scripts/secret-scan.mjs",
     "beta:preflight": "node scripts/beta-preflight.mjs",
     "evidence:init": "node scripts/prepare-beta-evidence.mjs",
-    "audit:prod": "npm audit --omit=dev && npm --prefix frontend audit --omit=dev && npm --prefix backend audit --omit=dev && npm --prefix examples/express-paid-api audit --omit=dev",
+    "audit:prod": "node scripts/audit-production.mjs",
     "reconcile:payments": "node scripts/reconcile-payments.mjs",
     "admin:withdraw-fees": "node scripts/admin-withdraw-fees.mjs",
-    "vercel-build": "npm run build"
+    "vercel-build": "npm run build",
+    "test:dependencies": "node --test scripts/audit-production.test.mjs scripts/dependency-compat.test.mjs"
   },
   "dependencies": {
     "@stellar/mpp": "^0.6.0",
@@ -46,6 +47,13 @@
     "axios": "^1.19.0",
     "body-parser": "^2.3.0",
     "form-data": "^4.0.6",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "@stellar/stellar-sdk": {
+      "toml": "4.2.0"
+    },
+    "incur": {
+      "@toon-format/toon": "2.3.1"
+    },
+    "qs": "6.16.0"
   }
 }

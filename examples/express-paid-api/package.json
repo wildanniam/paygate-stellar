@@ -19,6 +19,13 @@
     "axios": "^1.19.0",
     "body-parser": "^2.3.0",
     "form-data": "^4.0.6",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "@stellar/stellar-sdk": {
+      "toml": "4.2.0"
+    },
+    "incur": {
+      "@toon-format/toon": "2.3.1"
+    },
+    "qs": "6.16.0"
   }
 }
