@@ -64,7 +64,7 @@ export default function TransactionJourney({ sample, simulation, consoleRef }) {
       <div className={`tx-api tx-node ${delivered ? 'is-delivered' : ''}`}>
         <div className="tx-node-label"><span>02</span> Your API</div>
         <div className="tx-response-object">
-          <img className="tx-weather-art" src="/brand/visual-story/weather-clear-small.webp" alt="" width="800" height="597" loading="lazy" />
+          <img className="tx-weather-art" src="/brand/visual-story/weather-volume-small.webp" alt="" width="600" height="450" loading="lazy" />
           <div className="tx-response-top"><span>Jakarta, ID</span>{delivered ? <span className="tx-ok"><Check size={10} /> 200 OK</span> : <LockKeyhole size={12} />}</div>
           <div className="tx-temperature">{delivered ? '29' : '—'}<small>°</small></div>
           <span className="tx-weather-caption">{delivered ? 'Partly cloudy · JSON' : 'Access after payment'}</span>

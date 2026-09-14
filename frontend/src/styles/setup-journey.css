@@ -1,9 +1,9 @@
 /* One installation scene, three deliberate object actions. */
 .sj { padding:0 20px 32px; position:relative; }
-.sj-shell { max-width:1440px; margin:auto; border-radius:32px; position:relative; overflow:hidden; isolation:isolate; padding:62px 60px 24px; background:#0b0717; border:1px solid #a782ef30; }
+.sj-shell { max-width:1440px; margin:auto; border-radius:32px; position:relative; overflow:hidden; isolation:isolate; padding:62px 60px 24px; background:var(--lp-art-surface); border:1px solid #a782ef30; }
 .sj-shell>.story-media { inset:0; z-index:-2; opacity:.55; }
 .sj-shell>.story-media :is(img,video) { object-position:center 60%; }
-.sj-atmosphere { position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(#080610f5 0%,#080610d9 35%,#09061466 65%,#090611e8 100%); }
+.sj-atmosphere { position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(rgba(var(--lp-art-rgb),.96),rgba(var(--lp-art-rgb),.85) 35%,rgba(var(--lp-art-rgb),.4) 65%,rgba(var(--lp-art-rgb),.91)); }
 .sj-heading { text-align:center; }
 .sj-heading p { font-size:12px; color:#baadd1; margin:0 0 18px; }
 .sj h2 { font-size:clamp(36px,4.3vw,60px); letter-spacing:-.045em; line-height:1.07; font-weight:500; margin:0; }

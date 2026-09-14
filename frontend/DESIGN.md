@@ -1,3 +1,15 @@
+# Surface blending and cloud candidate — 14 September 2026
+
+Owner reports hard color patches inside the pricing artwork and across surrounding sections, and rejects the contour cloud. Scope: correct compositing and produce a better cloud study in the existing five-section preview; issue #5 / draft PR #6, no merge.
+
+Verified cause: price art is inset 5% from the top and 14% from the bottom, while the card, baked image background and opaque gradient end used different ink values. The overlay ended abruptly at those inset bounds. Section glows also extended beyond clipped containers. Shared `--lp-art-surface: #090613` and `--lp-art-rgb: 9, 6, 19` now anchor pricing/access/setup; alpha masks feather the whole media stack (poster plus pointer canvas), replacing the price's opaque gradient. Pricing/receipt glows fade before all section edges; closing uses the existing canvas token. Keep intentional lavender share-card hierarchy and semantic payment states.
+
+One Higgsfield still replaces the rejected contour cloud: natural asymmetrical cumulus volume, pearl/lavender light, indigo shadows and partly hidden lilac sun; no concentric cavity. This is an AI-selected candidate now integrated for owner review, NOT owner-approved artwork. Exact prompt, job and sources: `docs/design/weather-volume-asset.json`. Full WebP about 20 KB, small about 6.5 KB; no video or dependency added. Pricing retains native pointer response, while the hero uses the matching thumbnail. Earlier proposal-only notes below are historical and superseded by this actual integration.
+
+Validation: production build and all 19 motion/simulation tests pass; desktop 1470px and mobile 390px inspected, exact .05/.045/.005 relationship checked, motion-off compositing and hero thumbnail verified. No financial behavior or homepage route changed.
+
+---
+
 # Pricing feedback — 14 September 2026
 
 Owner asks for actual wave deformation on hover and price selection in “You keep 90%”, and analysis of the unsatisfactory cloud. Reuse issue #5 / draft PR #6. Native 30-bar wave, fixed 27/3 ownership split, exact immediate amounts. Pointer-local crest/trough; one 1.5s travelling wave on price change; settles and sleeps. Stop offscreen/hidden, global off and OS reduced-motion. Keep text/control positions stable and reserve room around the graphic at all breakpoints. No additional section or UI merge.

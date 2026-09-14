@@ -1,5 +1,5 @@
 .pr { position:relative; isolation:isolate; max-width:1380px; margin:0 auto; padding:110px 50px 90px; overflow:clip; }
-.pr::before { content:""; position:absolute; inset:10% -15% 0; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 80% 50%,#39235b20,transparent 55%); }
+.pr::before { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 70% 50%,#735cfa20,transparent 55%); mask-image:radial-gradient(ellipse 50% 50%,#000 40%,transparent 100%); }
 .pr-layout { display:grid; grid-template-columns: .88fr 1.12fr; align-items:center; gap:0; }
 .pr-copy { position:relative; z-index:2; padding:0 0 18px; }
 .pr-eyebrow { display:flex; align-items:center; gap:9px; color:#b3a3ef; font-size:12px; margin:0 0 28px; }

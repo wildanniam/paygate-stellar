@@ -7,7 +7,7 @@
   margin: 26px auto 0;
   overflow: hidden;
   border-radius: 28px;
-  background: #08070e;
+  background: var(--pg-bg-canvas);
   color: var(--pg-text-primary);
   scroll-margin-top: 105px;
 }

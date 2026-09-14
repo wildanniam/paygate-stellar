@@ -16,12 +16,12 @@ export default function ApiCapabilities({ motion }) {
   return <section className="ac" aria-labelledby="capabilities-title">
     <header className="ac-heading">
       <h2 id="capabilities-title">Your price.<br /><span>Clear fees.</span></h2>
-      <p>Choose a price per call.<br />See your share.</p>
+      <p>Choose a price per call.<br />{' '}See your share.</p>
     </header>
     <div className="ac-grid" data-price={cents}>
       <div className="ac-price-bridge" key={cents} aria-hidden="true"><svg viewBox="0 0 120 130" preserveAspectRatio="none"><path d="M0 8H32Q44 8 44 20V110Q44 122 56 122H120" pathLength="1" /></svg></div>
       <article className="ac-price-panel" aria-labelledby="ac-price-title">
-        <StoryMedia name="weather-clear" motion={motion} flow="weather" />
+        <StoryMedia name="weather-volume" motion={motion} flow="weather" />
         <div className="ac-panel-top"><span className="ac-chapter">PRICING</span><span className="ac-api-label"><Code2 size={14} /> Weather API</span></div>
         <div className="ac-weather-reading" aria-hidden="true"><span>Jakarta</span><strong>29°</strong></div>
         <div className="ac-value-tag" key={cents} aria-hidden="true"><span>Per call</span><strong>{gross}<small> USDC</small></strong></div>

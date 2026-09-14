@@ -8,10 +8,11 @@
 .ac::before {
   content: "";
   position: absolute;
-  inset: 0 -12% -8%;
+  inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 2% 48%,#46239917,transparent 58%),radial-gradient(ellipse at 88% 85%,#735cfa12,transparent 50%)
+  background: radial-gradient(ellipse at 24% 48%,#735cfa17,transparent 58%),radial-gradient(ellipse at 76% 70%,#735cfa12,transparent 50%);
+  mask-image: radial-gradient(ellipse 50% 50%,#000 45%,transparent 100%)
 }
 .ac>* {
   position: relative
@@ -85,16 +86,18 @@
 }
 .ac-price-panel {
   grid-area: price;
-  background: #0d071d
+  background: var(--lp-art-surface)
 }
 .ac-price-panel .story-media {
-  inset: 0 -100px 36px
+  inset: 5% -4% 14%;
+  /* Fade the entire stack (poster + pointer canvas), not a differently colored overlay. */
+  -webkit-mask-image: linear-gradient(transparent,#000 14%,#000 72%,transparent),linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(transparent,#000 14%,#000 72%,transparent),linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  mask-composite: intersect
 }
 .ac-price-panel .story-media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(#0d071d15 0%,transparent 40%,#12082588 71%,#120825 94%)
+  content: none
 }
 .ac-weather-reading {
   position: absolute;
@@ -189,10 +192,11 @@
 }
 .ac-access-panel {
   grid-area: access;
-  background: #0d0917
+  background: var(--lp-art-surface)
 }
 .ac-access-panel .story-media {
-  inset: -18px -10px -5px 20px
+  inset: -18px -10px -5px 20px;
+  mask-image: linear-gradient(90deg,transparent,#000 12%,#000)
 }
 .ac-access-panel .story-media img {
   object-position: 70% center
@@ -203,7 +207,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(90deg,#10091fde 0%,#10091f40 55%,transparent),linear-gradient(0deg,#10091f88,transparent 45%)
+  background: linear-gradient(90deg,rgba(var(--lp-art-rgb),.87),rgba(var(--lp-art-rgb),.25) 55%,transparent),linear-gradient(0deg,rgba(var(--lp-art-rgb),.53),transparent 45%)
 }
 .ac-protected {
   display: flex;
@@ -664,8 +668,6 @@
 .ac-access-panel:is(:hover,:focus-within) .ac-access-pulse i:nth-child(3) { animation-delay:200ms; }
 .ac-access-panel { transition:border-color 200ms; }
 .ac-access-panel:focus-within { border-color:#c1a7ff88; }
-.ac-price-panel .story-media { inset:5% -4% 14%; }
-.ac-price-panel .story-media::after { background:linear-gradient(#0d071d00 45%,#12082577 70%,#120825 100%); }
 @keyframes ac-share-pulse { 15% {opacity:.9;} 85% {opacity:.9;} to {stroke-dashoffset:-.2;opacity:0;} }
 @media(max-width:900px) { .ac-price-segments button {min-width:50px;} .ac-price-options {flex-wrap:wrap;} .ac-price-bridge {left:46%;width:11%;} }
 @media(max-width:640px) { .ac-price-bridge {left:50%;top:448px;width:1px;height:43px;} .ac-price-bridge svg {display:none;} .ac-price-bridge::after {content:'';display:block;width:2px;height:100%;background:linear-gradient(transparent,#c8b6ff,transparent);transform-origin:top;opacity:0;animation:ac-mobile-pulse 600ms ease;} .ac-price-segments {flex:1;} .ac-price-segments button {min-width:54px;} .ac-price-panel .story-media {inset:3% -4% 16%;} }

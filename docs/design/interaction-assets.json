@@ -42,5 +42,5 @@
   "processing": "cwebp q87 full1168x876; q84 resized600x450. Encoding/resizing only.",
   "newVideos": 0,
   "actualBilledCredits": null,
-  "review": "Two results previously inspected by AI; second integrated. Owner subsequently rejected the second image form as strange/unsatisfactory (14 September 2026). It remains displayed pending a replacement direction; AI integration acceptance was not owner visual acceptance."
+  "review": "Historical generations. Owner rejected contour form on 14 September 2026. Replaced in active preview by the volumetric candidate recorded in weather-volume-asset.json; owner acceptance of the new candidate is pending."
 }
