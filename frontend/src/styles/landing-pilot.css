@@ -60,16 +60,13 @@
   inset: 0;
   overflow: hidden;
   z-index: -2;
-  --field-x: 0px;
-  --field-y: 0px;
   background: radial-gradient(ellipse at 50% 70%, var(--pg-brand-purple-deep), #09071b 70%);
 }
 
 .lp-art-field {
   position: absolute;
   inset: -12px;
-  transform: translate3d(var(--field-x), var(--field-y), 0) scale(1.015);
-  transition: transform 700ms cubic-bezier(.2,.65,.25,1);
+  transform: scale(1.015);
 }
 
 .lp-art-field picture, .lp-art-field img, .lp-art-field video {

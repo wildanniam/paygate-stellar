@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import '../../styles/story-media.css';
+import PointerFlow from './PointerFlow.jsx';
 
 /** Decorative artwork: only loads its film near the viewport; always keeps a poster. */
-export default function StoryMedia({ name, motion, video = false, className = '', basePath = '/brand/visual-story' }) {
+export default function StoryMedia({ name, motion, video = false, className = '', basePath = '/brand/visual-story', flow = null }) {
   const container = useRef(null);
   const player = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -35,5 +36,6 @@ export default function StoryMedia({ name, motion, video = false, className = ''
   return <div ref={container} className={`story-media ${className}`} aria-hidden="true" data-visible={visible} data-media-state={failed ? 'fallback' : playing ? 'video' : 'poster'}>
     <picture><source media="(max-width: 640px)" srcSet={`${base}-small.webp`} /><img src={`${base}.webp`} alt="" loading="lazy" decoding="async" /></picture>
     {video && load && <video ref={player} src={`${base}.mp4`} muted playsInline loop preload="none" tabIndex={-1} className={playing && !failed ? 'is-playing' : ''} onPlaying={() => setPlaying(true)} onError={() => { setFailed(true); setPlaying(false); }} />}
+    <PointerFlow active={visible && motion} profile={flow} />
   </div>;
 }

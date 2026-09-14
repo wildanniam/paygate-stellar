@@ -18,7 +18,7 @@ export default function ApiCapabilities({ motion }) {
     </header>
     <div className="ac-grid">
       <article className="ac-price-panel" aria-labelledby="ac-price-title">
-        <StoryMedia name="weather" motion={motion} video />
+        <StoryMedia name="weather" motion={motion} video flow="weather" />
         <div className="ac-panel-top"><span className="ac-chapter">01 / PRICE</span><span className="ac-api-label"><Code2 size={14} /> Weather API</span></div>
         <div className="ac-weather-reading" aria-hidden="true"><span>Jakarta</span><strong>29°</strong></div>
         <div className="ac-value-tag" key={cents} aria-hidden="true"><span>Per call</span><strong>{gross}<small> USDC</small></strong></div>
@@ -33,7 +33,7 @@ export default function ApiCapabilities({ motion }) {
       </article>
 
       <article className="ac-access-panel" aria-labelledby="ac-access-title">
-        <StoryMedia name="access" motion={motion} />
+        <StoryMedia name="access" motion={motion} flow="access" />
         <div className="ac-panel-top"><span className="ac-chapter">02 / PROTECT</span><span className="ac-protected"><Check size={12} /> Verified access</span></div>
         <div className="ac-access-caption"><h3 id="ac-access-title">Paid requests.<br />Through your guard.</h3><p>Your server checks the secret.</p></div>
         <div className="ac-access-pulse" aria-hidden="true"><i /><i /><i /></div>

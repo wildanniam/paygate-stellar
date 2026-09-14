@@ -31,7 +31,7 @@ export default function SetupJourney({ motion }) {
 
   return <section className="sj" aria-labelledby="setup-title" data-step={step}>
     <div className="sj-shell">
-      <StoryMedia name="path" motion={motion} video />
+      <StoryMedia name="path" motion={motion} video flow="path" />
       <div className="sj-atmosphere" aria-hidden="true" />
       <header className="sj-heading"><p>From your URL to your first paid call</p><h2 id="setup-title">Keep your API.<br /><span>Open it for business.</span></h2></header>
       <div className="sj-tabs" role="tablist" aria-label="API setup steps">

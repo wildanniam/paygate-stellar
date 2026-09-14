@@ -95,12 +95,6 @@
   inset: 0;
   background: linear-gradient(#0d071d15 0%,transparent 40%,#12082588 71%,#120825 94%)
 }
-.ac-price-panel .story-media picture {
-  transition: transform 1.1s cubic-bezier(.2,.75,.2,1)
-}
-.ac-price-panel:hover .story-media picture {
-  transform: scale(1.035)
-}
 .ac-weather-reading {
   position: absolute;
   top: 24%;
@@ -202,11 +196,7 @@
   inset: -18px -10px -5px 20px
 }
 .ac-access-panel .story-media img {
-  object-position: 70% center;
-  transition: transform .9s
-}
-.ac-access-panel:hover .story-media img {
-  transform: scale(1.06)
+  object-position: 70% center
 }
 .ac-access-panel::after {
   content: "";
@@ -651,12 +641,6 @@
     animation: none!important;
     transition: none!important
   }
-  .ac-price-panel:hover .story-media picture,.ac-access-panel:hover .story-media img {
-    transform: none
-  }
-}
-.lp[data-motion=off] .ac-price-panel:hover .story-media picture,.lp[data-motion=off] .ac-access-panel:hover .story-media img {
-  transform: none
 }
 
 .ac-access-panel:has(.story-media[data-visible=false]) .ac-access-pulse i {

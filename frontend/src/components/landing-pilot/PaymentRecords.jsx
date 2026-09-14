@@ -74,7 +74,7 @@ export default function PaymentRecords({ motion, toggleMotion }) {
       </div>
 
       <div className="pr-art">
-        <StoryMedia name="receipt-field" basePath="/brand/payment-records" motion={motion} video />
+        <StoryMedia name="receipt-field" basePath="/brand/payment-records" motion={motion} video flow="receipt" />
         <div className="pr-receipt-area" role="tabpanel" id="record-panel" aria-labelledby={`record-tab-${record.id}`} tabIndex={0}>
           <div className="pr-receipt-turn" data-details={details}>
             <div className="pr-receipt-face pr-receipt-front" aria-hidden={details} {...(details ? { inert: '' } : {})}>

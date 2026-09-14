@@ -1,6 +1,25 @@
-# PayGate landing preview — payment records, 14 September 2026
+# PayGate landing preview — pointer-responsive artwork, 14 September 2026
+
+## Current authorized interaction — 14 September 2026
+
+Owner now approves the proposed local video-texture response and requests analysis of the other assets. Apply it within the existing four sections. This is a brand-motion enhancement, not a new content section. Preserve palette, composition, native copy, receipt, logo and product controls. Reuse current Higgsfield assets; no new generation is needed for this experiment.
+
+| Asset | Treatment | Reason |
+|---|---|---|
+| Hero violet fibers | Broad local displacement, soft momentum and luminance response | Long organic filaments can visibly follow a passing cursor |
+| Receipt light-paper | Local flex around pointer, slightly tighter radius | Paper edges remain recognizable; receipt itself is native and stable |
+| Weather field | Gentle wind response, lower displacement | Preserve cloud/data illustration clarity |
+| Setup path | Low, directionally restrained displacement | Keep connect/protect/publish spatial relationships clear |
+| Access shield | Local light response, zero displacement | Rigid protection shape should not melt |
+| Logos, weather thumbnail, native sheets and earnings bars | Preserve current treatment | Semantic product objects and exact data must remain sharp |
+
+Use one reusable, progressively enhanced WebGL texture plane, no 3D scene/dependency. Same source video frame or image as the existing media layer; preserve object-fit/object-position and color. Pointer position/velocity drives a bounded local response that dissipates, not video time scrubbing. Fine pointer + hover only; touch stays ambient. Ignore native interactive controls and receipt faces, without intercepting events. Canvas is decorative and cannot receive focus.
+
+Performance/lifecycle: cap render resolution/DPR, upload video textures on fresh frames only, sleep when a static image settles, disable observers/listeners/frames offscreen or with motion off, destroy GPU resources on cleanup. Preserve poster/video underneath until first successful draw. WebGL/context/texture failure immediately falls back to original media. Respect global motion, OS reduced default and hidden-document pause. Actual cursor response, crop/color equivalence, desktop/mobile, keyboard/product controls and cleanup need browser checks; math/fit lifecycle logic gets focused tests. Visual quality awaits owner feedback, not guaranteed by test results.
 
 ## Authority
+
+The pointer-response implementation and verification are recorded in `docs/design/pointer-flow.md`. The following section-creation scope is preceding history; the latest approval above adds interaction to the existing four sections.
 
 The owner now authorizes exactly one next section after the current hero, capabilities and setup. Preserve those surfaces. Add an artwork-led payment-record section on `/design-preview`, issue #5 / draft PR #6. User explicitly wants creative Higgsfield media and thoughtful microinteractions. The preview grows to four sections; homepage replacement, backend, further sections and merge remain out of scope. New section awaits owner visual feedback.
 

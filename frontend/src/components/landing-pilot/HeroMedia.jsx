@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import PointerFlow from './PointerFlow.jsx';
 
 const BASE = '/brand/hero-violet/';
 
 export default function HeroMedia({ motion, stageRef }) {
   const videoRef = useRef(null);
-  const fieldRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
   const [source, setSource] = useState(false);
@@ -31,44 +31,11 @@ export default function HeroMedia({ motion, stageRef }) {
     return () => { active = false; video?.pause(); };
   }, [motion, visible, source, failed]);
 
-  useEffect(() => {
-    const stage = stageRef.current;
-    const field = fieldRef.current;
-    const pointer = window.matchMedia('(pointer: fine)');
-    let frame;
-    let point = null;
-    function reset() {
-      point = null;
-      cancelAnimationFrame(frame);
-      frame = null;
-      field.style.setProperty('--field-x', '0px');
-      field.style.setProperty('--field-y', '0px');
-    }
-    function move(event) {
-      if (event.pointerType === 'touch' || !pointer.matches) return;
-      point = { x: event.clientX, y: event.clientY };
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = null;
-        const rect = stage.getBoundingClientRect();
-        if (!point) return;
-        const x = Math.max(0, Math.min(1, (point.x - rect.left) / rect.width));
-        const y = Math.max(0, Math.min(1, (point.y - rect.top) / rect.height));
-        field.style.setProperty('--field-x', `${(x - .5) * -16}px`);
-        field.style.setProperty('--field-y', `${(y - .5) * -8}px`);
-      });
-    }
-    if (motion && visible) {
-      stage.addEventListener('pointermove', move);
-      stage.addEventListener('pointerleave', reset);
-    } else reset();
-    return () => { stage.removeEventListener('pointermove', move); stage.removeEventListener('pointerleave', reset); reset(); };
-  }, [motion, visible, stageRef]);
-
-  return <div className="lp-art" ref={fieldRef} aria-hidden="true" data-media-state={failed ? 'fallback' : playing ? 'video' : 'poster'}>
+  return <div className="lp-art" aria-hidden="true" data-media-state={failed ? 'fallback' : playing ? 'video' : 'poster'}>
     <div className="lp-art-field">
       <picture><source media="(max-width: 640px)" srcSet={`${BASE}field-mobile.webp`} /><img src={`${BASE}field.webp`} width="1920" height="1072" alt="" fetchpriority="high" /></picture>
       {source && <video ref={videoRef} src={`${BASE}field.mp4`} muted playsInline loop preload="auto" tabIndex={-1} className={playing && !failed ? 'is-playing' : ''} onPlaying={() => setPlaying(true)} onError={() => { setFailed(true); setPlaying(false); }} />}
+      <PointerFlow active={motion && visible} profile="hero" eventHostRef={stageRef} />
     </div>
     <div className="lp-art-shade" />
   </div>;

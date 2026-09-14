@@ -1,3 +1,9 @@
+# PayGate preview: pointer-responsive artwork
+
+Latest owner approval, 14 September 2026: apply the proposed local texture response and analyze the other assets. Shared progressive WebGL now adds cursor-driven displacement/relaxation to existing hero, receipt, weather and setup media, with light-only response on the access shield. Preserve native product objects, colors and layout. Reuse existing Higgsfield assets with no generation cost or new dependency. Fine-pointer enhancement, original-media fallback, bounded render resolution, fresh-frame uploads and full lifecycle cleanup are implemented. See `docs/design/pointer-flow.md` for analysis and verification. Four-section preview only; aesthetic feedback remains pending.
+
+---
+
 # PayGate preview: inspectable payment records
 
 Latest owner instruction, 14 September 2026: continue by developing exactly one next section, informed by the supplied references and original Higgsfield media. Add “Every paid call. A clear record.” after setup. Three native sample tabs update a two-sided receipt with gross, provider share, fee, independent API response and illustrative IDs. Original violet light-paper artwork and a quiet film frame the receipt. Keyboard navigation, focus-preserving details toggle, real copy feedback, local/global motion control and responsive layouts are implemented. See `frontend/DESIGN.md`, `docs/design/payment-records.md` and its asset ledger.
