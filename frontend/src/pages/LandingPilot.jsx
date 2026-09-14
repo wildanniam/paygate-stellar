@@ -54,7 +54,7 @@ export default function LandingPilot() {
         <div className="lp-hero-copy">
           <p className="lp-category"><span className="lp-category-symbol" aria-hidden="true"><i /><i /><i /></span>Payments for API builders</p>
           <h1 id="pilot-title">Your API.<br /><span>Paid per request.</span></h1>
-          <p className="lp-lead">Set a price. Share your endpoint.<br className="lp-mobile-break" /> Let agents and apps<br className="lp-desktop-break" /> pay for every call.</p>
+          <p className="lp-lead">Add paid access to your API.<br />Let agents and apps pay per request.</p>
           <div className="lp-actions">
             <Link to="/apis/new" className="lp-primary"><span>Create paid endpoint</span><ArrowRight size={18} /></Link>
             <button type="button" className="lp-secondary" onClick={explore}><span className="lp-play-icon"><Play size={12} fill="currentColor" /></span> Try a request</button>

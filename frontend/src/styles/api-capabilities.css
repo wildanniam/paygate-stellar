@@ -42,6 +42,7 @@
 .ac-grid {
   display: grid;
   grid-template-columns: 1.12fr 1fr;
+  grid-template-areas: "price access" "price earn";
   grid-template-rows: 310px 290px;
   gap: 18px
 }
@@ -83,7 +84,7 @@
   color: #dcd5ef
 }
 .ac-price-panel {
-  grid-row: span 2;
+  grid-area: price;
   background: #0d071d
 }
 .ac-price-panel .story-media {
@@ -186,10 +187,8 @@
   color: #b4a7d1;
   margin-left: 4px
 }
-.ac-mobile-split {
-  display: none
-}
 .ac-access-panel {
+  grid-area: access;
   background: #0d0917
 }
 .ac-access-panel .story-media {
@@ -252,6 +251,7 @@
   animation-delay: 3.2s
 }
 .ac-earn-panel {
+  grid-area: earn;
   background: radial-gradient(ellipse at 88% 0%,#a182fc55,transparent 64%),#211444
 }
 .ac-earn-panel .ac-panel-top {
@@ -428,8 +428,8 @@
   .ac-earn-body {
     flex-direction: column;
     align-items: flex-start;
-    top: 65px;
-    gap: 12px
+    top: 60px;
+    gap: 7px
   }
   .ac-share-value {
     flex-direction: row;
@@ -537,16 +537,6 @@
   .ac-price-options>span {
     font-size: 9px
   }
-  .ac-mobile-split {
-    display: block;
-    font-size: 10px;
-    color: #a79abc;
-    margin: 15px 0 0
-  }
-  .ac-mobile-split strong {
-    font-weight: 500;
-    color: #e1d3ff
-  }
   .ac-access-panel {
     height: 285px
   }
@@ -645,4 +635,22 @@
 
 .ac-access-panel:has(.story-media[data-visible=false]) .ac-access-pulse i {
   animation-play-state: paused;
+}
+
+/* Short benefit link; pricing has one explanation and one live result. */
+.ac-access-caption a { display:inline-flex; align-items:center; gap:10px; min-height:44px; margin-top:8px; color:#d3c6ef; font-size:13px; }
+.ac-access-caption a svg { transition:transform .2s; }
+.ac-access-caption a:hover svg { transform:translate(2px,-2px); }
+.ac-access-caption a:focus-visible { outline:2px solid #e3d4ff; outline-offset:4px; border-radius:4px; }
+.ac-chapter,.ac-protected,.ac-api-label,.ac-example-note,.ac-share-value>span,.ac-split-labels { font-size:12px; }
+.ac-earn-body p { display:block; font-size:12px; }
+@media(max-width:640px) {
+  .ac-price-panel { height:470px; }
+  .ac-value-tag { top:47%; }
+  .ac-split-labels { flex-wrap:wrap; row-gap:5px; bottom:22px; }
+  .ac-earn-body { flex-wrap:wrap; align-items:flex-start; }
+  .ac-earn-body h3 { white-space:normal; }
+  .ac-share-value { margin-left:auto; }
+  .ac-price-options { flex-wrap:wrap; }
+  .ac-price-options>span { font-size:12px; }
 }

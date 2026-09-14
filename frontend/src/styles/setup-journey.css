@@ -472,61 +472,12 @@
 .sj-caption {
   animation: sj-caption-in .4s ease-out
 }
-.sj-caption h3 {
-  font-size: 20px;
-  letter-spacing: -.025em;
-  font-weight: 500;
-  margin: 0 0 7px
-}
 .sj-caption p {
   font-size: 12px;
   color: #bdafd0;
   line-height: 1.5;
   margin: 0;
   max-width: 540px
-}
-.sj-controls {
-  display: flex;
-  gap: 9px;
-  align-items: center;
-  flex-shrink: 0
-}
-.sj-controls button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: background .2s,transform .2s
-}
-.sj-controls button:active {
-  transform: scale(.97)
-}
-.sj-back {
-  width: 44px;
-  border: 1px solid #b79dd24d;
-  background: #ffffff05;
-  color: #cbbbdc
-}
-.sj-back:disabled {
-  opacity: .28;
-  cursor: default
-}
-.sj-back:not(:disabled):hover {
-  background: #b59fcb20
-}
-.sj-next {
-  gap: 21px;
-  border: 1px solid #dac6ff;
-  background: #bfa3f4;
-  padding: 0 19px;
-  color: #23113e;
-  font: 12px 'DM Sans',sans-serif;
-  min-width: 159px
-}
-.sj-next:hover {
-  background: #d3baff
 }
 .sj-bottom {
   display: flex;
@@ -664,14 +615,6 @@
   .sj-caption p {
     font-size: 11px;
     max-width: 360px
-  }
-  .sj-next {
-    min-width: 144px;
-    gap: 14px;
-    font-size: 11px
-  }
-  .sj-caption h3 {
-    font-size: 18px
   }
 }
 @media(max-width:640px) {
@@ -815,21 +758,9 @@
   .sj-caption {
     min-height: 78px
   }
-  .sj-caption h3 {
-    font-size: 20px;
-    margin-bottom: 9px
-  }
   .sj-caption p {
     font-size: 12px;
     line-height: 1.5
-  }
-  .sj-controls {
-    justify-content: flex-end;
-    margin-top: 14px
-  }
-  .sj-next {
-    font-size: 12px;
-    min-width: 152px
   }
   .sj-bottom {
     margin-top: 14px;
@@ -902,12 +833,34 @@
 
 .sj-object.is-pending .sj-guard-art,
 .sj-object.is-pending .sj-publish-art {
-  opacity: .45;
-  filter: saturate(.4);
+  opacity: .82;
 }
 .sj-guard-art, .sj-publish-art {
   transition: opacity .65s, filter .65s;
 }
 .sj-object-caption {
   background: radial-gradient(ellipse at center, #10062090, #10062040 50%, transparent 73%);
+}
+
+/* All three actions stay visible; tabs focus the explanation, not setup progress. */
+.sj-tabs { max-width:550px; }
+.sj-tabs button { font-size:13px; gap:9px; }
+.sj-story-footer { justify-content:center; }
+.sj-caption { display:flex; align-items:center; gap:22px; }
+.sj-caption-index { flex-shrink:0; color:#b29bcc; font:12px 'JetBrains Mono',monospace; }
+.sj-caption p { margin:0; font-size:15px; color:#e0d5ed; line-height:1.6; }
+.sj-object-caption code { font-size:11px; }
+.sj-bottom { font-size:12px; }
+.sj-bottom a { min-height:44px; }
+@media(max-width:900px) {
+  .sj-object-caption code { font-size:10px; }
+}
+@media(max-width:640px) {
+  .sj-tabs button { font-size:12px; padding:0 8px; gap:5px; }
+  .sj-tabs button>span { font-size:11px; }
+  .sj-caption { align-items:flex-start; gap:12px; flex-direction:column; }
+  .sj-caption p { font-size:14px; }
+  .sj-object-caption code { font-size:10px; overflow-wrap:anywhere; }
+  .sj-bottom { flex-wrap:wrap; gap:4px 12px; }
+  .sj-bottom>span,.sj-bottom a { font-size:12px; }
 }

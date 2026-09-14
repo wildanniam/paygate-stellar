@@ -40,8 +40,8 @@ export default function PilotNav({ explore }) {
     <button ref={toggle} className="lp-menu-toggle" type="button" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="pilot-navigation" onClick={() => setOpen(!open)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
     <nav id="pilot-navigation" aria-label="Main navigation">
       <button type="button" onClick={() => { setOpen(false); explore(); }}>Try a request</button>
-      <a href="#capabilities-title" onClick={() => setOpen(false)}>Product</a>
-      <a href="#setup-title" onClick={() => setOpen(false)}>How it works</a>
+      <a href="#capabilities-title" onClick={() => setOpen(false)}>Pricing</a>
+      <a href="#setup-title" onClick={() => setOpen(false)}>Setup</a>
       <a href={GUIDE} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>Docs <ArrowUpRight size={12} /></a>
     </nav>
     <Link to="/dashboard" className="lp-dashboard">Dashboard <ArrowUpRight size={15} /></Link>

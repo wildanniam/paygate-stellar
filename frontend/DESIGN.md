@@ -1,3 +1,22 @@
+# PayGate — four-section content revision, 14 September 2026
+
+## Current owner lock
+
+The owner accepts the content blueprint and authorizes revising the four existing sections only. No new landing section, FAQ, closing CTA, dashboard showcase or homepage replacement. Continue issue #5 / draft PR #6; no UI merge. This scope supersedes conflicting historical instructions below (persistent hero split, serial setup controls, three successful receipts).
+
+- Hero owns runtime request → explicit payment → response. Preserve artwork/diagram/402 pause; remove the repeated earnings bar. Copy distinguishes payment credited from response delivered.
+- Capabilities owns pricing: “Your price. Clear fees.” Keep weather art, selector and 90/10 graphic. DOM/mobile order price → share → access; keep the asymmetric desktop composition. Access becomes a short benefit with a link to setup, without secret-header mechanics.
+- Setup owns provider actions: Register → Protect → Verify & share. All objects remain readable initially; direct keyboard tabs choose one concise caption. Remove Next/Back/Replay. Tab selection does not perform real setup.
+- Receipt owns evidence: two illustrative Weather API records, Delivered and API error. Both explicitly have credited payment; one returns 200, the other is an upstream 502. Request identity and independent payment/response states dominate; gross/net/fee remain complete but secondary. A 502 code alone never establishes payment. Keep flip, copy feedback, inactive-face inertness and stable focus.
+
+Preserve dark/violet tokens, typography, fixed navbar, existing five Higgsfield media treatments, motion controls and pointer response. No new media generation required. Native labels/values stay sharp over the artwork. Important context labels target ≥12px and actions ≥44px. Preserve mobile, keyboard, reduced-motion and original-media fallback.
+
+Validate build, simulation/pointer tests, receipt payment-vs-delivery semantics, and actual browser desktop/tablet/390/320px views. Review interactions and content independently of visual taste; owner feedback remains pending on the assembled revision. Detailed implementation/evidence: `docs/design/content-revision.md`.
+
+---
+
+## Previous direction (historical)
+
 # PayGate landing preview — pointer-responsive artwork, 14 September 2026
 
 ## Current authorized interaction — 14 September 2026

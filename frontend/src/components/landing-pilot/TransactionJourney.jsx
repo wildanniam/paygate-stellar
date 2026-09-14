@@ -7,10 +7,10 @@ const STATUS = {
   requesting: ['Request sent.', 'The client asks for the weather in Jakarta.'],
   required: ['402 · Payment required.', 'Simulate a 0.010 testnet USDC payment to continue.'],
   verifying: ['Verifying payment…', 'PayGate checks the sample payment.'],
-  credited: ['Payment verified.', 'Revenue is credited before the request is forwarded.'],
+  credited: ['Payment credited.', 'Revenue is credited before the request is forwarded.'],
   forwarding: ['Your API gets the call.', 'The verified request carries your secret header.'],
   returning: ['Weather data returns.', 'Your API sends the response back to the client.'],
-  complete: ['Data delivered. You got paid.', 'The client received the JSON response.'],
+  complete: ['Response delivered.', 'The client received the JSON response.'],
 };
 
 function Connection({ side, step, credited }) {
@@ -77,9 +77,6 @@ export default function TransactionJourney({ sample, simulation, consoleRef }) {
       <div className="tx-controls"><button type="button" className="tx-reset" onClick={() => simulation.current?.reset()} disabled={step === 'idle'} aria-label="Reset sample request"><RotateCcw size={15} /></button><button type="button" className="tx-action" onClick={advance} aria-disabled={busy}>{busy ? <span className="tx-spinner" /> : complete ? <RotateCcw size={13} /> : step === 'required' ? <LockKeyhole size={12} /> : <Play size={11} fill="currentColor" />}<span>{action}</span></button></div>
     </div>
 
-    <div className="tx-earnings" aria-label={sample.credited ? 'Payment breakdown, credited' : 'Example payment breakdown, not yet credited'}>
-      <span className="tx-earned">{sample.credited && <Check size={12} />}<span>{sample.credited ? 'You earned' : 'Your share'}</span> <strong>{sample.credited ? '+0.009' : '0.009'}</strong></span><span className="tx-earnings-divider" /><span>PayGate fee <strong>0.001</strong></span><span className="tx-currency">testnet USDC</span>
-    </div>
     <footer className="tx-footer"><p>Interactive example. No funds are sent.</p><button type="button" onClick={() => setInspect(!inspect)} aria-expanded={inspect} aria-controls="sample-payload"><Code2 size={13} />{inspect ? 'Hide payload' : 'View payload'}<ChevronDown size={12} className={inspect ? 'is-open' : ''} /></button></footer>
     <div className="tx-payload" id="sample-payload" hidden={!inspect}>
       <div><span>Example request</span><pre><code>{'GET /weather?city=Jakarta\nAccept: application/json'}</code></pre></div>
