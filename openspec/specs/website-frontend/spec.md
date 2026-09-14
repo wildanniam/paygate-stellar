@@ -156,7 +156,17 @@ Long URLs, secrets, request ids, payment ids, and tx hashes SHALL be copyable an
 
 ### Requirement: Isolated landing design preview
 
-The `/design-preview` route SHALL provide a hero-only design preview without replacing `/`. It SHALL preserve the existing dark/purple color tokens. Its asset and interaction scope is recorded in `../../changes/pilot-higgsfield-landing/proposal.md`.
+The `/design-preview` route SHALL provide an isolated incremental design preview without replacing `/`. It SHALL preserve the existing dark/purple color tokens. The current five-section scope and owner locks are recorded in `frontend/DESIGN.md` and `docs/design/closing-section.md`; `../../changes/pilot-higgsfield-landing/proposal.md` preserves the original pilot history.
+
+#### Scenario: Visitor finishes the product story
+
+- GIVEN the visitor reaches the closing section after the hero, pricing, setup and receipt
+- THEN a concise CTA and four FAQ rows lead to a large PayGate wordmark and footer links
+- AND the primary CTA navigates to `/apis/new`, with testnet beta context visible
+- AND opening a FAQ closes the previous answer without moving keyboard focus
+- AND answers clarify existing API requirements, payment-client requirements, testnet scope and upstream failure after credited payment
+- AND desktop pointer light does not deform the wordmark or run while disabled, offscreen or hidden
+- AND touch and reduced-motion users retain readable content and working controls
 
 #### Scenario: Visitor tries the sample
 

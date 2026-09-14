@@ -1,4 +1,20 @@
-# PayGate — four-section content revision, 14 September 2026
+# PayGate — closing section, 14 September 2026
+
+## Current owner lock: approved closing study
+
+The owner accepts the CTA/FAQ/interactive-wordmark study and authorizes implementation as the fifth, closing section on `/design-preview`. This supersedes the four-section-only restriction below for this increment. Continue issue #5 / draft PR #6; do not merge the UI.
+
+Brand UI for API builders finishing the four-section product story. Primary path: resolve a prerequisite in the FAQ, then Create paid endpoint → `/apis/new`; the setup guide is secondary. Keep public Stellar Testnet beta visible by the CTA. Existing four sections remain unchanged.
+
+Target: the owner-approved `paygate-closing-direction.html` study, with CTA left / four quiet FAQ rows right, large PayGate wordmark below, and small Docs/GitHub footer. Retain DM Sans, ink/violet/lavender and the existing primary button family. Scale the study to the landing's content width; stack at 700px. Controls remain at least 44px, supporting text at least 12px. Preserve exact letter shapes and native readable content.
+
+Micro motion budget: bounded light inside the wordmark follows a fine pointer with easing and returns to 45% on leave; no idle loop, video, shader or scroll hijack. Stop frames/listeners when disabled/offscreen/hidden and clean up on unmount. Respect the shared motion setting and OS reduced motion. CTA lift/arrow/press and 240ms single-open FAQ disclosure complete the interaction. All answers start closed; keyboard Enter/Space and visible focus work; collapsed answer content is hidden from assistive technology. No loading/payment/validation state is needed for this local FAQ.
+
+Native fine-line material is the approved starting finish. A Higgsfield still is optional only if inspection shows a clear need; generating new media is not required to reproduce the accepted study. No generated text/logo. Review assembled desktop/tablet/390/320px views, pointer return/pause, FAQ single-open and keyboard behavior, CTA routes, build and existing regressions. Implementation and evidence: `docs/design/closing-section.md`.
+
+---
+
+# Previous lock — four-section content revision
 
 ## Current owner lock
 
