@@ -1,3 +1,11 @@
+# Pricing feedback — 14 September 2026
+
+Owner asks for actual wave deformation on hover and price selection in “You keep 90%”, and analysis of the unsatisfactory cloud. Reuse issue #5 / draft PR #6. Native 30-bar wave, fixed 27/3 ownership split, exact immediate amounts. Pointer-local crest/trough; one 1.5s travelling wave on price change; settles and sleeps. Stop offscreen/hidden, global off and OS reduced-motion. Keep text/control positions stable and reserve room around the graphic at all breakpoints. No additional section or UI merge.
+
+Cloud contour is now **rejected by owner for its form**, superseding AI integration acceptance below. Replacement direction is a proposal: one airy volumetric cloud with subtle lavender rim light and partly hidden sun, no concentric rings/triangular cavity. Analyze first; no new generation or image replacement in this increment. Detailed rationale, draft asset brief and checks: `docs/design/interaction-choreography.md#pricing-feedback-follow-up`.
+
+---
+
 # PayGate — interaction choreography, 14 September 2026
 
 ## Current owner lock: connect actions, objects and atmosphere

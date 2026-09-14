@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Check, ArrowUpRight, Code2 } from 'lucide-react';
 import StoryMedia from './StoryMedia.jsx';
+import useShareWave from './useShareWave.js';
 import '../../styles/api-capabilities.css';
 
 const PRICES = [1, 5, 10];
 
 export default function ApiCapabilities({ motion }) {
   const [cents, setCents] = useState(1);
+  const { cardRef, graphicRef } = useShareWave(motion, cents);
   const gross = (cents / 100).toFixed(3);
   const provider = (cents * 9 / 1000).toFixed(3);
   const fee = (cents / 1000).toFixed(3);
@@ -32,10 +34,10 @@ export default function ApiCapabilities({ motion }) {
         </div>
       </article>
 
-      <article className="ac-earn-panel" aria-labelledby="ac-earn-title">
+      <article ref={cardRef} className="ac-earn-panel" aria-labelledby="ac-earn-title">
         <div className="ac-panel-top"><span className="ac-chapter">YOUR SHARE</span></div>
         <div className="ac-earn-body"><div><h3 id="ac-earn-title">You keep <span>90%.</span></h3><p>PayGate fee: 10%.</p></div><div className="ac-share-value" key={cents}><strong>{provider}</strong><span>USDC / call</span></div></div>
-        <div className="ac-split-graphic" key={cents} aria-label="90 percent to you, 10 percent PayGate fee"><div className="ac-split-you">{Array.from({ length: 27 }, (_, i) => <i key={i} style={{ '--bar': i }} />)}</div><div className="ac-split-fee"><i /><i /><i /></div></div>
+        <div ref={graphicRef} className="ac-split-graphic" role="img" aria-label="90 percent to you, 10 percent PayGate fee"><div className="ac-split-you" aria-hidden="true">{Array.from({ length: 27 }, (_, i) => <i key={i} />)}</div><div className="ac-split-fee" aria-hidden="true"><i /><i /><i /></div></div>
         <div className="ac-split-labels"><span><i /> Your share</span><span>PayGate fee <b>{fee}</b> USDC</span></div>
       </article>
 

@@ -43,3 +43,36 @@ Two image generations, no new video. First Seedream result was rejected: visible
 - `git diff --check` passed. Review screenshots are local, not committed.
 
 Visual judgment: each section now has a distinct action, and setup has the largest structural improvement. The calmer field and receipt protect reading; the weather artwork is semantically corrected. This is ready for owner review in the live preview. It is not a claim that a static screenshot proves animation quality or that owner taste approval has been obtained.
+
+
+## Pricing feedback follow-up
+
+### Owner feedback and implementation
+
+On 14 September the owner requested actual wave motion for the share bars on hover and price changes; the earlier brightness sweep was insufficient. The owner also rejected the contour cloud form and asked how it should improve. This feedback supersedes the earlier AI judgment that the weather asset was ready; it does not invalidate the five-section content structure.
+
+Implemented native motion, without a dependency, canvas, video or generated asset:
+
+- Hover over the share card creates a continuous, spatially local crest/trough around the pointer. Its position eases toward the cursor. On leave, amplitude dissipates before the frame loop sleeps.
+- A different price launches one 1500ms wave from left to right, including the fee bars. Rapid changes blend at most three impulses; bounds keep scale between0.54 and1.68. There is no idle loop or initial-mount animation. A repeat click on the already-selected price has no financial or animation effect.
+- The 27 lavender /3 muted bars, their widths and labels remain fixed. Animated height expresses interaction, not a change to the90/10 split. Gross/net/fee update immediately and are announced through the existing live region. Numbers are never interpolated.
+- `useShareWave` mutates only decorative transforms through a single requestAnimationFrame loop. It cancels and resets on offscreen, hidden document, global off, OS reduced-motion and unmount. Fine-pointer hover only; touch and keyboard get the same price-change wave. A price chosen while share is just outside the phone viewport can play on entry within1.8s; older actions do not replay.
+- Mobile graphic raised8px to reserve space for the crest. Prices, labels and controls stay still.
+
+Verification: Node24 production build and19 tests pass (15 existing +4 wave propagation/locality/bounds/frame-rate tests). Chrome1470px desktop,835px tablet,390px and320px phone viewports: no document overflow. Pointer-local changing heights were observed; keyboard Space selected0.10 and displayed0.090/0.010; leave/settling restored all30 bars to neutral; global motion-off kept all transforms neutral while prices still changed. Narrow mobile retained space above/below the maximum bar envelope. OS preference/hidden cleanup reviewed in source, not Safari/physical-device performance testing. No new cloud asset or credits used.
+
+### Cloud analysis — proposal, not implemented or approved
+
+The concentric closed outlines make the cloud read as a fingerprint/logo; the triangular void is visually unexplained. A uniform bright tubular outline and a detached solid violet sun flatten the form. Scaling, adding glow or distorting this silhouette cannot fix the underlying construction.
+
+Recommended direction: **one soft volumetric weather object**. Use asymmetric, naturally clustered cloud lobes, an airy dry base, lilac highlights and deep indigo internal shading. A partly hidden sun illuminates the upper-right cloud edge, creating one connected composition. Keep purple through the lighting and background, with a few pearl highlights; avoid solid neon fill across the whole object. No fingerprint contours, hollow center, metallic material or unrelated sculpture.
+
+Composition:4:3 source; cloud/sun together occupy roughly60–65%width and50–55%height. Leave clear upper-left room for Jakarta/29° and lower-right room for the native price. Fit fully inside mobile crop; fade to#090613 without a floor or visible image rectangle. Keep labels and amounts native. A readable100px silhouette is needed because the same asset also appears in the hero API card.
+
+Interaction: a still is sufficient; retain only restrained pointer parallax/light response. Shape and weather do not change when the API price changes. Do not add another background video merely to create motion. Inspect the still at actual card and thumbnail sizes before considering a subtle breathing-light loop.
+
+Draft Higgsfield prompt (proposal only):
+
+> Create a refined volumetric partly-cloudy weather illustration for PayGate, a dark violet developer API payments website. One compact airy cumulus cloud, naturally asymmetric lobes and a clean dry softly dissolving base. Solid readable cloud volume with delicate vapor detail, no holes or hollow center. A softly luminous lilac sun is partially occluded behind its upper-right edge; its light grazes the cloud so both forms feel connected. Cloud body shaded deep indigo with soft lavender and a few pearlescent highlights, color atmosphere#735CFA and#A99AFF against uniform near-black#090613. Understated dimensional editorial lighting, soft internal occlusion, fine atmospheric detail, restrained bloom. Front view with a slight sense of depth. Whole object centered within60percent image width and50percent image height, generous empty dark margins, upper-left and lower-right kept quiet for native website labels.4:3 composition, no ground, horizon, pedestal, border, text, numbers, UI or logo. No concentric contour lines, fingerprint pattern, triangular cavity, wireframe cloud, metallic surface, plastic toy, hanging strands, drops, rain, lightning or detached glossy sphere. Recognizable at small sizes; detailed but calm at large sizes.
+
+Acceptance for a replacement: owner can recognize partly-cloudy weather immediately; no contour/cavity artifacts, awkward crop or loss of text contrast; cloud and sun look physically connected; matches the existing violet atmosphere without becoming a second visual focal point competing with price selection. Owner visual acceptance remains open.

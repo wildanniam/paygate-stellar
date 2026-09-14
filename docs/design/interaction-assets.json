@@ -27,7 +27,12 @@
       },
       "decision": "accepted-for-integration",
       "reason": "Dry partly-cloudy contour, readable silhouette, consistent violet palette.",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260914_152322_a1cd72b6-e0b0-4005-9ec5-87fabf59b479.png"
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260914_152322_a1cd72b6-e0b0-4005-9ec5-87fabf59b479.png",
+      "ownerFeedback": {
+        "date": "2026-09-14",
+        "decision": "rejected-form",
+        "reason": "Contour cloud looks strange; replacement direction should use a more natural volumetric form."
+      }
     }
   ],
   "shipped": [
@@ -37,5 +42,5 @@
   "processing": "cwebp q87 full1168x876; q84 resized600x450. Encoding/resizing only.",
   "newVideos": 0,
   "actualBilledCredits": null,
-  "review": "Both results visually inspected. Second integrated; owner feedback on assembled page pending."
+  "review": "Two results previously inspected by AI; second integrated. Owner subsequently rejected the second image form as strange/unsatisfactory (14 September 2026). It remains displayed pending a replacement direction; AI integration acceptance was not owner visual acceptance."
 }

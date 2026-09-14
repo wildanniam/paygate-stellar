@@ -20,6 +20,8 @@ Before editing code, read:
 
 ## Landing Design Preview — 2026-09-14
 
+Latest pricing feedback: implement real wave deformation on hover and price change, preserving 27/3 bars and immediate financial values. See `design/interaction-choreography.md#pricing-feedback-follow-up`. The owner rejects the contour cloud form; the volumetric replacement brief is an AI proposal, not a generated or approved replacement. Continue issue #5 / draft PR #6 with no merge.
+
 Latest owner authorization: implement and evaluate the five-section motion audit. `design/interaction-choreography.md` is the current interaction record: visible-scroll-first hero, state-aware atmosphere, linked pricing, native installation objects with one active mobile stage, stable payment/animated response evidence, and fiber-textured native closing. One accepted Higgsfield weather still replaces the rainy mismatch; two image attempts are recorded in `design/interaction-assets.json`. Continue draft PR #6, no UI merge or additional section. Visual feedback on this implementation remains pending.
 
 
