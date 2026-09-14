@@ -18,11 +18,11 @@ Before editing code, read:
 
 `README.md` may be stale. For V0/SOW generator work, `TECHNICAL_SPEC.md` wins. For the V1 branch, `PAYGATE_V1_PRODUCT_SPEC.md` wins where it intentionally conflicts with V0 constraints.
 
-## Landing Design Preview — 2026-09-13 revision
+## Landing Design Preview — 2026-09-14
 
-Issue #5 / draft PR #6 provide the isolated lazy `/design-preview` route. The owner accepts the violet hero, buttons and native transaction visualization. Latest feedback rejects **sections 2 and 3** as plain and text-heavy, superseding earlier capabilities acceptance. The replacement uses original Higgsfield weather/access/path artwork, two ambient loops, an interactive price/split visual and a spatial connect → protect → publish scene. Both revised sections await owner feedback. Read `../frontend/DESIGN.md`, `design/visual-story-revision.md` and `design/visual-story-assets.json`; earlier pilot/section notes preserve superseded history.
+Issue #5 / draft PR #6 provide the isolated lazy `/design-preview` route. The owner accepts the visual sections 2–3 and now asks to continue with exactly one next section after the hero/navigation revision. The preview has four sections: an open hero transaction scene, artwork-led capabilities, spatial setup, and an inspectable payment receipt. The new receipt section awaits owner visual feedback. Read `../frontend/DESIGN.md`, `design/payment-records.md` and `design/payment-records-assets.json`; earlier design notes preserve superseded history.
 
-Keep the original dark/purple tokens. Quality-led Higgsfield credit use is authorized. Illustrations never run wallet/API/payment operations. Hero settlement remains credit-before-forwarding and separate from delivery. Media is decorative, lazy, pausable and independent of product state. No further section, homepage replacement, backend/dependency change, release or merge is authorized by this preview work.
+Keep the original dark/purple tokens. Quality-led Higgsfield credit use is authorized. Exact data and controls stay native; receipt IDs and amounts are clearly illustrative, with payment credit separate from API delivery. `StoryMedia` accepts an optional `basePath` (default `/brand/visual-story`) for section-specific media, with poster fallback, viewport/visibility pause and global motion preference. Animations never determine product state. Preview controls do not run wallet/API/payment operations. A fifth section, homepage replacement, backend/dependency changes, release and merge remain outside scope.
 
 ## V1 Branch Direction
 

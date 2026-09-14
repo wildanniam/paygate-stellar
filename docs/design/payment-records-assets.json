@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-14",
+  "scope": "Fourth section on /design-preview: inspectable example payment receipts.",
+  "provider": "Higgsfield",
+  "credits": {
+    "before": 516,
+    "after": 495.5,
+    "spent": 20.5,
+    "image": 6.5,
+    "video": 14
+  },
+  "image": {
+    "model": "gpt_image_2",
+    "job_id": "3e3274ce-87b9-47a0-822e-229858a38a7e",
+    "reference_job": "bc4bc922-0905-4550-8360-fb034c0e7f2f",
+    "prompt": "Art-direct an original premium web illustration for PayGate, a developer API payment gateway. Use the supplied reference ONLY for its violet/lavender luminous fiber material and ink-black world, not for its wave composition. The concept is a PAPER TRAIL OF DIGITAL PAYMENT RECEIPTS. Landscape 4:3 composition, pure ink #080610 at the outer edges. Two long, delicate, semi-transparent lilac receipt-paper ribbons arc around an EMPTY central vertical area, one flowing from lower left behind the center up toward upper right, the other curling softly behind it. Their rectangular paper width, evenly spaced tiny perforations along one margin, and subtly serrated torn ends make them unmistakably receipt paper, not silk cloth or metal. Material is paper-thin iridescent vellum woven from thousands of precise lavender optical fibers, with violet rim light and restrained cool-white pearlescent highlights. The empty central rectangle from x=33% to68%, y=15% to85% must remain dark and visually quiet: a real HTML receipt card will be placed there later, so all ribbons live BEHIND and AROUND that central footprint. Build an elegant fan of layered light-paper surfaces around this space. Some fine data filaments connect their perforated edges, suggesting each API payment leaves a trace. Rich sculptural depth through soft occlusion and translucent overlapping edges, but no floor or pedestal. Camera locked, front-on with subtle depth, crisp intentional graphic silhouette, editorial fintech art direction. Violet #735CFA, lavender #B6A3FF, ink black, restrained ice-white. Strong image, not a stock abstract gradient. NO text, letters, digits, watermark, logo, UI, dashboard, receipt printing, barcodes, QR codes, coins, cryptocurrency symbols, metallic or chrome surfaces, spheres, planets, magical portal, shields, robot, grid wallpaper, excessive sparkles or lens flare. Keep the composition intact for a restrained ambient loop.",
+    "requested": {
+      "aspect_ratio": "4:3",
+      "resolution": "2k",
+      "quality": "high"
+    },
+    "actual": {
+      "width": 2336,
+      "height": 1744
+    },
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260914_003229_3e3274ce-87b9-47a0-822e-229858a38a7e.png"
+  },
+  "video": {
+    "model": "kling3_0",
+    "job_id": "a9972bcf-d707-4646-9ba2-03da7029d350",
+    "prompt": "Animate the supplied PayGate light-paper receipt environment as a premium silent web background. Camera absolutely locked. Preserve the exact composition, framing, colors, dark empty center and the shape/position of both perforated vellum ribbons. Only a restrained, clearly visible traveling lavender highlight runs along the tiny optical fibers and the paper edges gently flex by less than 2 percent of frame width. The physical paper stays anchored around the perimeter; do not bring it into the dark central area where a native receipt will sit. The feeling is a payment leaving a permanent luminous paper trail, not a spinning film reel. Begin motion immediately and return naturally to the supplied ending pose. 8-second quiet loop, smooth constant cadence, no sudden sweep, no new objects, no morphing, no text, no digits, no symbols, no coins, no camera pan, dolly, zoom or orbit, no cuts, no smoke, no particles. Preserve fine perforations and detailed fiber material without crawling noise. Keep the central 35 percent and outer black edges calm. No sound.",
+    "requested": {
+      "duration": 8,
+      "mode": "pro",
+      "sound": "off",
+      "aspect_ratio": "4:3",
+      "start_and_end_image": "3e3274ce-87b9-47a0-822e-229858a38a7e"
+    },
+    "aspect_note": "Tool normalized requested aspect to 1:1; actual result preserved input framing at 1664x1244. Poster and film share the composition.",
+    "actual": {
+      "width": 1664,
+      "height": 1244,
+      "duration": 8.042,
+      "fps": 24
+    },
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260914_003628_a9972bcf-d707-4646-9ba2-03da7029d350.mp4"
+  },
+  "delivery": {
+    "processing": "Higgsfield remote sandbox. Pillow Lanczos WebP quality88 method6. Film: 1200px width, H.264 CRF23,24fps,no audio,faststart; 0.4s crossfade of end into beginning yields 7.6s loop.",
+    "files": [
+      {
+        "path": "frontend/public/brand/payment-records/receipt-field.webp",
+        "width": 1600,
+        "height": 1195,
+        "bytes": 201156,
+        "media_id": "1f7dc01e-ba87-4778-b451-de7d3fe60eed"
+      },
+      {
+        "path": "frontend/public/brand/payment-records/receipt-field-small.webp",
+        "width": 800,
+        "height": 597,
+        "bytes": 43610,
+        "media_id": "65fca91a-64e2-4ff6-a5e6-da2254c4ddd4"
+      },
+      {
+        "path": "frontend/public/brand/payment-records/receipt-field.mp4",
+        "width": 1200,
+        "height": 898,
+        "bytes": 578473,
+        "media_id": "614f7a88-f2e0-4bf3-854a-8770e8c4e68f"
+      }
+    ]
+  },
+  "review": "Master, motion contact sheet and actual assembled desktop/tablet/mobile section inspected. No text baked in; all receipt amounts and controls native. 1 image and 1 film generated; no failed/discarded generation this turn."
+}

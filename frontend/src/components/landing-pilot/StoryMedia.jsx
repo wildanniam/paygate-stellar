@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import '../../styles/story-media.css';
 
 /** Decorative artwork: only loads its film near the viewport; always keeps a poster. */
-export default function StoryMedia({ name, motion, video = false, className = '' }) {
+export default function StoryMedia({ name, motion, video = false, className = '', basePath = '/brand/visual-story' }) {
   const container = useRef(null);
   const player = useRef(null);
   const [visible, setVisible] = useState(false);
   const [load, setLoad] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
-  const base = `/brand/visual-story/${name}`;
+  const base = `${basePath}/${name}`;
 
   useEffect(() => {
     let intersecting = false;

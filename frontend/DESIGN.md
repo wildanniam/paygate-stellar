@@ -1,8 +1,20 @@
-# PayGate landing preview — hero integration, 13 September 2026
+# PayGate landing preview — payment records, 14 September 2026
 
 ## Authority
 
-The owner accepts the replacement artwork-led sections 2 and 3 in commit 8119964. Preserve them. The boxed transaction walkthrough is now rejected as visually out of place; hero effects need better integration and navigation must remain available while scrolling. This supersedes earlier acceptance of the transaction component. Revise the hero presentation and navigation only on `/design-preview`, issue #5 / draft PR #6. No production replacement, backend change, fourth section or merge. This hero revision awaits owner feedback.
+The owner now authorizes exactly one next section after the current hero, capabilities and setup. Preserve those surfaces. Add an artwork-led payment-record section on `/design-preview`, issue #5 / draft PR #6. User explicitly wants creative Higgsfield media and thoughtful microinteractions. The preview grows to four sections; homepage replacement, backend, further sections and merge remain out of scope. New section awaits owner visual feedback.
+
+## Current section: every call leaves a record
+
+Brand-led interactive illustration for developer API owners, following setup. Headline: “Every paid call. A clear record.” One short supporting sentence connects payment, provider earnings and response. An asymmetric composition places three selectable sample calls beside a prominent native receipt in an original Higgsfield light-paper environment. This changes the rhythm after the wide setup panorama. No dashboard table, fabricated activity graph, fake live counter or wall of documentation.
+
+The generated art contains translucent, perforated receipt-paper ribbons woven from violet fibers around a quiet central footprint. Keep exact data native on a pale lavender receipt with perforated edges: selected API, gross payment, provider/fee, independent response status and request identity. A “View details” action turns the receipt to its reverse for endpoint, payment/request IDs and response evidence. The reverse offers a real clipboard action with success/failure feedback. Sample identifiers are visibly examples and never link to fabricated on-chain proof.
+
+State contract: three native vertical tabs with Up/Down/Home/End and roving focus; selection updates the same receipt and returns it to the front. A local 400ms sheet transition and finite verification-stamp reveal emphasize the new record. Hover/focus highlights the selected row; press moves it 1px. Receipt details use a controlled fold/turn; hidden faces are inert and nonfocusable, and a persistent toggle preserves keyboard focus. Clipboard success announces “Copied”; failure exposes a selectable ID. Motion off changes state immediately, stops film and all decorative CSS; no interaction waits for animation. No automatic cycling or simulated transactions in this section.
+
+Desktop uses an open 40/60 split inside a subtly bounded violet environment. Phone stacks heading, compact call selector, then a full-size receipt; controls remain ≥44px and the selected receipt is near the selector. The generated art is a poster first; the quiet loop loads only when in view and pauses offscreen/hidden. Assets do not carry exact amounts or determine payment state. Reuse StoryMedia with a backwards-compatible asset-base option if needed.
+
+References: Circular's differentiated panel scale; Cloudlight's concrete product objects and selectable result; Agentframe's textured art direction. Interpret principles within PayGate's existing purple palette and type system, without copying their assets, source or illustrative business claims.
 
 ## Current hero revision
 

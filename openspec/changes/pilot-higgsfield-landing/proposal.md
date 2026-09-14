@@ -1,3 +1,11 @@
+# PayGate preview: inspectable payment records
+
+Latest owner instruction, 14 September 2026: continue by developing exactly one next section, informed by the supplied references and original Higgsfield media. Add “Every paid call. A clear record.” after setup. Three native sample tabs update a two-sided receipt with gross, provider share, fee, independent API response and illustrative IDs. Original violet light-paper artwork and a quiet film frame the receipt. Keyboard navigation, focus-preserving details toggle, real copy feedback, local/global motion control and responsive layouts are implemented. See `frontend/DESIGN.md`, `docs/design/payment-records.md` and its asset ledger.
+
+The preview now contains four sections. The owner has authorized this incremental implementation; visual approval of the new section is pending. No fifth section, homepage replacement, backend/wallet/contract change, dependency, merge or deployment. Earlier scope boundaries below are historical and superseded only where this instruction extends them.
+
+---
+
 # PayGate preview: integrate hero journey and persistent navigation
 
 Latest owner feedback, 13 September 2026: the artwork-led sections 2–3 in 8119964 are accepted. The owner asks for a better concept for the boxed hero transaction walkthrough, more coherent background effects, and navigation available while scrolling. Replace the opaque walkthrough with an open scene, reuse approved violet/weather media, simplify visible copy, localize state lighting, reduce field parallax, and add a page-level fixed nav with a mobile disclosure. Preserve explicit sample payment, credit-before-delivery, cancellation, motion-off and truthful testnet labels. See `frontend/DESIGN.md` and `docs/design/hero-integration.md`.
