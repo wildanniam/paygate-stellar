@@ -1,3 +1,11 @@
+# Setup selection and card feedback — 14 September 2026
+
+Owner asks for unmistakable active setup artwork, smoother step changes, and whole-card pricing hover. Standard UI increment; reuse issue #5 / draft PR #6, no merge. Preserve existing palette, artwork, five sections and payment truth.
+
+Target: selected setup stage has a persistent Viewing marker, bright tab plate, stronger shield material and a quiet grounding light. Inactive hover must stay weaker than selection. Keep artwork DOM mounted; transition from current transforms over 420ms instead of remounting/restarting all objects. Caption uses three persistent overlapping rows; mobile crossfades one stage at a time with hidden inactive controls. Keyboard focus remains distinct. Pricing cards lift 4px with edge light/shadow in 220ms on fine-pointer hover, native controls retain focus/press. No card-wide click action or tilt. Motion-off/reduced-motion removes travel while preserving visual state. No new media/dependency. Verify rapid switching, keyboard, desktop/mobile, hover leave, exact pricing and motion-off.
+
+---
+
 # Surface blending and cloud candidate — 14 September 2026
 
 Owner reports hard color patches inside the pricing artwork and across surrounding sections, and rejects the contour cloud. Scope: correct compositing and produce a better cloud study in the existing five-section preview; issue #5 / draft PR #6, no merge.

@@ -47,13 +47,14 @@ export default function SetupJourney({ motion }) {
         {STEPS.map(({ label }, index) => <button key={label} ref={el => { tabs.current[index] = el; }} type="button" role="tab" id={`setup-step-${index}`} aria-selected={step === index} aria-controls="setup-scene" tabIndex={step === index ? 0 : -1} onClick={() => select(index)} onKeyDown={event => onTabKey(event, index)}><span>0{index + 1}</span>{label}</button>)}
       </div>
       <div className="sj-scene" id="setup-scene" role="tabpanel" tabIndex={0} aria-labelledby={`setup-step-${step}`} aria-describedby="setup-caption">
-        <div key={step} className="sj-rails" aria-hidden="true"><span className="sj-rail sj-rail-first"><i /></span><span className="sj-rail sj-rail-last"><i /></span></div>
+        <div className="sj-rails" aria-hidden="true"><span className="sj-rail sj-rail-first"><i /></span><span className="sj-rail sj-rail-last"><i /></span></div>
         {STEPS.map(({ label, title, detail }, index) => <button type="button" key={label} className={`sj-object sj-object-${index}`} data-active={step === index} aria-label={`Explore ${label} step`} aria-pressed={step === index} onClick={() => select(index)}>
-          <div className="sj-artwork" key={`${index}-${step}`} aria-hidden="true"><StepArtwork index={index} /></div>
+          <span className="sj-selection" aria-hidden="true"><i /> Viewing</span>
+          <div className="sj-artwork" aria-hidden="true"><StepArtwork index={index} /></div>
           <span className="sj-object-caption"><strong>{title}</strong><code>{detail}</code></span>
         </button>)}
       </div>
-      <div className="sj-story-footer"><div id="setup-caption" className="sj-caption" key={step}><span aria-hidden="true">0{step + 1} / 03</span><p>{STEPS[step].description}</p></div></div>
+      <div className="sj-story-footer" id="setup-caption">{STEPS.map(({ label, description }, index) => <div className="sj-caption" key={label} data-active={step === index} aria-hidden={step !== index}><span aria-hidden="true">0{index + 1} / 03</span><p>{description}</p></div>)}</div>
       <div className="sj-bottom"><span>Interactive illustration · No API is created</span><a href={GUIDE} target="_blank" rel="noreferrer">Setup guide <ArrowUpRight size={13} /></a></div>
       <p className="sj-live" role="status">Step {step + 1} of 3. {STEPS[step].description}</p>
     </div>

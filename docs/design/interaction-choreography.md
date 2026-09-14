@@ -91,3 +91,19 @@ Validation: production build and all 19 motion/simulation tests pass; desktop 14
 ---
 
 Research rationale (design inference): [Apple weather icon semantics](https://support.apple.com/en-ie/guide/iphone/iph4305794fb/ios) support a recognizable partly-cloudy silhouette. [Spline displacement](https://docs.spline.design/materials-shading/surface-detail/displace-layer) and [environment lighting](https://docs.spline.design/lighting/environment-and-hdri) inform volume and unified lighting; these do not require introducing Spline or real-time 3D. The generated still uses these visual principles with the existing lightweight interaction layer. Quality remains subject to owner feedback.
+
+
+## Setup Selection And Whole-Card Feedback
+
+# Setup selection and card feedback — 14 September 2026
+
+Owner asks for unmistakable active setup artwork, smoother step changes, and whole-card pricing hover. Standard UI increment; reuse issue #5 / draft PR #6, no merge. Preserve existing palette, artwork, five sections and payment truth.
+
+Target: selected setup stage has a persistent Viewing marker, bright tab plate, stronger shield material and a quiet grounding light. Inactive hover must stay weaker than selection. Keep artwork DOM mounted; transition from current transforms over 420ms instead of remounting/restarting all objects. Caption uses three persistent overlapping rows; mobile crossfades one stage at a time with hidden inactive controls. Keyboard focus remains distinct. Pricing cards lift 4px with edge light/shadow in 220ms on fine-pointer hover, native controls retain focus/press. No card-wide click action or tilt. Motion-off/reduced-motion removes travel while preserving visual state. No new media/dependency. Verify rapid switching, keyboard, desktop/mobile, hover leave, exact pricing and motion-off.
+
+
+Implementation: removed step-dependent artwork/rail/caption remount keys and obsolete object entrance keyframes. Persistent property transitions can reverse from their current value under rapid selection. Shield selection adds stronger material/white icon; other artwork remains at .3 opacity (.48 hover), selected at1 with a Viewing marker. Caption rows overlap in a stable footer grid; mobile objects crossfade with inactive visibility/pointer suppression. Existing short scan/rail effects remain. Pricing card lift4px, edge light and shadow220ms are fine-pointer gated; focus-within has edge emphasis without travel. Global motion-off and reduced-motion retain selected styling and disable movement.
+
+Verification: production build and19 existing tests pass; Chrome1470px active Protect, keyboard ArrowRight/Home, rapid step selection, card hover transform -4px and return-to-none verified. Mobile390/320px keeps one visible settled object/caption, no horizontal overflow; motion-off uses0s transitions and selected state remains immediate. Viewport restored. No media/dependency/backend/payment changes. Physical device/Safari and screen-reader speech not separately tested.
+
+Research: [Fluent motion](https://fluent2.microsoft.design/motion) informs consistent duration/easing; [WAI focus versus selection](https://www.w3.org/TR/2021/NOTE-wai-aria-practices-1.2-20211129/) informs separating selected appearance from transient hover/focus; [Motion hover guidance](https://motion.dev/docs/react-hover-animation) informs avoiding touch-emulated hover. Specific420ms/220ms/4px values are local design choices, not claims of required standards.
