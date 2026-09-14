@@ -242,13 +242,13 @@
   background: #e0c8ff;
   box-shadow: 0 0 10px #9a71ff;
   opacity: 0;
-  animation: ac-packet 5s linear infinite
+  animation: none
 }
 .ac-access-pulse i:nth-child(2) {
-  animation-delay: 1.6s
+  animation-delay: .12s
 }
 .ac-access-pulse i:nth-child(3) {
-  animation-delay: 3.2s
+  animation-delay: .24s
 }
 .ac-earn-panel {
   grid-area: earn;
@@ -654,3 +654,35 @@
   .ac-price-options { flex-wrap:wrap; }
   .ac-price-options>span { font-size:12px; }
 }
+
+/* Price selection directs one finite pulse toward the share, without animating amounts. */
+.ac-grid { position:relative; }
+.ac-price-segments { position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:3px; padding:4px; border:1px solid #b79cff30; border-radius:14px; background:#110b21c4; }
+.ac-price-plate { position:absolute; inset:4px auto 4px 4px; width:calc((100% - 14px)/3); border-radius:9px; background:#bcadff; box-shadow:inset 0 1px #f0e7ffaa,0 3px 12px #06031144; transform:translateX(calc(var(--selected)* (100% + 3px))); transition:transform 280ms cubic-bezier(.2,.8,.2,1); pointer-events:none; }
+.ac-price-segments button { z-index:1; position:relative; min-width:70px; border:0; background:transparent; border-radius:9px; gap:5px; }
+.ac-price-segments button[aria-pressed=true] { background:transparent; box-shadow:none; }
+.ac-price-segments button svg { width:12px; }
+.ac-price-segments button:active { transform:scale(.96); }
+.ac-price-segments button:focus-visible { outline-offset:1px; }
+.ac-price-options>span { font-size:11px; }
+.ac-value-tag strong,.ac-share-value strong,.ac-split-labels b { font-variant-numeric:tabular-nums; }
+.ac-price-bridge { position:absolute; z-index:3; pointer-events:none; left:47%; top:56%; width:10%; height:120px; }
+.ac-price-bridge svg { width:100%; height:100%; overflow:visible; }
+.ac-price-bridge path { fill:none; stroke:#b9a5ff; stroke-width:1.5; stroke-dasharray:.14 .86; stroke-dashoffset:1; opacity:0; animation:ac-share-pulse 650ms 100ms ease-out; }
+.ac-split-you i { animation:ac-bar-light 500ms calc(180ms + var(--bar)*12ms) ease both; }
+.ac-access-panel:is(:hover,:focus-within) .ac-access-pulse i { animation:ac-packet 850ms ease-out; }
+.ac-access-panel:is(:hover,:focus-within) .ac-access-pulse i:nth-child(2) { animation-delay:100ms; }
+.ac-access-panel:is(:hover,:focus-within) .ac-access-pulse i:nth-child(3) { animation-delay:200ms; }
+.ac-access-panel { transition:border-color 200ms; }
+.ac-access-panel:focus-within { border-color:#c1a7ff88; }
+.ac-price-panel .story-media { inset:5% -4% 14%; }
+.ac-price-panel .story-media::after { background:linear-gradient(#0d071d00 45%,#12082577 70%,#120825 100%); }
+@keyframes ac-share-pulse { 15% {opacity:.9;} 85% {opacity:.9;} to {stroke-dashoffset:-.2;opacity:0;} }
+@keyframes ac-bar-light { 0%,100% {filter:brightness(1);} 45% {filter:brightness(1.55);} }
+@media(max-width:900px) { .ac-price-segments button {min-width:50px;} .ac-price-options {flex-wrap:wrap;} .ac-price-bridge {left:46%;width:11%;} }
+@media(max-width:640px) { .ac-price-bridge {left:50%;top:448px;width:1px;height:43px;} .ac-price-bridge svg {display:none;} .ac-price-bridge::after {content:'';display:block;width:2px;height:100%;background:linear-gradient(transparent,#c8b6ff,transparent);transform-origin:top;opacity:0;animation:ac-mobile-pulse 600ms ease;} .ac-price-segments {flex:1;} .ac-price-segments button {min-width:54px;} .ac-price-panel .story-media {inset:3% -4% 16%;} }
+@keyframes ac-mobile-pulse { 20% {opacity:1;transform:scaleY(.2);} 70% {opacity:1;transform:scaleY(1);} }
+.ac-split-labels span {transition:color 180ms;}
+.ac-split-graphic:has(.ac-split-you:hover)+.ac-split-labels span:first-child,.ac-split-graphic:has(.ac-split-fee:hover)+.ac-split-labels span:last-child {color:#fff1ff;}
+.ac-split-you:hover i {box-shadow:0 0 10px #c0a6ff38;}
+.ac-split-fee:hover i {background:#8c73b2;}

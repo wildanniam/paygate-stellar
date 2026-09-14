@@ -44,7 +44,7 @@
 .lc-wordmark { position: relative; text-align: center; font-weight: 600; font-size: 20.3cqw; letter-spacing: -.085em; padding-right: .08em; line-height: 1.07; white-space: nowrap; color: #9a80ee; user-select: none; }
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .lc-wordmark { color: transparent; background: radial-gradient(ellipse at var(--lc-light) 50%, #e0cfff 0%, #a088ff 22%, #5a4593 62%, #342545 100%); background-clip: text; -webkit-background-clip: text; }
-  .lc-wordmark::after { content: attr(data-word); position: absolute; inset: 0; padding-right: .08em; color: transparent; background: repeating-linear-gradient(0deg, transparent 0 2px, #0b081f 2px 3px); background-clip: text; -webkit-background-clip: text; opacity: .22; pointer-events: none; }
+  .lc-wordmark::after { content: attr(data-word); position: absolute; inset: 0; padding-right: .08em; color: transparent; background-image:url(/brand/hero-violet/field.webp); background-size:115% 220%; background-position:var(--lc-light) 65%; background-clip: text; -webkit-background-clip: text; opacity: .46; pointer-events: none; }
 }
 .lc-bottom { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 18px; margin: 18px 60px 0; padding: 19px 0 27px; border-top: 1px solid #bfb1ff28; font-size: 12px; color: #aaa4bc; }
 .lc-bottom nav { display: flex; gap: 24px; }
@@ -84,3 +84,10 @@
   .lc-wordmark { color: CanvasText; background: none; }
   .lc-wordmark::after, .lc-wordzone::before { display: none; }
 }
+
+/* Existing violet filaments follow the native letter mask; no extra media loop. */
+.lc-row {position:relative;isolation:isolate;}
+.lc-row::before {content:'';position:absolute;z-index:-1;inset:0 -12px;background:linear-gradient(90deg,#a78aff0d,transparent);border-radius:8px;opacity:0;transition:opacity 180ms;pointer-events:none;}
+.lc-row:is(:hover,:focus-within)::before,.lc-row:has([aria-expanded=true])::before {opacity:1;}
+.lc-guide,.lc-bottom a {text-underline-offset:5px;text-decoration-color:transparent;transition:color 180ms,text-decoration-color 180ms;}
+.lc-guide:is(:hover,:focus-visible),.lc-bottom a:is(:hover,:focus-visible) {text-decoration:underline;text-decoration-color:#bca8ff70;}

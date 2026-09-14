@@ -36,7 +36,7 @@
 .pr-receipt-brand { display:flex; align-items:center; justify-content:space-between; padding-bottom:21px; border-bottom:1px solid #67507826; gap:8px; }
 .pr-receipt-brand>span { display:flex; align-items:center; gap:6px; font-weight:600; font-size:16px; letter-spacing:-.04em; }
 .pr-receipt-brand>small { font:8px/1.2 'JetBrains Mono',monospace; letter-spacing:.09em; color:#766285; }
-.pr-receipt-content { animation:pr-sheet-in .36s ease-out; }
+.pr-receipt-content {  }
 .pr-receipt-service { display:flex; align-items:center; gap:10px; margin:22px 0 25px; }
 .pr-receipt-service>span:first-child { color:#7753b4; }
 .pr-receipt-service>div { display:flex; flex-direction:column; gap:3px; }
@@ -102,7 +102,7 @@
 .pr-record-event strong { font-size:24px; font-weight:550; letter-spacing:-.04em; line-height:1.15; }
 .pr-record-event small { font-size:12px; line-height:1.5; color:#705a80; }
 .pr-event-icon { display:grid; place-items:center; flex-shrink:0; width:35px; height:35px; background:#e4d7f4; border:1px solid #c5aade; color:#78519d; border-radius:50%; }
-.pr-event-stamp { margin:15px 0 0 auto; color:#9a7fb5; animation:pr-stamp-in .35s ease-out; }
+.pr-event-stamp { margin:15px 0 0 auto; color:#9a7fb5;  }
 .pr-delivery-event { padding-bottom:0; }
 .pr-delivery-event .pr-event-icon { background:#dcebe1; border-color:#a7c3b0; color:#3e7053; }
 .pr-delivery-event strong { color:#365e45; }
@@ -141,3 +141,17 @@
   .pr-receipt-turn { height:548px; }
   .pr-receipt-bottom { font-size:9px; }
 }
+
+/* Keep the credited payment still; only identity and API outcome change between records. */
+.pr-art>.story-media {opacity:.72;}
+.pr-selector>button::before {content:'';position:absolute;left:0;top:23%;bottom:23%;width:2px;border-radius:2px;background:#b49dff;opacity:0;transform:scaleY(.3);transition:opacity 220ms,transform 220ms;}
+.pr-selector>button[aria-selected=true]::before {opacity:1;transform:scaleY(1);}
+.pr-tab-arrow {width:17px;transform:translateX(-4px);transition:opacity 200ms,transform 200ms;}
+.pr-selector>button[aria-selected=true] .pr-tab-arrow {transform:none;}
+.pr-delivery-event {animation:pr-outcome-in 300ms ease-out;}
+.pr-request-identity {animation:pr-identity-in 240ms ease-out;}
+.pr-receipt-turn {transform:rotate(-2deg);}
+.pr-receipt-area:hover .pr-receipt-turn {transform:rotate(-1deg) translateY(-1px);}
+.pr-turn-control:focus-visible svg {transform:rotate(-15deg);}
+@keyframes pr-outcome-in {from{opacity:.4;transform:translateX(7px);}to{opacity:1;transform:none;}}
+@keyframes pr-identity-in {from{opacity:.5;}to{opacity:1;}}

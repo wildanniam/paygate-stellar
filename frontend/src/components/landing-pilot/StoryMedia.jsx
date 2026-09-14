@@ -3,7 +3,7 @@ import '../../styles/story-media.css';
 import PointerFlow from './PointerFlow.jsx';
 
 /** Decorative artwork: only loads its film near the viewport; always keeps a poster. */
-export default function StoryMedia({ name, motion, video = false, className = '', basePath = '/brand/visual-story', flow = null }) {
+export default function StoryMedia({ name, motion, video = false, className = '', basePath = '/brand/visual-story', flow = null, playbackRate = 1 }) {
   const container = useRef(null);
   const player = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -32,6 +32,8 @@ export default function StoryMedia({ name, motion, video = false, className = ''
     else element?.pause();
     return () => { current = false; element?.pause(); };
   }, [visible, motion, video, load, failed]);
+
+  useEffect(() => { if (player.current) player.current.playbackRate = playbackRate; }, [playbackRate, load]);
 
   return <div ref={container} className={`story-media ${className}`} aria-hidden="true" data-visible={visible} data-media-state={failed ? 'fallback' : playing ? 'video' : 'poster'}>
     <picture><source media="(max-width: 640px)" srcSet={`${base}-small.webp`} /><img src={`${base}.webp`} alt="" loading="lazy" decoding="async" /></picture>

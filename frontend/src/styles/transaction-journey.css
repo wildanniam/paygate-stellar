@@ -154,3 +154,26 @@
 @media (prefers-reduced-motion: reduce) { .tx-packet { opacity: 1; left: calc(50% - 23px); right: auto; } }
 @media (max-width: 700px) { .lp[data-motion="off"] .tx-packet { left: -17px; top: calc(50% - 10px); bottom: auto; } }
 @media (max-width: 700px) and (prefers-reduced-motion: reduce) { .tx-packet { left: -17px; top: calc(50% - 10px); bottom: auto; } }
+
+/* Only the object involved in the current request takes visual emphasis. */
+.tx-core { width:100px;height:100px;border-radius:29px; }
+.tx-core img {width:70px;height:70px;}
+.tx-verify-ring {position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);fill:none;stroke:#d6c3ff;stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1;opacity:0;pointer-events:none;}
+.tx[data-step=verifying] .tx-verify-ring {opacity:1;animation:tx-verify-trace 1200ms linear both;}
+.tx[data-credited=true] .tx-verify-ring {opacity:.6;stroke-dashoffset:0;transition:opacity .4s;}
+.tx[data-step=verifying] .tx-orbit {animation:none;opacity:.6;}
+.tx-request-object,.tx-response-object {transition:border-color 250ms,box-shadow 250ms;}
+.tx[data-step=requesting] .tx-request-object,.tx[data-step=complete] .tx-request-object {border-color:#d1baff99;box-shadow:inset 0 1px #eee1ff2b,0 0 28px #a482ff24;}
+.tx-api.is-delivered .tx-response-object {animation:tx-response-in 400ms ease-out;box-shadow:inset 0 1px #eee1ff2b,0 0 24px #ab87f626;}
+.tx-node-label>span,.tx-request-icon>span,.tx-client-state,.tx-gate-state,.tx-weather-caption,.tx-response-top {font-size:11px;}
+.tx-status-detail,.tx-footer p,.tx-footer button,.tx-payload span {font-size:12px;}
+.tx-request-object>code {font-size:15px;}
+.tx-request-object>code>span {font-size:10px;}
+.tx-reset svg {transition:transform 240ms;}
+.tx-reset:is(:hover,:focus-visible):not(:disabled) svg {transform:rotate(-35deg);}
+.tx-payload:not([hidden]) {animation:tx-payload-in 200ms ease-out;}
+@keyframes tx-verify-trace {from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
+@keyframes tx-response-in {from{filter:brightness(.8);}to{filter:brightness(1);}}
+@keyframes tx-payload-in {from{opacity:0;transform:translateY(-3px);}to{opacity:1;transform:none;}}
+@media(max-width:700px) { .tx-core {width:60px;height:60px;border-radius:20px;} .tx-core img {width:45px;height:45px;} .tx-node-label {font-size:11px;} .tx-status-detail {font-size:11px;} .tx-request-object>code {font-size:14px;} .tx-request-object>code>span {font-size:9px;} .tx-footer p {font-size:11px;} }
+@media(max-width:360px) { .tx-core {width:50px;height:50px;border-radius:17px;} .tx-core img {width:38px;height:38px;} .tx-request-object>code>span {display:block;margin-top:3px;font-size:10px;} .tx-request-object {height:132px;} }

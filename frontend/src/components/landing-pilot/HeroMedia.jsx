@@ -3,7 +3,7 @@ import PointerFlow from './PointerFlow.jsx';
 
 const BASE = '/brand/hero-violet/';
 
-export default function HeroMedia({ motion, stageRef }) {
+export default function HeroMedia({ motion, stageRef, engaged }) {
   const videoRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -30,6 +30,8 @@ export default function HeroMedia({ motion, stageRef }) {
     } else video?.pause();
     return () => { active = false; video?.pause(); };
   }, [motion, visible, source, failed]);
+
+  useEffect(() => { if (videoRef.current) videoRef.current.playbackRate = engaged ? .65 : .85; }, [engaged, source]);
 
   return <div className="lp-art" aria-hidden="true" data-media-state={failed ? 'fallback' : playing ? 'video' : 'poster'}>
     <div className="lp-art-field">

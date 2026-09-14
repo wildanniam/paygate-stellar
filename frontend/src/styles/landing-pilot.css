@@ -470,3 +470,23 @@
   .lp main [id] { scroll-margin-top: 96px; }
   .lp #setup-title { scroll-margin-top: 134px; }
 }
+
+/* Atmosphere yields to the request; text and controls remain the stable foreground. */
+.lp-art-field { opacity:.92; transition:opacity 650ms ease; }
+.lp-stage[data-demo-active=true] .lp-art-field { opacity:.62; }
+.lp-art-shade { background:linear-gradient(180deg,#09071877 0%,#09071822 32%,#0907184d 52%,#090718aa 76%,#050609 100%),radial-gradient(ellipse 39% 34% at 50% 30%,#0907189c,transparent); }
+.lp-nav nav :is(a,button) { position:relative; }
+.lp-nav nav :is(a,button)::after { content:''; position:absolute; left:0; right:0; bottom:3px; height:1px; background:#b3a0ff; transform:scaleX(0); transition:transform 220ms ease; }
+.lp-nav nav [aria-current=location] { color:#e4dbff; }
+.lp-nav nav [aria-current=location]::after { transform:scaleX(1); }
+.lp-primary { position:relative; isolation:isolate; overflow:hidden; }
+.lp-primary::before { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(110deg,transparent 30%,#ffffff35 48%,transparent 65%); transform:translateX(-115%); pointer-events:none; }
+.lp-primary:is(:hover,:focus-visible)::before { animation:lp-button-light 550ms ease-out; }
+.lp-primary:focus-visible svg { transform:translateX(3px); }
+.lp-dashboard svg { transition:transform 180ms; }
+.lp-dashboard:is(:hover,:focus-visible) svg { transform:translate(2px,-2px); }
+.lp-secondary:focus-visible .lp-play-icon { background:#735cfa50; border-color:#b5a2ff88; }
+@keyframes lp-button-light { to {transform:translateX(115%);} }
+@keyframes lp-menu-in { from {opacity:0;transform:translateY(-6px);} to {opacity:1;transform:none;} }
+@media(max-width:700px) { .lp-nav[data-open=true] nav {animation:lp-menu-in 180ms ease-out;} .lp-nav nav :is(a,button)::after {left:14px;right:14px;bottom:4px;} }
+.lp-primary {box-shadow:inset 0 1px 1px #d4caff88,inset 0 -2px 3px #42249c88,0 0 0 3px #9a90ff09,0 5px 16px #39258255;}

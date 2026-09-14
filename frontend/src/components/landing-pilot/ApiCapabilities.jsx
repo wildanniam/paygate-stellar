@@ -16,16 +16,17 @@ export default function ApiCapabilities({ motion }) {
       <h2 id="capabilities-title">Your price.<br /><span>Clear fees.</span></h2>
       <p>Choose a price per call.<br />See your share.</p>
     </header>
-    <div className="ac-grid">
+    <div className="ac-grid" data-price={cents}>
+      <div className="ac-price-bridge" key={cents} aria-hidden="true"><svg viewBox="0 0 120 130" preserveAspectRatio="none"><path d="M0 8H32Q44 8 44 20V110Q44 122 56 122H120" pathLength="1" /></svg></div>
       <article className="ac-price-panel" aria-labelledby="ac-price-title">
-        <StoryMedia name="weather" motion={motion} video flow="weather" />
+        <StoryMedia name="weather-clear" motion={motion} flow="weather" />
         <div className="ac-panel-top"><span className="ac-chapter">PRICING</span><span className="ac-api-label"><Code2 size={14} /> Weather API</span></div>
         <div className="ac-weather-reading" aria-hidden="true"><span>Jakarta</span><strong>29°</strong></div>
         <div className="ac-value-tag" key={cents} aria-hidden="true"><span>Per call</span><strong>{gross}<small> USDC</small></strong></div>
         <div className="ac-price-bottom">
           <h3 id="ac-price-title">Price per request.</h3>
           <div className="ac-price-options" role="group" aria-label="Example price per request">
-            {PRICES.map(value => <button key={value} type="button" aria-pressed={value === cents} onClick={() => setCents(value)} aria-label={`${(value / 100).toFixed(2)} testnet USDC per request`}><span>{(value / 100).toFixed(2)}</span>{value === cents && <Check size={13} />}</button>)}
+            <div className="ac-price-segments" style={{ '--selected': PRICES.indexOf(cents) }}><i className="ac-price-plate" aria-hidden="true" />{PRICES.map(value => <button key={value} type="button" aria-pressed={value === cents} onClick={() => setCents(value)} aria-label={`${(value / 100).toFixed(2)} testnet USDC per request`}><span>{(value / 100).toFixed(2)}</span>{value === cents && <Check size={13} />}</button>)}</div>
             <span>USDC / call</span>
           </div>
         </div>

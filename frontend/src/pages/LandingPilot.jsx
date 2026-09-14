@@ -9,6 +9,7 @@ import SetupJourney from '../components/landing-pilot/SetupJourney.jsx';
 import PaymentRecords from '../components/landing-pilot/PaymentRecords.jsx';
 import LandingClosing from '../components/landing-pilot/LandingClosing.jsx';
 import { createLandingPilotSimulation, INITIAL_SAMPLE } from '../lib/landingPilotSimulation.js';
+import { afterScrollSettles } from '../lib/afterScrollSettles.js';
 import '../styles/landing-pilot.css';
 
 function useMotion() {
@@ -29,6 +30,7 @@ export default function LandingPilot() {
   const simulation = useRef(null);
   const consoleRef = useRef(null);
   const stageRef = useRef(null);
+  const cancelExplore = useRef(null);
   const [motion, toggleMotion] = useMotion();
 
   useEffect(() => {
@@ -36,21 +38,27 @@ export default function LandingPilot() {
     simulation.current = instance;
     const previous = document.title;
     document.title = 'PayGate — Design preview';
-    return () => { instance.dispose(); document.title = previous; };
+    return () => { cancelExplore.current?.(); instance.dispose(); document.title = previous; };
   }, []);
 
   function explore() {
-    consoleRef.current?.scrollIntoView({ behavior: motion ? 'smooth' : 'instant', block: 'start' });
-    consoleRef.current?.focus({ preventScroll: true });
-    simulation.current?.request();
+    cancelExplore.current?.();
+    const target = consoleRef.current;
+    if (!target) return;
+    target.scrollIntoView({ behavior: motion ? 'smooth' : 'instant', block: 'start' });
+    cancelExplore.current = afterScrollSettles({
+      measure: () => consoleRef.current?.getBoundingClientRect(),
+      viewportHeight: () => window.innerHeight,
+      onReady: () => { target.focus({ preventScroll: true }); simulation.current?.request(); },
+    });
   }
 
   return <div className="lp" data-motion={motion ? 'on' : 'off'}>
     <a className="lp-skip" href="#pilot-main">Skip to content</a>
     <PilotNav explore={explore} />
     <main id="pilot-main" tabIndex={-1}>
-    <section className="lp-stage" ref={stageRef} aria-labelledby="pilot-title" data-credited={sample.credited}>
-      <HeroMedia motion={motion} stageRef={stageRef} />
+    <section className="lp-stage" ref={stageRef} aria-labelledby="pilot-title" data-credited={sample.credited} data-demo-active={sample.step !== 'idle'}>
+      <HeroMedia motion={motion} stageRef={stageRef} engaged={sample.step !== 'idle'} />
       <div className="lp-main">
         <div className="lp-hero-copy">
           <p className="lp-category"><span className="lp-category-symbol" aria-hidden="true"><i /><i /><i /></span>Payments for API builders</p>

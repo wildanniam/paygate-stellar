@@ -44,7 +44,7 @@ void main() {
   }
 }`;
 
-const EXCLUDED = 'button,a,input,textarea,select,[role="tab"],[role="tablist"],.pr-receipt-area,.sj-object,.tx-endpoint';
+const EXCLUDED = 'button,a,input,textarea,select,[role="tab"],[role="tablist"],.pr-receipt-area,.sj-object,.tx-endpoint,.lp-hero-copy';
 
 /** One texture plane, no geometry scene. Returns complete listener/GPU cleanup. */
 export function mountPointerFlow(canvas, mediaHost, eventHost, profile) {

@@ -1,4 +1,20 @@
-# PayGate — closing section, 14 September 2026
+# PayGate — interaction choreography, 14 September 2026
+
+## Current owner lock: connect actions, objects and atmosphere
+
+The owner approves the five-section interaction audit and requests implementation and evaluation. Continue issue #5 / draft PR #6 without merging. Keep ink/violet, type, five content roles and simulated payment truth. This supersedes the prior instruction to leave the first four sections unchanged.
+
+- Hero: foreground request/credit/response choreography; subdued ambient during the demonstration; start the request only after its controls are in view. Static content and keyboard focus remain immediate.
+- Pricing: moving segmented selection and a short connection into the constant 90/10 split. All values update immediately; animation is emphasis, not financial state. Dry sun/cloud artwork replaces the inconsistent rainy asset.
+- Setup: bundle, attach guard, verify/share are distinct object actions. Three anchors on desktop; one stable active stage under tabs on phones. No setup operations or automatic progress claims.
+- Receipt: independent payment and response events; subtle record selection and explicit flip, stable readable data.
+- Closing/navigation: native fiber-like wordmark texture, tactile buttons, quiet disclosures and section-aware navigation. No new section or repeating full-screen film.
+
+Motion: local controls 150–220ms, transitions 250–450ms, one-shot object actions under 1s; ongoing hero simulation follows its existing explicit state machine. Stop decorative work offscreen/hidden. Global off/OS reduced-motion preserves all state, suppresses travel and distortion. Touch does not require hover. Verify desktop/tablet/390/320px, rapid selection/reset, keyboard, motion-off and clipboard; build and relevant existing tests. Implementation record: `docs/design/interaction-choreography.md`.
+
+---
+
+# Previous lock — closing section, 14 September 2026
 
 ## Current owner lock: approved closing study
 

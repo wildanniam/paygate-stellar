@@ -46,7 +46,7 @@ export default function PaymentRecords({ motion, toggleMotion }) {
     }
   }
 
-  return <section className="pr" id="payment-records" aria-labelledby="records-title">
+  return <section className="pr" data-selected={selected} id="payment-records" aria-labelledby="records-title">
     <div className="pr-layout">
       <div className="pr-copy">
         <p className="pr-eyebrow"><span /> Payment and response, connected</p>
@@ -69,17 +69,17 @@ export default function PaymentRecords({ motion, toggleMotion }) {
       </div>
 
       <div className="pr-art">
-        <StoryMedia name="receipt-field" basePath="/brand/payment-records" motion={motion} video flow="receipt" />
+        <StoryMedia name="receipt-field" basePath="/brand/payment-records" motion={motion} video flow="receipt" playbackRate={.8} />
         <div className="pr-receipt-area" role="tabpanel" id="record-panel" aria-labelledby={`record-tab-${record.id}`} tabIndex={0}>
           <div className="pr-receipt-turn" data-details={details}>
             <div className="pr-receipt-face pr-receipt-front" aria-hidden={details} {...(details ? { inert: '' } : {})}>
               <div className="pr-receipt-brand"><span><img src="/brand/paygate-mark.svg" alt="" width="23" height="23" />PayGate</span><small>REQUEST RECORD</small></div>
-              <div className="pr-receipt-content" key={record.id}>
+              <div className="pr-receipt-content">
                 <div className="pr-receipt-service"><span><CloudSun size={23} strokeWidth={1.6} /></span><div><strong>{record.name}</strong><small>Jakarta forecast</small></div><span className="pr-service-method">GET</span></div>
-                <div className="pr-request-identity"><span>Request ID</span><code>…{record.shortRequest}</code></div>
+                <div className="pr-request-identity" key={`identity-${record.id}`}><span>Request ID</span><code>…{record.shortRequest}</code></div>
                 <div className="pr-record-events" data-outcome={record.id}>
                   <div className="pr-record-event pr-payment-event"><span className="pr-event-icon"><Check size={18} /></span><div><span>Payment</span><strong>Credited</strong><small>{record.gross} testnet USDC</small></div><CheckCheck className="pr-event-stamp" size={24} aria-hidden="true" /></div>
-                  <div className="pr-record-event pr-delivery-event"><span className="pr-event-icon">{failed ? <CircleAlert size={18} /> : <CornerDownLeft size={18} />}</span><div><span>API response · {record.responseStatus}</span><strong>{record.outcome}</strong><small>{record.result}</small></div></div>
+                  <div className="pr-record-event pr-delivery-event" key={record.id}><span className="pr-event-icon">{failed ? <CircleAlert size={18} /> : <CornerDownLeft size={18} />}</span><div><span>API response · {record.responseStatus}</span><strong>{record.outcome}</strong><small>{record.result}</small></div></div>
                 </div>
                 <div className="pr-receipt-tear" aria-hidden="true" />
                 <dl className="pr-breakdown"><div><dt>Client paid</dt><dd>{record.gross} <small>USDC</small></dd></div><div><dt>Your share</dt><dd>{record.net} <small>USDC</small></dd></div><div><dt>PayGate fee</dt><dd>{record.fee} <small>USDC</small></dd></div></dl>

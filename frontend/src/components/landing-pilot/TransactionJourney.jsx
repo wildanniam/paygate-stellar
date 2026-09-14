@@ -55,7 +55,7 @@ export default function TransactionJourney({ sample, simulation, consoleRef }) {
 
       <div className="tx-gateway">
         <div className="tx-orbit" aria-hidden="true"><i /><i /></div>
-        <div className="tx-core"><img src="/brand/paygate-mark.svg" width="64" height="64" alt="" /><span className="tx-core-check">{sample.credited ? <Check size={13} /> : <LockKeyhole size={11} />}</span></div>
+        <div className="tx-core"><svg className="tx-verify-ring" viewBox="0 0 112 112" aria-hidden="true"><rect x="2" y="2" width="108" height="108" rx="30" pathLength="1" /></svg><img src="/brand/paygate-mark.svg" width="64" height="64" alt="" /><span className="tx-core-check">{sample.credited ? <Check size={13} /> : <LockKeyhole size={11} />}</span></div>
         <strong>PayGate</strong><span className="tx-gate-state">{gateLabel}</span>
       </div>
 
@@ -64,7 +64,7 @@ export default function TransactionJourney({ sample, simulation, consoleRef }) {
       <div className={`tx-api tx-node ${delivered ? 'is-delivered' : ''}`}>
         <div className="tx-node-label"><span>02</span> Your API</div>
         <div className="tx-response-object">
-          <img className="tx-weather-art" src="/brand/visual-story/weather-small.webp" alt="" width="800" height="597" loading="lazy" />
+          <img className="tx-weather-art" src="/brand/visual-story/weather-clear-small.webp" alt="" width="800" height="597" loading="lazy" />
           <div className="tx-response-top"><span>Jakarta, ID</span>{delivered ? <span className="tx-ok"><Check size={10} /> 200 OK</span> : <LockKeyhole size={12} />}</div>
           <div className="tx-temperature">{delivered ? '29' : '—'}<small>°</small></div>
           <span className="tx-weather-caption">{delivered ? 'Partly cloudy · JSON' : 'Access after payment'}</span>
