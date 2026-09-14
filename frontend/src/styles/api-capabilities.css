@@ -423,7 +423,7 @@
   }
   .ac-grid {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 290px 280px
+    grid-template-rows: 290px 300px
   }
   .ac-earn-body {
     flex-direction: column;
