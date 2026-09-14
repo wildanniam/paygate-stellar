@@ -4,6 +4,8 @@ This file is the project memory for Claude Code and other Claude-based agents wo
 
 ## Source of Truth
 
+Dependency security maintenance (September 2026): see `DEPENDENCY_SECURITY.md`. Use Node >=22, retain MPP/SDK compatibility and the documented parser overrides, run `npm run audit:prod` across all four lockfiles plus `npm --prefix frontend audit` for build tooling, and run `npm run test:dependencies`, `npm run test:beta`, and `npm run test:browser` for dependency changes. Router is now declarative v7 with React 18. Finish installs/builds before browser tests; do not mutate their node_modules concurrently. Passing mocked payment tests does not establish a new live settlement proof.
+
 Read these in order before making code changes:
 
 1. `PAYGATE_V1_PRODUCT_SPEC.md` — locked V1 product concept for the `codex/paygate-v1` branch.

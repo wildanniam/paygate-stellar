@@ -12,6 +12,8 @@
     "express": "^4.22.2",
     "express-rate-limit": "^7.0.0",
     "zod": "^3.22.0"
+  },
+  "overrides": {
+    "qs": "6.16.0"
   }
 }
-

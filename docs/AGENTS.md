@@ -171,6 +171,8 @@ For V0/SOW generator work, use this order:
 
 ## Verification
 
+Dependency security maintenance (September 2026): see `DEPENDENCY_SECURITY.md`. Use Node >=22, retain MPP/SDK compatibility and the documented parser overrides, run `npm run audit:prod` across all four lockfiles plus `npm --prefix frontend audit` for build tooling, and run `npm run test:dependencies`, `npm run test:beta`, and `npm run test:browser` for dependency changes. Router is now declarative v7 with React 18. Finish installs/builds before browser tests; do not mutate their node_modules concurrently. Passing mocked payment tests does not establish a new live settlement proof.
+
 Use `TECHNICAL_SPEC.md` section 10 as the acceptance checklist. At minimum:
 
 - Run `cd frontend && npm run build` after frontend changes.
