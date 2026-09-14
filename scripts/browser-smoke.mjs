@@ -76,12 +76,16 @@ async function stopProcess(child) {
 
 function routeExpectation(pathname) {
   if (pathname === '/') return 'PayGate';
-  if (pathname === '/dashboard') return 'Wallet login required';
-  if (pathname === '/apis/new') return 'Connect wallet to register APIs';
+  if (pathname === '/generate' || pathname === '/result') return 'Generate Express middleware for V0 testing.';
+  if (pathname.startsWith('/dashboard')) return 'Wallet not connected.';
+  if (pathname === '/apis/new') return 'Connect wallet to create paid endpoints';
   return 'Connect wallet to view this API';
 }
 
-const routes = ['/', '/dashboard', '/apis/new', '/apis/smoke-api-id'];
+const routes = [
+  '/', '/generate', '/result', '/dashboard', '/dashboard/endpoints',
+  '/dashboard/activity', '/dashboard/payouts', '/apis/new', '/apis/smoke-api-id',
+];
 const viewports = [
   { name: 'desktop', width: 1366, height: 900 },
   { name: 'mobile', width: 390, height: 844 },
@@ -115,13 +119,27 @@ try {
 
   for (const viewport of viewports) {
     const page = await browser.newPage({ viewport });
+    const pageErrors = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+    let authenticated = false;
+    const detailRequests = [];
     await page.route('**/api/**', (route) => {
       const url = new URL(route.request().url());
-      const body = url.pathname === '/api/auth/me'
-        ? { authenticated: false }
-        : { error: 'Unexpected API call during browser smoke' };
+      let status = 500;
+      let body = { error: 'Unexpected API call during browser smoke' };
+      if (url.pathname === '/api/auth/me') {
+        status = 200;
+        body = { authenticated, walletAddress: authenticated ? 'browser-smoke-wallet' : undefined };
+      } else if (url.pathname === '/api/generate' && route.request().method() === 'POST') {
+        status = 200;
+        body = { middleware: '// Browser routing fixture', integration: '// Integration fixture' };
+      } else if (url.pathname.startsWith('/api/apis/') && authenticated) {
+        detailRequests.push(url.pathname);
+        status = 404;
+        body = { error: 'API not found' };
+      }
       return route.fulfill({
-        status: url.pathname === '/api/auth/me' ? 200 : 500,
+        status,
         contentType: 'application/json',
         body: JSON.stringify(body),
       });
@@ -133,10 +151,19 @@ try {
       const expectedText = routeExpectation(route);
       await page.waitForFunction((expected) => document.body.innerText.includes(expected), expectedText, {
         timeout: 8_000,
+      }).catch(async () => {
+        throw new Error(`${viewport.name} ${route} expected ${expectedText}; got ${await page.locator('body').innerText()}; errors: ${pageErrors.join('; ')}`);
       });
       const text = await page.locator('body').innerText();
       assert(text.includes(expectedText), `${route} did not include expected text: ${expectedText}`);
       assert(!text.includes('Authentication required'), `${route} leaked raw API auth error`);
+      if (route === '/result') {
+        assert(new URL(page.url()).pathname === '/generate', 'empty result must redirect to generator');
+      }
+      if (route.startsWith('/dashboard')) {
+        assert(await page.locator('.pg-app-navbar a[href="/dashboard"][aria-current="page"]').count() === 1,
+          `${route} lost its active Dashboard navigation state`);
+      }
 
       const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       assert(!hasHorizontalOverflow, `${route} has horizontal overflow at ${viewport.name}`);
@@ -146,10 +173,39 @@ try {
         await page.screenshot({ path: join(screenshotDir, `${viewport.name}-${fileSafeRoute}.png`), fullPage: true });
       }
     }
+
+    // Exercise Link, browser history, Navigate and useNavigate/state after the v7 migration.
+    await page.locator('.pg-app-navbar a[href="/dashboard"]').click();
+    await page.waitForURL('**/dashboard');
+    await page.goBack();
+    await page.waitForURL('**/apis/smoke-api-id');
+    await page.goForward();
+    await page.waitForURL('**/dashboard');
+    await page.locator('.pg-app-navbar a[href="/apis/new"]').click();
+    await page.waitForURL('**/apis/new');
+    await page.getByText('Connect wallet to create paid endpoints').waitFor();
+
+    await page.goto(`${baseUrl}/generate`);
+    await page.getByPlaceholder('https://api.yourservice.com').fill('https://api.example.com');
+    await page.getByPlaceholder('/v1/data').fill('/weather');
+    await page.getByPlaceholder('0.01').fill('0.01');
+    await page.getByRole('button', { name: 'Generate legacy code' }).click();
+    await page.waitForURL('**/result');
+    await page.getByText('Your paywall is ready.').waitFor();
+    await page.reload();
+    await page.getByText('Your paywall is ready.').waitFor();
+    assert((await page.locator('body').innerText()).includes('https://api.example.com'),
+      'generated result must survive refresh via sessionStorage');
+
+    authenticated = true;
+    await page.goto(`${baseUrl}/apis/route-param-check`);
+    await page.getByText('API not found for this wallet', { exact: true }).waitFor();
+    assert(detailRequests.includes('/api/apis/route-param-check'), 'useParams must request the selected API ID');
+    assert(pageErrors.length === 0, `Browser errors at ${viewport.name}: ${pageErrors.join('; ')}`);
     await page.close();
   }
 
-  console.log(`Browser smoke passed for ${routes.length} routes across ${viewports.length} viewports`);
+  console.log(`Browser smoke passed for ${routes.length} routes across ${viewports.length} viewports, history, auth guards, dynamic params and result persistence`);
 } catch (err) {
   if (String(err.message || '').includes('Executable doesn\'t exist')) {
     throw new Error('Playwright browser is not installed. Run npm --prefix frontend exec playwright install chromium.');
