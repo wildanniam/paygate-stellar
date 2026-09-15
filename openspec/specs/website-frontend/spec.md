@@ -154,6 +154,53 @@ Long URLs, secrets, request ids, payment ids, and tx hashes SHALL be copyable an
 - AND copy controls remain visible
 - AND no content overflows the card boundary
 
+### Requirement: Isolated landing design preview
+
+The `/design-preview` route SHALL provide an isolated incremental design preview without replacing `/`. It SHALL preserve the existing dark/purple color tokens. The current five-section scope and owner locks are recorded in `frontend/DESIGN.md` and `docs/design/closing-section.md`; `../../changes/pilot-higgsfield-landing/proposal.md` preserves the original pilot history.
+
+#### Scenario: Visitor finishes the product story
+
+- GIVEN the visitor reaches the closing section after the hero, pricing, setup and receipt
+- THEN a concise CTA and four FAQ rows lead to a large PayGate wordmark and footer links
+- AND the primary CTA navigates to `/apis/new`, with testnet beta context visible
+- AND opening a FAQ closes the previous answer without moving keyboard focus
+- AND answers clarify existing API requirements, payment-client requirements, testnet scope and upstream failure after credited payment
+- AND desktop pointer light does not deform the wordmark or run while disabled, offscreen or hidden
+- AND touch and reduced-motion users retain readable content and working controls
+
+#### Scenario: Visitor tries the sample
+
+- GIVEN the visitor opens `/design-preview`
+- WHEN they send the sample request
+- THEN the page displays a simulated 402 and waits for an explicit simulated-payment action
+- AND labels the example as a simulation with no payment sent
+- WHEN they simulate payment and retry
+- THEN verification and escrow credit precede forwarding and the example JSON response
+- AND the native diagram distinguishes the API producing a response from the client receiving it
+- AND credited amounts remain visible after delivery; raw payload is available in an optional disclosure
+- AND no real payment, wallet or upstream API call is made
+- AND media failure or disabled motion does not prevent the example from completing
+- WHEN they reset
+- THEN old callbacks cannot change the new example state
+- AND the same applies when reset occurs while a response is returning
+
+#### Scenario: Responsive sample diagram
+
+- GIVEN the hero sample is visible
+- THEN desktop presents client, PayGate and API along a horizontal path
+- AND phone layouts present the same participants along a vertical path
+- AND turning motion off preserves readable states and a static active-path indicator
+
+#### Scenario: Ambient hero motion
+
+- GIVEN motion is enabled and the hero is visible
+- THEN its silent artwork film plays independently of sample actions
+- AND pointer movement adds a bounded visual response without moving readable copy
+- WHEN motion is disabled or the document is hidden
+- THEN the film pauses
+- AND a reduced-motion preference starts with still artwork
+- AND media failure retains the poster and working controls
+
 ## Known Limitations
 
 - The V1 app is optimized for PayGate's testnet demo and early beta.

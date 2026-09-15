@@ -1,0 +1,15 @@
+.pointer-flow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+.pointer-flow[data-flow-state=ready] { opacity: 1; }
+.pointer-flow[data-flow-state=fallback] { opacity: 0; transition: none; }
+/* Keep existing section masks/grades above the texture plane. */
+.story-media { isolation: isolate; }
+.story-media::after { z-index: 1; }

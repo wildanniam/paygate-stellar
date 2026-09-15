@@ -1,0 +1,21 @@
+.story-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none
+}
+.story-media picture,.story-media img,.story-media video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover
+}
+.story-media video {
+  opacity: 0;
+  transition: opacity .6s
+}
+.story-media video.is-playing {
+  opacity: 1
+}

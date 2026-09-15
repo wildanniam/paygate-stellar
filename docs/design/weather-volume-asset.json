@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-14",
+  "provider": "Higgsfield",
+  "jobId": "7160ba3c-e67a-4110-9feb-fb160c06f09a",
+  "params": {
+    "model": "gpt_image_2_5",
+    "aspect_ratio": "4:3",
+    "count": 1,
+    "use_unlim": false,
+    "prompt": "Create one finished high-end weather illustration for PayGate's dark violet developer API website. A single compact naturally shaped cumulus cloud with softly irregular asymmetric lobes, suspended in empty near-black space. Real volumetric cloud material: soft vapor detail, rounded illuminated volumes, delicate subsurface light scattering, airy edges, dense readable body with NO cavity. Behind its upper right, a pale lilac sun disk is 45 percent occluded by the cloud, gently illuminating the nearby cloud edge; it is a light source, NOT a shiny ball. Color direction: pearl-lavender illuminated front, violet #735CFA rim, deep indigo shadows, restrained bloom. Fine natural atmosphere, not a cotton toy, plastic, chrome or silver sculpture. A clear partly-cloudy weather symbol, softly dimensional and art-directed, immediately readable at thumbnail scale. Front three-quarter view with minimal perspective, no horizon, no ground shadow, no platform. Uniform deep ink background #090613 with generous quiet negative space around the object. Object centered, group fills about 62 percent width and 52 percent height of the 4:3 image; all cloud and sun edges comfortably inside frame. Keep upper left and lower right quiet for separate native website labels. No text, numbers, logo, UI, stars, orbit rings, outline drawing, concentric contour lines, fingerprint lines, wireframe, triangular hole, droplets, rain, hanging threads, lightning. The overall impression is luminous weather data, precise yet airy, elegantly integrated into a dark ink and violet interface."
+  },
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260914_163331_7160ba3c-e67a-4110-9feb-fb160c06f09a.png",
+  "status": "completed",
+  "decision": "AI-selected candidate integrated in design-preview; owner acceptance pending",
+  "reason": "Natural closed cloud volume, connected lilac sun illumination, no concentric cavity; composited with soft alpha masks over shared ink surface.",
+  "references": [
+    "https://support.apple.com/en-ie/guide/iphone/iph4305794fb/ios",
+    "https://docs.spline.design/materials-shading/surface-detail/displace-layer",
+    "https://docs.spline.design/lighting/environment-and-hdri"
+  ],
+  "actualBilledCredits": null,
+  "newVideos": 0,
+  "shipped": [
+    {
+      "path": "frontend/public/brand/visual-story/weather-volume.webp",
+      "bytes": 20092
+    },
+    {
+      "path": "frontend/public/brand/visual-story/weather-volume-small.webp",
+      "bytes": 6698
+    }
+  ],
+  "processing": "WebP encoding/resizing only: q87 1168x876, q84 600x450. CSS alpha masks blend into shared ink."
+}

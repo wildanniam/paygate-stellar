@@ -1,0 +1,84 @@
+{
+  "revision": "hero-violet-2026-09-13",
+  "status": "implemented-for-owner-feedback",
+  "scope": "Hero only, isolated /design-preview. No later sections or release.",
+  "sourceConstraints": {
+    "dark": true,
+    "preservePalette": true,
+    "creditAuthorization": "Owner explicitly permits quality-led Higgsfield spend; old pilot cap superseded."
+  },
+  "balance": {
+    "before": 581.5,
+    "after": 563.5,
+    "observedDelta": 18,
+    "note": "Observed account balance delta for this generation sequence; not a per-job price quote."
+  },
+  "generations": [
+    {
+      "index": 0,
+      "role": "selected ambient field master",
+      "jobId": "bc4bc922-0905-4550-8360-fb034c0e7f2f",
+      "requestedModel": "nano_banana_pro",
+      "reportedModel": "nano_banana_2",
+      "resolution": "2k",
+      "prompt": "[FORMAT]\nWide 16:9 abstract cinematic brand artwork for a dark developer payments platform.\n[FOCAL SUBJECT]\nA sweeping field of violet light woven from thousands of extremely fine luminous filaments. The filaments form a broad shallow concave horizon across the LOWER HALF, rising in asymmetrical folds at the far left and right. Entire frame is an immersive optical environment; there is no physical object or studio floor. Precise flowing light suggests continuous exchange and connected requests.\n[COMPOSITION]\nLow viewpoint over the luminous field, with strong horizontal sweep and layered depth. One crisp pale lavender crest travels from bottom left through the lower center toward mid-right, splitting into fine parallel fibers. Dense indigo violet folds recede into the top of the image. Upper-middle atmosphere is naturally dark and deep, with delicate gradients and subtle light traces, while the edges and lower third carry saturated detail. The brightest crest occupies just 15 percent of the image. Beautiful detailed composition at every crop.\n[ATMOSPHERE]\nAlive, expansive, fluid and precise. The texture is optical diffraction and fine analog photographic grain. Selectively focused razor-thin ridges within broader soft fields, real depth, controlled richness.\n[LIGHTING]\nSelf-luminous violet with 6500K cool spectral white along selective edges, grazing from lower right. Deep ink shadows and soft falloff. Lavender refractions with rare ice-blue highlights, strong directional depth without bloom washing out detail.\n[LENS & CAMERA]\n24mm wide perspective, f/5.6, medium depth of field, fixed viewpoint, cinematic image.\n[COLOR PALETTE]\nInk black #050609 and deep indigo, vivid signature violet #735CFA, lavender #9A90FF, restrained accents #38BDF8. Purple is unmistakably dominant. No gray monochrome treatment, pink or green.\n[STYLE REFERENCE]\nAbstract editorial light study, sophisticated color handling, precise geometric rhythm meeting organic movement. Art-directed optical experiment with microtexture and cinematic tonal depth.\n[QUALITY MARKERS]\nMagazine-cover quality, ultra-sharp optical detail, professional retouching standard, editorial commercial standard, hyper-detailed photorealistic light.\n[AVOID]\nNo metal, steel, doors, gates, hardware, monoliths, coins, spheres, planets, space, nebulae, literal circuitry, generic smoke, cartoon rendering or decorative UI. No AI artifacts, warped or smeared text, fake words, plastic look, waxy surfaces, extra fingers or limbs, melted geometry, doubled subjects, oversaturated HDR, HDR halos, oversharpening, flat fluorescent lighting, harsh on-camera flash, stock poses, cliché compositions, unrelated brand logos, watermarks, signatures, AI sheen on hair or skin, doll-like rendering, airbrush look, flat solid color bands, empty rectangular areas, disconnected dull gradient zones. No stale stock aesthetic, synthetic stock-photo look, over-staging, unrealistically clean environments, clipart elements or obviously composited backgrounds.\nresolution: 2k",
+      "selection": "Selected after inspecting both candidates. Broad optical horizon, violet dominance, coherent center for native copy."
+    },
+    {
+      "index": 1,
+      "role": "alternate composition, not shipped",
+      "jobId": "06d63466-489c-4b3b-98a7-11bc0344cce2",
+      "requestedModel": "nano_banana_pro",
+      "reportedModel": "nano_banana_2",
+      "resolution": "2k",
+      "prompt": "[FORMAT]\nWide 16:9 abstract cinematic brand artwork for a dark developer payments platform.\n[FOCAL SUBJECT]\nTwo expansive translucent sheets of violet light flow into a luminous horizontal passage across the lower third. Not a sculptural object: an edge-to-edge immersive image of refracted light, as if multiple exposed optical film layers are folding into one another. Strong iridescent lavender and saturated purple ribbons with very fine contour-line texture.\n[COMPOSITION]\nA broad soft fold enters from the upper left edge and curves down toward bottom center. A sharper layered fold rises diagonally from bottom right, creating a graceful asymmetrical S-shaped light path. Spacious deep indigo atmosphere through the upper middle. Full field composition with layered edge detail. Intense selective luminosity toward the perimeter, dark tonal depth around the upper center, with subtle fine texture throughout.\n[ATMOSPHERE]\nExpressive, magnetic, precise, quietly energetic. Smooth large forms, densely detailed light interference at their edges, selective analog grain. This is a light environment, never a solid material.\n[LIGHTING]\n6500K spectral rim illumination from camera-right filtered through violet, rich soft internal diffusion with crisp edge caustics. Soft shadow falloff into ink. No smoky volumetrics.\n[LENS & CAMERA]\n35mm cinematic macro perspective, f/4, selective focus, fixed camera.\n[COLOR PALETTE]\nDeep ink #050609, saturated #735CFA violet, #4B44AA, #9A90FF lavender, tiny ice-blue #38BDF8 reflections. Rich purple detail; no metallic silver, gray monochrome, green or pink.\n[STYLE REFERENCE]\nColor-rich abstract editorial photography, unusual optical composition, controlled dramatic illumination, fine material-free light texture.\n[QUALITY MARKERS]\nMagazine-cover quality, hyper-detailed photorealistic light, wide cinematic depth, professional retouching standard.\n[AVOID]\nNo metal, steel, doors, gates, hardware, monoliths, coins, spheres, planets, space, nebulae, literal circuitry, generic smoke, cartoon rendering or decorative UI. No AI artifacts, warped or smeared text, fake words, plastic look, waxy surfaces, extra fingers or limbs, melted geometry, doubled subjects, oversaturated HDR, HDR halos, oversharpening, flat fluorescent lighting, harsh on-camera flash, stock poses, cliché compositions, unrelated brand logos, watermarks, signatures, AI sheen on hair or skin, doll-like rendering, airbrush look, flat solid color bands, empty rectangular areas, disconnected dull gradient zones. No stale stock aesthetic, synthetic stock-photo look, over-staging, unrealistically clean environments, clipart elements or obviously composited backgrounds.\nresolution: 2k",
+      "selection": "Valid alternative, but narrower folded membrane reads more like an object than the selected immersive field. No refinement spent."
+    },
+    {
+      "index": 2,
+      "role": "ambient motion source",
+      "jobId": "34849e57-43ad-4627-b0fe-f101f8a5922f",
+      "requestedModel": "kling3_0",
+      "reportedModel": "kling3_0",
+      "durationRequested": 8,
+      "mode": "pro",
+      "sound": "off",
+      "startAndEndJobId": "bc4bc922-0905-4550-8360-fb034c0e7f2f",
+      "prompt": "Animate the supplied abstract violet light-field artwork as a seamless 8-second ambient website background. Preserve its composition, precise fine filament texture, ink-dark upper middle and rich violet palette. Camera is COMPLETELY LOCKED: no zoom, dolly, pan, rotation or cuts.\nMOTION: thousands of luminous optical filaments gently flow from lower left toward the right-hand horizon, with a graceful broad undulation traveling across the shallow concave field. Thin lavender highlights glide continuously along the existing contours. The tall peripheral folds slowly breathe, shifting only a few percent of the frame, and return to the starting shape at the end. Keep continuous motion visible from the very first frame, smooth and fluid throughout, no opening animation, no static hold.\nDEPTH: near fibers glide a little faster than distant fibers, with subtle parallax within the existing light field. No new objects or bursts. Upper central region stays naturally dark and calm. Highlights are restrained and finely detailed; do not brighten the entire scene.\nEnd on the supplied original frame with matching position and velocity for an unobtrusive loop. The aesthetic is an abstract optical current, never fabric, metal, water, smoke, outer space or a physical landscape. No text, icons, logos, particles exploding, flashing, jitter, hard transitions or audio."
+    }
+  ],
+  "processing": {
+    "environment": "Higgsfield sandbox",
+    "film": "1600x892, 24 fps, H.264, no audio, CRF 23, faststart. Source 8.042s / 9,725,431 bytes. 0.5-second wrap crossfade produces 7.5-second loop.",
+    "posters": "Master resized in Pillow to 1920x1072 and 960x536 WebP. No new generated mobile asset."
+  },
+  "files": [
+    {
+      "path": "frontend/public/brand/hero-violet/field.webp",
+      "bytes": 131670,
+      "width": 1920,
+      "height": 1072
+    },
+    {
+      "path": "frontend/public/brand/hero-violet/field-mobile.webp",
+      "bytes": 31618,
+      "width": 960,
+      "height": 536
+    },
+    {
+      "path": "frontend/public/brand/hero-violet/field.mp4",
+      "bytes": 1190276,
+      "width": 1600,
+      "height": 892,
+      "duration": 7.5
+    }
+  ],
+  "processedUrls": [
+    "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/30403e73-8a32-4a5c-995e-832f2ed3788c.webp",
+    "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/13f9808e-f1cc-4e32-af68-6929833d0d5b.webp",
+    "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/abd12c26-11bb-4369-a217-465624f167ae.mp4",
+    "https://d2ol7oe51mr4n9.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/8789f7e1-48b9-4270-9369-f7a482a53dbc.jpg"
+  ],
+  "modelNote": "Requested model differs from returned image job label. Catalog alias equivalence has not been independently verified.",
+  "feedback": "Awaiting Wildan's review of the actual hero; implementation completion is not creative acceptance."
+}

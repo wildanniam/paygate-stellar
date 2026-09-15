@@ -1,3 +1,33 @@
+# Hero demo placement — 15 September 2026
+
+Owner accepts the separate hero placement study and requests implementation. Standard UI increment on issue #5 / draft PR #6; do not merge. Visual target: `hero-placement-study.html` in the 13 September visualization session. Keep centered hero, existing brand/media and the five-section narrative.
+
+Place a shallow demo surface at the lower hero transition. Group the request strip, example price and one stable action; use a smaller gateway and a larger response. Remove the separate playback bar and duplicate reset. Payment state belongs to the gateway, delivery state to the response. Keep a polite live status and optional payload. The existing simulation must still pause at402, credit before forwarding, and cancel stale runs; no wallet/network actions. On phones, request/action → compact gateway → response; controls ≥44px and readable supporting text. Native signal travel/verification trace/response reveal follow actual state, with stable layout and motion-off/reduced-motion alternatives. Existing fiber stack fades into shared ink behind the demo; no regenerated media or dependencies. Verify desktop/tablet/390/320px, explicit payment/replay, rapid clicks, payload, keyboard, scroll entry and motion off; build and existing19tests.
+
+Implementation and verification completed: shallow grouped demo, stable46px action, larger response, bounded background mask and native state-driven signals. Final build and19 regression tests pass; Chrome desktop/tablet/390/320px and explicit payment/replay/keyboard/motion-off checked. Full record: `docs/design/interaction-choreography.md#hero-demo-placement--15-september-2026`. Owner approval covers the study direction; assembled visual feedback remains open.
+
+---
+
+# Setup selection and card feedback — 14 September 2026
+
+Owner asks for unmistakable active setup artwork, smoother step changes, and whole-card pricing hover. Standard UI increment; reuse issue #5 / draft PR #6, no merge. Preserve existing palette, artwork, five sections and payment truth.
+
+Target: selected setup stage has a persistent Viewing marker, bright tab plate, stronger shield material and a quiet grounding light. Inactive hover must stay weaker than selection. Keep artwork DOM mounted; transition from current transforms over 420ms instead of remounting/restarting all objects. Caption uses three persistent overlapping rows; mobile crossfades one stage at a time with hidden inactive controls. Keyboard focus remains distinct. Pricing cards lift 4px with edge light/shadow in 220ms on fine-pointer hover, native controls retain focus/press. No card-wide click action or tilt. Motion-off/reduced-motion removes travel while preserving visual state. No new media/dependency. Verify rapid switching, keyboard, desktop/mobile, hover leave, exact pricing and motion-off.
+
+---
+
+# Surface blending and cloud candidate — 14 September 2026
+
+Owner reports hard color patches inside the pricing artwork and across surrounding sections, and rejects the contour cloud. Scope: correct compositing and produce a better cloud study in the existing five-section preview; issue #5 / draft PR #6, no merge.
+
+Verified cause: price art is inset 5% from the top and 14% from the bottom, while the card, baked image background and opaque gradient end used different ink values. The overlay ended abruptly at those inset bounds. Section glows also extended beyond clipped containers. Shared `--lp-art-surface: #090613` and `--lp-art-rgb: 9, 6, 19` now anchor pricing/access/setup; alpha masks feather the whole media stack (poster plus pointer canvas), replacing the price's opaque gradient. Pricing/receipt glows fade before all section edges; closing uses the existing canvas token. Keep intentional lavender share-card hierarchy and semantic payment states.
+
+One Higgsfield still replaces the rejected contour cloud: natural asymmetrical cumulus volume, pearl/lavender light, indigo shadows and partly hidden lilac sun; no concentric cavity. This is an AI-selected candidate now integrated for owner review, NOT owner-approved artwork. Exact prompt, job and sources: `docs/design/weather-volume-asset.json`. Full WebP about 20 KB, small about 6.5 KB; no video or dependency added. Pricing retains native pointer response, while the hero uses the matching thumbnail. Earlier proposal-only notes below are historical and superseded by this actual integration.
+
+Validation: production build and all 19 motion/simulation tests pass; desktop 1470px and mobile 390px inspected, exact .05/.045/.005 relationship checked, motion-off compositing and hero thumbnail verified. No financial behavior or homepage route changed.
+
+---
+
 # AGENTS.md
 
 This file gives Codex and other coding agents the durable project context for PayGate.
@@ -17,6 +47,23 @@ Before editing code, read:
 9. `../frontend/PayGate_LandingPage_Brief.md` — only when changing landing page copy or visuals.
 
 `README.md` may be stale. For V0/SOW generator work, `TECHNICAL_SPEC.md` wins. For the V1 branch, `PAYGATE_V1_PRODUCT_SPEC.md` wins where it intentionally conflicts with V0 constraints.
+
+## Landing Design Preview — 2026-09-14
+
+Latest pricing feedback: implement real wave deformation on hover and price change, preserving 27/3 bars and immediate financial values. See `design/interaction-choreography.md#pricing-feedback-follow-up`. The owner rejects the contour cloud form; the volumetric replacement brief is an AI proposal, not a generated or approved replacement. Continue issue #5 / draft PR #6 with no merge.
+
+Latest owner authorization: implement and evaluate the five-section motion audit. `design/interaction-choreography.md` is the current interaction record: visible-scroll-first hero, state-aware atmosphere, linked pricing, native installation objects with one active mobile stage, stable payment/animated response evidence, and fiber-textured native closing. One accepted Higgsfield weather still replaces the rainy mismatch; two image attempts are recorded in `design/interaction-assets.json`. Continue draft PR #6, no UI merge or additional section. Visual feedback on this implementation remains pending.
+
+
+Previous owner lock: the CTA/FAQ/interactive-wordmark study is accepted and may now be implemented as the fifth, closing section. `design/closing-section.md` records the approved composition, native material, pointer light, responsive/keyboard/motion contract and checks. It supersedes the four-section-only/fifth-section exclusion in historical entries below. Preserve the existing four sections, homepage and draft/unmerged PR #6. No new video or Higgsfield generation is required for the accepted finish.
+
+Previous content lock: revise the four existing sections, with no new section at that time. Runtime belongs to the hero; pricing/90–10 split to capabilities; provider setup to the spatial scene; independent payment/response evidence to the receipt. Implemented in `design/content-revision.md`: remove repeated hero earnings, price → share → access DOM/mobile order, direct setup tabs without Next/Replay, and two Weather API records (delivered or credited payment plus upstream failure). Preserve the approved dark/violet assets and cursor behavior. This supersedes earlier three-receipt and serial-setup instructions. No new generation, homepage replacement or UI merge. Visual feedback on this revision is pending.
+
+Previous interaction milestone: apply local cursor response to the existing Higgsfield media and analyze other assets. This is implemented with shared `PointerFlow` / `pointerFlowRenderer`, no new library or generation. Hero/receipt get local displacement, weather/setup a gentler response, shield light only. Fine-pointer desktop enhancement; native text/data stay stable, touch retains ambient media, motion-off/offscreen removes renderers. Read `design/pointer-flow.md` for asset rationale, lifecycle rules and checks. Visual approval remains pending; scope stays four sections.
+
+Issue #5 / draft PR #6 provide the isolated lazy `/design-preview` route. The owner accepts the visual sections 2–3 and now asks to continue with exactly one next section after the hero/navigation revision. The preview has four sections: an open hero transaction scene, artwork-led capabilities, spatial setup, and an inspectable payment receipt. The new receipt section awaits owner visual feedback. Read `../frontend/DESIGN.md`, `design/payment-records.md` and `design/payment-records-assets.json`; earlier design notes preserve superseded history.
+
+Keep the original dark/purple tokens. Quality-led Higgsfield credit use is authorized. Exact data and controls stay native; receipt IDs and amounts are clearly illustrative, with payment credit separate from API delivery. `StoryMedia` accepts an optional `basePath` (default `/brand/visual-story`) for section-specific media, with poster fallback, viewport/visibility pause and global motion preference. Animations never determine product state. Preview controls do not run wallet/API/payment operations. A fifth section, homepage replacement, backend/dependency changes, release and merge remain outside scope.
 
 ## V1 Branch Direction
 
@@ -196,3 +243,7 @@ Use this framing:
 Avoid leading with file names, implementation details, or code references unless Wildan explicitly asks for technical detail. A good short report says:
 
 > PayGate is a functional alpha. Users can open the app, generate Express middleware, copy the code, and open the dashboard. However, it is not yet fully usable for real API monetization because the generated middleware has not been proven in a sample API with a real Stellar testnet MPP payment and dashboard transaction evidence.
+
+## Landing preview scope — 13 September 2026
+
+Current authority is the visual revision described at the top of this file and in `frontend/DESIGN.md`. The previous capabilities acceptance and setup workspace are superseded by explicit owner criticism. The hero remains accepted; revised capabilities/setup await feedback on draft PR #6. Preserve actual product prerequisites and distinguish illustrations from real operations.

@@ -20,6 +20,16 @@ Read these in order before making code changes:
 
 If any file conflicts with `TECHNICAL_SPEC.md`, follow `TECHNICAL_SPEC.md` for V0/SOW work. For the V1 branch, follow `PAYGATE_V1_PRODUCT_SPEC.md` where it intentionally conflicts with the old stateless generator scope.
 
+## Landing Design Preview — 2026-09-14
+
+Latest owner lock: revise the four existing sections, with no new section. Runtime belongs to the hero; pricing/90–10 split to capabilities; provider setup to the spatial scene; independent payment/response evidence to the receipt. Implemented in `design/content-revision.md`: remove repeated hero earnings, price → share → access DOM/mobile order, direct setup tabs without Next/Replay, and two Weather API records (delivered or credited payment plus upstream failure). Preserve the approved dark/violet assets and cursor behavior. This supersedes earlier three-receipt and serial-setup instructions. No new generation, homepage replacement or UI merge. Visual feedback on this revision is pending.
+
+Previous interaction milestone: apply local cursor response to the existing Higgsfield media and analyze other assets. This is implemented with shared `PointerFlow` / `pointerFlowRenderer`, no new library or generation. Hero/receipt get local displacement, weather/setup a gentler response, shield light only. Fine-pointer desktop enhancement; native text/data stay stable, touch retains ambient media, motion-off/offscreen removes renderers. Read `design/pointer-flow.md` for asset rationale, lifecycle rules and checks. Visual approval remains pending; scope stays four sections.
+
+Issue #5 / draft PR #6 provide the isolated lazy `/design-preview` route. The owner accepts the visual sections 2–3 and now asks to continue with exactly one next section after the hero/navigation revision. The preview has four sections: an open hero transaction scene, artwork-led capabilities, spatial setup, and an inspectable payment receipt. The new receipt section awaits owner visual feedback. Read `../frontend/DESIGN.md`, `design/payment-records.md` and `design/payment-records-assets.json`; earlier design notes preserve superseded history.
+
+Keep the original dark/purple tokens. Quality-led Higgsfield credit use is authorized. Exact data and controls stay native; receipt IDs and amounts are clearly illustrative, with payment credit separate from API delivery. `StoryMedia` accepts an optional `basePath` (default `/brand/visual-story`) for section-specific media, with poster fallback, viewport/visibility pause and global motion preference. Animations never determine product state. Preview controls do not run wallet/API/payment operations. A fifth section, homepage replacement, backend/dependency changes, release and merge remain outside scope.
+
 ## V1 Branch Direction
 
 Wildan has approved the V1 pivot on `codex/paygate-v1`.
@@ -228,3 +238,7 @@ Do not lead with code files, architecture, or implementation details unless Wild
 Preferred short verdict:
 
 > PayGate is a functional alpha. Users can try the generator and dashboard, but it is not yet fully ready for real API monetization until one end-to-end Stellar testnet payment is proven from generated middleware to dashboard evidence.
+
+## Landing preview scope — 13 September 2026
+
+Current authority is the visual revision described at the top of this file and in `frontend/DESIGN.md`. The previous capabilities acceptance and setup workspace are superseded by explicit owner criticism. The hero remains accepted; revised capabilities/setup await feedback on draft PR #6. Preserve actual product prerequisites and distinguish illustrations from real operations.

@@ -1,0 +1,46 @@
+{
+  "date": "2026-09-14",
+  "purpose": "Correct partly-cloudy artwork during five-section interaction revision",
+  "provider": "Higgsfield",
+  "authorization": "Owner authorizes quality-led asset generation and credit use.",
+  "generations": [
+    {
+      "jobId": "421b69f6-5ec8-40c0-aed6-5215a994ca6d",
+      "model": "seedream_v4_5",
+      "status": "completed",
+      "params": {
+        "prompt": "Create one finished premium website illustration for PayGate, a developer API payments brand. A sculptural but weightless partly cloudy weather symbol built entirely from thousands of extremely fine luminous optical filaments. A soft compact cumulus cloud in front of the lower left of a clean sun disk, sun peeking above the cloud upper right. The cloud has a clean dry underside, absolutely no droplets, no rain, no icicles, no melting, no strings hanging beneath it. Delicate layered fibers follow the cloud's rounded contours, clear intentional curves with refined detail. Color palette limited to deep ink #090613, violet #735CFA, lavender #A99AFF, small pearlescent highlights. Purple sun, no yellow. Background uniform near-black #090613 fading smoothly around the object with no floor, no pedestal, no frame, no surrounding rings or orbital ellipses, no stars, no galaxy, no other objects. Cloud and sun together occupy centered 65 percent of the width and 55 percent of the height, wholly inside the frame with generous empty dark space on all sides for website compositing and responsive crops. Front view with gentle dimensional lighting. Strong luminous silhouette, fine controlled highlights, darker internal layers. Understated futuristic editorial brand imagery, not a cartoon, not a gaming icon, not metal or plastic. Image only, absolutely no text, no numbers, no letters, no logo, no UI. Render exquisite visible filament detail and a calm clear silhouette at small display sizes.",
+        "aspect_ratio": "4:3",
+        "quality": "basic"
+      },
+      "decision": "rejected",
+      "reason": "Visible hanging droplets contradict the partly-cloudy API example.",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260914_151739_421b69f6-5ec8-40c0-aed6-5215a994ca6d.png"
+    },
+    {
+      "jobId": "a1cd72b6-e0b0-4005-9ec5-87fabf59b479",
+      "model": "gpt_image_2_5",
+      "status": "completed",
+      "params": {
+        "prompt": "PayGate website asset. One elegant minimal partly-cloudy weather symbol on uniform black #090613. Exactly ONE cloud with a clean flat horizontal base and three rounded lobes. A violet sun disc peeks behind its top right. The cloud volume is formed from tightly spaced concentric lavender contour lines, like precise optical fiber winding neatly around its closed silhouette. All contour lines stay completely inside the cloud silhouette. The entire underside is a single neat continuous horizontal edge. Empty black space below the cloud. Completely DRY weather. No droplets, no rain, no hanging threads, no melting. Refined electric lavender #A99AFF and violet #735CFA, subtle dimensional glow, not silver, not metal, not cartoon. Centered composition occupying 65% width and 55% height with plenty of black around it. Clear silhouette readable at 100px. No text, no label, no logo, no UI, no background scene, no pedestal. This is a clean weather-data illustration for a premium developer payment gateway.",
+        "aspect_ratio": "4:3"
+      },
+      "decision": "accepted-for-integration",
+      "reason": "Dry partly-cloudy contour, readable silhouette, consistent violet palette.",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3GLGuzGUqO61GJIJGETSoz6hYue/hf_20260914_152322_a1cd72b6-e0b0-4005-9ec5-87fabf59b479.png",
+      "ownerFeedback": {
+        "date": "2026-09-14",
+        "decision": "rejected-form",
+        "reason": "Contour cloud looks strange; replacement direction should use a more natural volumetric form."
+      }
+    }
+  ],
+  "shipped": [
+    "frontend/public/brand/visual-story/weather-clear.webp",
+    "frontend/public/brand/visual-story/weather-clear-small.webp"
+  ],
+  "processing": "cwebp q87 full1168x876; q84 resized600x450. Encoding/resizing only.",
+  "newVideos": 0,
+  "actualBilledCredits": null,
+  "review": "Historical generations. Owner rejected contour form on 14 September 2026. Replaced in active preview by the volumetric candidate recorded in weather-volume-asset.json; owner acceptance of the new candidate is pending."
+}
