@@ -128,3 +128,10 @@ Verification:
 - Full hero and focused desktop/mobile screenshots were saved outside the repository for review. The assembled hero is visually closer to the accepted study; final owner visual acceptance remains open.
 
 Research basis remains the approved study's Circular, Cloudlight and Agentframe observations: one composed product demonstration belongs close to the promise/CTA, and interaction controls belong with their input. The placement is a PayGate-specific interpretation, not a copied template.
+
+
+## Per-call amount transition — 15 September 2026
+
+Owner requests visible motion when selecting a different per-call price. Standard UI increment on issue5/draft PR6. The price badge previously remounted with the value, so any entrance effect affected the entire object rather than communicating the number change. Keep the badge, label and currency stationary; retain three exact amount layers in a clipped inline grid. A higher/lower selection slides the old and new amounts vertically with420ms easing and280ms opacity. Persistent CSS transitions can reverse mid-flight; selecting the same price does not restart anything. No initial entrance or idle animation. This updates the prior no-amount-animation direction only for this decorative per-call display; no interpolated amounts, accounting changes or animated share/fee calculations.
+
+The decorative badge remains aria-hidden; the existing polite live region announces the exact selected price/share/fee immediately. Global motion-off and OS reduced-motion disable transition. No timer, dependency or generated media added. Build and diff check pass. Chrome desktop and390px checked: live intermediate transforms/opacity observed, rapid reverse selections settle to one visible exact amount, keyboard Space works, stable badge dimensions and no mobile horizontal overflow. Motion-off measured0s with exact new price. Viewport and motion restored. OS reduced-motion source-reviewed; physical devices/Safari not separately tested. No new tests for this small CSS-only presentation behavior; financial/state logic unchanged.

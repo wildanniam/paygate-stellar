@@ -1,3 +1,9 @@
+# Per-call price motion — 15 September 2026
+
+Owner requests an animated per-call amount. Keep badge/label/currency fixed; exact price layers slide/crossfade on selection for420ms/280ms, without interpolating monetary values. Persistent layers reverse smoothly; no remount/idle entrance. Existing live price announcement stays immediate. Global off/reduced-motion disable travel. This supersedes earlier no-amount-animation guidance for the decorative per-call badge only. Verified desktop/390px, keyboard, rapid selections and motion-off; build passes. See `docs/design/interaction-choreography.md`. Reuse issue5/draft PR6; no merge.
+
+---
+
 # Hero demo placement — 15 September 2026
 
 Owner accepts the separate hero placement study and requests implementation. Standard UI increment on issue #5 / draft PR #6; do not merge. Visual target: `hero-placement-study.html` in the 13 September visualization session. Keep centered hero, existing brand/media and the five-section narrative.

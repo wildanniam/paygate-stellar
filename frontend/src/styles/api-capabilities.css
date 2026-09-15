@@ -129,8 +129,7 @@
   box-shadow: 0 8px 40px #08031355;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  animation: ac-value-in .35s ease-out
+  gap: 2px
 }
 .ac-value-tag>span {
   font-size: 10px;
@@ -146,6 +145,20 @@
   color: #b8a9d3;
   letter-spacing: 0
 }
+.ac-price-number {
+  display: inline-grid;
+  overflow: hidden;
+  height: 1.2em;
+  line-height: 1.2;
+  vertical-align: bottom;
+}
+.ac-price-number-layer {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(calc(var(--number-offset) * 105%));
+  transition: transform 420ms cubic-bezier(.22,1,.36,1), opacity 280ms ease;
+}
+.ac-price-number-layer[data-active=true] { opacity: 1; }
 .ac-price-bottom {
   position: absolute;
   left: 32px;
@@ -648,7 +661,7 @@
   .ac-price-options>span { font-size:12px; }
 }
 
-/* Price selection directs one finite pulse toward the share, without animating amounts. */
+/* Price selection directs one finite pulse toward the share, without interpolating monetary values. */
 .ac-grid { position:relative; }
 .ac-price-segments { position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:3px; padding:4px; border:1px solid #b79cff30; border-radius:14px; background:#110b21c4; }
 .ac-price-plate { position:absolute; inset:4px auto 4px 4px; width:calc((100% - 14px)/3); border-radius:9px; background:#bcadff; box-shadow:inset 0 1px #f0e7ffaa,0 3px 12px #06031144; transform:translateX(calc(var(--selected)* (100% + 3px))); transition:transform 280ms cubic-bezier(.2,.8,.2,1); pointer-events:none; }

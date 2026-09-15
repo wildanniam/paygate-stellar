@@ -24,7 +24,7 @@ export default function ApiCapabilities({ motion }) {
         <StoryMedia name="weather-volume" motion={motion} flow="weather" />
         <div className="ac-panel-top"><span className="ac-chapter">PRICING</span><span className="ac-api-label"><Code2 size={14} /> Weather API</span></div>
         <div className="ac-weather-reading" aria-hidden="true"><span>Jakarta</span><strong>29°</strong></div>
-        <div className="ac-value-tag" key={cents} aria-hidden="true"><span>Per call</span><strong>{gross}<small> USDC</small></strong></div>
+        <div className="ac-value-tag" aria-hidden="true"><span>Per call</span><strong><span className="ac-price-number">{PRICES.map(value => <span key={value} className="ac-price-number-layer" data-active={value === cents} style={{ '--number-offset': Math.sign(value - cents) }}>{(value / 100).toFixed(3)}</span>)}</span><small> USDC</small></strong></div>
         <div className="ac-price-bottom">
           <h3 id="ac-price-title">Price per request.</h3>
           <div className="ac-price-options" role="group" aria-label="Example price per request">
