@@ -1,3 +1,13 @@
+# Homepage promotion — 15 September 2026
+
+Owner clarified that the approved design must replace the actual homepage on main, and requested implementation plus post-replacement checks. This supersedes previous preview-only/no-homepage-change restrictions. Standard UI/routing increment, issue9, branch `codex/promote-landing-homepage`; owner authorization includes completing the homepage replacement on main.
+
+Root renders the approved landing directly, removing the old landing import from the shipped route graph. `/design-preview` redirects to `/` with query/hash preserved locally; Vercel has a permanent redirect. Product routes stay unchanged. Replace preview title, add beta-aware description/theme color, and scope canonical URL to the mounted homepage. Restore initial anchor/top on entry; map prior landing section anchors to corresponding sections. No wallet/backend changes.
+
+Verification record: `docs/design/homepage-promotion.md`.
+
+---
+
 # Hero demo placement — 15 September 2026
 
 Owner accepts the separate hero placement study and requests implementation. Standard UI increment on issue #5 / draft PR #6; do not merge. Visual target: `hero-placement-study.html` in the 13 September visualization session. Keep centered hero, existing brand/media and the five-section narrative.

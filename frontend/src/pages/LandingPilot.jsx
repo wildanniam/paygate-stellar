@@ -37,8 +37,25 @@ export default function LandingPilot() {
     const instance = createLandingPilotSimulation(setSample);
     simulation.current = instance;
     const previous = document.title;
-    document.title = 'PayGate — Design preview';
-    return () => { cancelExplore.current?.(); instance.dispose(); document.title = previous; };
+    document.title = 'PayGate — Pay-per-call API gateway';
+    const canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    canonical.href = 'https://trypaygate.com/';
+    document.head.append(canonical);
+    const anchorFrame = requestAnimationFrame(() => {
+      const legacyAnchors = { 'how-it-works': 'setup-title', 'protected-calls': 'setup-title', proof: 'payment-records', workspace: 'payment-records', features: 'capabilities-title' };
+      const hash = window.location.hash.slice(1);
+      const target = document.getElementById(legacyAnchors[hash] ?? hash);
+      target?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      if (!target) window.scrollTo({ top: 0, behavior: 'instant' });
+    });
+    return () => {
+      cancelAnimationFrame(anchorFrame);
+      cancelExplore.current?.();
+      instance.dispose();
+      canonical.remove();
+      document.title = previous;
+    };
   }, []);
 
   function explore() {

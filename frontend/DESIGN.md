@@ -1,3 +1,13 @@
+# Homepage promotion — 15 September 2026
+
+Owner clarified that the approved design must replace the actual homepage on main, and requested implementation plus post-replacement checks. This supersedes previous preview-only/no-homepage-change restrictions. Standard UI/routing increment, issue9, branch `codex/promote-landing-homepage`; owner authorization includes completing the homepage replacement on main.
+
+Root renders the approved landing directly, removing the old landing import from the shipped route graph. `/design-preview` redirects to `/` with query/hash preserved locally; Vercel has a permanent redirect. Product routes stay unchanged. Replace preview title, add beta-aware description/theme color, and scope canonical URL to the mounted homepage. Restore initial anchor/top on entry; map prior landing section anchors to corresponding sections. No wallet/backend changes.
+
+Verification record: `docs/design/homepage-promotion.md`.
+
+---
+
 # Per-call price motion — 15 September 2026
 
 Owner requests an animated per-call amount. Keep badge/label/currency fixed; exact price layers slide/crossfade on selection for420ms/280ms, without interpolating monetary values. Persistent layers reverse smoothly; no remount/idle entrance. Existing live price announcement stays immediate. Global off/reduced-motion disable travel. This supersedes earlier no-amount-animation guidance for the decorative per-call badge only. Verified desktop/390px, keyboard, rapid selections and motion-off; build passes. See `docs/design/interaction-choreography.md`. Reuse issue5/draft PR6; no merge.
