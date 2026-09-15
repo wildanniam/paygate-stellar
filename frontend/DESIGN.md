@@ -1,3 +1,13 @@
+# Hero demo placement — 15 September 2026
+
+Owner accepts the separate hero placement study and requests implementation. Standard UI increment on issue #5 / draft PR #6; do not merge. Visual target: `hero-placement-study.html` in the 13 September visualization session. Keep centered hero, existing brand/media and the five-section narrative.
+
+Place a shallow demo surface at the lower hero transition. Group the request strip, example price and one stable action; use a smaller gateway and a larger response. Remove the separate playback bar and duplicate reset. Payment state belongs to the gateway, delivery state to the response. Keep a polite live status and optional payload. The existing simulation must still pause at402, credit before forwarding, and cancel stale runs; no wallet/network actions. On phones, request/action → compact gateway → response; controls ≥44px and readable supporting text. Native signal travel/verification trace/response reveal follow actual state, with stable layout and motion-off/reduced-motion alternatives. Existing fiber stack fades into shared ink behind the demo; no regenerated media or dependencies. Verify desktop/tablet/390/320px, explicit payment/replay, rapid clicks, payload, keyboard, scroll entry and motion off; build and existing19tests.
+
+Implementation and verification completed: shallow grouped demo, stable46px action, larger response, bounded background mask and native state-driven signals. Final build and19 regression tests pass; Chrome desktop/tablet/390/320px and explicit payment/replay/keyboard/motion-off checked. Full record: `docs/design/interaction-choreography.md#hero-demo-placement--15-september-2026`. Owner approval covers the study direction; assembled visual feedback remains open.
+
+---
+
 # Setup selection and card feedback — 14 September 2026
 
 Owner asks for unmistakable active setup artwork, smoother step changes, and whole-card pricing hover. Standard UI increment; reuse issue #5 / draft PR #6, no merge. Preserve existing palette, artwork, five sections and payment truth.

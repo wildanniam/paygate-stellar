@@ -36,9 +36,8 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border-radius: 28px;
-  border: 1px solid var(--lp-line);
-  background: #090718;
+  border-radius: 28px 28px 0 0;
+  background: var(--pg-bg-canvas);
   padding-top: 90px;
 }
 
@@ -180,7 +179,7 @@
 .lp-main {
   position: relative;
   z-index: 1;
-  padding: 80px 30px 0;
+  padding: 38px 30px 0;
 }
 
 .lp-hero-copy {
@@ -222,11 +221,11 @@
 }
 
 .lp h1 {
-  font-size: clamp(66px, 6.85vw, 104px);
+  font-size: clamp(60px, 5.8vw, 84px);
   font-weight: 650;
   letter-spacing: -.065em;
   line-height: 1.02;
-  margin: 26px 0 23px;
+  margin: 22px 0 18px;
   color: var(--pg-text-primary);
 }
 
@@ -312,8 +311,8 @@
 }
 
 .lp-product-preview {
-  max-width: 960px;
-  margin: 68px auto 0;
+  max-width: 1080px;
+  margin: 44px auto 0;
 }
 
 .lp-stage-footer {
@@ -323,7 +322,7 @@
   justify-content: space-between;
   align-items: center;
   max-width: 1160px;
-  margin: 27px auto 16px;
+  margin: 12px auto 0;
   padding: 0 5px;
   font-size: 10px;
   color: #9286aa;
@@ -389,14 +388,12 @@
 }
 
 @media (min-width: 1600px) {
-  .lp-main { padding-top: 96px; }
-  .lp-product-preview { margin-top: 92px; }
+  .lp-main { padding-top: 48px; }
 }
 @media (max-width: 1200px) {
 
   .lp-stage-footer { margin-left: 28px; margin-right: 28px; }
-  .lp-main { padding-top: 65px; }
-  .lp h1 { font-size: 84px; }
+  .lp h1 { font-size: clamp(60px, 6.4vw, 78px); }
 }
 @media (max-width: 800px) {
   .lp { padding: 10px; }
@@ -406,10 +403,10 @@
   .lp-nav nav button { display: none; }
   .lp-brand { font-size: 21px; }
   .lp-dashboard { gap: 12px; }
-  .lp-main { padding: 64px 20px 0; }
+  .lp-main { padding: 38px 20px 0; }
   .lp h1 { font-size: clamp(54px, 8.75vw, 70px); }
   .lp-lead { font-size: 17px; }
-  .lp-product-preview { margin-top: 70px; }
+  .lp-product-preview { margin-top: 38px; }
   .lp-art-field img, .lp-art-field video { object-position: center 20%; }
 }
 @media (max-width: 560px) {
@@ -422,7 +419,7 @@
   .lp-dashboard { font-size: 11px; padding: 0 10px; min-height: 44px; gap: 5px; }
   .lp-dashboard svg { display: none; }
   .lp-stage { padding-top: 76px; }
-  .lp-main { padding: 48px 16px 0; }
+  .lp-main { padding: 38px 16px 0; }
   .lp-category { font-size: 10px; padding: 6px 10px; }
   .lp h1 { font-size: clamp(40px, 11.45vw, 63px); letter-spacing: -.065em; margin: 26px -5px 22px; line-height: 1.075; }
   .lp-lead { font-size: 14px; line-height: 1.8; }
@@ -435,8 +432,8 @@
   .lp-play-icon { width: 30px; height: 30px; }
   .lp-play-icon svg { width: 10px; }
   .lp-beta { font-size: 11px; margin-top: 18px; }
-  .lp-product-preview { margin: 61px -5px 0; }
-  .lp-stage-footer { margin: 18px 17px 10px; font-size: 10px; }
+  .lp-product-preview { margin: 35px -5px 0; }
+  .lp-stage-footer { margin: 10px 17px 0; font-size: 10px; }
   .lp-stage-footer button { font-size: 10px; }
   .lp-preview-footer { font-size: 9px; padding: 13px 6px 4px; }
   .lp-art-field { height: auto; bottom: -12px; }
@@ -456,10 +453,6 @@
 .lp-beta {
   width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; padding: 5px 10px; border-radius: 6px; background: rgba(8,7,20,.62); color: #c4b9df;
 }
-@media (min-width: 801px) {
-  .lp-main { padding-top: 62px; }
-  .lp-product-preview { margin-top: 66px; }
-}
 
 @media (max-width: 700px) {
   .lp-menu-toggle { display: grid; place-items: center; order: 3; width: 44px; height: 44px; flex-shrink: 0; border: 0; border-radius: 9px; color: #ece4fa; background: transparent; }
@@ -474,8 +467,9 @@
 }
 
 /* Atmosphere yields to the request; text and controls remain the stable foreground. */
+.lp-art { inset:0 0 auto; height:min(100%,900px); background:none; mask-image:linear-gradient(#000 0%,#000 46%,transparent 100%); }
 .lp-art-field { opacity:.92; transition:opacity 650ms ease; }
-.lp-stage[data-demo-active=true] .lp-art-field { opacity:.62; }
+.lp-stage[data-demo-active=true] .lp-art-field { opacity:.72; }
 .lp-art-shade { background:linear-gradient(180deg,#09071877 0%,#09071822 32%,#0907184d 52%,#090718aa 76%,#050609 100%),radial-gradient(ellipse 39% 34% at 50% 30%,#0907189c,transparent); }
 .lp-nav nav :is(a,button) { position:relative; }
 .lp-nav nav :is(a,button)::after { content:''; position:absolute; left:0; right:0; bottom:3px; height:1px; background:#b3a0ff; transform:scaleX(0); transition:transform 220ms ease; }
@@ -492,3 +486,7 @@
 @keyframes lp-menu-in { from {opacity:0;transform:translateY(-6px);} to {opacity:1;transform:none;} }
 @media(max-width:700px) { .lp-nav[data-open=true] nav {animation:lp-menu-in 180ms ease-out;} .lp-nav nav :is(a,button)::after {left:14px;right:14px;bottom:4px;} }
 .lp-primary {box-shadow:inset 0 1px 1px #d4caff88,inset 0 -2px 3px #42249c88,0 0 0 3px #9a90ff09,0 5px 16px #39258255;}
+
+/* Keep the composition fixed when the payload expands below it. */
+@media(max-width:850px) { .lp-art { height:760px; } }
+@media(max-width:560px) { .lp-art { height:680px; } }

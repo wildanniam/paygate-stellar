@@ -107,3 +107,24 @@ Implementation: removed step-dependent artwork/rail/caption remount keys and obs
 Verification: production build and19 existing tests pass; Chrome1470px active Protect, keyboard ArrowRight/Home, rapid step selection, card hover transform -4px and return-to-none verified. Mobile390/320px keeps one visible settled object/caption, no horizontal overflow; motion-off uses0s transitions and selected state remains immediate. Viewport restored. No media/dependency/backend/payment changes. Physical device/Safari and screen-reader speech not separately tested.
 
 Research: [Fluent motion](https://fluent2.microsoft.design/motion) informs consistent duration/easing; [WAI focus versus selection](https://www.w3.org/TR/2021/NOTE-wai-aria-practices-1.2-20211129/) informs separating selected appearance from transient hover/focus; [Motion hover guidance](https://motion.dev/docs/react-hover-animation) informs avoiding touch-emulated hover. Specific420ms/220ms/4px values are local design choices, not claims of required standards.
+
+## Hero demo placement — 15 September 2026
+
+The owner approved the separate placement study and requested implementation in the existing preview. This supersedes the earlier free-floating hero diagram and separate playback bar. Reuses issue #5 / draft PR #6; the UI remains unmerged.
+
+Implemented a shallow surface at the transition from the violet hero to shared ink. The centered headline and CTA lead directly to the demo. Request strip, price and one action form the left group; a smaller gateway sits between the request and a larger weather response. Payment status stays beside the gateway, while delivery status stays in the response. Removed the duplicate reset and detached status/action bar. The action remains in one place through Send request, Simulate payment and Replay. Payload disclosure and the simulation notice remain available.
+
+The existing Higgsfield media stack is masked together and has a bounded height, so opening the payload does not stretch the background. Native beads travel along the two connections in the corresponding request/payment/forward/return phases. The verification ring traces during verification. Persistent response layers crossfade and translate slightly without moving labels or controls. On phones, request/action → compact gateway → response; tablet widths above760px retain the horizontal relationship. The action is46px tall, including at320px.
+
+The underlying simulation is unchanged: the first request stops at402, explicit payment is required, credit precedes forwarding and delivery, and replay cancels the prior run. A busy click guard also prevents the focusable aria-disabled button from dispatching another action. There are no wallet/network calls, new dependencies, asset generations or new sections.
+
+Verification:
+
+- Final production build passes on Node24.18.0. All19 existing simulation, receipt, wave, scroll sequencing and pointer lifecycle tests pass. `git diff --check` passes.
+- Chrome desktop1440/1470px, tablet835px and phone390/320px inspected; no horizontal document overflow. The narrower tablet breakpoint was adjusted after visual review; request text fits in the horizontal tablet layout.
+- Try a request scrolls to and focuses the demo before starting.402 pauses until explicit payment; a scoped DOM check observed credited=true while delivered=false. Replay, payload disclosure and keyboard activation work.
+- The button's vertical offset within the demo stays identical between402 and credited states, on both desktop and mobile. Response numbers/art remain mounted, avoiding layout jumps.
+- Global motion off pauses all loaded videos, removes the hero pointer canvas and disables signal/response movement while the simulation still works. OS reduced-motion paths were source-reviewed; physical phone GPU performance, Safari and screen-reader speech were not separately tested.
+- Full hero and focused desktop/mobile screenshots were saved outside the repository for review. The assembled hero is visually closer to the accepted study; final owner visual acceptance remains open.
+
+Research basis remains the approved study's Circular, Cloudlight and Agentframe observations: one composed product demonstration belongs close to the promise/CTA, and interaction controls belong with their input. The placement is a PayGate-specific interpretation, not a copied template.
