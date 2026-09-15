@@ -1,20 +1,22 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Landing from './pages/Landing.jsx';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import LandingPilot from './pages/LandingPilot.jsx';
 import Generate from './pages/Generate.jsx';
 import Result from './pages/Result.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import RegisterApi from './pages/RegisterApi.jsx';
 import ApiDetail from './pages/ApiDetail.jsx';
 
-const LandingPilot = lazy(() => import('./pages/LandingPilot.jsx'));
+function PreviewRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={{ pathname: '/', search, hash }} replace />;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/design-preview" element={<Suspense fallback={<p role="status" style={{ padding: 32 }}>Loading preview…</p>}><LandingPilot /></Suspense>} />
+        <Route path="/" element={<LandingPilot />} />
+        <Route path="/design-preview" element={<PreviewRedirect />} />
         <Route path="/generate" element={<Generate />} />
         <Route path="/result" element={<Result />} />
         <Route path="/dashboard" element={<Dashboard />} />
